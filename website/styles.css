@@ -1,0 +1,31 @@
+:root {
+  color-scheme: dark;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  background: #06132e;
+  color: #f4f8ff;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; background: radial-gradient(circle at 20% 0%, #132c54, #06132e 48%); }
+a { color: #75e6dc; }
+.shell { width: min(1080px, calc(100% - 40px)); margin: 0 auto; padding: 64px 0 32px; }
+.hero { display: grid; grid-template-columns: minmax(220px, 360px) 1fr; gap: 56px; align-items: center; min-height: 620px; }
+.logo { width: 100%; max-width: 360px; border-radius: 28%; box-shadow: 0 28px 90px #0008; }
+.eyebrow { color: #75e6dc; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+h1 { max-width: 700px; margin: 0 0 20px; font-size: clamp(2.6rem, 7vw, 5.5rem); line-height: .98; letter-spacing: -.06em; }
+h2 { margin-top: 0; }
+.lede { max-width: 650px; color: #c6d3e8; font-size: 1.2rem; line-height: 1.6; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 28px 0 16px; }
+.button { display: inline-block; padding: 13px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; }
+.primary { background: #f6a52b; color: #09152c; }
+.secondary { border: 1px solid #52698b; color: #f4f8ff; }
+.note, .warning { color: #aabbd4; font-size: .92rem; line-height: 1.5; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 20px 0; }
+article, .panel { padding: 24px; border: 1px solid #29466f; border-radius: 18px; background: #0b1c3a99; }
+article p, li { color: #b9c9df; line-height: 1.55; }
+.panel { margin-top: 24px; }
+code, pre { font-family: "SF Mono", Menlo, monospace; }
+pre { overflow-x: auto; padding: 16px; border-radius: 10px; background: #020918; color: #9ff5ec; }
+footer { display: flex; justify-content: space-between; gap: 16px; padding-top: 32px; color: #9aacc7; }
+@media (max-width: 760px) { .shell { padding-top: 32px; } .hero { grid-template-columns: 1fr; gap: 28px; min-height: auto; } .logo { max-width: 260px; } .grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) { .grid { grid-template-columns: 1fr; } footer { flex-direction: column; } }

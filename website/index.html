@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#06132e">
+  <meta name="description" content="BrewStore is a focused Homebrew package manager for macOS.">
+  <meta property="og:title" content="BrewStore">
+  <meta property="og:description" content="Browse and manage Homebrew casks, formulae, services, and taps.">
+  <meta property="og:image" content="/assets/og-image-1200x630.png">
+  <link rel="icon" href="/assets/favicon-32.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon-180.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/styles.css">
+  <title>BrewStore — Homebrew for macOS</title>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <img class="logo" src="/assets/logo.png" alt="BrewStore logo">
+      <div>
+        <p class="eyebrow">BrewStore 1.0.0</p>
+        <h1>Homebrew, in a focused macOS app.</h1>
+        <p class="lede">Browse casks and formulae, inspect updates, manage services and taps, and preview application removal before anything changes.</p>
+        <div class="actions">
+          <a class="button primary" href="/downloads/brewstore-1.0.0.dmg">Download DMG</a>
+          <a class="button secondary" href="https://github.com/amfi-disable/BrewStore/releases/tag/v1.0.0">View Source Release</a>
+        </div>
+        <p class="note">This zero-budget build is ad-hoc signed and is not notarized by Apple. Read the installation notes before opening it.</p>
+      </div>
+    </section>
+
+    <section class="grid" aria-label="BrewStore features">
+      <article><h2>Apps</h2><p>Search and manage Homebrew casks with installed and update state.</p></article>
+      <article><h2>Formulae</h2><p>Browse command-line packages and run controlled install, upgrade, and uninstall actions.</p></article>
+      <article><h2>Services</h2><p>Inspect and control Homebrew-managed background services.</p></article>
+      <article><h2>Safe removal</h2><p>Preview application support files before selected items are moved to the Trash.</p></article>
+    </section>
+
+    <section class="panel">
+      <h2>Install on macOS</h2>
+      <ol>
+        <li>Download the DMG and compare its SHA-256 checksum with the published checksum.</li>
+        <li>Open the DMG and drag <code>BrewStore.app</code> to Applications.</li>
+        <li>If macOS blocks the app, use System Settings → Privacy &amp; Security → Open Anyway.</li>
+        <li>Only if you trust the verified download, use the quarantine-removal command below.</li>
+      </ol>
+      <pre><code>xattr -d com.apple.quarantine ~/Downloads/brewstore-1.0.0.dmg</code></pre>
+      <p class="warning">Removing quarantine does not make the app signed or notarized. Never disable Gatekeeper globally.</p>
+      <p><a href="/downloads/brewstore-1.0.0.sha256">Download checksum</a> · <a href="https://github.com/amfi-disable/BrewStore/issues">Report an issue</a></p>
+    </section>
+
+    <footer>
+      <span>MIT License · macOS 14+</span>
+      <a href="https://github.com/amfi-disable/BrewStore">GitHub</a>
+    </footer>
+  </main>
+  <script>
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js');
+  </script>
+</body>
+</html>

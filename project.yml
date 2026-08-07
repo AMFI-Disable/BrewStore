@@ -22,6 +22,7 @@ targets:
       PRODUCT_BUNDLE_IDENTIFIER: com.even.brewstore
       PRODUCT_NAME: BrewStore
       MACOSX_DEPLOYMENT_TARGET: "14.0"
+      ASSETCATALOG_COMPILER_APPICON_NAME: appicon
       ENABLE_HARDENED_RUNTIME: YES
   BrewStoreTests:
     type: bundle.unit-test

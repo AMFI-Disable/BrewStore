@@ -14,3 +14,15 @@ xcodebuild test -project BrewStore.xcodeproj -scheme BrewStore -sdk macosx -dest
 ```
 
 Homebrew is optional during build and required for package operations. BrewStore does not silently install it.
+
+## Zero-budget distribution
+
+The repository includes a Vercel-ready static download page in `website` and a reproducible ad-hoc DMG workflow:
+
+```bash
+./scripts/build-dmg.sh 1.0.0
+```
+
+The script creates `website/downloads/brewstore-1.0.0.dmg` and its SHA-256 checksum. This build is not signed with Apple Developer ID and is not notarized. Users should verify the checksum and use macOS Privacy & Security → Open Anyway when required. The documented `xattr` command only removes the download quarantine attribute; it does not provide notarization.
+
+The Homebrew cask is maintained in the separate `homebrew-brewstore` repository. BrewStore is installed through the user’s existing Homebrew installation; Homebrew itself is not bundled in the DMG.
