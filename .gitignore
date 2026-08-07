@@ -1,0 +1,10 @@
+.DS_Store
+*.xcodeproj
+*.xcworkspace
+DerivedData/
+build/
+*.app
+*.dmg
+*.zip
+*.xcuserstate
+*.xcscmblueprint
