@@ -31,7 +31,7 @@ struct PackageListView: View {
                 HStack {
                     Text(manager.errorMessage ?? manager.statusMessage)
                         .font(.caption)
-                        .foregroundStyle(manager.errorMessage == nil ? .secondary : .red)
+                        .foregroundStyle(manager.errorMessage == nil ? Color.secondary : Color.red)
                         .textSelection(.enabled)
                     Spacer()
                 }
