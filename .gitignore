@@ -5,6 +5,8 @@ DerivedData/
 build/
 *.app
 *.dmg
+!website/downloads/
+!website/downloads/brewstore-1.0.0.dmg
 *.zip
 *.xcuserstate
 *.xcscmblueprint
