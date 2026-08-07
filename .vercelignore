@@ -1,0 +1,10 @@
+.git
+.build
+build
+DerivedData
+BrewStore.xcodeproj
+scripts
+sources
+tests
+project.yml
+Package.resolved

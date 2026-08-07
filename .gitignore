@@ -10,3 +10,4 @@ build/
 *.zip
 *.xcuserstate
 *.xcscmblueprint
+.vercel
