@@ -22,5 +22,18 @@
 	<string>Copyright © 2026 Juicer contributors. Licensed under MIT.</string>
 	<key>SUFeedURL</key>
 	<string>https://github.com/amfi-disable/BrewStore/releases/latest/download/appcast.xml</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>com.amfi-disable.BrewStore</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>brewstore</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

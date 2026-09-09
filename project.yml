@@ -1,10 +1,6 @@
 name: BrewStore
 options:
-  bundleIdPrefix: com.even
-packages:
-  JuicerKit:
-    url: https://github.com/amfi-disable/JuicerKit.git
-    version: 0.1.0
+  bundleIdPrefix: com.amfi-disable
 targets:
   BrewStore:
     type: application
@@ -12,15 +8,14 @@ targets:
     deploymentTarget: "14.0"
     sources:
       - path: sources
-    dependencies:
-      - package: JuicerKit
     settings:
       CODE_SIGN_IDENTITY: "-"
       DEVELOPMENT_TEAM: ""
       CODE_SIGN_ENTITLEMENTS: sources/resources/brewstore.entitlements
       INFOPLIST_FILE: sources/resources/info.plist
-      PRODUCT_BUNDLE_IDENTIFIER: com.even.brewstore
+      PRODUCT_BUNDLE_IDENTIFIER: com.amfi-disable.brewstore
       PRODUCT_NAME: BrewStore
+      ARCHS: arm64
       MACOSX_DEPLOYMENT_TARGET: "14.0"
       ASSETCATALOG_COMPILER_APPICON_NAME: appicon
       ENABLE_HARDENED_RUNTIME: YES
@@ -33,7 +28,9 @@ targets:
     dependencies:
       - target: BrewStore
     settings:
-      PRODUCT_BUNDLE_IDENTIFIER: com.even.brewstore.tests
+      GENERATE_INFOPLIST_FILE: YES
+      PRODUCT_BUNDLE_IDENTIFIER: com.amfi-disable.brewstore.tests
+      ARCHS: arm64
       MACOSX_DEPLOYMENT_TARGET: "14.0"
       TEST_HOST: "$(BUILT_PRODUCTS_DIR)/BrewStore.app/Contents/MacOS/BrewStore"
       BUNDLE_LOADER: "$(TEST_HOST)"

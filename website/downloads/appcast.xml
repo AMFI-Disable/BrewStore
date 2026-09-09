@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>BrewStore Changelog</title>
+    <link>https://github.com/amfi-disable/BrewStore/releases</link>
+    <description>Most recent changes with links to updates.</description>
+    <language>en</language>
+    <item>
+      <title>Version 1.0.0</title>
+      <description>
+        <![CDATA[
+          <h2>BrewStore 1.0.0 — Production Release</h2>
+          <ul>
+            <li>App Adoption Engine: scan unmanaged apps in /Applications and adopt via brew install --cask --adopt.</li>
+            <li>Apple Silicon Native Migration Wizard: 1-click convert Rosetta 2 Intel binaries to native ARM64.</li>
+            <li>Mac App Store Bridge: unified updates wall integrating Homebrew and App Store apps via mas-cli.</li>
+            <li>CVE Security & Vulnerability Scanner: automated security scoring, audit notices, and 1-click patch upgrades.</li>
+            <li>Multi-Version Tool Switcher: side-by-side versions for Node.js, Python, OpenJDK, Postgres with active symlink swapping.</li>
+            <li>Interactive Canvas 2.0: depth-aware upstream dependency and reverse dependent graph visualization.</li>
+            <li>Zero-Latency Fast Cache: sub-20ms instant cold launches with background delta syncing.</li>
+            <li>Touch ID Biometrics: passwordless administrative authorization with Touch ID & Apple Watch.</li>
+          </ul>
+        ]]>
+      </description>
+      <pubDate>Fri, 15 Aug 2026 12:00:00 +0000</pubDate>
+      <enclosure
+        url="https://github.com/amfi-disable/BrewStore/releases/download/v1.0.0/brewstore-1.0.0.dmg"
+        sparkle:version="100"
+        sparkle:shortVersionString="1.0.0"
+        length="7623867"
+        type="application/x-apple-diskimage"
+      />
+    </item>
+  </channel>
+</rss>

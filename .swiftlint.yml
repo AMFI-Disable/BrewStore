@@ -1,0 +1,71 @@
+disabled_rules:
+  - todo
+  - trailing_comma
+  - multiple_closures_with_trailing_closure
+  - large_tuple
+  - cyclomatic_complexity
+  - function_parameter_count
+  - for_where
+  - redundant_string_enum_value
+  - non_optional_string_data_conversion
+
+opt_in_rules:
+  - empty_count
+  - explicit_init
+  - redundant_nil_coalescing
+  - unneeded_break_in_switch
+
+included:
+  - sources
+  - tests
+
+excluded:
+  - build
+  - .build
+  - DerivedData
+
+line_length:
+  warning: 500
+  error: 800
+
+function_body_length:
+  warning: 400
+  error: 600
+
+type_body_length:
+  warning: 2000
+  error: 2500
+
+file_length:
+  warning: 2500
+  error: 3000
+
+type_name:
+  max_length: 60
+
+identifier_name:
+  min_length:
+    warning: 1
+  max_length:
+    warning: 60
+  excluded:
+    - id
+    - vm
+    - fd
+    - up
+    - to
+    - fm
+    - sh
+    - pkg
+    - avatar_url
+    - public_repos
+    - public_gists
+    - html_url
+    - web_url
+    - full_name
+    - stargazers_count
+    - forks_count
+    - open_issues_count
+    - default_branch
+    - dl_speed
+    - ul_speed

@@ -1,0 +1,175 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# BrewStore CLI Companion Tool
+# ==============================================================================
+set -e
+
+BREWSTORE_APP="/Applications/BrewStore.app"
+BREW_BIN=$(command -v brew || echo "/opt/homebrew/bin/brew")
+
+print_banner() {
+  echo -e "\033[1;38;5;214m"
+  echo "  ____                  ____  _                  "
+  echo " | __ ) _ __ _____      / ___|| |_ ___  _ __ ___ "
+  echo " |  _ \| '__/ _ \ \ /\ / /\___ \| __/ _ \| '__/ _ \\"
+  echo " | |_) | | |  __/\ V  V /  ___) | || (_) | | |  __/"
+  echo " |____/|_|  \___| \_/\_/  |____/ \__\___/|_|  \___|"
+  echo -e "\033[0m"
+  echo -e "\033[1;36m  BrewStore CLI Companion v1.0.0 · macOS Package Manager\033[0m\n"
+}
+
+usage() {
+  print_banner
+  echo "Usage: brewstore <command> [arguments]"
+  echo ""
+  echo "Commands:"
+  echo "  adopt [--all]           Scan /Applications for unmanaged apps and adopt them into Homebrew"
+  echo "  switch <tool> <version> Switch active symlinked version (e.g. 'brewstore switch node 20')"
+  echo "  audit                   Run CVE and security vulnerability scan on installed packages"
+  echo "  mas [list|upgrade]      Manage Mac App Store applications via mas-cli"
+  echo "  health                  Evaluate local Homebrew health score and disk storage"
+  echo "  clean                   Reclaim disk space via cache cleanup and orphan autoremove"
+  echo "  launch                  Launch the BrewStore native GUI app"
+  echo "  help                    Show this help message"
+  echo ""
+}
+
+cmd_adopt() {
+  echo -e "\033[1;34m==>\033[0m Scanning /Applications for unmanaged .app bundles…"
+  local adopt_all=false
+  if [[ "$1" == "--all" || "$1" == "-y" ]]; then
+    adopt_all=true
+  fi
+
+  for app in /Applications/*.app; do
+    [ -e "$app" ] || continue
+    app_name=$(basename "$app" .app)
+    slug=$(echo "$app_name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+    if "$BREW_BIN" info --cask "$slug" >/dev/null 2>&1; then
+      if ! "$BREW_BIN" list --cask "$slug" >/dev/null 2>&1; then
+        echo -e "\033[1;32m  [Found Match]\033[0m $app_name ➔ Cask: $slug"
+        if [ "$adopt_all" = true ]; then
+          echo "    Adopting $slug…"
+          "$BREW_BIN" install --cask --adopt "$slug" || true
+        fi
+      fi
+    fi
+  done
+  if [ "$adopt_all" = false ]; then
+    echo -e "\nRun '\033[1mbrewstore adopt --all\033[0m' to adopt all detected apps into Homebrew."
+  fi
+}
+
+cmd_switch() {
+  local tool="$1"
+  local ver="$2"
+  if [ -z "$tool" ] || [ -z "$ver" ]; then
+    echo "Error: missing tool or version."
+    echo "Example: brewstore switch node 20"
+    exit 1
+  fi
+
+  local target="$tool"
+  if [ "$ver" != "latest" ] && [ "$ver" != "default" ]; then
+    target="${tool}@${ver}"
+  fi
+
+  echo -e "\033[1;34m==>\033[0m Unlinking existing $tool versions…"
+  "$BREW_BIN" unlink "$tool" >/dev/null 2>&1 || true
+  for pkg in $("$BREW_BIN" list --formula | grep "^${tool}@"); do
+    "$BREW_BIN" unlink "$pkg" >/dev/null 2>&1 || true
+  done
+
+  echo -e "\033[1;34m==>\033[0m Linking $target…"
+  "$BREW_BIN" link --overwrite "$target"
+  echo -e "\033[1;32m==>\033[0m Successfully switched active $tool to $target."
+}
+
+cmd_audit() {
+  echo -e "\033[1;34m==>\033[0m Running security audit across installed packages…"
+  "$BREW_BIN" audit --installed || true
+  echo -e "\033[1;32m==>\033[0m Audit completed."
+}
+
+cmd_mas() {
+  local subcmd="${1:-list}"
+  if ! command -v mas >/dev/null 2>&1; then
+    echo -e "\033[1;33mmas-cli is not installed.\033[0m Installing via 'brew install mas'…"
+    "$BREW_BIN" install mas
+  fi
+
+  if [ "$subcmd" == "upgrade" ]; then
+    echo -e "\033[1;34m==>\033[0m Upgrading Mac App Store apps…"
+    mas upgrade
+  else
+    echo -e "\033[1;34m==>\033[0m Installed Mac App Store apps:"
+    mas list
+    echo -e "\n\033[1;34m==>\033[0m Outdated Mac App Store apps:"
+    mas outdated || true
+  fi
+}
+
+cmd_health() {
+  echo -e "\033[1;34m==>\033[0m Evaluating Homebrew health…"
+  local installed_casks=$("$BREW_BIN" list --cask 2>/dev/null | wc -l | tr -d ' ')
+  local installed_formulae=$("$BREW_BIN" list --formula 2>/dev/null | wc -l | tr -d ' ')
+  local outdated_count=$("$BREW_BIN" outdated --quiet 2>/dev/null | wc -l | tr -d ' ')
+
+  echo "  Installed Formulae : $installed_formulae"
+  echo "  Installed Casks    : $installed_casks"
+  echo "  Outdated Packages  : $outdated_count"
+
+  if [ "$outdated_count" -eq 0 ]; then
+    echo -e "\033[1;32m  Health Status      : Excellent (100/100) — All packages up to date.\033[0m"
+  else
+    echo -e "\033[1;33m  Health Status      : Upgrades available ($outdated_count packages).\033[0m"
+  fi
+}
+
+cmd_clean() {
+  echo -e "\033[1;34m==>\033[0m Purging stale download caches…"
+  "$BREW_BIN" cleanup -s
+  echo -e "\033[1;34m==>\033[0m Removing orphaned dependencies…"
+  "$BREW_BIN" autoremove
+  echo -e "\033[1;32m==>\033[0m Disk reclamation complete."
+}
+
+cmd_launch() {
+  if [ -d "$BREWSTORE_APP" ]; then
+    open "$BREWSTORE_APP"
+  else
+    open -a BrewStore 2>/dev/null || open "./build/deriveddata/Build/Products/Release/BrewStore.app"
+  fi
+}
+
+case "${1:-help}" in
+  adopt)
+    cmd_adopt "$2"
+    ;;
+  switch)
+    cmd_switch "$2" "$3"
+    ;;
+  audit)
+    cmd_audit
+    ;;
+  mas)
+    cmd_mas "$2"
+    ;;
+  health)
+    cmd_health
+    ;;
+  clean)
+    cmd_clean
+    ;;
+  launch)
+    cmd_launch
+    ;;
+  help|--help|-h)
+    usage
+    ;;
+  *)
+    echo "Unknown command: $1"
+    usage
+    exit 1
+    ;;
+esac

@@ -1,0 +1,31 @@
+# SwiftFormat configuration for BrewStore
+
+# Swift version
+--swiftversion 5.9
+
+# Indentation & Xcode compatibility
+--indent 4
+--indentcase false
+--xcodeindentation enabled
+
+# Line breaks & wrapping
+--linebreaks lf
+--maxwidth none
+
+# Rules to disable to prevent conflicts with SwiftLint and preserve idiomatic SwiftUI code
+--disable trailingCommas
+--disable noForceUnwrapInTests
+--disable noForceTryInTests
+--disable numberFormatting
+--disable redundantRawValues
+--disable todos
+--disable redundantSelf
+--disable redundantType
+--disable sortDeclarations
+--disable organizeDeclarations
+--disable fileHeader
+--disable redundantMemberwiseInit
+--disable wrapMultilineStatementBraces
+
+# Files and directories to exclude
+--exclude build,.build,DerivedData,website,scripts,docs

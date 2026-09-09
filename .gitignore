@@ -1,13 +1,147 @@
+# ==============================================================================
+# BrewStore .gitignore
+# Controls visibility of project files, preventing leaks of build artifacts,
+# system metadata, credentials, user configs, and local audit documents.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# macOS System & Filesystem Metadata
+# ------------------------------------------------------------------------------
 .DS_Store
+.DS_Store?
+._*
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+Icon?
+
+# ------------------------------------------------------------------------------
+# Xcode, XcodeGen & Developer User State
+# Note: project.yml is the sole source of truth for generating Xcode projects.
+# ------------------------------------------------------------------------------
 *.xcodeproj
 *.xcworkspace
-DerivedData/
-build/
-*.app
-*.dmg
-!website/downloads/
-!website/downloads/brewstore-1.0.0.dmg
-*.zip
+*.xcuserdata/
+xcuserdata/
 *.xcuserstate
 *.xcscmblueprint
+*.xccheckout
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+# Swift Package Manager & Tooling
+.build/
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.swiftpm/xcode/xcuserdata/
+
+# ------------------------------------------------------------------------------
+# Build Products, Intermediate Compilation Outputs & DerivedData
+# ------------------------------------------------------------------------------
+build/
+Build/
+DerivedData/
+*.app
+*.ipa
+*.pkg
+*.dSYM.zip
+*.dSYM
+*.o
+*.a
+*.dylib
+*.profdata
+*.profraw
+*.coverage
+
+# ------------------------------------------------------------------------------
+# Release Archives & Binaries (with Website Downloads Whitelist)
+# ------------------------------------------------------------------------------
+*.dmg
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+
+# Allow public distribution artifacts in website/downloads
+!website/downloads/
+!website/downloads/*.dmg
+!website/downloads/*.sha256
+!website/downloads/appcast.xml
+
+# ------------------------------------------------------------------------------
+# Secrets, Private Keys, Certificates & Tokens
+# ------------------------------------------------------------------------------
+.env
+.env.*
+*.env
+*.key
+*.pem
+*.p12
+*.pfx
+*.cer
+*.crt
+*.mobileprovision
+*.token
+*.pat
+.credentials
+credentials.json
+token.json
+*secret*
+*dsa_priv.pem
+*ed25519_priv*
+
+# ------------------------------------------------------------------------------
+# Local Logs, Crash Reports & Diagnostics
+# ------------------------------------------------------------------------------
+*.log
+logs/
+crash_reports/
+*.crash
+*.ips
+*.diag
+
+# ------------------------------------------------------------------------------
+# Hosting, Web & Deployment
+# ------------------------------------------------------------------------------
 .vercel
+.netlify
+node_modules/
+.npm
+.yarn
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ------------------------------------------------------------------------------
+# IDEs, Code Editors & AI Agent Contexts
+# ------------------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.gemini/
+.claude/
+.cursor/
+.windsurf/
+
+# ------------------------------------------------------------------------------
+# Temporary, Scratch & Local Internal Audit Documents
+# ------------------------------------------------------------------------------
+*.tmp
+*.temp
+*.bak
+tmp/
+temp/
+scratch/
+task.md
+todo.md
+report.md
+report_template.md

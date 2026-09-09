@@ -36,12 +36,18 @@ ln -s /Applications "$staging_root/Applications"
 
 mkdir -p "$release_dir"
 rm -f "$dmg_path"
-hdiutil create \
-  -volname "BrewStore ${version}" \
-  -srcfolder "$staging_root" \
-  -format UDZO \
-  -ov \
-  "$dmg_path"
+sync
 
-shasum -a 256 "$dmg_path" | tee "$release_dir/brewstore-${version}.sha256"
+temp_dmg="$build_root/brewstore-temp.dmg"
+rm -f "$temp_dmg"
+
+hdiutil create \
+  -volname "BrewStore" \
+  -srcfolder "$staging_root" \
+  -ov \
+  -format UDZO \
+  "$temp_dmg"
+
+mv -f "$temp_dmg" "$dmg_path"
+(cd "$release_dir" && shasum -a 256 "brewstore-${version}.dmg") | tee "$release_dir/brewstore-${version}.sha256"
 print "Created $dmg_path"
