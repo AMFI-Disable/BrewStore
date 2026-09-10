@@ -141,6 +141,7 @@ yarn-error.log*
 tmp/
 temp/
 scratch/
+docs/internal/
 task.md
 todo.md
 report.md

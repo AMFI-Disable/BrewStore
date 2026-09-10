@@ -58,6 +58,7 @@ struct SettingsView: View {
     @StateObject private var launchAgent = BrewStoreLaunchAgentManager.shared
     @StateObject private var appUpdateChecker = BrewStoreAppUpdateChecker.shared
     @StateObject private var speedTestManager = BrewStoreSpeedTestManager.shared
+    @ObservedObject private var cliManager = BrewStoreCLIToolManager.shared
     @State private var selectedRollbackSnapshot: BrewStoreSnapshot?
     @State private var showingRollbackConfirmation = false
     @State private var pendingRollbackPlan: SnapshotRollbackPlan?
@@ -459,6 +460,101 @@ struct SettingsView: View {
                     .padding(8)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 6))
+            }
+
+            cardSection(title: "Command Line Companion (brewstore)", icon: "terminal.fill") {
+                HStack {
+                    VStack(alignment: .leading, spacing: 3) {
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(cliManager.isInstalled ? Color.green : Color.secondary)
+                                .frame(width: 8, height: 8)
+                            Text(cliManager.isInstalled ? "CLI Tool Installed" : "CLI Tool Not Installed")
+                                .font(.subheadline.bold())
+                                .foregroundStyle(cliManager.isInstalled ? Color.primary : Color.secondary)
+                        }
+
+                        if let path = cliManager.installedPath {
+                            Text(path)
+                                .font(.caption.monospaced())
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Text("Install 'brewstore' into ~/.local/bin to run CLI commands from Terminal, iTerm2, or Ghostty.")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    Spacer()
+
+                    if cliManager.isInstalled {
+                        Button("Uninstall CLI") {
+                            cliManager.uninstallCLISymlink()
+                        }
+                        .controlSize(.small)
+                        .disabled(cliManager.isOperating)
+
+                        Button("Reinstall") {
+                            cliManager.installCLISymlink()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                        .disabled(cliManager.isOperating)
+                    } else {
+                        Button {
+                            cliManager.installCLISymlink()
+                        } label: {
+                            Label("Install CLI Tool", systemImage: "arrow.down.circle")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                        .disabled(cliManager.isOperating)
+                    }
+                }
+
+                Divider()
+
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Shell Auto-Completions").font(.subheadline.bold())
+                        Text("Install tab-completion scripts for Zsh (~/.zsh/completions), Bash, and Fish.")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    Button {
+                        cliManager.installShellCompletions()
+                    } label: {
+                        Label(cliManager.completionsInstalled ? "Reinstall Completions" : "Install Completions", systemImage: "sparkles")
+                    }
+                    .controlSize(.small)
+                    .disabled(cliManager.isOperating)
+                }
+
+                if let status = cliManager.statusMessage {
+                    Text(status)
+                        .font(.caption.bold())
+                        .foregroundStyle(status.lowercased().contains("failed") || status.lowercased().contains("error") ? Color.red : Color.green)
+                        .padding(.top, 2)
+                }
+
+                HStack {
+                    Text("PATH Configuration:")
+                        .font(.caption2.bold())
+                    Text("export PATH=\"$HOME/.local/bin:$PATH\"")
+                        .font(.caption2.monospaced())
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 4))
+                    Spacer()
+                    Button("Copy") {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString("export PATH=\"$HOME/.local/bin:$PATH\"", forType: .string)
+                    }
+                    .controlSize(.mini)
+                }
             }
 
             cardSection(title: "Background Auto-Updating & Auto-Upgrading", icon: "arrow.triangle.2.circlepath.circle.fill") {

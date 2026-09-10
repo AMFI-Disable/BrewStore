@@ -8,7 +8,7 @@
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/平台-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
 [![Release: v1.0.0](https://img.shields.io/badge/版本-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/amfi-disable/BrewStore/releases)
-[![Tests: 339 / 339 Passed](https://img.shields.io/badge/测试-339%20%2F%20339%20全数通过-success.svg?style=flat-square&logo=checkmarx)](#-自动化测试与质量保障)
+[![Tests: 345 / 345 Passed](https://img.shields.io/badge/测试-339%20%2F%20339%20全数通过-success.svg?style=flat-square&logo=checkmarx)](#-自动化测试与质量保障)
 [![License: MIT](https://img.shields.io/badge/开源协议-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/价格-100%25%20免费开源-success.svg?style=flat-square)](#-为什么选择-brewstore而不是-caskhub-或-taphouse-pro-1999)
 [![Zero Telemetry](https://img.shields.io/badge/隐私-零遥测%20%2F%20100%25%20本地-purple.svg?style=flat-square)](#-隐私与安全第一原则)
@@ -170,7 +170,7 @@ brew upgrade --cask brewstore
 - **发布版本**：`v1.0.0`
 - **已校验 SHA-256 校验码**：
   ```
-  07c3ac83f1c814973d5d5033a0b816e919a2fe982541172ac42f8f2a07231753
+  8605dbdd19cf3d39edc8d3edc14e187ffc3f2324072b8ebaff82cda34a44259e
   ```
 
 验证下载文件的完整性：
@@ -200,7 +200,7 @@ xcodegen generate
 # 编译 Release 配置
 xcodebuild -scheme BrewStore -configuration Release -destination 'platform=macOS' build
 
-# 运行完整的 339 项自动化单元测试
+# 运行完整的 345 项自动化单元测试
 xcodebuild test -scheme BrewStore -destination 'platform=macOS'
 ```
 
@@ -263,7 +263,7 @@ brewstore launch
 | :--- | :---: | :---: | :---: |
 | **定价与开源协议** | **100% 永久免费且 MIT 开源** | $19.99 商业收费 / 闭源 | 免费 |
 | **遥测与隐私保护** | **零遥测 / 100% 纯本地运行** | 集成第三方数据分析 | 未知 |
-| **自动化测试覆盖** | **339 项 XCTest 测试 (100% 通过)** | 未公开 | 极少 |
+| **自动化测试覆盖** | **345 项 XCTest 测试 (100% 通过)** | 未公开 | 极少 |
 | **单应用存储透析与缓存安全清理** | **✅ 非破坏性安全移至废纸篓** | ❌ 无 | ❌ 无 |
 | **Apple Silicon 原生与 Rosetta 检测** | **✅ 智能检测与一键迁移原生** | ❌ 无 | ❌ 无 |
 | **macOS LaunchAgent 与登录项管理** | **✅ 全生命周期与 CPU/RAM 遥测** | ⚠️ 仅限 brew 服务 | ❌ 无 |
@@ -292,7 +292,7 @@ xcodegen generate
 xcodebuild test -scheme BrewStore -destination "platform=macOS"
 ```
 
-### 核心测试套件概览 (339 / 339 全数通过)
+### 核心测试套件概览 (345 / 345 全数通过)
 
 - `AppStorageInspectorTests`：单应用存储透析，精确拆解主程序、缓存与数据体积，保证废纸篓删除安全性。
 - `AppleSiliconMigrationTests`：Rosetta 2 运行侦测、原生 ARM64 迁移候选池生成及架构状态映射。

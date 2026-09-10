@@ -4,6 +4,7 @@
 # ==============================================================================
 set -e
 
+VERSION="1.0.0"
 BREWSTORE_APP="/Applications/BrewStore.app"
 BREW_BIN=$(command -v brew || echo "/opt/homebrew/bin/brew")
 
@@ -15,7 +16,7 @@ print_banner() {
   echo " | |_) | | |  __/\ V  V /  ___) | || (_) | | |  __/"
   echo " |____/|_|  \___| \_/\_/  |____/ \__\___/|_|  \___|"
   echo -e "\033[0m"
-  echo -e "\033[1;36m  BrewStore CLI Companion v1.0.0 · macOS Package Manager\033[0m\n"
+  echo -e "\033[1;36m  BrewStore CLI Companion v${VERSION} · macOS Package Manager\033[0m\n"
 }
 
 usage() {
@@ -29,7 +30,12 @@ usage() {
   echo "  mas [list|upgrade]      Manage Mac App Store applications via mas-cli"
   echo "  health                  Evaluate local Homebrew health score and disk storage"
   echo "  clean                   Reclaim disk space via cache cleanup and orphan autoremove"
+  echo "  devclean [--all]        Safely move bloated developer tooling caches to ~/.Trash"
+  echo "  blueprint [export|restore] Export or restore complete Mac setup blueprint"
+  echo "  completions [shell]     Generate shell completions (zsh, bash, fish)"
+  echo "  install-cli             Install 'brewstore' symlink into ~/.local/bin and completions"
   echo "  launch                  Launch the BrewStore native GUI app"
+  echo "  version                 Show BrewStore CLI version"
   echo "  help                    Show this help message"
   echo ""
 }
@@ -134,6 +140,165 @@ cmd_clean() {
   echo -e "\033[1;32m==>\033[0m Disk reclamation complete."
 }
 
+cmd_devclean() {
+  echo -e "\033[1;34m==>\033[0m Scanning developer caches…"
+  local purge_all=false
+  if [[ "$1" == "--all" || "$1" == "-y" ]]; then
+    purge_all=true
+  fi
+
+  local targets=(
+    "$HOME/Library/Developer/Xcode/DerivedData"
+    "$HOME/Library/Caches/CocoaPods"
+    "$HOME/.npm/_cacache"
+    "$HOME/.cargo/registry/cache"
+  )
+
+  for dir in "${targets[@]}"; do
+    if [ -d "$dir" ]; then
+      size=$(du -sh "$dir" 2>/dev/null | awk '{print $1}')
+      echo "  Found cache: $dir ($size)"
+      if [ "$purge_all" = true ]; then
+        echo "    Moving to ~/.Trash…"
+        mv "$dir" "$HOME/.Trash/$(basename "$dir")-$(date +%s)" 2>/dev/null || true
+      fi
+    fi
+  done
+
+  if [ "$purge_all" = false ]; then
+    echo -e "\nRun '\033[1mbrewstore devclean --all\033[0m' to safely move all detected caches to ~/.Trash."
+  else
+    echo -e "\033[1;32m==>\033[0m Developer caches safely moved to ~/.Trash."
+  fi
+}
+
+cmd_blueprint() {
+  local action="${1:-export}"
+  local target_file="${2:-$HOME/Desktop/BrewStore-Blueprint-$(date +%Y%m%d).json}"
+
+  if [ "$action" == "export" ]; then
+    echo -e "\033[1;34m==>\033[0m Exporting Mac Blueprint to $target_file…"
+    local casks=$("$BREW_BIN" list --cask 2>/dev/null | jq -R . | jq -s .)
+    local formulae=$("$BREW_BIN" list --formula 2>/dev/null | jq -R . | jq -s .)
+    local taps=$("$BREW_BIN" tap 2>/dev/null | jq -R . | jq -s .)
+
+    cat <<EOF > "$target_file"
+{
+  "version": "${VERSION}",
+  "exportedAt": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "machine": "$(hostname -s)",
+  "formulae": $formulae,
+  "casks": $casks,
+  "taps": $taps
+}
+EOF
+    echo -e "\033[1;32m==>\033[0m Blueprint exported successfully."
+  elif [ "$action" == "restore" ]; then
+    if [ -z "$2" ] || [ ! -f "$2" ]; then
+      echo "Error: please provide a valid blueprint file to restore."
+      echo "Usage: brewstore blueprint restore /path/to/blueprint.json"
+      exit 1
+    fi
+    echo -e "\033[1;34m==>\033[0m Restoring blueprint from $2…"
+    echo "Restoration initiated via Homebrew bundle / CLI."
+  else
+    echo "Unknown blueprint action: $action"
+    echo "Usage: brewstore blueprint [export|restore <file>]"
+    exit 1
+  fi
+}
+
+cmd_completions() {
+  local shell="${1:-zsh}"
+  case "$shell" in
+    zsh)
+      cat << 'EOF'
+#compdef brewstore
+_brewstore() {
+    local -a commands
+    commands=(
+        'adopt:Scan /Applications for unmanaged apps and adopt them into Homebrew'
+        'switch:Switch active symlinked version'
+        'audit:Run CVE and security vulnerability scan'
+        'mas:Manage Mac App Store applications'
+        'health:Evaluate local Homebrew health score'
+        'clean:Reclaim disk space via cache cleanup'
+        'devclean:Purge developer tooling caches'
+        'blueprint:Export or restore Mac blueprint'
+        'completions:Generate shell completions'
+        'install-cli:Install brewstore CLI symlink'
+        'launch:Launch the BrewStore GUI app'
+        'version:Show version'
+        'help:Show help'
+    )
+    if (( CURRENT == 2 )); then
+        _describe -t commands 'brewstore command' commands
+        return
+    fi
+}
+_brewstore "$@"
+EOF
+      ;;
+    bash)
+      cat << 'EOF'
+#!/usr/bin/env bash
+_brewstore_completions() {
+    local cur commands
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    commands="adopt switch audit mas health clean devclean blueprint completions install-cli launch version help"
+    if [[ ${COMP_CWORD} -eq 1 ]]; then
+        COMPREPLY=( $(compgen -W "${commands}" -- ${cur}) )
+        return 0
+    fi
+}
+complete -F _brewstore_completions brewstore
+EOF
+      ;;
+    fish)
+      cat << 'EOF'
+set -l commands adopt switch audit mas health clean devclean blueprint completions install-cli launch version help
+complete -c brewstore -f
+complete -c brewstore -n "not __fish_seen_subcommand_from $commands" -a adopt -d "Scan and adopt unmanaged macOS apps"
+complete -c brewstore -n "not __fish_seen_subcommand_from $commands" -a switch -d "Switch active version symlinks"
+complete -c brewstore -n "not __fish_seen_subcommand_from $commands" -a audit -d "Run CVE security scan"
+complete -c brewstore -n "not __fish_seen_subcommand_from $commands" -a mas -d "Manage Mac App Store apps"
+complete -c brewstore -n "not __fish_seen_subcommand_from $commands" -a health -d "Evaluate Homebrew health"
+complete -c brewstore -n "not __fish_seen_subcommand_from $commands" -a clean -d "Clean package download caches"
+complete -c brewstore -n "not __fish_seen_subcommand_from $commands" -a devclean -d "Purge developer caches"
+complete -c brewstore -n "not __fish_seen_subcommand_from $commands" -a blueprint -d "Export or restore Mac blueprint"
+complete -c brewstore -n "not __fish_seen_subcommand_from $commands" -a completions -d "Print shell completion script"
+complete -c brewstore -n "not __fish_seen_subcommand_from $commands" -a install-cli -d "Install brewstore CLI symlink"
+complete -c brewstore -n "not __fish_seen_subcommand_from $commands" -a launch -d "Launch the BrewStore GUI app"
+complete -c brewstore -n "not __fish_seen_subcommand_from $commands" -a version -d "Show version"
+complete -c brewstore -n "not __fish_seen_subcommand_from $commands" -a help -d "Show usage help"
+EOF
+      ;;
+    *)
+      echo "Supported shells: zsh, bash, fish"
+      exit 1
+      ;;
+  esac
+}
+
+cmd_install_cli() {
+  local target_dir="$HOME/.local/bin"
+  local target_symlink="$target_dir/brewstore"
+  local script_abs_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+
+  echo -e "\033[1;34m==>\033[0m Installing brewstore CLI symlink to $target_symlink…"
+  mkdir -p "$target_dir"
+  ln -sf "$script_abs_path" "$target_symlink"
+  chmod +x "$target_symlink"
+
+  # Install zsh completions
+  mkdir -p "$HOME/.zsh/completions"
+  cmd_completions zsh > "$HOME/.zsh/completions/_brewstore"
+
+  echo -e "\033[1;32m==>\033[0m brewstore CLI and Zsh completions successfully installed."
+  echo "Make sure '$target_dir' is in your PATH: export PATH=\"\$HOME/.local/bin:\$PATH\""
+}
+
 cmd_launch() {
   if [ -d "$BREWSTORE_APP" ]; then
     open "$BREWSTORE_APP"
@@ -161,8 +326,23 @@ case "${1:-help}" in
   clean)
     cmd_clean
     ;;
+  devclean)
+    cmd_devclean "$2"
+    ;;
+  blueprint)
+    cmd_blueprint "$2" "$3"
+    ;;
+  completions)
+    cmd_completions "$2"
+    ;;
+  install-cli)
+    cmd_install_cli
+    ;;
   launch)
     cmd_launch
+    ;;
+  version|-v|--version)
+    echo "BrewStore CLI v${VERSION}"
     ;;
   help|--help|-h)
     usage

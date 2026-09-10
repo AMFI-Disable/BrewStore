@@ -8,7 +8,7 @@
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/プラットフォーム-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
 [![Release: v1.0.0](https://img.shields.io/badge/リリース-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/amfi-disable/BrewStore/releases)
-[![Tests: 339 / 339 Passed](https://img.shields.io/badge/テスト-339%20%2F%20339%20合格%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-自動テストと品質保証)
+[![Tests: 345 / 345 Passed](https://img.shields.io/badge/テスト-339%20%2F%20339%20合格%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-自動テストと品質保証)
 [![License: MIT](https://img.shields.io/badge/ライセンス-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/価格-100%25%20無料＆オープンソース-success.svg?style=flat-square)](#-なぜ-brewstore-が選ばれるのか)
 [![Zero Telemetry](https://img.shields.io/badge/プライバシー-完全ローカル%20%2F%20テレメトリゼロ-purple.svg?style=flat-square)](#-セキュリティとプライバシー最優先)
@@ -162,7 +162,7 @@ brew upgrade --cask brewstore
 - **バージョン**: `v1.0.0`
 - **検証済み SHA-256 チェックサム**:
   ```
-  07c3ac83f1c814973d5d5033a0b816e919a2fe982541172ac42f8f2a07231753
+  8605dbdd19cf3d39edc8d3edc14e187ffc3f2324072b8ebaff82cda34a44259e
   ```
 
 検証コマンド:
@@ -192,7 +192,7 @@ xcodegen generate
 # Release ビルド
 xcodebuild -scheme BrewStore -configuration Release -destination 'platform=macOS' build
 
-# 全自動テスト実行（339 項目）
+# 全自動テスト実行（345 項目）
 xcodebuild test -scheme BrewStore -destination 'platform=macOS'
 ```
 
@@ -255,7 +255,7 @@ brewstore launch
 | :--- | :---: | :---: | :---: |
 | **価格とライセンス** | **100% 無料・MIT オープンソース** | $19.99 商用有償・プロプライエタリ | 無料 |
 | **プライバシー** | **テレメトリゼロ・完全ローカル** | サードパーティ解析あり | 不明 |
-| **自動テスト合格数** | **339 項目 XCTest (100% 合格)** | 非公開 | 僅少 |
+| **自動テスト合格数** | **345 項目 XCTest (100% 合格)** | 非公開 | 僅少 |
 | **アプリ別ストレージ＆キャッシュ消去** | **✅ 非破壊的・安全ゴミ箱退避 (~/.Trash)** | ❌ なし | ❌ なし |
 | **Apple Silicon vs Rosetta 2** | **✅ 自動検知＆ワンクリック移行** | ❌ なし | ❌ なし |
 | **macOS LaunchAgents ＆ ログイン項目** | **✅ 完全テレメトリ・PID / RAM 監視** | ⚠️ サービスのみ | ❌ なし |
@@ -284,7 +284,7 @@ xcodegen generate
 xcodebuild test -scheme BrewStore -destination "platform=macOS"
 ```
 
-### 検証済みテストスイート（339 / 339 全て合格）
+### 検証済みテストスイート（345 / 345 全て合格）
 
 - `AppStorageInspectorTests`: 非破壊的なアプリ別キャッシュ削除、ディスク内訳（バイナリ vs キャッシュ vs データ）、ゴミ箱退避の検証。
 - `AppleSiliconMigrationTests`: Rosetta 2 エミュレーション検知、ネイティブ ARM64 移行候補検出、アーキテクチャマッピング。
@@ -322,7 +322,7 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
   - [x] プレビュー優先のアンインストール関門と逆依存関係警告。
   - [x] 原子性ピン留め管理とロールバック機構。
   - [x] メニューバー常駐ウィンドウの固定ジオメトリ化。
-  - [x] 339 項目すべての回帰テストに合格。
+  - [x] 345 項目すべての回帰テストに合格。
 - [ ] **v1.2.0**:
   - [ ] 同一 LAN 内での P2P ボトルキャッシュ共有。
   - [ ] Apple Virtualization Framework によるサンドボックス安全実行。

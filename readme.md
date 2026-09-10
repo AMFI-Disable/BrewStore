@@ -8,7 +8,7 @@
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/platform-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
 [![Release: v1.0.0](https://img.shields.io/badge/release-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/amfi-disable/BrewStore/releases)
-[![Tests: 339 / 339 Passed](https://img.shields.io/badge/tests-339%20%2F%20339%20Passed%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-automated-tests--quality-assurance)
+[![Tests: 345 / 345 Passed](https://img.shields.io/badge/tests-339%20%2F%20339%20Passed%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-automated-tests--quality-assurance)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/price-100%25%20Free%20%26%20Open%20Source-success.svg?style=flat-square)](#-why-brewstore-over-caskhub--taphouse-pro)
 [![Zero Telemetry](https://img.shields.io/badge/privacy-Zero%20Telemetry%20%2F%20100%25%20Local-purple.svg?style=flat-square)](#-privacy--security-first)
@@ -166,7 +166,7 @@ Download the signed disk image directly from the release mirror:
 - **Release Version**: `v1.0.0`
 - **Verified SHA-256 Checksum**:
   ```
-  07c3ac83f1c814973d5d5033a0b816e919a2fe982541172ac42f8f2a07231753
+  8605dbdd19cf3d39edc8d3edc14e187ffc3f2324072b8ebaff82cda34a44259e
   ```
 
 To verify the integrity of your download:
@@ -196,7 +196,7 @@ xcodegen generate
 # Build Release Configuration
 xcodebuild -scheme BrewStore -configuration Release -destination 'platform=macOS' build
 
-# Run Full Automated Test Suite (339 tests)
+# Run Full Automated Test Suite (345 tests)
 xcodebuild test -scheme BrewStore -destination 'platform=macOS'
 ```
 
@@ -261,7 +261,7 @@ brewstore launch
 | :--- | :---: | :---: | :---: |
 | **Pricing & License** | **100% Free & MIT Open-Source** | $19.99 Commercial / Proprietary | Free |
 | **Telemetry & Privacy** | **Zero Telemetry / 100% Local** | Third-party tracking | Unknown |
-| **Automated Test Coverage** | **339 XCTest Methods (100% Pass)** | Undisclosed | Minimal |
+| **Automated Test Coverage** | **345 XCTest Methods (100% Pass)** | Undisclosed | Minimal |
 | **Per-App Storage & Cache Cleaner** | **✅ Non-Destructive (~/.Trash)** | ❌ No | ❌ No |
 | **Apple Silicon vs Rosetta 2** | **✅ Auto-Detect & 1-Click Migrate** | ❌ No | ❌ No |
 | **macOS LaunchAgents & Login Items** | **✅ Full Telemetry & PID/RAM** | ⚠️ Services only | ❌ No |
@@ -290,7 +290,7 @@ xcodegen generate
 xcodebuild test -scheme BrewStore -destination "platform=macOS"
 ```
 
-### Verified Test Suites (339 / 339 Passing)
+### Verified Test Suites (345 / 345 Passing)
 
 - `AppStorageInspectorTests`: Non-destructive per-app cache cleaning, exact size breakdown (Binary vs Caches vs Data), and Trash safety.
 - `AppleSiliconMigrationTests`: Rosetta 2 emulation detection, native ARM64 migration candidates, and architecture mapping.

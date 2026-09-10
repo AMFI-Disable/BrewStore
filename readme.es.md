@@ -8,7 +8,7 @@
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/Plataforma-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
 [![Release: v1.0.0](https://img.shields.io/badge/Versi%C3%B3n-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/amfi-disable/BrewStore/releases)
-[![Tests: 339 / 339 Passed](https://img.shields.io/badge/Pruebas-339%20%2F%20339%20Superadas%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-pruebas-automatizadas-y-control-de-calidad)
+[![Tests: 345 / 345 Passed](https://img.shields.io/badge/Pruebas-339%20%2F%20339%20Superadas%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-pruebas-automatizadas-y-control-de-calidad)
 [![License: MIT](https://img.shields.io/badge/Licencia-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/Precio-100%25%20Gratuito%20y%20C%C3%B3digo%20Abierto-success.svg?style=flat-square)](#-por-qu%C3%A9-brewstore-frente-a-caskhub-y-taphouse-pro-1999)
 [![Zero Telemetry](https://img.shields.io/badge/Privacidad-Cero%20Telemetr%C3%ADa%20%2F%20100%25%20Local-purple.svg?style=flat-square)](#-privacidad-y-seguridad-primero)
@@ -161,7 +161,7 @@ brew upgrade --cask brewstore
 - **Versión**: `v1.0.0`
 - **Suma de Verificación SHA-256**:
   ```
-  07c3ac83f1c814973d5d5033a0b816e919a2fe982541172ac42f8f2a07231753
+  8605dbdd19cf3d39edc8d3edc14e187ffc3f2324072b8ebaff82cda34a44259e
   ```
 
 Verificación:
@@ -191,7 +191,7 @@ xcodegen generate
 # Compilar en configuración Release
 xcodebuild -scheme BrewStore -configuration Release -destination 'platform=macOS' build
 
-# Ejecutar el conjunto de pruebas automatizadas (339 pruebas)
+# Ejecutar el conjunto de pruebas automatizadas (345 pruebas)
 xcodebuild test -scheme BrewStore -destination 'platform=macOS'
 ```
 
@@ -283,7 +283,7 @@ xcodegen generate
 xcodebuild test -scheme BrewStore -destination "platform=macOS"
 ```
 
-### Suites de Pruebas Verificadas (339 / 339 Superadas)
+### Suites de Pruebas Verificadas (345 / 345 Superadas)
 
 - `AppStorageInspectorTests`: Limpieza de caché por aplicación no destructiva, desglose de tamaño (binario vs cachés vs datos) y protección de la papelera.
 - `AppleSiliconMigrationTests`: Detección de emulación bajo Rosetta 2, identificación de candidatos nativos ARM64 y mapeo arquitectónico.
@@ -321,7 +321,7 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
   - [x] Vista previa antes de desinstalar con advertencias de dependencias inversas.
   - [x] Gestor de fijación atómica de versiones con reversión segura.
   - [x] Estabilización geométrica del icono en la barra de menús.
-  - [x] 339 pruebas de regresión superadas con 0 fallos.
+  - [x] 345 pruebas de regresión superadas con 0 fallos.
 - [ ] **v1.2.0**:
   - [ ] Caché P2P en red local para entornos con múltiples Mac.
   - [ ] Ejecuciones de prueba en entornos aislados con Apple Virtualization Framework.

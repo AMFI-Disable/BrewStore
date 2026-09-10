@@ -61,7 +61,18 @@ Complete transformation into the unified Mac Application & Package Manager, comb
   - Removed artificial 63% ratio constraint in `EditorialHeroView`, enabling hero cards and review quotes to expand across the full width of the window in fullscreen mode.
   - Expanded review quote limit to 3 lines with unbounded horizontal width.
 
+### CLI Companion & Shell Integration (Option 3)
+- Embedded `brewstore` CLI companion tool supporting `adopt`, `switch`, `audit`, `mas`, `health`, `clean`, `devclean`, `blueprint`, `completions`, `install-cli`, and `version`.
+- Automated shell completion generators for Zsh (`_brewstore`), Bash (`brewstore.bash`), and Fish (`brewstore.fish`).
+- `BrewStoreCLIToolManager` and dedicated Settings card providing 1-click symlink installation to `~/.local/bin/brewstore` and shell completions setup.
+
+### Internal Isolation (Option 4) & UX Polish (Option 2)
+- Moved local internal notes (`task.md`, `todo.md`, `report.md`, `report_template.md`) into `docs/internal/` and added to `.gitignore`.
+- Enhanced `CommandPaletteView` with wrap-around arrow navigation, escape-to-close handling, and async focus capture.
+- Added full-row tap gesture and accessibility traits for developer cache checklists in `DiskStorageView`.
+- Added accessibility labels and hints to Menu Bar companion badges and controls.
+
 ### Verification & Test Suite
-- Expanded automated unit test suite from 19 to **339 tests across 47 test suites with 0 failures (100% passing)**.
-- Full SwiftLint strict compliance with **0 violations across all 199 source files**.
-- Ad-hoc signed release DMG (`website/downloads/brewstore-1.0.0.dmg`) with verified SHA-256 checksum.
+- Expanded automated unit test suite to **345 tests across 48 test suites with 0 failures (100% passing)**.
+- Full SwiftLint strict compliance with **0 violations across all 201 source files**.
+- Ad-hoc signed release DMG (`website/downloads/brewstore-1.0.0.dmg`) with verified SHA-256 checksum (`8605dbdd19cf3d39edc8d3edc14e187ffc3f2324072b8ebaff82cda34a44259e`).

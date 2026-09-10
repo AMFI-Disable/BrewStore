@@ -8,7 +8,7 @@
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/Plateforme-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
 [![Release: v1.0.0](https://img.shields.io/badge/Version-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/amfi-disable/BrewStore/releases)
-[![Tests: 339 / 339 Passed](https://img.shields.io/badge/Tests-339%20%2F%20339%20R%C3%A9ussis%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-tests-automatis%C3%A9s-et-assurance-qualit%C3%A9)
+[![Tests: 345 / 345 Passed](https://img.shields.io/badge/Tests-339%20%2F%20339%20R%C3%A9ussis%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-tests-automatis%C3%A9s-et-assurance-qualit%C3%A9)
 [![License: MIT](https://img.shields.io/badge/Licence-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/Prix-100%25%20Gratuit%20%26%20Open%20Source-success.svg?style=flat-square)](#-pourquoi-brewstore-face-%C3%A0-caskhub-et-taphouse-pro-1999)
 [![Zero Telemetry](https://img.shields.io/badge/Confidentialit%C3%A9-Z%C3%A9ro%20T%C3%A9l%C3%A9m%C3%A9trie%20%2F%20100%25%20Local-purple.svg?style=flat-square)](#-confidentialit%C3%A9-et-s%C3%A9curit%C3%A9-dabord)
@@ -161,7 +161,7 @@ brew upgrade --cask brewstore
 - **Version** : `v1.0.0`
 - **Empreinte SHA-256 Vérifiée** :
   ```
-  07c3ac83f1c814973d5d5033a0b816e919a2fe982541172ac42f8f2a07231753
+  8605dbdd19cf3d39edc8d3edc14e187ffc3f2324072b8ebaff82cda34a44259e
   ```
 
 Vérifier le fichier :
@@ -191,7 +191,7 @@ xcodegen generate
 # Compiler en configuration Release
 xcodebuild -scheme BrewStore -configuration Release -destination 'platform=macOS' build
 
-# Exécuter l'ensemble des tests automatisés (339 tests)
+# Exécuter l'ensemble des tests automatisés (345 tests)
 xcodebuild test -scheme BrewStore -destination 'platform=macOS'
 ```
 
@@ -254,7 +254,7 @@ brewstore launch
 | :--- | :---: | :---: | :---: |
 | **Prix & Licence** | **100% Gratuit & Open Source MIT** | 19,99 $ Propriétaire | Gratuit |
 | **Confidentialité** | **Zéro Télémétrie / 100% Local** | Traceurs tiers | Inconnue |
-| **Couverture de Tests** | **339 Méthodes XCTest (100% Réussite)**| Non communiquée | Faible |
+| **Couverture de Tests** | **345 Méthodes XCTest (100% Réussite)**| Non communiquée | Faible |
 | **Nettoyeur de Cache par App** | **✅ Non-destructif (~/.Trash)** | ❌ Non | ❌ Non |
 | **Apple Silicon vs Rosetta 2** | **✅ Détection auto & migration 1 clic**| ❌ Non | ❌ Non |
 | **LaunchAgents & Éléments d'Ouverture**| **✅ Télémétrie & suivi PID/RAM** | ⚠️ Services seuls | ❌ Non |
@@ -283,7 +283,7 @@ xcodegen generate
 xcodebuild test -scheme BrewStore -destination "platform=macOS"
 ```
 
-### Suites de Tests Validées (339 / 339 Réussis)
+### Suites de Tests Validées (345 / 345 Réussis)
 
 - `AppStorageInspectorTests` : Nettoyage de cache non-destructif par application, décomposition précise de la taille (binaire vs caches vs données) et vérification de la corbeille.
 - `AppleSiliconMigrationTests` : Détection de l'émulation Rosetta 2, identification des candidats ARM64 natifs et cartographie architecturale.
@@ -321,7 +321,7 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
   - [x] Prévisualisation avant désinstallation avec alertes de dépendances inverses.
   - [x] Gestionnaire de verrouillage atomique de versions avec retour arrière sécurisé.
   - [x] Stabilisation de la géométrie de la barre des menus.
-  - [x] 339 tests de régression validés avec 0 échec.
+  - [x] 345 tests de régression validés avec 0 échec.
 - [ ] **v1.2.0** :
   - [ ] Cache P2P sur réseau local pour parcs de Mac et serveurs domestiques.
   - [ ] Exécution sécurisée en bac à sable via Apple Virtualization Framework.

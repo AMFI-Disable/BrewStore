@@ -1,6 +1,6 @@
 cask "brewstore" do
   version "1.0.0"
-  sha256 "07c3ac83f1c814973d5d5033a0b816e919a2fe982541172ac42f8f2a07231753"
+  sha256 "8605dbdd19cf3d39edc8d3edc14e187ffc3f2324072b8ebaff82cda34a44259e"
 
   url "https://github.com/amfi-disable/BrewStore/releases/download/v#{version}/brewstore-#{version}.dmg"
   name "BrewStore"

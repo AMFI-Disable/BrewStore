@@ -374,23 +374,29 @@ struct CommandPaletteView: View {
                     .focused($isSearchFocused)
                     .onKeyPress(.downArrow) {
                         if !filteredItems.isEmpty {
-                            selectedIndex = min(selectedIndex + 1, filteredItems.count - 1)
+                            selectedIndex = (selectedIndex + 1) % filteredItems.count
                             return .handled
                         }
                         return .ignored
                     }
                     .onKeyPress(.upArrow) {
                         if !filteredItems.isEmpty {
-                            selectedIndex = max(selectedIndex - 1, 0)
+                            selectedIndex = (selectedIndex - 1 + filteredItems.count) % filteredItems.count
                             return .handled
                         }
                         return .ignored
+                    }
+                    .onKeyPress(.escape) {
+                        isPresented = false
+                        return .handled
                     }
                     .onSubmit {
                         if filteredItems.indices.contains(selectedIndex) {
                             filteredItems[selectedIndex].execute()
                         }
                     }
+                    .accessibilityLabel("Command Palette Search Field")
+                    .accessibilityHint("Type to filter commands, use up and down arrow keys to navigate, enter to execute, escape to close")
 
                 if !query.isEmpty {
                     Button(action: { query = "" }) {
@@ -398,6 +404,7 @@ struct CommandPaletteView: View {
                             .foregroundStyle(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Clear search query")
                 }
 
                 Button("ESC") {
@@ -406,6 +413,7 @@ struct CommandPaletteView: View {
                 .keyboardShortcut(.cancelAction)
                 .controlSize(.small)
                 .font(.caption2.bold())
+                .accessibilityLabel("Close Command Palette")
             }
             .padding(.horizontal, 18)
             .padding(.vertical, 16)
@@ -511,6 +519,9 @@ struct CommandPaletteView: View {
                                 .padding(.horizontal, 4)
                             }
                             .buttonStyle(.plain)
+                            .accessibilityElement(children: .combine)
+                            .accessibilityLabel("\(item.title), \(item.subtitle)")
+                            .accessibilityHint("Return or click to execute")
                             .tag(index)
                             .id(index)
                         }
@@ -587,7 +598,9 @@ struct CommandPaletteView: View {
         )
         .shadow(color: Color.black.opacity(0.18), radius: 24, y: 10)
         .onAppear {
-            isSearchFocused = true
+            DispatchQueue.main.async {
+                isSearchFocused = true
+            }
         }
         .onChange(of: query) {
             selectedIndex = 0
@@ -630,5 +643,7 @@ struct CommandPaletteView: View {
                 .foregroundStyle(isSelected ? Color.white : Color.primary)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Filter by \(title)")
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 }

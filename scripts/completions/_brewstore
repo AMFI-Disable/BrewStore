@@ -1,0 +1,42 @@
+#compdef brewstore
+
+_brewstore() {
+    local -a commands
+    commands=(
+        'adopt:Scan /Applications for unmanaged apps and adopt them into Homebrew'
+        'switch:Switch active symlinked version (e.g. node 20)'
+        'audit:Run CVE and security vulnerability audit on packages'
+        'mas:Manage Mac App Store applications via mas-cli'
+        'health:Evaluate local Homebrew health score and disk storage'
+        'clean:Reclaim disk space via cache cleanup and orphan autoremove'
+        'devclean:Purge developer caches (Xcode, Docker, Cargo, npm)'
+        'blueprint:Export or restore complete Mac setup blueprint'
+        'completions:Print shell completion scripts (zsh, bash, fish)'
+        'install-cli:Install brewstore symlink and completions'
+        'launch:Launch the BrewStore native GUI app'
+        'version:Display BrewStore version'
+        'help:Show command line help'
+    )
+
+    if (( CURRENT == 2 )); then
+        _describe -t commands 'brewstore command' commands
+        return
+    fi
+
+    case $words[2] in
+        adopt)
+            _values 'options' '--all[Adopt all detected applications]'
+            ;;
+        mas)
+            _values 'subcommands' 'list[List installed apps]' 'upgrade[Upgrade outdated apps]' 'outdated[Show outdated apps]'
+            ;;
+        blueprint)
+            _values 'subcommands' 'export[Export Mac Blueprint JSON]' 'restore[Restore Mac Blueprint from file]'
+            ;;
+        completions)
+            _values 'shells' 'zsh[Zsh completions]' 'bash[Bash completions]' 'fish[Fish completions]'
+            ;;
+    esac
+}
+
+_brewstore "$@"

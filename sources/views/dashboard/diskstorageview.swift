@@ -319,6 +319,14 @@ struct DiskStorageView: View {
                         }
                         .padding(8)
                         .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 6))
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            devCacheManager.toggleTarget(id: target.id)
+                        }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel("\(target.name), \(target.formattedSize), \(target.isSelected ? "Selected" : "Unselected")")
+                        .accessibilityHint("Click to toggle selection")
+                        .accessibilityAddTraits(target.isSelected ? [.isSelected] : [])
                     }
                 }
             }

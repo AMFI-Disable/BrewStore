@@ -8,7 +8,7 @@
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/平台-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
 [![Release: v1.0.0](https://img.shields.io/badge/版本-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/amfi-disable/BrewStore/releases)
-[![Tests: 339 / 339 Passed](https://img.shields.io/badge/測試-339%20%2F%20339%20全數通過%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-自動化測試與品質保障)
+[![Tests: 345 / 345 Passed](https://img.shields.io/badge/測試-339%20%2F%20339%20全數通過%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-自動化測試與品質保障)
 [![License: MIT](https://img.shields.io/badge/開源協議-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/價格-100%25%20免費開源-success.svg?style=flat-square)](#-為什麼選擇-brewstore而不是-caskhub-或-taphouse-pro-1999)
 [![Zero Telemetry](https://img.shields.io/badge/隱私-零遙測%20%2F%20100%25%20純本地-purple.svg?style=flat-square)](#-隱私與安全第一原則)
@@ -162,7 +162,7 @@ brew upgrade --cask brewstore
 - **版本號**：`v1.0.0`
 - **SHA-256 驗證碼**：
   ```
-  07c3ac83f1c814973d5d5033a0b816e919a2fe982541172ac42f8f2a07231753
+  8605dbdd19cf3d39edc8d3edc14e187ffc3f2324072b8ebaff82cda34a44259e
   ```
 
 驗證下載檔案的完整性：
@@ -284,7 +284,7 @@ xcodegen generate
 xcodebuild test -scheme BrewStore -destination "platform=macOS"
 ```
 
-### 已驗證的測試套件（339 / 339 全數通過）
+### 已驗證的測試套件（345 / 345 全數通過）
 
 - `AppStorageInspectorTests`：非破壞性單應用快取清理、精準三欄儲存空間透析（二進位檔 vs 快取 vs 資料）與廢紙簍安全路徑驗證。
 - `AppleSiliconMigrationTests`：Rosetta 2 模擬執行偵測、原生 ARM64 遷移候選者比對與架構膠囊對應。

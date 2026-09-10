@@ -82,6 +82,8 @@ struct MenuBarExtraView: View {
                     }
                     .buttonStyle(.plain)
                     .help("\(rosettaCount) Intel apps running under Rosetta 2 emulation. Click to inspect.")
+                    .accessibilityLabel("\(rosettaCount) Intel apps running under Rosetta 2 emulation")
+                    .accessibilityHint("Click to open BrewStore and inspect native migration")
                 }
 
                 // Stable trailing status/action area
@@ -108,6 +110,7 @@ struct MenuBarExtraView: View {
                         }
                         .buttonStyle(.plain)
                         .help("Refresh Homebrew")
+                        .accessibilityLabel("Refresh Homebrew")
                     }
                 }
                 .frame(width: 110, height: 26, alignment: .trailing)

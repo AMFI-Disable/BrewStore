@@ -8,7 +8,7 @@
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/Plattform-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
 [![Release: v1.0.0](https://img.shields.io/badge/Version-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/amfi-disable/BrewStore/releases)
-[![Tests: 339 / 339 Passed](https://img.shields.io/badge/Tests-339%20%2F%20339%20Bestanden%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-automatisierte-tests-und-qualit%C3%A4tssicherung)
+[![Tests: 345 / 345 Passed](https://img.shields.io/badge/Tests-339%20%2F%20339%20Bestanden%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-automatisierte-tests-und-qualit%C3%A4tssicherung)
 [![License: MIT](https://img.shields.io/badge/Lizenz-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/Preis-100%25%20Kostenlos%20%26%20Open%20Source-success.svg?style=flat-square)](#-warum-brewstore-im-vergleich-zu-caskhub-und-taphouse-pro-1999)
 [![Zero Telemetry](https://img.shields.io/badge/Datenschutz-Keine%20Telemetrie%20%2F%20100%25%20Lokal-purple.svg?style=flat-square)](#-sicherheit-und-datenschutz-an-erster-stelle)
@@ -161,7 +161,7 @@ brew upgrade --cask brewstore
 - **Version**: `v1.0.0`
 - **Geprüfte SHA-256 Prüfsumme**:
   ```
-  07c3ac83f1c814973d5d5033a0b816e919a2fe982541172ac42f8f2a07231753
+  8605dbdd19cf3d39edc8d3edc14e187ffc3f2324072b8ebaff82cda34a44259e
   ```
 
 Prüfsumme verifizieren:
@@ -191,7 +191,7 @@ xcodegen generate
 # Release-Konfiguration bauen
 xcodebuild -scheme BrewStore -configuration Release -destination 'platform=macOS' build
 
-# Vollständige automatisierte Testsuite ausführen (339 Tests)
+# Vollständige automatisierte Testsuite ausführen (345 Tests)
 xcodebuild test -scheme BrewStore -destination 'platform=macOS'
 ```
 
@@ -254,7 +254,7 @@ brewstore launch
 | :--- | :---: | :---: | :---: |
 | **Preis & Lizenz** | **100% Kostenlos & Open Source (MIT)** | 19,99 $ Kommerziell / Proprietär | Kostenlos |
 | **Datenschutz** | **Keine Telemetrie / 100% Lokal** | Drittanbieter-Tracking | Unbekannt |
-| **Testabdeckung** | **339 XCTest-Methoden (100% Erfolg)** | Nicht veröffentlicht | Sehr gering |
+| **Testabdeckung** | **345 XCTest-Methoden (100% Erfolg)** | Nicht veröffentlicht | Sehr gering |
 | **Speicheranalyse & Cache-Reiniger** | **✅ Nicht-destruktiv in den Papierkorb** | ❌ Nein | ❌ Nein |
 | **Apple Silicon vs Rosetta 2** | **✅ Auto-Erkennung & 1-Klick-Migration** | ❌ Nein | ❌ Nein |
 | **LaunchAgents & Anmeldeobjekte** | **✅ Volle Telemetrie & PID/RAM-Monitor** | ⚠️ Nur Dienste | ❌ Nein |
@@ -283,7 +283,7 @@ xcodegen generate
 xcodebuild test -scheme BrewStore -destination "platform=macOS"
 ```
 
-### Verifizierte Test-Suiten (339 / 339 Bestanden)
+### Verifizierte Test-Suiten (345 / 345 Bestanden)
 
 - `AppStorageInspectorTests`: Nicht-destruktive Cache-Bereinigung pro App, Speicheraufteilung (Binär vs Cache vs Daten) und Papierkorb-Prüfung.
 - `AppleSiliconMigrationTests`: Rosetta 2 Emulationserkennung, native ARM64-Migrationskandidaten und Architektur-Zuordnung.
@@ -321,7 +321,7 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
   - [x] Deinstallations-Vorschau mit inversen Abhängigkeitswarnungen.
   - [x] Atomarer Versions-Pinning-Manager mit Rollback-Sicherheit.
   - [x] Menüleisten-Begleiter mit fester Geometrie und verzerrungsfreier Fensterfixierung.
-  - [x] 339 automatisierte Regressionstests erfolgreich bestanden.
+  - [x] 345 automatisierte Regressionstests erfolgreich bestanden.
 - [ ] **v1.2.0**:
   - [ ] P2P lokales Flaschen-Caching im Netzwerk für Büros und Heimlabore.
   - [ ] Isolierte Sandbox-Testläufe über das Apple Virtualization Framework.
