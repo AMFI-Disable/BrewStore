@@ -75,4 +75,4 @@ Complete transformation into the unified Mac Application & Package Manager, comb
 ### Verification & Test Suite
 - Expanded automated unit test suite to **345 tests across 48 test suites with 0 failures (100% passing)**.
 - Full SwiftLint strict compliance with **0 violations across all 201 source files**.
-- Ad-hoc signed release DMG (`website/downloads/brewstore-1.0.0.dmg`) with verified SHA-256 checksum (`3f19822633a9b73adfc34c9cd404ff608286b550f17cecf3d672ee75603be125`).
+- Ad-hoc signed release DMG (`website/downloads/brewstore-1.0.0.dmg`) with verified SHA-256 checksum (`2a187fae00dda997c99b9377610e16ab24c067aaf473f3a2ead0ca25eea789d9`).

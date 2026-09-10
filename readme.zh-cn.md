@@ -170,7 +170,7 @@ brew upgrade --cask brewstore
 - **发布版本**：`v1.0.0`
 - **已校验 SHA-256 校验码**：
   ```
-  3f19822633a9b73adfc34c9cd404ff608286b550f17cecf3d672ee75603be125
+  2a187fae00dda997c99b9377610e16ab24c067aaf473f3a2ead0ca25eea789d9
   ```
 
 验证下载文件的完整性：

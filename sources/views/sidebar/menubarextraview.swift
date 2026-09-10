@@ -115,13 +115,14 @@ struct MenuBarExtraView: View {
                 }
                 .frame(width: 110, height: 26, alignment: .trailing)
             }
+            .frame(maxWidth: .infinity)
             .frame(height: 48)
             .padding(.horizontal, 14)
             .background(Color.secondary.opacity(0.06))
 
             Divider()
 
-            // 4-Tab Segment (Rigid height)
+            // 4-Tab Segment (Rigid height & full width)
             Picker("", selection: $selectedTab) {
                 Text("Updates (\(outdatedPackages.count))").tag(MenuBarTab.updates)
                 Text("Search").tag(MenuBarTab.search)
@@ -129,14 +130,15 @@ struct MenuBarExtraView: View {
                 Text("Tools").tag(MenuBarTab.tools)
             }
             .pickerStyle(.segmented)
+            .frame(maxWidth: .infinity)
             .frame(height: 28)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
 
             Divider()
 
-            // Tab Content fills exact remaining space without shifting parent panel
-            ScrollView {
+            // Tab Content fills exact remaining space with tab-isolated scroll offset and no shifting
+            ScrollView(.vertical) {
                 VStack(alignment: .leading, spacing: 8) {
                     switch selectedTab {
                     case .updates:
@@ -150,7 +152,10 @@ struct MenuBarExtraView: View {
                     }
                 }
                 .padding(10)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
             }
+            .id(selectedTab)
+            .animation(nil, value: selectedTab)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             Divider()
@@ -174,6 +179,7 @@ struct MenuBarExtraView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             }
+            .frame(maxWidth: .infinity)
             .frame(height: 36)
             .padding(.horizontal, 14)
         }
@@ -272,6 +278,7 @@ struct MenuBarExtraView: View {
                             }
                             Spacer()
                         }
+                        .frame(maxWidth: .infinity)
                         .frame(height: 22)
                     }
                     .buttonStyle(.borderedProminent)
@@ -280,6 +287,7 @@ struct MenuBarExtraView: View {
                     .disabled(manager.isOperating)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .topLeading)
         }
     }
 
@@ -292,18 +300,50 @@ struct MenuBarExtraView: View {
                     .foregroundStyle(.secondary)
                 TextField("Search all packages…", text: $searchInput)
                     .textFieldStyle(.plain)
+                if !searchInput.isEmpty {
+                    Button {
+                        searchInput = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
+            .frame(maxWidth: .infinity)
             .frame(height: 28)
             .padding(.horizontal, 8)
             .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 6))
             .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.secondary.opacity(0.2), lineWidth: 1))
 
             if searchResults.isEmpty, !searchInput.isEmpty {
-                Text("No matching packages found.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.vertical, 20)
-                    .frame(maxWidth: .infinity)
+                VStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.title3)
+                        .foregroundStyle(.secondary)
+                    Text("No matching packages found.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 30)
+            } else if searchInput.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.title3)
+                        .foregroundStyle(.secondary.opacity(0.6))
+                    Text("Quick Search")
+                        .font(.caption.bold())
+                        .foregroundStyle(.secondary)
+                    Text("Search formulas, casks, and tools to install or update instantly.")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary.opacity(0.8))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 20)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 30)
             } else {
                 ForEach(searchResults) { pkg in
                     MenuBarSearchRow(
@@ -314,6 +354,7 @@ struct MenuBarExtraView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
     // MARK: - Services Tab
@@ -321,11 +362,18 @@ struct MenuBarExtraView: View {
     @ViewBuilder
     private var servicesTabContent: some View {
         if manager.services.isEmpty {
-            Text("No background services installed.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 30)
+            VStack(spacing: 8) {
+                Image(systemName: "gearshape.2")
+                    .font(.title2)
+                    .foregroundStyle(.secondary)
+                Text("No Background Services")
+                    .font(.caption.bold())
+                Text("No Homebrew services are currently configured.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 30)
         } else {
             VStack(spacing: 6) {
                 ForEach(manager.services) { svc in
@@ -337,6 +385,7 @@ struct MenuBarExtraView: View {
                     )
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .topLeading)
         }
     }
 
@@ -424,6 +473,7 @@ struct MenuBarExtraView: View {
             }
         }
         .padding(4)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
     private func menuBarToolRow(title: String, icon: String, action: @escaping () -> Void) -> some View {
@@ -438,6 +488,7 @@ struct MenuBarExtraView: View {
                     .lineLimit(1)
                 Spacer()
             }
+            .frame(maxWidth: .infinity)
             .frame(height: 28)
             .padding(.horizontal, 8)
             .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 6))
@@ -491,6 +542,7 @@ private struct MenuBarOutdatedRow: View {
             .frame(width: 58)
             .disabled(manager.isOperating)
         }
+        .frame(maxWidth: .infinity)
         .frame(height: 32)
         .padding(.horizontal, 8)
         .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 6))
@@ -555,6 +607,7 @@ private struct MenuBarSearchRow: View {
                 .disabled(manager.isOperating)
             }
         }
+        .frame(maxWidth: .infinity)
         .frame(height: 34)
         .padding(.horizontal, 8)
         .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 6))
@@ -632,6 +685,7 @@ private struct MenuBarServiceRow: View {
             .frame(width: 54)
             .disabled(manager.isOperating)
         }
+        .frame(maxWidth: .infinity)
         .frame(height: 32)
         .padding(.horizontal, 8)
         .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 6))
@@ -654,10 +708,8 @@ private struct MenuBarPanelWindowAccessor: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: NSView, context _: Context) {
-        DispatchQueue.main.async {
-            if let window = nsView.window {
-                BrewStoreMenuBarCompanionManager.shared.configureMenuBarWindow(window, isCompact: isCompact)
-            }
+        if let window = nsView.window {
+            BrewStoreMenuBarCompanionManager.shared.configureMenuBarWindow(window, isCompact: isCompact)
         }
     }
 }

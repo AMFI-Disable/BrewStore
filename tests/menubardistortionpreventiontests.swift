@@ -58,6 +58,36 @@ final class MenuBarDistortionPreventionTests: XCTestCase {
         XCTAssertEqual(window.maxSize, NSSize(width: 360, height: 360))
     }
 
+    func testConfigureMenuBarWindowAnchorsFromTopAndAvoidsFrameJumping() {
+        let manager = BrewStoreMenuBarCompanionManager.shared
+        let window = NSWindow(
+            contentRect: NSRect(x: 200, y: 500, width: 360, height: 440),
+            styleMask: [.borderless],
+            backing: .buffered,
+            defer: false
+        )
+
+        let initialMaxY = window.frame.maxY
+        manager.configureMenuBarWindow(window, isCompact: false)
+        XCTAssertEqual(window.frame.maxY, initialMaxY)
+        XCTAssertEqual(window.frame.size, NSSize(width: 360, height: 440))
+
+        // Switch to compact mode: top edge (maxY) must stay fixed
+        manager.configureMenuBarWindow(window, isCompact: true)
+        XCTAssertEqual(window.frame.maxY, initialMaxY)
+        XCTAssertEqual(window.frame.size, NSSize(width: 360, height: 360))
+
+        // Switch back to standard mode: top edge (maxY) must stay fixed
+        manager.configureMenuBarWindow(window, isCompact: false)
+        XCTAssertEqual(window.frame.maxY, initialMaxY)
+        XCTAssertEqual(window.frame.size, NSSize(width: 360, height: 440))
+
+        // Repeated call with same mode should not shift frame
+        let previousFrame = window.frame
+        manager.configureMenuBarWindow(window, isCompact: false)
+        XCTAssertEqual(window.frame, previousFrame)
+    }
+
     func testMenuBarTitleStateReporting() {
         let companion = BrewStoreMenuBarCompanionManager.shared
 

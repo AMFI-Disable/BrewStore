@@ -45,13 +45,33 @@ final class BrewStoreMenuBarCompanionManager: ObservableObject {
         let targetHeight = isCompact ? Self.compactPanelHeight : Self.panelHeight
         let fixedSize = NSSize(width: Self.panelWidth, height: targetHeight)
 
-        window.isMovable = false
-        window.isMovableByWindowBackground = false
-        window.animationBehavior = .none
-        window.styleMask.remove(.resizable)
-        window.setContentSize(fixedSize)
-        window.minSize = fixedSize
-        window.maxSize = fixedSize
-        window.hasShadow = true
+        if window.isMovable {
+            window.isMovable = false
+        }
+        if window.isMovableByWindowBackground {
+            window.isMovableByWindowBackground = false
+        }
+        if window.animationBehavior != .none {
+            window.animationBehavior = .none
+        }
+        if window.styleMask.contains(.resizable) {
+            window.styleMask.remove(.resizable)
+        }
+        if !window.hasShadow {
+            window.hasShadow = true
+        }
+
+        if window.minSize != fixedSize {
+            window.minSize = fixedSize
+        }
+        if window.maxSize != fixedSize {
+            window.maxSize = fixedSize
+        }
+        if window.frame.size != fixedSize {
+            let currentFrame = window.frame
+            let newY = currentFrame.maxY - targetHeight
+            let newFrame = NSRect(x: currentFrame.origin.x, y: newY, width: Self.panelWidth, height: targetHeight)
+            window.setFrame(newFrame, display: true, animate: false)
+        }
     }
 }
