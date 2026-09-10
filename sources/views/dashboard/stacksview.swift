@@ -49,6 +49,7 @@ struct StacksView: View {
                             Text(type.rawValue).tag(type)
                         }
                     }
+                    .labelsHidden()
                     .pickerStyle(.segmented)
                     .fixedSize(horizontal: true, vertical: false)
 

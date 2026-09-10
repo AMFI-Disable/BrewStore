@@ -41,6 +41,7 @@ struct AppReplacementView: View {
                     Text("Suggested Replacements (\(replacementManager.detectedAlternatives.count))").tag(0)
                     Text("Full Directory (\(BrewStoreAppReplacementManager.curatedAlternativeCatalog.count))").tag(1)
                 }
+                .labelsHidden()
                 .pickerStyle(.segmented)
                 .fixedSize(horizontal: true, vertical: false)
             }
@@ -68,6 +69,8 @@ struct AppReplacementView: View {
                 }
                 .padding(.vertical, 4)
             }
+            .id(selectedTab)
+            .animation(nil, value: selectedTab)
         }
         .sheet(item: $sheetMapping) { mapping in
             AppReplacementSheet(

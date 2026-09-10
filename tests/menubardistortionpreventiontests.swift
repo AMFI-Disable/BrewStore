@@ -1,5 +1,6 @@
 import AppKit
 @testable import BrewStore
+import SwiftUI
 import XCTest
 
 @MainActor
@@ -117,5 +118,16 @@ final class MenuBarDistortionPreventionTests: XCTestCase {
         prefs.resetToDefaults()
         XCTAssertFalse(prefs.compactMenuBarView)
         XCTAssertFalse(prefs.menuBarCloseOnAction)
+    }
+
+    func testMenuBarExtraViewHostingRender() {
+        let manager = HomebrewManager()
+        let updateMonitor = BrewStoreUpdateMonitor()
+        let view = MenuBarExtraView(manager: manager, updateMonitor: updateMonitor)
+        let hostingView = NSHostingView(rootView: view)
+        hostingView.frame = NSRect(x: 0, y: 0, width: 360, height: 440)
+        hostingView.layoutSubtreeIfNeeded()
+        XCTAssertEqual(hostingView.frame.size.width, 360)
+        XCTAssertEqual(hostingView.frame.size.height, 440)
     }
 }

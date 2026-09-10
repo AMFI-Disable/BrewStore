@@ -116,6 +116,7 @@ struct BrewfileImportView: View {
                         Text("All (\(entries.count))").tag(1)
                         Text("Installed (\(entries.filter(\.isInstalled).count))").tag(2)
                     }
+                    .labelsHidden()
                     .pickerStyle(.segmented)
                     .fixedSize(horizontal: true, vertical: false)
 

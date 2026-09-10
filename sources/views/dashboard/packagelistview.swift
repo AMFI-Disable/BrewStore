@@ -521,6 +521,7 @@ struct PackageListView: View {
                     Text("Apps").tag(Optional(BrewPackageKind.cask))
                     Text("CLI").tag(Optional(BrewPackageKind.formula))
                 }
+                .labelsHidden()
                 .pickerStyle(.segmented)
                 .fixedSize(horizontal: true, vertical: false)
             }

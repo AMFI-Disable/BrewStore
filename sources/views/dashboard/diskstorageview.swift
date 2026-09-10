@@ -225,6 +225,7 @@ struct DiskStorageView: View {
                                 Text(filter.rawValue).tag(filter)
                             }
                         }
+                        .labelsHidden()
                         .pickerStyle(.segmented)
                         .frame(width: 240)
                     }

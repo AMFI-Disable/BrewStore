@@ -98,6 +98,7 @@ struct DependencyTopologyView: View {
                                 Text(tab.rawValue).tag(tab)
                             }
                         }
+                        .labelsHidden()
                         .pickerStyle(.segmented)
                         .frame(maxWidth: 480)
                         .accessibilityIdentifier("Topology.SegmentedPicker")
@@ -109,14 +110,18 @@ struct DependencyTopologyView: View {
                     }
 
                     // Tab Content
-                    switch topologyManager.selectedTab {
-                    case .foundations:
-                        foundationsList(foundations: filteredFoundations(top.sharedFoundations), totalCount: top.sharedFoundations.count)
-                    case .orphans:
-                        orphansList(orphans: filteredOrphans(top.orphanLeaves), totalOrphanCount: top.orphanLeaves.count)
-                    case .integrity:
-                        integrityList(issues: filteredIssues(top.linkageIssues), totalCount: top.linkageIssues.count)
+                    Group {
+                        switch topologyManager.selectedTab {
+                        case .foundations:
+                            foundationsList(foundations: filteredFoundations(top.sharedFoundations), totalCount: top.sharedFoundations.count)
+                        case .orphans:
+                            orphansList(orphans: filteredOrphans(top.orphanLeaves), totalOrphanCount: top.orphanLeaves.count)
+                        case .integrity:
+                            integrityList(issues: filteredIssues(top.linkageIssues), totalCount: top.linkageIssues.count)
+                        }
                     }
+                    .id(topologyManager.selectedTab)
+                    .animation(nil, value: topologyManager.selectedTab)
                 } else {
                     loadingStateView
                 }
@@ -625,6 +630,7 @@ struct DependencyExportSheet: View {
                     Text("Deterministic Lockfile (JSON)").tag(1)
                     Text("Markdown Hierarchy Tree (.md)").tag(2)
                 }
+                .labelsHidden()
                 .pickerStyle(.segmented)
                 .frame(maxWidth: 480)
 

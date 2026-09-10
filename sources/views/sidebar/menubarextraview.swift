@@ -42,6 +42,13 @@ struct MenuBarExtraView: View {
         }.prefix(10).map { $0 }
     }
 
+    private var scrollAreaHeight: CGFloat {
+        let totalHeight = preferences.compactMenuBarView ?
+            BrewStoreMenuBarCompanionManager.compactPanelHeight :
+            BrewStoreMenuBarCompanionManager.panelHeight
+        return totalHeight - 127
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Header (Rigid 48pt height prevents window jumps)
@@ -115,9 +122,8 @@ struct MenuBarExtraView: View {
                 }
                 .frame(width: 110, height: 26, alignment: .trailing)
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 48)
             .padding(.horizontal, 14)
+            .frame(width: BrewStoreMenuBarCompanionManager.panelWidth, height: 48)
             .background(Color.secondary.opacity(0.06))
 
             Divider()
@@ -129,11 +135,11 @@ struct MenuBarExtraView: View {
                 Text("Services (\(runningServices.count))").tag(MenuBarTab.services)
                 Text("Tools").tag(MenuBarTab.tools)
             }
+            .labelsHidden()
             .pickerStyle(.segmented)
-            .frame(maxWidth: .infinity)
-            .frame(height: 28)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
+            .frame(width: BrewStoreMenuBarCompanionManager.panelWidth, height: 40)
 
             Divider()
 
@@ -156,7 +162,7 @@ struct MenuBarExtraView: View {
             }
             .id(selectedTab)
             .animation(nil, value: selectedTab)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(width: BrewStoreMenuBarCompanionManager.panelWidth, height: scrollAreaHeight)
 
             Divider()
 
@@ -179,15 +185,15 @@ struct MenuBarExtraView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 36)
             .padding(.horizontal, 14)
+            .frame(width: BrewStoreMenuBarCompanionManager.panelWidth, height: 36)
         }
         .frame(
             width: BrewStoreMenuBarCompanionManager.panelWidth,
-            height: preferences.compactMenuBarView ? BrewStoreMenuBarCompanionManager.compactPanelHeight : BrewStoreMenuBarCompanionManager.panelHeight
+            height: preferences.compactMenuBarView ?
+                BrewStoreMenuBarCompanionManager.compactPanelHeight :
+                BrewStoreMenuBarCompanionManager.panelHeight
         )
-        .fixedSize(horizontal: true, vertical: true)
         .background(MenuBarPanelWindowAccessor(isCompact: preferences.compactMenuBarView))
         .onAppear {
             if let tab = MenuBarTab(rawValue: preferences.defaultMenuBarTab) {

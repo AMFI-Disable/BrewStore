@@ -79,14 +79,19 @@ public struct CommunityShowdownView: View {
                         Label(tab.rawValue, systemImage: tab.icon).tag(tab)
                     }
                 }
+                .labelsHidden()
                 .pickerStyle(.segmented)
                 .padding(.horizontal)
 
-                if selectedTab == .qualifying {
-                    qualifyingNomineesSection
-                } else {
-                    tournamentBracketsSection
+                Group {
+                    if selectedTab == .qualifying {
+                        qualifyingNomineesSection
+                    } else {
+                        tournamentBracketsSection
+                    }
                 }
+                .id(selectedTab)
+                .animation(nil, value: selectedTab)
             }
             .padding(24)
         }

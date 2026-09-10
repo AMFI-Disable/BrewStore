@@ -230,6 +230,7 @@ struct DiscoveryView: View {
                             Text("Apps").tag(Optional(BrewPackageKind.cask))
                             Text("CLI").tag(Optional(BrewPackageKind.formula))
                         }
+                        .labelsHidden()
                         .pickerStyle(.segmented)
                         .frame(maxWidth: 180)
                     }
@@ -640,6 +641,7 @@ struct DiscoveryView: View {
             Text("⚙️ All CLI Tools").tag(DiscoveryViewMode.allFormulae)
             Text("📦 All Packages").tag(DiscoveryViewMode.allCatalog)
         }
+        .labelsHidden()
         .pickerStyle(.segmented)
         .fixedSize(horizontal: true, vertical: false)
         .onChange(of: viewMode) { _, newMode in

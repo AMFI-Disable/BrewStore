@@ -129,6 +129,7 @@ struct DependencyGraphView: View {
                             Label(mode.rawValue, systemImage: mode.icon).tag(mode)
                         }
                     }
+                    .labelsHidden()
                     .pickerStyle(.segmented)
                     .fixedSize(horizontal: true, vertical: false)
                     .onChange(of: graphMode) {

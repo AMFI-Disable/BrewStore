@@ -116,6 +116,7 @@ struct MyMacHubView: View {
                         Text("Adoption (\(adoptableCount))").tag(MyMacSubMode.adoption)
                         Text("Dependencies").tag(MyMacSubMode.topology)
                     }
+                    .labelsHidden()
                     .pickerStyle(.segmented)
                     .fixedSize(horizontal: true, vertical: false)
                     .onChange(of: subMode) { _, newMode in
@@ -148,6 +149,8 @@ struct MyMacHubView: View {
                     DependencyTopologyView(manager: manager)
                 }
             }
+            .id(subMode)
+            .animation(nil, value: subMode)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .onAppear {

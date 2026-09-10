@@ -210,6 +210,7 @@ struct CategoriesGridView: View {
                             Text(filter.rawValue).tag(filter)
                         }
                     }
+                    .labelsHidden()
                     .pickerStyle(.segmented)
                     .fixedSize(horizontal: true, vertical: false)
 

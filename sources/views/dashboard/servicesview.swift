@@ -134,6 +134,7 @@ struct ServicesView: View {
                     Text("Homebrew Daemons (\(manager.services.count))").tag(0)
                     Text("macOS LaunchAgents & Login Items (\(backgroundManager.items.count))").tag(1)
                 }
+                .labelsHidden()
                 .pickerStyle(.segmented)
                 .fixedSize(horizontal: true, vertical: false)
 
@@ -144,11 +145,15 @@ struct ServicesView: View {
 
             Divider()
 
-            if serviceCategoryTab == 1 {
-                macOSBackgroundItemsView
-            } else {
-                homebrewServicesView
+            Group {
+                if serviceCategoryTab == 1 {
+                    macOSBackgroundItemsView
+                } else {
+                    homebrewServicesView
+                }
             }
+            .id(serviceCategoryTab)
+            .animation(nil, value: serviceCategoryTab)
         }
         .sheet(item: $selectedLogService) { svc in
             ServiceLogView(service: svc, brewPrefix: manager.brewPrefix)

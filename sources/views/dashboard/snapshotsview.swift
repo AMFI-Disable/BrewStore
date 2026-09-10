@@ -56,6 +56,7 @@ struct SnapshotsView: View {
                     Text("Package Snapshots (\(snapshotManager.snapshots.count))").tag(0)
                     Text("Mac Blueprint & Transfer").tag(1)
                 }
+                .labelsHidden()
                 .pickerStyle(.segmented)
                 .fixedSize(horizontal: true, vertical: false)
 
@@ -71,95 +72,99 @@ struct SnapshotsView: View {
 
             Divider()
 
-            if selectedTab == 1 {
-                ScrollView {
-                    MultiMachineSyncView(manager: manager)
-                        .padding(20)
-                }
-            } else if snapshotManager.snapshots.isEmpty {
-                VStack(spacing: 12) {
-                    Spacer()
-                    Image(systemName: "clock.arrow.circlepath")
-                        .font(.system(size: 48))
-                        .foregroundStyle(.secondary)
-                    Text("No Snapshots Yet").font(.headline)
-                    Text("Create a snapshot to record your currently installed packages and restore them at any time.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Button("Create First Snapshot") {
-                        snapshotManager.createSnapshot(manager: manager)
+            Group {
+                if selectedTab == 1 {
+                    ScrollView {
+                        MultiMachineSyncView(manager: manager)
+                            .padding(20)
                     }
-                    .buttonStyle(.borderedProminent)
-                    Spacer()
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                HSplitView {
-                    // Left Snapshot List
-                    List(filteredSnapshots, selection: $selectedSnapshot) { snapshot in
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Image(systemName: "clock.fill")
+                } else if snapshotManager.snapshots.isEmpty {
+                    VStack(spacing: 12) {
+                        Spacer()
+                        Image(systemName: "clock.arrow.circlepath")
+                            .font(.system(size: 48))
+                            .foregroundStyle(.secondary)
+                        Text("No Snapshots Yet").font(.headline)
+                        Text("Create a snapshot to record your currently installed packages and restore them at any time.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Button("Create First Snapshot") {
+                            snapshotManager.createSnapshot(manager: manager)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    HSplitView {
+                        // Left Snapshot List
+                        List(filteredSnapshots, selection: $selectedSnapshot) { snapshot in
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack {
+                                    Image(systemName: "clock.fill")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                    Text(snapshot.formattedDate)
+                                        .font(.headline)
+                                }
+                                Text("\(snapshot.totalCount) packages (\(snapshot.casks.count) casks, \(snapshot.formulae.count) formulae)")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
-                                Text(snapshot.formattedDate)
-                                    .font(.headline)
                             }
-                            Text("\(snapshot.totalCount) packages (\(snapshot.casks.count) casks, \(snapshot.formulae.count) formulae)")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                            .tag(snapshot)
+                            .padding(.vertical, 4)
+                            .contextMenu {
+                                Button("Restore (Install Missing Packages)") {
+                                    triggerRestore(for: snapshot)
+                                }
+                                .disabled(manager.isOperating || !manager.isAvailable)
+
+                                Button("Reveal in Finder") {
+                                    NSWorkspace.shared.activateFileViewerSelecting([snapshot.fileURL])
+                                }
+
+                                Button("Copy Snapshot Path") {
+                                    NSPasteboard.general.clearContents()
+                                    NSPasteboard.general.setString(snapshot.fileURL.path, forType: .string)
+                                }
+
+                                Divider()
+
+                                Button("Restore Missing Packages…") {
+                                    triggerRestore(for: snapshot)
+                                }
+                                .disabled(manager.isOperating || !manager.isAvailable)
+                            }
                         }
-                        .tag(snapshot)
-                        .padding(.vertical, 4)
-                        .contextMenu {
-                            Button("Restore (Install Missing Packages)") {
-                                triggerRestore(for: snapshot)
-                            }
-                            .disabled(manager.isOperating || !manager.isAvailable)
+                        .frame(minWidth: 260, maxWidth: 360)
 
-                            Button("Reveal in Finder") {
-                                NSWorkspace.shared.activateFileViewerSelecting([snapshot.fileURL])
+                        // Right Diff Inspector
+                        if let snapshot = selectedSnapshot {
+                            SnapshotDetailInspector(
+                                snapshot: snapshot,
+                                diff: snapshotManager.computeDiff(for: snapshot, currentPackages: manager.packages, currentTaps: manager.taps),
+                                manager: manager,
+                                onDelete: {
+                                    snapshotManager.deleteSnapshot(snapshot)
+                                    selectedSnapshot = nil
+                                },
+                                onRestore: {
+                                    triggerRestore(for: snapshot)
+                                }
+                            )
+                        } else {
+                            VStack {
+                                Spacer()
+                                Text("Select a snapshot to inspect state diff").foregroundStyle(.secondary)
+                                Spacer()
                             }
-
-                            Button("Copy Snapshot Path") {
-                                NSPasteboard.general.clearContents()
-                                NSPasteboard.general.setString(snapshot.fileURL.path, forType: .string)
-                            }
-
-                            Divider()
-
-                            Button("Restore Missing Packages…") {
-                                triggerRestore(for: snapshot)
-                            }
-                            .disabled(manager.isOperating || !manager.isAvailable)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                         }
-                    }
-                    .frame(minWidth: 260, maxWidth: 360)
-
-                    // Right Diff Inspector
-                    if let snapshot = selectedSnapshot {
-                        SnapshotDetailInspector(
-                            snapshot: snapshot,
-                            diff: snapshotManager.computeDiff(for: snapshot, currentPackages: manager.packages, currentTaps: manager.taps),
-                            manager: manager,
-                            onDelete: {
-                                snapshotManager.deleteSnapshot(snapshot)
-                                selectedSnapshot = nil
-                            },
-                            onRestore: {
-                                triggerRestore(for: snapshot)
-                            }
-                        )
-                    } else {
-                        VStack {
-                            Spacer()
-                            Text("Select a snapshot to inspect state diff").foregroundStyle(.secondary)
-                            Spacer()
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                 }
             }
+            .id(selectedTab)
+            .animation(nil, value: selectedTab)
         }
         .onAppear {
             if selectedSnapshot == nil {

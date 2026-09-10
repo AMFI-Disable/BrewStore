@@ -166,7 +166,7 @@ Download the signed disk image directly from the release mirror:
 - **Release Version**: `v1.0.0`
 - **Verified SHA-256 Checksum**:
   ```
-  2a187fae00dda997c99b9377610e16ab24c067aaf473f3a2ead0ca25eea789d9
+  d702a472a3080cbc246dafe9ea810cdcb6e88b886bdca6c92e934b2c278f33a6
   ```
 
 To verify the integrity of your download:

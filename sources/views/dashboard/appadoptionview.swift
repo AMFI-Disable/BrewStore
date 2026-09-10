@@ -46,48 +46,53 @@ struct AppAdoptionView: View {
                 Text("Adopt Existing Apps (\(adoptionManager.adoptableApps.count + adoptionManager.reviewRequiredApps.count))").tag(0)
                 Text("Open-Source Alternatives (\(BrewStoreAppReplacementManager.curatedAlternativeCatalog.count))").tag(1)
             }
+            .labelsHidden()
             .pickerStyle(.segmented)
             .padding(.horizontal)
             .padding(.bottom, 10)
 
             Divider()
 
-            if activeHubTab == 1 {
-                AppReplacementView(manager: manager)
-                    .padding(20)
-            } else {
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "info.circle.fill").foregroundStyle(Color.accentColor)
-                        Text("How App Adoption Works").font(.subheadline.bold())
-                    }
-                    Text("Adopting links apps already installed on your Mac with Homebrew. This lets BrewStore keep them updated automatically without redownloading. Apps with multiple versions or loose matches are flagged for your review so nothing gets replaced accidentally.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.accentColor.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
-                .padding(.horizontal)
-                .padding(.bottom, 6)
-
-                filterBar
-                Divider()
-
-                if adoptionManager.isScanning {
-                    VStack(spacing: 12) {
-                        ProgressView()
-                        Text("Scanning /Applications and ~/Applications for unmanaged macOS apps…")
-                            .font(.callout)
+            Group {
+                if activeHubTab == 1 {
+                    AppReplacementView(manager: manager)
+                        .padding(20)
+                } else {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "info.circle.fill").foregroundStyle(Color.accentColor)
+                            Text("How App Adoption Works").font(.subheadline.bold())
+                        }
+                        Text("Adopting links apps already installed on your Mac with Homebrew. This lets BrewStore keep them updated automatically without redownloading. Apps with multiple versions or loose matches are flagged for your review so nothing gets replaced accidentally.")
+                            .font(.caption)
                             .foregroundStyle(.secondary)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if filteredApps.isEmpty {
-                    emptyStateView
-                } else {
-                    appsListView
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.accentColor.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
+                    .padding(.horizontal)
+                    .padding(.bottom, 6)
+
+                    filterBar
+                    Divider()
+
+                    if adoptionManager.isScanning {
+                        VStack(spacing: 12) {
+                            ProgressView()
+                            Text("Scanning /Applications and ~/Applications for unmanaged macOS apps…")
+                                .font(.callout)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else if filteredApps.isEmpty {
+                        emptyStateView
+                    } else {
+                        appsListView
+                    }
                 }
             }
+            .id(activeHubTab)
+            .animation(nil, value: activeHubTab)
         }
         .onAppear {
             if adoptionManager.scannedApps.isEmpty {
@@ -214,6 +219,7 @@ struct AppAdoptionView: View {
                     Text("All Scanned (\(adoptionManager.scannedApps.count))").tag(2)
                     Text("Already Managed (\(adoptionManager.managedApps.count))").tag(3)
                 }
+                .labelsHidden()
                 .pickerStyle(.segmented)
                 .fixedSize(horizontal: true, vertical: false)
 
@@ -229,6 +235,7 @@ struct AppAdoptionView: View {
                     Text("All Scanned (\(adoptionManager.scannedApps.count))").tag(2)
                     Text("Already Managed (\(adoptionManager.managedApps.count))").tag(3)
                 }
+                .labelsHidden()
                 .pickerStyle(.segmented)
                 .fixedSize(horizontal: true, vertical: false)
 

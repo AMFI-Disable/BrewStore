@@ -105,6 +105,7 @@ struct EnvironmentHubView: View {
                         Text("Custom Taps (\(tapsCount))").tag(EnvironmentSubMode.taps)
                         Text("Creator Studio").tag(EnvironmentSubMode.creator)
                     }
+                    .labelsHidden()
                     .pickerStyle(.segmented)
                     .fixedSize(horizontal: true, vertical: false)
                     .onChange(of: subMode) { _, newMode in
@@ -136,6 +137,8 @@ struct EnvironmentHubView: View {
                     CreatorStudioView(manager: manager, accountManager: accountManager)
                 }
             }
+            .id(subMode)
+            .animation(nil, value: subMode)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .onAppear {

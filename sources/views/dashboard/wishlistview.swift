@@ -46,6 +46,8 @@ struct WishlistView: View {
                     collectionsContent
                 }
             }
+            .id(selectedTab)
+            .animation(nil, value: selectedTab)
         }
         .detailModalOverlay(item: $selectedPackageForDetail) { pkg in
             PackageDetailView(manager: manager, package: pkg, onDismiss: {
@@ -100,6 +102,7 @@ struct WishlistView: View {
                 Text("Starred Wishlist (\(wishlistManager.wishlistIDs.count))").tag(0)
                 Text("Custom Collections (\(wishlistManager.collections.count))").tag(1)
             }
+            .labelsHidden()
             .pickerStyle(.segmented)
             .fixedSize(horizontal: true, vertical: false)
 

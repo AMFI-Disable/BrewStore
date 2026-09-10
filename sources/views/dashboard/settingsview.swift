@@ -114,6 +114,7 @@ struct SettingsView: View {
                         Label(tab.rawValue, systemImage: tab.icon).tag(tab)
                     }
                 }
+                .labelsHidden()
                 .pickerStyle(.segmented)
                 .fixedSize(horizontal: true, vertical: false)
                 .padding(.horizontal, 24)
@@ -143,7 +144,10 @@ struct SettingsView: View {
                     }
                 }
                 .padding(24)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
             }
+            .id(selectedTab)
+            .animation(nil, value: selectedTab)
         }
         .confirmationDialog("Upgrade all Homebrew packages?", isPresented: $showingUpgradeConfirmation, titleVisibility: .visible) {
             Button("Upgrade all packages", role: .destructive) { manager.upgradeAllPackages() }
@@ -1211,6 +1215,7 @@ struct SettingsView: View {
                         Text(level.rawValue).tag(level)
                     }
                 }
+                .labelsHidden()
                 .pickerStyle(.segmented)
 
                 Text("Adjust macOS window translucency and background vibrancy blending.")

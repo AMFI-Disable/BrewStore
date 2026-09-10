@@ -95,6 +95,7 @@ struct HealthHubView: View {
                         Text("Doctor Diagnostics").tag(HealthSubMode.doctor)
                         Text("Disk Storage & Cleanup").tag(HealthSubMode.storage)
                     }
+                    .labelsHidden()
                     .pickerStyle(.segmented)
                     .fixedSize(horizontal: true, vertical: false)
 
@@ -118,6 +119,8 @@ struct HealthHubView: View {
                     DiskStorageView(manager: manager)
                 }
             }
+            .id(subMode)
+            .animation(nil, value: subMode)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }

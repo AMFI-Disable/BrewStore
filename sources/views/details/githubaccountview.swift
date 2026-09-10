@@ -149,6 +149,7 @@ struct GitHubAccountView: View {
                                 .tag(provider)
                         }
                     }
+                    .labelsHidden()
                     .pickerStyle(.segmented)
 
                     if selectedProvider == .gitlab || selectedProvider == .custom {

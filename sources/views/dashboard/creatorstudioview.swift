@@ -208,6 +208,7 @@ struct CreatorStudioView: View {
                             Text(k.rawValue).tag(k)
                         }
                     }
+                    .labelsHidden()
                     .pickerStyle(.segmented)
                     .fixedSize(horizontal: true, vertical: false)
                 }
@@ -220,6 +221,7 @@ struct CreatorStudioView: View {
                             Text(k.rawValue).tag(k)
                         }
                     }
+                    .labelsHidden()
                     .pickerStyle(.segmented)
                     .fixedSize(horizontal: true, vertical: false)
                 }
@@ -730,6 +732,7 @@ struct FormulaScaffolderModal: View {
                             Text(k.rawValue).tag(k)
                         }
                     }
+                    .labelsHidden()
                     .pickerStyle(.segmented)
                     .fixedSize(horizontal: true, vertical: false)
 
@@ -748,6 +751,7 @@ struct FormulaScaffolderModal: View {
                             Text(k.rawValue).tag(k)
                         }
                     }
+                    .labelsHidden()
                     .pickerStyle(.segmented)
                     .fixedSize(horizontal: true, vertical: false)
 

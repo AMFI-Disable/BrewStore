@@ -61,6 +61,7 @@ struct AISearchView: View {
                             Text(filter.rawValue).tag(filter)
                         }
                     }
+                    .labelsHidden()
                     .pickerStyle(.segmented)
                     .frame(maxWidth: 320)
                     .onChange(of: selectedKindFilter) {
