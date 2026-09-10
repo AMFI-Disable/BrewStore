@@ -30,12 +30,14 @@ struct PackageDetailView: View {
     @StateObject private var securityInspector = BrewStoreSecurityInspector()
     @StateObject private var storageInspector = BrewStoreAppStorageInspector()
     @StateObject private var analyticsManager = BrewStoreAnalyticsManager.shared
+    @StateObject private var shellAssistant = BrewStoreShellConfigAssistant()
     @ObservedObject private var pinningManager = BrewStorePackagePinningManager.shared
     @ObservedObject private var wishlistManager = BrewStoreWishlistManager.shared
     @Environment(\.dismiss) private var dismiss
     var onDismiss: (() -> Void)?
     @State private var packageAnalytics: PackageInstallAnalytics?
     @State private var selectedDependencyPackage: BrewStorePackage?
+    @State private var caveatAppliedSuccess = false
 
     private var currentPackage: BrewStorePackage {
         manager.packages.first { $0.id == package.id && $0.kind == package.kind } ?? package
@@ -466,6 +468,20 @@ struct PackageDetailView: View {
                     .padding(.horizontal, 8)
                     .padding(.vertical, 6)
                     .background(Color.orange.opacity(0.12), in: Capsule())
+
+                    if BrewStoreVersionComparator.isMajorUpgrade(installed: currentPackage.installedVersion, latest: currentPackage.version) {
+                        let summary = BrewStoreVersionComparator.majorUpgradeSummary(installed: currentPackage.installedVersion, latest: currentPackage.version) ?? "Major Bump"
+                        HStack(spacing: 4) {
+                            Image(systemName: "exclamationmark.triangle.fill").font(.caption2)
+                            Text("Major Upgrade (\(summary))")
+                                .font(.caption2.bold())
+                        }
+                        .foregroundStyle(.orange)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 6)
+                        .background(Color.orange.opacity(0.16), in: Capsule())
+                        .help("Major version updates may contain breaking changes or require database migrations.")
+                    }
                 }
 
                 Button {
@@ -934,10 +950,57 @@ struct PackageDetailView: View {
     }
 
     private func caveatsContent(caveats: String) -> some View {
-        MarkdownTextView(markdown: caveats, baseFont: .caption, lineSpacing: 3)
-            .padding(10)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+        VStack(alignment: .leading, spacing: 10) {
+            MarkdownTextView(markdown: caveats, baseFont: .caption, lineSpacing: 3)
+                .padding(10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+
+            let exportLines = shellAssistant.extractCaveatExports(from: caveats)
+            if !exportLines.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "terminal.fill").foregroundStyle(.blue).font(.caption)
+                        Text("Shell Environment Configuration Detected")
+                            .font(.caption.bold())
+                    }
+
+                    Text(exportLines.joined(separator: "\n"))
+                        .font(.system(.caption2, design: .monospaced))
+                        .padding(8)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.black.opacity(0.2), in: RoundedRectangle(cornerRadius: 6))
+
+                    HStack {
+                        Button {
+                            let snippet = exportLines.joined(separator: "\n")
+                            if shellAssistant.injectCaveatSnippet(packageName: currentPackage.name, snippet: snippet, manager: manager) {
+                                caveatAppliedSuccess = true
+                            }
+                        } label: {
+                            Label(
+                                caveatAppliedSuccess ? "Applied to .\(shellAssistant.detectedShell)rc" : "1-Click Apply to .\(shellAssistant.detectedShell)rc",
+                                systemImage: caveatAppliedSuccess ? "checkmark.circle.fill" : "arrow.down.doc.fill"
+                            )
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(caveatAppliedSuccess ? .green : .blue)
+                        .controlSize(.small)
+                        .disabled(caveatAppliedSuccess)
+
+                        if let status = shellAssistant.statusMessage {
+                            Text(status)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
+                }
+                .padding(10)
+                .background(Color.blue.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.blue.opacity(0.2), lineWidth: 1))
+            }
+        }
     }
 
     private var securityInspectorContent: some View {

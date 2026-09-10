@@ -353,10 +353,12 @@ struct CommandPaletteView: View {
         if cleanQuery.isEmpty {
             return baseItems
         }
-        return baseItems.filter {
-            $0.title.localizedCaseInsensitiveContains(cleanQuery) ||
-                $0.subtitle.localizedCaseInsensitiveContains(cleanQuery) ||
-                $0.id.localizedCaseInsensitiveContains(cleanQuery)
+        return BrewStoreFuzzySearchEngine.filterAndRank(
+            items: baseItems,
+            query: cleanQuery,
+            minimumScore: 1
+        ) { item in
+            [item.title, item.subtitle, item.id]
         }
     }
 

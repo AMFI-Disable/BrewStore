@@ -5,9 +5,22 @@ struct BrewStorePackageContextMenu: ViewModifier {
     @ObservedObject var manager: HomebrewManager
     let package: BrewStorePackage
     let onShowDetails: (() -> Void)?
+    let onQuickLook: (() -> Void)?
 
     @ObservedObject private var pinningManager = BrewStorePackagePinningManager.shared
     @ObservedObject private var wishlistManager = BrewStoreWishlistManager.shared
+
+    init(
+        manager: HomebrewManager,
+        package: BrewStorePackage,
+        onShowDetails: (() -> Void)? = nil,
+        onQuickLook: (() -> Void)? = nil
+    ) {
+        self.manager = manager
+        self.package = package
+        self.onShowDetails = onShowDetails
+        self.onQuickLook = onQuickLook
+    }
 
     private var installedAppURL: URL? {
         guard package.kind == .cask, package.isInstalled else { return nil }
@@ -55,8 +68,20 @@ struct BrewStorePackageContextMenu: ViewModifier {
     func body(content: Content) -> some View {
         content
             .contextMenu {
+                if let onQuickLook {
+                    Button {
+                        onQuickLook()
+                    } label: {
+                        Label("Quick Look Preview", systemImage: "eye")
+                    }
+                }
+
                 if let onShowDetails {
-                    Button("View Details", action: onShowDetails)
+                    Button {
+                        onShowDetails()
+                    } label: {
+                        Label("View Details", systemImage: "info.circle")
+                    }
                     Divider()
                 }
 
@@ -188,8 +213,9 @@ extension View {
     func brewStorePackageContextMenu(
         package: BrewStorePackage,
         manager: HomebrewManager,
-        onShowDetails: (() -> Void)? = nil
+        onShowDetails: (() -> Void)? = nil,
+        onQuickLook: (() -> Void)? = nil
     ) -> some View {
-        modifier(BrewStorePackageContextMenu(manager: manager, package: package, onShowDetails: onShowDetails))
+        modifier(BrewStorePackageContextMenu(manager: manager, package: package, onShowDetails: onShowDetails, onQuickLook: onQuickLook))
     }
 }

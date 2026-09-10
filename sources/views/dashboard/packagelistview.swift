@@ -16,6 +16,7 @@ struct PackageListView: View {
     @State private var selectedPackageIDs: Set<String> = []
     @State private var showingMASSheet = false
     @State private var selectedPackageForDetail: BrewStorePackage?
+    @State private var quickLookPackage: BrewStorePackage?
 
     @State private var licenseFilter: PackageLicenseFilter = .all
     @State private var editorialFilter: PackageEditorialFilter = .all
@@ -442,6 +443,30 @@ struct PackageListView: View {
                     selectedPackageForDetail = nil
                 })
             }
+            .overlay {
+                if let ql = quickLookPackage {
+                    ZStack {
+                        Color.black.opacity(0.35)
+                            .ignoresSafeArea()
+                            .onTapGesture {
+                                quickLookPackage = nil
+                            }
+
+                        BrewStoreQuickLookView(
+                            package: ql,
+                            manager: manager,
+                            onOpenDetail: {
+                                quickLookPackage = nil
+                                selectedPackageForDetail = ql
+                            },
+                            onDismiss: {
+                                quickLookPackage = nil
+                            }
+                        )
+                    }
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                }
+            }
             .task {
                 if installedOnly {
                     BrewStoreAppleSiliconMigrationManager.shared.scanMigrationCandidates(manager: manager)
@@ -472,9 +497,16 @@ struct PackageListView: View {
                 Button {
                     selectedPackageForDetail = package
                 } label: {
-                    PackageListRow(package: package, manager: manager, onShowDetail: {
-                        selectedPackageForDetail = package
-                    })
+                    PackageListRow(
+                        package: package,
+                        manager: manager,
+                        onShowDetail: {
+                            selectedPackageForDetail = package
+                        },
+                        onQuickLook: {
+                            quickLookPackage = package
+                        }
+                    )
                 }
                 .buttonStyle(.plain)
             }
@@ -579,6 +611,7 @@ private struct PackageListRow: View {
     let package: BrewStorePackage
     @ObservedObject var manager: HomebrewManager
     var onShowDetail: (() -> Void)?
+    var onQuickLook: (() -> Void)?
 
     var body: some View {
         HStack(spacing: 12) {
@@ -621,6 +654,21 @@ private struct PackageListRow: View {
             Spacer()
 
             if package.isOutdated {
+                if BrewStoreVersionComparator.isMajorUpgrade(installed: package.installedVersion, latest: package.version) {
+                    let summary = BrewStoreVersionComparator.majorUpgradeSummary(installed: package.installedVersion, latest: package.version) ?? "Major"
+                    HStack(spacing: 3) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 9))
+                        Text(summary)
+                            .font(.system(size: 10, weight: .semibold))
+                    }
+                    .foregroundStyle(.orange)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(Color.orange.opacity(0.15), in: Capsule())
+                    .help("Major version upgrade — may require configuration or database migrations.")
+                }
+
                 let est = BrewStoreUpdateEstimator.estimate(for: package)
                 HStack(spacing: 4) {
                     Image(systemName: "timer")
@@ -634,10 +682,24 @@ private struct PackageListRow: View {
                 .background(Color.secondary.opacity(0.08), in: Capsule())
             }
 
+            if let onQuickLook {
+                Button {
+                    onQuickLook()
+                } label: {
+                    Image(systemName: "eye")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 26, height: 26)
+                        .background(Color.secondary.opacity(0.08), in: Circle())
+                }
+                .buttonStyle(.plain)
+                .help("Quick Look Preview (Space)")
+            }
+
             AppStoreActionButton(manager: manager, package: package, size: .small, onShowDetail: onShowDetail)
         }
         .padding(.vertical, 8)
-        .brewStorePackageContextMenu(package: package, manager: manager, onShowDetails: onShowDetail)
+        .brewStorePackageContextMenu(package: package, manager: manager, onShowDetails: onShowDetail, onQuickLook: onQuickLook)
     }
 }
 

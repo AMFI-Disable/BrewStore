@@ -7,6 +7,10 @@ enum AppAccentTheme: String, CaseIterable, Identifiable, Codable {
     case cyberViolet = "Royal Violet"
     case sunsetRuby = "Ruby Red"
     case carbonMonochrome = "Graphite Gray"
+    case catppuccin = "Catppuccin Mocha"
+    case tokyoNight = "Tokyo Night"
+    case dracula = "Dracula Purple"
+    case nord = "Nord Frost"
 
     var id: String {
         rawValue
@@ -26,6 +30,14 @@ enum AppAccentTheme: String, CaseIterable, Identifiable, Codable {
             Color(red: 0.96, green: 0.26, blue: 0.42)
         case .carbonMonochrome:
             Color(red: 0.55, green: 0.58, blue: 0.65)
+        case .catppuccin:
+            Color(red: 0.796, green: 0.651, blue: 0.969)
+        case .tokyoNight:
+            Color(red: 0.478, green: 0.635, blue: 0.969)
+        case .dracula:
+            Color(red: 0.741, green: 0.576, blue: 0.976)
+        case .nord:
+            Color(red: 0.533, green: 0.753, blue: 0.816)
         }
     }
 
@@ -37,6 +49,10 @@ enum AppAccentTheme: String, CaseIterable, Identifiable, Codable {
         case .cyberViolet: "sparkles"
         case .sunsetRuby: "flame.fill"
         case .carbonMonochrome: "circle.fill"
+        case .catppuccin: "cat.fill"
+        case .tokyoNight: "moon.stars.fill"
+        case .dracula: "cross.fill"
+        case .nord: "snowflake"
         }
     }
 }

@@ -170,16 +170,26 @@ enum BrewStorePackageFilterEngine {
             if editorial == .thirdParty, pkg.tap?.hasPrefix("homebrew/") ?? true {
                 return false
             }
-            // Search query
+            // Search query with fuzzy scoring
             if !query.isEmpty {
-                let matchesName = pkg.name.localizedCaseInsensitiveContains(query)
-                let matchesID = pkg.id.localizedCaseInsensitiveContains(query)
-                let matchesDesc = pkg.description.localizedCaseInsensitiveContains(query)
-                if !matchesName, !matchesID, !matchesDesc {
+                let s = BrewStoreFuzzySearchEngine.bestScore(query: query, targets: [pkg.name, pkg.id, pkg.description])
+                if s == 0 {
                     return false
                 }
             }
             return true
+        }
+
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedQuery.isEmpty, sort == .nameAsc {
+            return filtered.sorted { p1, p2 in
+                let s1 = BrewStoreFuzzySearchEngine.bestScore(query: trimmedQuery, targets: [p1.name, p1.id, p1.description])
+                let s2 = BrewStoreFuzzySearchEngine.bestScore(query: trimmedQuery, targets: [p2.name, p2.id, p2.description])
+                if s1 != s2 {
+                    return s1 > s2
+                }
+                return p1.name.localizedCaseInsensitiveCompare(p2.name) == .orderedAscending
+            }
         }
 
         // Sorting

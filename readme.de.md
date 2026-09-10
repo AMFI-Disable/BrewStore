@@ -161,7 +161,7 @@ brew upgrade --cask brewstore
 - **Version**: `v1.0.0`
 - **Geprüfte SHA-256 Prüfsumme**:
   ```
-  8605dbdd19cf3d39edc8d3edc14e187ffc3f2324072b8ebaff82cda34a44259e
+  3f19822633a9b73adfc34c9cd404ff608286b550f17cecf3d672ee75603be125
   ```
 
 Prüfsumme verifizieren:

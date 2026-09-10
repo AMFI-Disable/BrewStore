@@ -81,12 +81,16 @@ final class BrewStoreDoctorRemediationManager: ObservableObject {
         }
 
         // 2. Broken Symlinks or uncommitted taps
-        if trimmed.contains("broken symlinks") || trimmed.contains("broken symlink") {
+        let danglingLinks = scanDanglingSymlinks()
+        if !danglingLinks.isEmpty || trimmed.contains("broken symlinks") || trimmed.contains("broken symlink") {
+            let desc = !danglingLinks.isEmpty
+                ? "Found \(danglingLinks.count) orphaned symlink(s) in Homebrew binary paths (e.g. \(danglingLinks.prefix(3).map(\.lastPathComponent).joined(separator: ", ")))."
+                : "Orphaned symlinks exist in your Homebrew directory pointing to deleted files."
             issues.append(
                 BrewStoreDoctorIssue(
                     id: "broken_symlinks",
                     title: "Broken Symlinks in Homebrew Prefix",
-                    description: "Orphaned symlinks exist in your Homebrew directory pointing to deleted files.",
+                    description: desc,
                     severity: .warning,
                     fixActionTitle: "Prune Broken Symlinks",
                     fixCommandArgs: ["cleanup", "-s"]
@@ -169,5 +173,51 @@ final class BrewStoreDoctorRemediationManager: ObservableObject {
                 completion(result.succeeded)
             }
         }
+    }
+
+    func scanDanglingSymlinks(prefixPath: String? = nil) -> [URL] {
+        let fm = FileManager.default
+        let prefix = prefixPath ?? (fm.fileExists(atPath: "/opt/homebrew") ? "/opt/homebrew" : "/usr/local")
+        let candidateDirs = [
+            URL(fileURLWithPath: prefix).appendingPathComponent("bin", isDirectory: true),
+            URL(fileURLWithPath: prefix).appendingPathComponent("sbin", isDirectory: true)
+        ]
+
+        var dangling: [URL] = []
+
+        for dir in candidateDirs {
+            guard let contents = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: [.isSymbolicLinkKey], options: .skipsHiddenFiles) else {
+                continue
+            }
+            for url in contents {
+                guard let values = try? url.resourceValues(forKeys: [.isSymbolicLinkKey]), values.isSymbolicLink == true else {
+                    continue
+                }
+                if let dest = try? fm.destinationOfSymbolicLink(atPath: url.path) {
+                    let destURL = dest.hasPrefix("/") ? URL(fileURLWithPath: dest) : url.deletingLastPathComponent().appendingPathComponent(dest)
+                    if !fm.fileExists(atPath: destURL.path) {
+                        dangling.append(url)
+                    }
+                }
+            }
+        }
+
+        return dangling
+    }
+
+    func pruneBrokenSymlinks(links: [URL]) -> (removed: Int, errors: [String]) {
+        let fm = FileManager.default
+        var removedCount = 0
+        var errors: [String] = []
+
+        for link in links {
+            do {
+                try fm.removeItem(at: link)
+                removedCount += 1
+            } catch {
+                errors.append("Failed to remove \(link.lastPathComponent): \(error.localizedDescription)")
+            }
+        }
+        return (removedCount, errors)
     }
 }

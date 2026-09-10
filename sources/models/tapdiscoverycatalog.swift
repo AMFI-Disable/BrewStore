@@ -86,6 +86,42 @@ final class BrewStoreTapDiscoveryCatalog: ObservableObject {
             website: "https://github.com/oven-sh/homebrew-bun",
             featuredPackages: ["bun"],
             isOfficial: false
+        ),
+        CuratedTap(
+            id: "koekeishiya/formulae",
+            name: "Yabai & Skhd Window Automation",
+            category: "Window Management",
+            description: "Tiling window management and modal hotkey daemon for macOS with accessibility APIs.",
+            website: "https://github.com/koekeishiya/homebrew-formulae",
+            featuredPackages: ["yabai", "skhd"],
+            isOfficial: false
+        ),
+        CuratedTap(
+            id: "railwaycat/emacsmacport",
+            name: "Emacs Mac Port",
+            category: "Developer Tools",
+            description: "GNU Emacs with macOS GUI features (smooth scrolling, touch gestures, native clipboard).",
+            website: "https://github.com/railwaycat/homebrew-emacsmacport",
+            featuredPackages: ["emacs-mac"],
+            isOfficial: false
+        ),
+        CuratedTap(
+            id: "derailed/k9s",
+            name: "K9s Kubernetes UI",
+            category: "Cloud & DevOps",
+            description: "Fast terminal-based UI to interact with, observe, and manage Kubernetes clusters.",
+            website: "https://github.com/derailed/homebrew-k9s",
+            featuredPackages: ["k9s"],
+            isOfficial: false
+        ),
+        CuratedTap(
+            id: "homebrew/cask-versions",
+            name: "Homebrew Cask Versions",
+            category: "System & Compatibility",
+            description: "Alternate, legacy, beta, and nightly versions of popular macOS desktop applications.",
+            website: "https://github.com/Homebrew/homebrew-cask-versions",
+            featuredPackages: ["visual-studio-code-insiders", "google-chrome-canary", "sublime-text-dev"],
+            isOfficial: true
         )
     ]
 

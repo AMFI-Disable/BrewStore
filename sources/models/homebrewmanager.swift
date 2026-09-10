@@ -576,6 +576,7 @@ final class HomebrewManager: ObservableObject {
                 BrewStoreFastCacheEngine.saveCache(packages: self.packages, taps: self.taps, services: self.services)
                 BrewStorePackagePinningManager.shared.reconcileWithHomebrew(manager: self)
                 BrewStoreDotfilesAutoSyncManager.shared.onPackageOperationCompleted(manager: self)
+                BrewStoreSpotlightIndexer.shared.indexInstalledPackages(self.packages)
             }
         }
     }
@@ -685,6 +686,7 @@ final class HomebrewManager: ObservableObject {
                 if result.succeeded {
                     self.statusMessage = "Completed \(action.title.lowercased()) for \(packageName)."
                     self.recordOperation(title: "\(action.title) \(packageName)", succeeded: true, detail: self.outputLog.isEmpty ? result.standardOutput : self.outputLog)
+                    BrewStoreNotificationManager.shared.notifyOperationCompleted(action: action.title, packageName: packageName, success: true)
                     self.refresh()
                 } else {
                     var failureDetail = self.failureMessage(for: result)
@@ -827,6 +829,7 @@ final class HomebrewManager: ObservableObject {
                 self.errorMessage = result.succeeded ? nil : self.failureMessage(for: result)
                 self.statusMessage = result.succeeded ? "\(title) completed." : "\(title) failed."
                 self.recordOperation(title: title, succeeded: result.succeeded, detail: result.succeeded ? result.standardOutput : (self.errorMessage ?? ""))
+                BrewStoreNotificationManager.shared.notifyOperationCompleted(action: "Command", packageName: title, success: result.succeeded)
                 if result.succeeded {
                     self.refresh()
                 }

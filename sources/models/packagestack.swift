@@ -238,11 +238,50 @@ struct BrewStoreStack: Identifiable, Hashable, Codable {
         isCustom: false
     )
 
+    static let nativeMacDev = BrewStoreStack(
+        id: "native-mac-dev",
+        name: "Native macOS & Swift Development",
+        description: "Linter, formatter, clean build output formatter, Carthage, and SF Symbols for native Apple platform engineers.",
+        icon: "swift",
+        bundleType: .hybrid,
+        pricingTier: .freeFOSS,
+        formulae: ["swiftlint", "swiftformat", "xcbeautify", "carthage"],
+        casks: ["sf-symbols"],
+        isCustom: false
+    )
+
+    static let cloudDevOps = BrewStoreStack(
+        id: "cloud-devops",
+        name: "Cloud & DevOps Infrastructure",
+        description: "Declarative infrastructure as code, cloud CLIs, Docker engine, and terminal Kubernetes management.",
+        icon: "server.rack",
+        bundleType: .hybrid,
+        pricingTier: .freeFOSS,
+        formulae: ["terraform", "awscli", "azure-cli", "docker", "k9s"],
+        casks: [],
+        isCustom: false
+    )
+
+    static let modernAI = BrewStoreStack(
+        id: "modern-ai-llm",
+        name: "Modern AI & LLM Engineering",
+        description: "Local large language model runners, Python package tooling (uv), command-line AI assistants, and media processing.",
+        icon: "sparkles",
+        bundleType: .formulae,
+        pricingTier: .freeFOSS,
+        formulae: ["ollama", "uv", "ffmpeg", "mods", "aichat", "python@3.12"],
+        casks: [],
+        isCustom: false
+    )
+
     static let defaultStacks: [BrewStoreStack] = [
         .cliSupercharger,
         .rustSystems,
         .pythonAI,
+        .modernAI,
         .goCloud,
+        .cloudDevOps,
+        .nativeMacDev,
         .macMaintenance,
         .securityCrypto,
         .macEssentials,

@@ -6,6 +6,7 @@ struct DiskStorageView: View {
     @ObservedObject private var devCacheManager = BrewStoreDeveloperCacheManager.shared
     @State private var selectedPackageForDetail: BrewStorePackage?
     @State private var selectedFilter: StorageFilter = .all
+    @State private var selectedHog: StorageItem?
 
     enum StorageFilter: String, CaseIterable, Identifiable {
         case all = "All Items"
@@ -103,35 +104,107 @@ struct DiskStorageView: View {
                     statCard(title: "Inactive Versions", value: rep.formattedInactiveVersions, icon: "arrow.triangle.swap", color: .pink)
                 }
 
-                // Storage Distribution Proportional Treemap Bar
+                // Interactive Storage Distribution Proportional Treemap Bar
                 if rep.totalCellarBytes > 0, !rep.topHogs.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Storage Distribution (Top Packages)").font(.subheadline.bold())
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            Text("Interactive Storage Treemap (Top Packages)").font(.subheadline.bold())
+                            Spacer()
+                            Text("Click any segment to drill down")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
 
                         GeometryReader { geo in
                             HStack(spacing: 2) {
                                 ForEach(Array(rep.topHogs.enumerated()), id: \.element.id) { index, hog in
                                     let barColor = colorForIndex(index)
-                                    let width = max(geo.size.width * CGFloat(hog.percentageOfTotal) - 2, 4)
-                                    RoundedRectangle(cornerRadius: 3)
-                                        .fill(barColor)
-                                        .frame(width: width)
-                                        .help("\(hog.name): \(hog.formattedSize) (\(Int(hog.percentageOfTotal * 100))%)")
+                                    let isSelected = selectedHog?.id == hog.id
+                                    let width = max(geo.size.width * CGFloat(hog.percentageOfTotal) - 2, 6)
+
+                                    Button {
+                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                                            selectedHog = (selectedHog?.id == hog.id) ? nil : hog
+                                        }
+                                    } label: {
+                                        RoundedRectangle(cornerRadius: 3)
+                                            .fill(barColor)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 3)
+                                                    .stroke(isSelected ? Color.white : Color.clear, lineWidth: 2)
+                                            )
+                                            .frame(width: width)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .help("\(hog.name): \(hog.formattedSize) (\(Int(hog.percentageOfTotal * 100))%)")
                                 }
                             }
                         }
-                        .frame(height: 14)
+                        .frame(height: 20)
                         .background(Color.secondary.opacity(0.12), in: RoundedRectangle(cornerRadius: 4))
+
+                        // Selected Hog Drill-Down Detail Card
+                        if let hog = selectedHog {
+                            HStack(spacing: 12) {
+                                Image(systemName: hog.kind == .cask ? "app.fill" : "terminal.fill")
+                                    .font(.title3)
+                                    .foregroundStyle(.tint)
+                                    .frame(width: 32, height: 32)
+                                    .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 6))
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    HStack(spacing: 6) {
+                                        Text(hog.name).font(.subheadline.bold())
+                                        Text("(\(hog.formattedSize) · \(Int(hog.percentageOfTotal * 100))% of storage)")
+                                            .font(.caption2.monospaced())
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Text(hog.path)
+                                        .font(.caption2.monospaced())
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(1)
+                                }
+
+                                Spacer()
+
+                                Button {
+                                    NSWorkspace.shared.selectFile(hog.path, inFileViewerRootedAtPath: "")
+                                } label: {
+                                    Label("Reveal in Finder", systemImage: "folder")
+                                }
+                                .controlSize(.small)
+
+                                if let pkg = manager.packages.first(where: { $0.id == hog.id }) {
+                                    Button {
+                                        selectedPackageForDetail = pkg
+                                    } label: {
+                                        Label("Package Details", systemImage: "info.circle")
+                                    }
+                                    .buttonStyle(.borderedProminent)
+                                    .controlSize(.small)
+                                }
+                            }
+                            .padding(10)
+                            .background(Color.secondary.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
 
                         // Legend
                         HStack(spacing: 12) {
-                            ForEach(Array(rep.topHogs.prefix(4).enumerated()), id: \.element.id) { index, hog in
-                                HStack(spacing: 4) {
-                                    Circle().fill(colorForIndex(index)).frame(width: 8, height: 8)
-                                    Text("\(hog.name) (\(hog.formattedSize))")
-                                        .font(.caption2.monospaced())
-                                        .foregroundStyle(.secondary)
+                            ForEach(Array(rep.topHogs.prefix(5).enumerated()), id: \.element.id) { index, hog in
+                                Button {
+                                    withAnimation {
+                                        selectedHog = (selectedHog?.id == hog.id) ? nil : hog
+                                    }
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Circle().fill(colorForIndex(index)).frame(width: 8, height: 8)
+                                        Text("\(hog.name) (\(hog.formattedSize))")
+                                            .font(.caption2.monospaced())
+                                            .foregroundStyle(selectedHog?.id == hog.id ? Color.primary : Color.secondary)
+                                    }
                                 }
+                                .buttonStyle(.plain)
                             }
                         }
                     }

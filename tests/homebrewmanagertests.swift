@@ -215,7 +215,7 @@ final class HomebrewManagerTests: XCTestCase {
 
     func testBundleFreePricingIntegrity() {
         let defaultStacks = BrewStoreStack.defaultStacks
-        XCTAssertEqual(defaultStacks.count, 12)
+        XCTAssertEqual(defaultStacks.count, 15)
 
         for stack in defaultStacks {
             // Assert that every stack is either 100% Free & FOSS, or allowed freemium with Bitwarden

@@ -176,6 +176,58 @@ final class BrewStoreShellConfigAssistant: ObservableObject {
         }
     }
 
+    func extractCaveatExports(from caveats: String) -> [String] {
+        let lines = caveats.components(separatedBy: .newlines)
+        var exports: [String] = []
+        for line in lines {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix("export ") || trimmed.hasPrefix("fish_add_path") || trimmed.hasPrefix("eval ") || trimmed.hasPrefix("source ") {
+                exports.append(trimmed)
+            }
+        }
+        return exports
+    }
+
+    func injectCaveatSnippet(packageName: String, snippet: String, manager: HomebrewManager) -> Bool {
+        detectShellEnvironment()
+        guard let configURL else { return false }
+
+        let currentContent = (try? String(contentsOf: configURL, encoding: .utf8)) ?? ""
+        if currentContent.contains(snippet.trimmingCharacters(in: .whitespacesAndNewlines)) {
+            statusMessage = "Snippet already configured in \(configURL.lastPathComponent)."
+            return true
+        }
+
+        let timestamp = Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd-HHmmss"
+        let backupFilename = "\(configURL.lastPathComponent).brewstore-bak-\(formatter.string(from: timestamp))"
+        let backupURL = configURL.deletingLastPathComponent().appendingPathComponent(backupFilename)
+
+        do {
+            if fileManager.fileExists(atPath: configURL.path) {
+                try fileManager.copyItem(at: configURL, to: backupURL)
+                self.lastBackupURL = backupURL
+            }
+
+            let block = """
+
+            # >>> BrewStore Caveat: \(packageName) >>>
+            \(snippet)
+            # <<< BrewStore Caveat: \(packageName) <<<
+            """
+
+            let updatedContent = currentContent + block
+            try updatedContent.write(to: configURL, atomically: true, encoding: .utf8)
+            statusMessage = "Added \(packageName) configuration to \(configURL.lastPathComponent). Backup created."
+            scanInstalledHooks(manager: manager)
+            return true
+        } catch {
+            statusMessage = "Failed to update \(configURL.lastPathComponent): \(error.localizedDescription)"
+            return false
+        }
+    }
+
     var isCLIInstalled: Bool {
         let home = fileManager.homeDirectoryForCurrentUser
         let localBin = home.appendingPathComponent(".local/bin/brewstore")
