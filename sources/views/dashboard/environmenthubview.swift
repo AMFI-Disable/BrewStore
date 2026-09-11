@@ -179,17 +179,19 @@ final class ToolchainCompanionsModel: ObservableObject {
     @Published var isDetecting: Bool = false
     @Published var installingItemID: String?
 
-    func refresh(speedTestManager: BrewStoreSpeedTestManager = .shared, masManager: BrewStoreMASManager = .shared) {
-        speedTestManager.detectBinary()
-        masManager.checkMASAvailability()
+    func refresh(speedTestManager: BrewStoreSpeedTestManager? = nil, masManager: BrewStoreMASManager? = nil) {
+        let speedTest = speedTestManager ?? .shared
+        let mas = masManager ?? .shared
+        speedTest.detectBinary()
+        mas.checkMASAvailability()
 
         var list: [ToolchainCompanionItem] = []
 
         // 1. speedtest-go (Live download speed & ETA calculation)
-        let speedInstalled = speedTestManager.isAvailable
+        let speedInstalled = speedTest.isAvailable
         let speedDetail: String = if speedInstalled {
-            if speedTestManager.currentDownloadSpeedMbps != nil {
-                speedTestManager.formattedSpeed
+            if speedTest.currentDownloadSpeedMbps != nil {
+                speedTest.formattedSpeed
             } else {
                 "Ready (Live ETA active)"
             }
@@ -204,16 +206,16 @@ final class ToolchainCompanionsModel: ObservableObject {
             icon: "speedometer",
             description: "Measures real-time download bandwidth to calculate precise package installation ETAs.",
             isInstalled: speedInstalled,
-            binaryPath: speedTestManager.binaryPath,
+            binaryPath: speedTest.binaryPath,
             detailStatus: speedDetail,
             canInstall: !speedInstalled
         ))
 
         // 2. mas-cli (Mac App Store package management)
-        let masInstalled = masManager.isMASInstalled
+        let masInstalled = mas.isMASInstalled
         let masDetail: String
         if masInstalled {
-            let count = masManager.installedApps.count
+            let count = mas.installedApps.count
             masDetail = count > 0 ? "\(count) MAS apps tracked" : "Ready (CLI active)"
         } else {
             masDetail = "Missing (App Store off)"
@@ -226,7 +228,7 @@ final class ToolchainCompanionsModel: ObservableObject {
             icon: "apple.logo",
             description: "Scans, inspects, and upgrades Mac App Store applications alongside Homebrew casks.",
             isInstalled: masInstalled,
-            binaryPath: masManager.masBinaryPath,
+            binaryPath: mas.masBinaryPath,
             detailStatus: masDetail,
             canInstall: !masInstalled
         ))

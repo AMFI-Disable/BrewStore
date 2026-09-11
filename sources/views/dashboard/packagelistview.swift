@@ -430,9 +430,6 @@ struct PackageListView: View {
             }
             .accessibilityLabel("\(title) packages list, \(packages.count) total items")
             .searchable(text: $search, prompt: "Search \(title.lowercased())")
-            .navigationDestination(for: BrewStorePackage.self) { package in
-                PackageDetailView(manager: manager, package: package)
-            }
             .overlay {
                 if manager.isLoading {
                     ProgressView("Refreshing Homebrew…")

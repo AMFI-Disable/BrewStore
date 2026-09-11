@@ -76,19 +76,21 @@ final class BrewStoreServiceLogManager: ObservableObject {
 
         logEntries = []
 
-        fileWatcherTask = Task.detached(priority: .background) { [weak self, path] in
-            let initialEntries = Self.readTailEntries(filePath: path)
-            await MainActor.run {
-                self?.logEntries = initialEntries
-            }
+        fileWatcherTask = Task { [weak self] in
+            let initialEntries = await Task.detached(priority: .background) {
+                Self.readTailEntries(filePath: path)
+            }.value
+            guard let self else { return }
+            self.logEntries = initialEntries
 
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
                 guard !Task.isCancelled else { break }
-                let entries = Self.readTailEntries(filePath: path)
-                await MainActor.run {
-                    self?.logEntries = entries
-                }
+                let entries = await Task.detached(priority: .background) {
+                    Self.readTailEntries(filePath: path)
+                }.value
+                guard !Task.isCancelled else { break }
+                self.logEntries = entries
             }
         }
     }
