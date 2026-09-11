@@ -18,8 +18,10 @@ struct HealthScoreView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            headerBar
-            Divider()
+            if showHeader {
+                headerBar
+                Divider()
+            }
             contentBody
         }
         .frame(minWidth: showHeader ? 720 : nil, minHeight: showHeader ? 560 : nil)
@@ -112,44 +114,20 @@ struct HealthScoreView: View {
             }
             .padding()
             .background(Color.secondary.opacity(0.04))
-        } else {
-            HStack(spacing: Spacing.sm) {
-                Spacer()
-
-                Button {
-                    showingCVESecuritySheet = true
-                } label: {
-                    Label("Security Audit", systemImage: "shield.lefthalf.filled.trianglebadge.exclamationmark")
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-
-                Button {
-                    optimizer.evaluateHealth(manager: manager, doctorDiagnostics: doctorDiagnostics)
-                    doctorManager.diagnose(manager: manager)
-                } label: {
-                    Label("Re-Evaluate", systemImage: "arrow.clockwise")
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-                .disabled(optimizer.isEvaluating || doctorManager.isDiagnosing || manager.isOperating)
-            }
-            .padding(.horizontal, Spacing.lg)
-            .padding(.vertical, Spacing.sm)
         }
     }
 
     private var contentBody: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: Spacing.lg) {
                 // Repair In Progress Banner
                 if doctorManager.isHealing, let msg = doctorManager.healStatusMessage {
-                    HStack(spacing: 12) {
+                    HStack(spacing: Spacing.md) {
                         ProgressView().controlSize(.small)
                         Text(msg).font(.subheadline.bold())
                         Spacer()
                     }
-                    .padding(14)
+                    .padding(Spacing.md)
                     .background(Color.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: 10))
                 }
 
@@ -170,7 +148,8 @@ struct HealthScoreView: View {
                     }
                 }
             }
-            .padding(20)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.vertical, Spacing.md)
         }
     }
 
@@ -278,19 +257,41 @@ struct HealthScoreView: View {
                     .font(.callout)
                     .foregroundStyle(.secondary)
 
-                Button {
-                    optimizer.optimizeAll(manager: manager)
-                } label: {
-                    Label("Optimize System", systemImage: "sparkles")
+                HStack(spacing: Spacing.sm) {
+                    Button {
+                        optimizer.optimizeAll(manager: manager)
+                    } label: {
+                        Label("Optimize System", systemImage: "sparkles")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.green)
+                    .controlSize(.small)
+                    .disabled(manager.isOperating)
+
+                    if !showHeader {
+                        Button {
+                            showingCVESecuritySheet = true
+                        } label: {
+                            Label("Security Audit", systemImage: "shield.lefthalf.filled.trianglebadge.exclamationmark")
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+
+                        Button {
+                            optimizer.evaluateHealth(manager: manager, doctorDiagnostics: doctorDiagnostics)
+                            doctorManager.diagnose(manager: manager)
+                        } label: {
+                            Label("Re-Evaluate", systemImage: "arrow.clockwise")
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        .disabled(optimizer.isEvaluating || doctorManager.isDiagnosing || manager.isOperating)
+                    }
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.green)
-                .controlSize(.small)
-                .disabled(manager.isOperating)
             }
             Spacer()
         }
-        .padding(20)
+        .padding(Spacing.lg)
         .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)

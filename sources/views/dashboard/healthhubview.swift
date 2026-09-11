@@ -24,6 +24,7 @@ struct HealthHubView: View {
     @Binding var selection: BrewStoreSection?
 
     @State private var subMode: HealthSubMode = .snapshots
+    @State private var showingCVESecuritySheet = false
     @StateObject private var snapshotManager = BrewStoreSnapshotManager()
     @StateObject private var storageManager = BrewStoreDiskStorageAnalyzerManager.shared
     @StateObject private var doctorManager = BrewStoreDependencyDoctorManager.shared
@@ -61,6 +62,14 @@ struct HealthHubView: View {
                             .controlSize(.small)
                             .disabled(manager.isOperating)
                         case .doctor:
+                            Button {
+                                showingCVESecuritySheet = true
+                            } label: {
+                                Label("Security Audit", systemImage: "shield.lefthalf.filled.trianglebadge.exclamationmark")
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+
                             Button {
                                 doctorManager.autoHealToolchain(manager: manager)
                             } label: {
@@ -122,6 +131,9 @@ struct HealthHubView: View {
             .id(subMode)
             .animation(nil, value: subMode)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .sheet(isPresented: $showingCVESecuritySheet) {
+            CVESecurityView(manager: manager)
         }
     }
 }
