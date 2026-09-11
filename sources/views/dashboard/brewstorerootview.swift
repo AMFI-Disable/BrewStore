@@ -108,37 +108,49 @@ struct BrewStoreRootView: View {
                     )
                     .accessibilityIdentifier("Toolbar.GlobalSearchBar")
 
-                    Button {
-                        showingBrewfileImportSheet = true
-                    } label: {
-                        Label("Import Brewfile", systemImage: "doc.badge.plus")
-                    }
-                    .help("Import software bundle from Brewfile")
-                    .accessibilityIdentifier("Toolbar.ImportBrewfile")
+                    Menu {
+                        Button {
+                            showingHealthSheet = true
+                        } label: {
+                            Label("Health Score & Optimizer", systemImage: "heart.text.square")
+                        }
+                        .accessibilityIdentifier("Toolbar.HealthScore")
 
-                    Button {
-                        showingHealthSheet = true
-                    } label: {
-                        Label("Health Score", systemImage: "heart.text.square")
-                    }
-                    .help("Homebrew Health & Optimizer")
-                    .accessibilityIdentifier("Toolbar.HealthScore")
+                        Button {
+                            showingAISheet = true
+                        } label: {
+                            Label("AI Package Assistant", systemImage: "wand.and.stars")
+                        }
+                        .accessibilityIdentifier("Toolbar.AIAssistant")
 
-                    Button {
-                        showingAISheet = true
-                    } label: {
-                        Label("AI Assistant", systemImage: "wand.and.stars")
-                    }
-                    .help("AI Package Assistant")
-                    .accessibilityIdentifier("Toolbar.AIAssistant")
+                        Button {
+                            showingBrewfileImportSheet = true
+                        } label: {
+                            Label("Import Brewfile…", systemImage: "doc.badge.plus")
+                        }
+                        .accessibilityIdentifier("Toolbar.ImportBrewfile")
 
-                    Button {
-                        showingShellConfigSheet = true
+                        Button {
+                            showingShellConfigSheet = true
+                        } label: {
+                            Label("Shell Environment Assistant…", systemImage: "terminal")
+                        }
+                        .accessibilityIdentifier("Toolbar.ShellSetup")
+
+                        Divider()
+
+                        Button {
+                            showingHelpSheet = true
+                        } label: {
+                            Label("BrewStore Help Manual", systemImage: "questionmark.circle")
+                        }
+                        .keyboardShortcut("?", modifiers: .command)
+                        .accessibilityIdentifier("Toolbar.Help")
                     } label: {
-                        Label("Shell Setup", systemImage: "terminal")
+                        Label("Tools & Diagnostics", systemImage: "wrench.and.screwdriver")
                     }
-                    .help("Shell Environment Assistant")
-                    .accessibilityIdentifier("Toolbar.ShellSetup")
+                    .help("Tools, Diagnostics & Utilities")
+                    .accessibilityIdentifier("Toolbar.ToolsMenu")
 
                     Button {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
@@ -158,14 +170,6 @@ struct BrewStoreRootView: View {
                     }
                     .help("Quick Open (⌘K)")
                     .accessibilityIdentifier("Toolbar.QuickOpen")
-
-                    Button {
-                        showingHelpSheet = true
-                    } label: {
-                        Label("Help", systemImage: "questionmark.circle")
-                    }
-                    .help("Help Manual (⌘?)")
-                    .accessibilityIdentifier("Toolbar.Help")
                 }
             }
         } detail: {
