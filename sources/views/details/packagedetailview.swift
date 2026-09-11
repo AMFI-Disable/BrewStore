@@ -16,16 +16,8 @@ struct PackageDetailView: View {
     @State private var showingDependencyTree = false
     @State private var showingVisualGraph = false
 
-    // Collapsible Disclosures State
-    @State private var isVersionsExpanded = true
-    @State private var isDependenciesExpanded = false
-    @State private var isDependentsExpanded = false
-    @State private var isCleanerExpanded = false
-    @State private var isCaveatsExpanded = false
-    @State private var isSecurityExpanded = false
     @State private var showingAdvancedInstallSheet = false
     @State private var showingSecurityApprovalSheet = false
-    @State private var isAnalyticsExpanded = false
 
     @StateObject private var securityInspector = BrewStoreSecurityInspector()
     @StateObject private var storageInspector = BrewStoreAppStorageInspector()
@@ -85,209 +77,53 @@ struct PackageDetailView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+        GeometryReader { geometry in
+            let isWide = geometry.size.width >= 680
+
+            VStack(spacing: 0) {
                 headerView
-
-                // Inline Streaming Operation Drawer
-                if isOperatingThisPackage {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 8) {
-                            ProgressView()
-                                .controlSize(.small)
-                            HStack(spacing: 6) {
-                                Text(manager.activeOperationTitle ?? "Processing…")
-                                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-
-                                if let live = BrewStoreUpdateEstimator.liveRemainingTimeString(manager: manager) {
-                                    Text(live)
-                                        .font(.caption.bold())
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
-                                        .background(Color.accentColor.opacity(0.14), in: Capsule())
-                                        .foregroundStyle(Color.accentColor)
-                                }
-                            }
-                            Spacer()
-                            Button("Cancel", role: .destructive, action: manager.cancelCurrentOperation)
-                                .buttonStyle(.bordered)
-                                .controlSize(.small)
-                        }
-
-                        if !manager.statusMessage.isEmpty {
-                            ScrollView {
-                                Text(manager.statusMessage)
-                                    .font(.system(size: 11, design: .monospaced))
-                                    .foregroundStyle(.secondary)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            }
-                            .frame(maxHeight: 75)
-                            .padding(8)
-                            .background(Color.black.opacity(0.12), in: RoundedRectangle(cornerRadius: 6))
-                        }
-                    }
-                    .padding(12)
-                    .background(Color.accentColor.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.accentColor.opacity(0.3), lineWidth: 1.5))
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                }
+                    .padding(.horizontal, Spacing.lg)
+                    .padding(.top, Spacing.md)
+                    .padding(.bottom, Spacing.sm)
 
                 Divider()
 
-                keyMetricsBar
-
-                if let pick = BrewStoreEditorialPick.pick(for: currentPackage.id) {
-                    editorialPickCard(pick: pick)
-                }
-
-                // Description
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("About").font(.headline)
-                    if !currentPackage.description.isEmpty {
-                        Text(currentPackage.description)
-                            .font(.body)
-                            .lineSpacing(4)
-                            .foregroundStyle(.primary)
-                            .textSelection(.enabled)
-                    }
-                }
-
-                // Collapsible Panels
-                VStack(spacing: 8) {
-                    if siblings.count > 1 {
-                        DisclosureGroup(isExpanded: $isVersionsExpanded) {
-                            versionSwitcherContent(siblings: siblings)
-                                .padding(.top, 6)
-                        } label: {
-                            Label("Versions (\(siblings.count) Installed)", systemImage: "arrow.triangle.swap")
-                                .font(.headline)
-                        }
-                        .brewCardStyle(elevation: .subtle, padding: Spacing.sm)
-                    }
-
-                    if !currentPackage.dependencies.isEmpty {
-                        DisclosureGroup(isExpanded: $isDependenciesExpanded) {
-                            dependenciesContent
-                                .padding(.top, 6)
-                        } label: {
-                            Label("Dependencies (\(currentPackage.dependencies.count))", systemImage: "point.3.connected.trianglepath.dotted")
-                                .font(.headline)
-                        }
-                        .brewCardStyle(elevation: .subtle, padding: Spacing.sm)
-                    }
-
-                    if !dependents.isEmpty {
-                        DisclosureGroup(isExpanded: $isDependentsExpanded) {
-                            dependentsContent
-                                .padding(.top, 6)
-                        } label: {
-                            Label("Used By (\(dependents.count) Packages)", systemImage: "exclamationmark.triangle.fill")
-                                .font(.headline)
-                        }
-                        .brewCardStyle(elevation: .subtle, padding: Spacing.sm)
-                    }
-
-                    if preferences.enableAppCleaner, currentPackage.isInstalled {
-                        DisclosureGroup(isExpanded: $isCleanerExpanded) {
-                            appStorageInspectorContent
-                                .padding(.top, 6)
-                        } label: {
-                            Label("Storage & Cache Breakdown", systemImage: "internaldrive.fill")
-                                .font(.headline)
-                        }
-                        .brewCardStyle(elevation: .subtle, padding: Spacing.sm)
-                    }
-
-                    if let caveats = currentPackage.caveats, !caveats.isEmpty {
-                        DisclosureGroup(isExpanded: $isCaveatsExpanded) {
-                            caveatsContent(caveats: caveats)
-                                .padding(.top, 6)
-                        } label: {
-                            Label("Configuration & Shell Setup", systemImage: "terminal")
-                                .font(.headline)
-                        }
-                        .brewCardStyle(elevation: .subtle, padding: Spacing.sm)
-                    }
-
-                    if currentPackage.isInstalled {
-                        DisclosureGroup(isExpanded: $isSecurityExpanded) {
-                            securityInspectorContent
-                                .padding(.top, 6)
-                        } label: {
-                            Label("Security, Architecture & Gatekeeper", systemImage: "shield.lefthalf.filled")
-                                .font(.headline)
-                        }
-                        .brewCardStyle(elevation: .subtle, padding: Spacing.sm)
-                    }
-                }
-
-                // Similar & Alternative Tools Carousel
-                similarToolsCarousel
-
-                let requiredPerms = TCCPermissionManager.shared.detectPermissions(for: currentPackage)
-                if !requiredPerms.isEmpty {
-                    HStack {
-                        Label("\(requiredPerms.count) System Permission(s) Required", systemImage: "hand.raised.square.on.square.fill")
-                            .font(.subheadline.bold())
-                            .foregroundStyle(.blue)
-                        Spacer()
-                        Button("Review Approvals") {
-                            showingSecurityApprovalSheet = true
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
-                    }
-                    .padding(12)
-                    .background(Color.blue.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
-                    .sheet(isPresented: $showingSecurityApprovalSheet) {
-                        SecurityApprovalSheet(package: currentPackage, permissions: requiredPerms)
-                    }
-                }
-
-                // Popularity & Install Activity (Collapsed by default)
-                DisclosureGroup(isExpanded: $isAnalyticsExpanded) {
-                    analyticsDashboardSection
-                        .padding(.top, 6)
-                } label: {
-                    Label("Install Trends & Popularity", systemImage: "chart.bar.xaxis")
-                        .font(.headline)
-                }
-                .brewCardStyle(elevation: .subtle, padding: Spacing.sm)
-
-                // App Store Information Table
-                informationTable
-
-                if !manager.statusMessage.isEmpty {
-                    Text(manager.statusMessage).font(.callout).foregroundStyle(.secondary)
-                }
-                if let error = manager.errorMessage {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(error).font(.callout).foregroundStyle(.red).textSelection(.enabled)
-                        if manager.lastOperationRequiresElevation {
-                            Button {
-                                let action: PackageAction = currentPackage.isInstalled ? .upgrade : .install
-                                manager.performElevated(package: currentPackage, action: action)
-                            } label: {
-                                Label("Rerun with Administrator Privileges", systemImage: "lock.shield.fill")
+                if isWide {
+                    HStack(alignment: .top, spacing: 0) {
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: Spacing.md) {
+                                mainContentColumn
                             }
-                            .buttonStyle(.borderedProminent)
-                            .controlSize(.small)
+                            .padding(.horizontal, Spacing.lg)
+                            .padding(.vertical, Spacing.md)
                         }
+                        .frame(maxWidth: .infinity)
+
+                        Divider()
+
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: Spacing.md) {
+                                inspectorColumn
+                            }
+                            .padding(.horizontal, Spacing.md)
+                            .padding(.vertical, Spacing.md)
+                        }
+                        .frame(width: 260)
+                        .background(Color.secondary.opacity(0.02))
+                    }
+                } else {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: Spacing.md) {
+                            mainContentColumn
+                            Divider()
+                                .padding(.vertical, Spacing.xs)
+                            inspectorColumn
+                        }
+                        .padding(.horizontal, Spacing.lg)
+                        .padding(.vertical, Spacing.md)
                     }
                 }
-
-                // Blank space tap area at bottom: clicking empty space returns to previous view
-                Color.clear
-                    .frame(minHeight: 40)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        handleDismiss()
-                    }
             }
-            .padding(.horizontal, Spacing.lg)
-            .padding(.vertical, Spacing.md)
         }
         .brewStorePackageContextMenu(package: currentPackage, manager: manager)
         .task {
@@ -313,6 +149,10 @@ struct PackageDetailView: View {
         .sheet(isPresented: $showingAdvancedInstallSheet) {
             AdvancedInstallView(manager: manager, package: currentPackage)
         }
+        .sheet(isPresented: $showingSecurityApprovalSheet) {
+            let requiredPerms = TCCPermissionManager.shared.detectPermissions(for: currentPackage)
+            SecurityApprovalSheet(package: currentPackage, permissions: requiredPerms)
+        }
         .detailModalOverlay(item: $selectedDependencyPackage) { depPkg in
             PackageDetailView(manager: manager, package: depPkg, onDismiss: {
                 selectedDependencyPackage = nil
@@ -320,13 +160,13 @@ struct PackageDetailView: View {
         }
     }
 
-    // MARK: - App Store Header View
+    // MARK: - App Store Pinned Header View
 
     @ViewBuilder
     private var headerView: some View {
         let isWishlisted = wishlistManager.isWishlisted(id: currentPackage.id)
 
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
             // Navigation Bar with Back and Close affordances
             HStack {
                 Button {
@@ -359,33 +199,36 @@ struct PackageDetailView: View {
                 .help("Close (Esc)")
                 .accessibilityIdentifier("PackageDetail.CloseButton")
             }
-            .padding(.bottom, 2)
 
-            HStack(alignment: .center, spacing: 16) {
+            // Identity & Primary Actions Row
+            HStack(alignment: .center, spacing: Spacing.md) {
                 if let icon = installedAppIcon {
                     Image(nsImage: icon)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 64, height: 64)
-                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                        .shadow(color: Color.black.opacity(0.1), radius: 5, y: 2)
+                        .frame(width: 48, height: 48)
+                        .clipShape(RoundedRectangle(cornerRadius: Radius.panel, style: .continuous))
+                        .shadow(color: Color.black.opacity(0.1), radius: 4, y: 2)
                 } else {
                     Image(systemName: currentPackage.kind == .cask ? "app.fill" : "terminal.fill")
-                        .font(.system(size: 34))
+                        .font(.system(size: 26))
                         .foregroundStyle(.tint)
-                        .frame(width: 64, height: 64)
-                        .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .frame(width: 48, height: 48)
+                        .background(
+                            Color.accentColor.opacity(0.12),
+                            in: RoundedRectangle(cornerRadius: Radius.panel, style: .continuous)
+                        )
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 8) {
+                    HStack(spacing: 6) {
                         Text(currentPackage.name)
-                            .font(.title.bold())
+                            .font(.title2.bold())
                             .lineLimit(1)
                             .truncationMode(.tail)
 
                         if currentPackage.isInstalled, pinningManager.isPinned(packageID: currentPackage.id) {
-                            HStack(spacing: 4) {
+                            HStack(spacing: 3) {
                                 Image(systemName: "pin.fill")
                                 Text("Pinned")
                             }
@@ -397,7 +240,7 @@ struct PackageDetailView: View {
                         }
 
                         if let badge = TrendingRankingsManager.badge(for: currentPackage) {
-                            HStack(spacing: 4) {
+                            HStack(spacing: 3) {
                                 Image(systemName: badge.icon)
                                 Text(badge.title)
                             }
@@ -407,143 +250,750 @@ struct PackageDetailView: View {
                             .padding(.vertical, 2)
                             .background(Color.orange.opacity(0.12), in: Capsule())
                         }
-                    }
 
-                    Text(currentPackage.id).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1)
-                    Text(currentPackage.displayKind).font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
-                }
-
-                Spacer()
-            }
-
-            // Primary Action Buttons Bar
-            HStack(spacing: 8) {
-                AppStoreActionButton(manager: manager, package: currentPackage, size: .regular)
-
-                if currentPackage.isInstalled {
-                    let isPinned = pinningManager.isPinned(packageID: currentPackage.id)
-                    let isPinning = pinningManager.isPinningInProgress(packageID: currentPackage.id)
-                    Button {
-                        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
-                            pinningManager.togglePin(package: currentPackage, manager: manager)
-                        }
-                    } label: {
-                        if isPinning {
-                            HStack(spacing: 5) {
-                                ProgressView().controlSize(.mini)
-                                Text(isPinned ? "Unpinning…" : "Pinning…")
+                        if currentPackage.isOutdated {
+                            let est = BrewStoreUpdateEstimator.estimate(for: currentPackage)
+                            HStack(spacing: 3) {
+                                Image(systemName: "timer").font(.caption2)
+                                Text("~\(est.formattedEstimate)")
+                                    .font(.caption2.bold().monospaced())
                             }
-                        } else {
-                            Label(isPinned ? "Unpin" : "Pin", systemImage: isPinned ? "pin.slash.fill" : "pin.fill")
+                            .foregroundStyle(.orange)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.orange.opacity(0.12), in: Capsule())
                         }
                     }
-                    .buttonStyle(.bordered)
-                    .controlSize(.regular)
-                    .disabled(manager.isOperating || isPinning)
-                    .accessibilityIdentifier("PackageDetail.PinButton")
-                    .help(isPinned ? "Unpin version to allow updates" : "Pin version to prevent automatic updates")
-                }
 
-                if currentPackage.isOutdated {
-                    let est = BrewStoreUpdateEstimator.estimate(for: currentPackage)
-                    HStack(spacing: 4) {
-                        Image(systemName: "timer").font(.caption2)
-                        Text("~\(est.formattedEstimate)")
-                            .font(.caption2.bold().monospaced())
+                    HStack(spacing: 6) {
+                        Text(currentPackage.id).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1)
+                        Text("•").font(.caption2).foregroundStyle(.secondary)
+                        Text("v\(currentPackage.version)").font(.caption.monospaced()).foregroundStyle(.secondary)
+                        Text("•").font(.caption2).foregroundStyle(.secondary)
+                        Text(currentPackage.displayKind).font(.caption).foregroundStyle(.secondary)
                     }
-                    .foregroundStyle(.orange)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 6)
-                    .background(Color.orange.opacity(0.12), in: Capsule())
-
-                    if BrewStoreVersionComparator.isMajorUpgrade(installed: currentPackage.installedVersion, latest: currentPackage.version) {
-                        let summary = BrewStoreVersionComparator.majorUpgradeSummary(installed: currentPackage.installedVersion, latest: currentPackage.version) ?? "Major Bump"
-                        HStack(spacing: 4) {
-                            Image(systemName: "exclamationmark.triangle.fill").font(.caption2)
-                            Text("Major Upgrade (\(summary))")
-                                .font(.caption2.bold())
-                        }
-                        .foregroundStyle(.orange)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 6)
-                        .background(Color.orange.opacity(0.16), in: Capsule())
-                        .help("Major version updates may contain breaking changes or require database migrations.")
-                    }
-                }
-
-                Button {
-                    showingAdvancedInstallSheet = true
-                } label: {
-                    Label("Options", systemImage: "slider.horizontal.3")
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.regular)
-
-                Button {
-                    wishlistManager.toggleWishlist(id: currentPackage.id)
-                } label: {
-                    Image(systemName: isWishlisted ? "star.fill" : "star")
-                        .foregroundStyle(isWishlisted ? Color.yellow : Color.secondary)
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.regular)
-                .help(isWishlisted ? "Unstar (Remove from Wishlist)" : "Star (Add to Wishlist)")
-
-                if let url = URL(string: currentPackage.homepage), !currentPackage.homepage.isEmpty {
-                    ShareLink(item: url) {
-                        Image(systemName: "square.and.arrow.up")
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.regular)
-                    .help("Share Package")
                 }
 
                 Spacer()
+
+                // Action Buttons Bar
+                HStack(spacing: 6) {
+                    AppStoreActionButton(manager: manager, package: currentPackage, size: .regular)
+
+                    if currentPackage.isInstalled {
+                        let isPinned = pinningManager.isPinned(packageID: currentPackage.id)
+                        let isPinning = pinningManager.isPinningInProgress(packageID: currentPackage.id)
+                        Button {
+                            withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                                pinningManager.togglePin(package: currentPackage, manager: manager)
+                            }
+                        } label: {
+                            if isPinning {
+                                HStack(spacing: 4) {
+                                    ProgressView().controlSize(.mini)
+                                    Text(isPinned ? "Unpinning…" : "Pinning…")
+                                }
+                            } else {
+                                Label(isPinned ? "Unpin" : "Pin", systemImage: isPinned ? "pin.slash.fill" : "pin.fill")
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.regular)
+                        .disabled(manager.isOperating || isPinning)
+                        .accessibilityIdentifier("PackageDetail.PinButton")
+                        .help(isPinned ? "Unpin version to allow updates" : "Pin version to prevent automatic updates")
+                    }
+
+                    Button {
+                        showingAdvancedInstallSheet = true
+                    } label: {
+                        Label("Options", systemImage: "slider.horizontal.3")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.regular)
+
+                    Button {
+                        wishlistManager.toggleWishlist(id: currentPackage.id)
+                    } label: {
+                        Image(systemName: isWishlisted ? "star.fill" : "star")
+                            .foregroundStyle(isWishlisted ? Color.yellow : Color.secondary)
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.regular)
+                    .help(isWishlisted ? "Unstar (Remove from Wishlist)" : "Star (Add to Wishlist)")
+
+                    if let url = URL(string: currentPackage.homepage), !currentPackage.homepage.isEmpty {
+                        ShareLink(item: url) {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.regular)
+                        .help("Share Package")
+                    }
+                }
             }
         }
     }
 
-    // MARK: - Key Metrics Bar
+    // MARK: - Main Content Column
 
     @ViewBuilder
-    private var keyMetricsBar: some View {
-        let footprint = BrewStoreBottleFootprintEstimator.estimateFootprint(for: currentPackage)
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 110, maximum: 160), spacing: 8)], spacing: 8) {
-            metricCard(title: "Type", value: currentPackage.kind == .cask ? "macOS App" : "CLI Binary", icon: currentPackage.kind == .cask ? "app.fill" : "terminal.fill")
-            metricCard(title: "Download size", value: "~" + footprint.formattedDownloadSize, icon: "arrow.down.circle")
-            metricCard(title: "Disk space", value: "~" + footprint.formattedFootprintSize, icon: "internaldrive")
-            metricCard(title: "Status", value: currentPackage.isInstalled ? (currentPackage.isOutdated ? "Update" : "Installed") : "Available", icon: currentPackage.isInstalled ? "checkmark.circle.fill" : "circle")
-            metricCard(title: "Installs (30d)", value: packageAnalytics?.formatted30d ?? "—", icon: "calendar")
-            metricCard(title: "Installs (1 yr)", value: packageAnalytics?.formatted365d ?? "—", icon: "chart.line.uptrend.xyaxis")
-            if currentPackage.isOutdated {
-                let est = BrewStoreUpdateEstimator.estimate(for: currentPackage)
-                metricCard(title: "Est. update", value: "~" + est.formattedEstimate, icon: "timer")
+    private var mainContentColumn: some View {
+        if isOperatingThisPackage {
+            operationDrawer
+        }
+
+        if let pick = BrewStoreEditorialPick.pick(for: currentPackage.id) {
+            editorialPickCard(pick: pick)
+        }
+
+        VStack(alignment: .leading, spacing: 8) {
+            Text("About").font(.headline)
+            if !currentPackage.description.isEmpty {
+                Text(currentPackage.description)
+                    .font(.body)
+                    .lineSpacing(3)
+                    .foregroundStyle(.primary)
+                    .textSelection(.enabled)
+            } else {
+                Text("No description provided for this package.")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .brewCardStyle(elevation: .subtle, padding: Spacing.md)
+
+        if let caveats = currentPackage.caveats, !caveats.isEmpty {
+            caveatsSection(caveats: caveats)
+        }
+
+        if !currentPackage.dependencies.isEmpty || !dependents.isEmpty {
+            dependenciesSection
+        }
+
+        if siblings.count > 1 {
+            versionSwitcherSection(siblings: siblings)
+        }
+
+        if preferences.enableAppCleaner, currentPackage.isInstalled {
+            storageSection
+        }
+
+        similarToolsCarousel
+
+        analyticsDashboardSection
+
+        if !manager.statusMessage.isEmpty {
+            Text(manager.statusMessage).font(.callout).foregroundStyle(.secondary)
+        }
+        if let error = manager.errorMessage {
+            errorBanner(error: error)
+        }
+
+        Color.clear
+            .frame(minHeight: 30)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                handleDismiss()
+            }
+    }
+
+    // MARK: - Inspector Column
+
+    @ViewBuilder
+    private var inspectorColumn: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            specificationsCard
+
+            informationCard
+
+            securityInspectorCard
+
+            if currentPackage.isInstalled {
+                packageControlsCard
+            }
+
+            let requiredPerms = TCCPermissionManager.shared.detectPermissions(for: currentPackage)
+            if !requiredPerms.isEmpty {
+                systemPermissionsCard(requiredPerms: requiredPerms)
+            }
+
+            Color.clear
+                .frame(minHeight: 30)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    handleDismiss()
+                }
+        }
+    }
+
+    // MARK: - Main Column Helper Subviews
+
+    private var operationDrawer: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                ProgressView()
+                    .controlSize(.small)
+                HStack(spacing: 6) {
+                    Text(manager.activeOperationTitle ?? "Processing…")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+
+                    if let live = BrewStoreUpdateEstimator.liveRemainingTimeString(manager: manager) {
+                        Text(live)
+                            .font(.caption.bold())
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.accentColor.opacity(0.14), in: Capsule())
+                            .foregroundStyle(Color.accentColor)
+                    }
+                }
+                Spacer()
+                Button("Cancel", role: .destructive, action: manager.cancelCurrentOperation)
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+            }
+
+            if !manager.statusMessage.isEmpty {
+                ScrollView {
+                    Text(manager.statusMessage)
+                        .font(.system(size: 11, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxHeight: 75)
+                .padding(8)
+                .background(Color.black.opacity(0.12), in: RoundedRectangle(cornerRadius: 6))
+            }
+        }
+        .padding(12)
+        .background(Color.accentColor.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.accentColor.opacity(0.3), lineWidth: 1.5))
+        .transition(.move(edge: .top).combined(with: .opacity))
+    }
+
+    private func errorBanner(error: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(error).font(.callout).foregroundStyle(.red).textSelection(.enabled)
+            if manager.lastOperationRequiresElevation {
+                Button {
+                    let action: PackageAction = currentPackage.isInstalled ? .upgrade : .install
+                    manager.performElevated(package: currentPackage, action: action)
+                } label: {
+                    Label("Rerun with Administrator Privileges", systemImage: "lock.shield.fill")
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
             }
         }
     }
 
-    private func metricCard(title: String, value: String, icon: String) -> some View {
-        VStack(spacing: 4) {
-            Text(title)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-            HStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.caption)
-                    .foregroundStyle(.tint)
-                Text(value)
-                    .font(.system(size: 12, weight: .semibold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.85)
+    private func caveatsSection(caveats: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Image(systemName: "terminal.fill").foregroundStyle(.blue).font(.caption)
+                Text("Configuration & Shell Setup").font(.headline)
             }
-            .foregroundStyle(.primary)
+
+            MarkdownTextView(markdown: caveats, baseFont: .caption, lineSpacing: 3)
+                .padding(8)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.secondary.opacity(0.06), in: RoundedRectangle(cornerRadius: Radius.sm))
+
+            let exportLines = shellAssistant.extractCaveatExports(from: caveats)
+            if !exportLines.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(exportLines.joined(separator: "\n"))
+                        .font(.system(.caption2, design: .monospaced))
+                        .padding(6)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.black.opacity(0.2), in: RoundedRectangle(cornerRadius: 6))
+
+                    HStack {
+                        Button {
+                            let snippet = exportLines.joined(separator: "\n")
+                            if shellAssistant.injectCaveatSnippet(
+                                packageName: currentPackage.name,
+                                snippet: snippet,
+                                manager: manager
+                            ) {
+                                caveatAppliedSuccess = true
+                            }
+                        } label: {
+                            Label(
+                                caveatAppliedSuccess ?
+                                    "Applied to .\(shellAssistant.detectedShell)rc" :
+                                    "1-Click Apply to .\(shellAssistant.detectedShell)rc",
+                                systemImage: caveatAppliedSuccess ? "checkmark.circle.fill" : "arrow.down.doc.fill"
+                            )
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(caveatAppliedSuccess ? .green : .blue)
+                        .controlSize(.small)
+                        .disabled(caveatAppliedSuccess)
+
+                        if let status = shellAssistant.statusMessage {
+                            Text(status)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
+                }
+                .padding(8)
+                .background(Color.blue.opacity(0.06), in: RoundedRectangle(cornerRadius: Radius.sm))
+                .overlay(RoundedRectangle(cornerRadius: Radius.sm).stroke(Color.blue.opacity(0.2), lineWidth: 1))
+            }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
-        .padding(.horizontal, 6)
-        .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
-        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.08), lineWidth: 1))
+        .brewCardStyle(elevation: .subtle, padding: Spacing.md)
+    }
+
+    private var dependenciesSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Label(
+                    "Dependencies (\(currentPackage.dependencies.count))",
+                    systemImage: "point.3.connected.trianglepath.dotted"
+                )
+                .font(.headline)
+
+                Spacer()
+
+                if preferences.enableVisualDependencyGraph {
+                    Button {
+                        showingVisualGraph = true
+                    } label: {
+                        Label("Visual Graph", systemImage: "point.3.connected.trianglepath.dotted")
+                    }
+                    .controlSize(.small)
+                }
+
+                if currentPackage.kind == .formula {
+                    Button(showingDependencyTree ? "Hide Tree" : "Tree View") {
+                        showingDependencyTree.toggle()
+                        if showingDependencyTree, dependencyTree == nil {
+                            Task { dependencyTree = await manager.fetchDependencyTree(for: currentPackage) }
+                        }
+                    }
+                    .controlSize(.small)
+                }
+            }
+
+            if !currentPackage.dependencies.isEmpty {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 120))], alignment: .leading, spacing: 6) {
+                    ForEach(currentPackage.dependencies, id: \.self) { depID in
+                        let depPkg = manager.packages.first { $0.id == depID } ?? BrewStorePackage(
+                            id: depID,
+                            name: depID,
+                            description: "",
+                            homepage: "",
+                            version: "",
+                            kind: .formula
+                        )
+                        Button {
+                            selectedDependencyPackage = depPkg
+                        } label: {
+                            HStack(spacing: 5) {
+                                Image(systemName: depPkg.kind == .cask ? "app.fill" : "terminal.fill")
+                                    .font(.system(size: 9))
+                                    .foregroundStyle(depPkg.isInstalled ? Color.green : Color.accentColor)
+
+                                Text(depID)
+                                    .font(.caption.monospaced().bold())
+                                    .foregroundStyle(.primary)
+                                    .lineLimit(1)
+
+                                Spacer(minLength: 2)
+
+                                if depPkg.isInstalled {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 9))
+                                        .foregroundStyle(.green)
+                                }
+                            }
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 4)
+                            .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 6))
+                            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.secondary.opacity(0.12), lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                        .help(
+                            depPkg.isInstalled ?
+                                "\(depID) (Installed) - Click to inspect" :
+                                "\(depID) (Available) - Click to inspect"
+                        )
+                    }
+                }
+            }
+
+            if showingDependencyTree, let tree = dependencyTree {
+                Text(tree)
+                    .font(.caption.monospaced())
+                    .padding(8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 6))
+                    .textSelection(.enabled)
+            }
+
+            if !dependents.isEmpty {
+                Divider().padding(.vertical, 2)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Used By (\(dependents.count) Packages)")
+                        .font(.caption.bold())
+                        .foregroundStyle(.secondary)
+                    Text(dependents.joined(separator: " · "))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
+            }
+        }
+        .brewCardStyle(elevation: .subtle, padding: Spacing.md)
+    }
+
+    private func versionSwitcherSection(siblings: [BrewStorePackage]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Installed Family Versions (\(siblings.count))", systemImage: "arrow.triangle.swap")
+                .font(.headline)
+            versionSwitcherContent(siblings: siblings)
+        }
+        .brewCardStyle(elevation: .subtle, padding: Spacing.md)
+    }
+
+    private var storageSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Storage & Cache Breakdown", systemImage: "internaldrive.fill")
+                .font(.headline)
+            appStorageInspectorContent
+        }
+        .brewCardStyle(elevation: .subtle, padding: Spacing.md)
+    }
+
+    // MARK: - Inspector Column Helper Subviews
+
+    private var specificationsCard: some View {
+        let footprint = BrewStoreBottleFootprintEstimator.estimateFootprint(for: currentPackage)
+        return VStack(alignment: .leading, spacing: 8) {
+            Text("Specifications").font(.headline)
+
+            VStack(spacing: 6) {
+                specRow(
+                    title: "Type",
+                    value: currentPackage.kind == .cask ? "macOS App" : "CLI Binary",
+                    icon: currentPackage.kind == .cask ? "app.fill" : "terminal.fill"
+                )
+                Divider()
+                specRow(
+                    title: "Status",
+                    value: currentPackage.isInstalled ?
+                        (currentPackage.isOutdated ? "Update" : "Installed") :
+                        "Available",
+                    icon: currentPackage.isInstalled ? "checkmark.circle.fill" : "circle"
+                )
+                Divider()
+                specRow(title: "Download", value: "~" + footprint.formattedDownloadSize, icon: "arrow.down.circle")
+                Divider()
+                specRow(title: "Disk Space", value: "~" + footprint.formattedFootprintSize, icon: "internaldrive")
+                Divider()
+                specRow(title: "30d Installs", value: packageAnalytics?.formatted30d ?? "—", icon: "calendar")
+                if currentPackage.isOutdated {
+                    let est = BrewStoreUpdateEstimator.estimate(for: currentPackage)
+                    Divider()
+                    specRow(title: "Est. Update", value: "~" + est.formattedEstimate, icon: "timer")
+                }
+            }
+        }
+        .brewCardStyle(elevation: .subtle, padding: Spacing.md)
+    }
+
+    private func specRow(title: String, value: String, icon: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.caption2)
+                .foregroundStyle(.tint)
+                .frame(width: 14)
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Text(value)
+                .font(.caption.bold())
+                .lineLimit(1)
+        }
+    }
+
+    private var informationCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Information").font(.headline)
+
+            VStack(spacing: 6) {
+                HStack {
+                    Text("Tap / Source").font(.caption).foregroundStyle(.secondary)
+                    Spacer()
+                    Text(currentPackage.tap ?? "homebrew/core").font(.caption.monospaced()).lineLimit(1)
+                }
+                Divider()
+                HStack {
+                    Text("Kind").font(.caption).foregroundStyle(.secondary)
+                    Spacer()
+                    Text(currentPackage.displayKind).font(.caption)
+                }
+                if let cellar = currentPackage.cellarURL(prefix: manager.brewPrefix) {
+                    Divider()
+                    HStack {
+                        Text("Cellar").font(.caption).foregroundStyle(.secondary)
+                        Spacer()
+                        Text(cellar.lastPathComponent).font(.caption.monospaced()).lineLimit(1)
+                    }
+                    .help(cellar.path)
+                }
+                if let homepage = URL(string: currentPackage.homepage), !currentPackage.homepage.isEmpty {
+                    Divider()
+                    HStack {
+                        Text("Homepage").font(.caption).foregroundStyle(.secondary)
+                        Spacer()
+                        Link(destination: homepage) {
+                            HStack(spacing: 3) {
+                                Text("Visit Site")
+                                Image(systemName: "arrow.up.right.square")
+                            }
+                            .font(.caption)
+                        }
+                    }
+                }
+            }
+        }
+        .brewCardStyle(elevation: .subtle, padding: Spacing.md)
+    }
+
+    private var securityInspectorCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Security & Integrity").font(.headline)
+
+            if securityInspector.isInspecting {
+                HStack(spacing: 6) {
+                    ProgressView().controlSize(.small)
+                    Text("Inspecting binary…").font(.caption).foregroundStyle(.secondary)
+                }
+            } else if let report = securityInspector.report {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text("Architecture").font(.caption).foregroundStyle(.secondary)
+                        Spacer()
+                        let isSilicon = report.architecture == .appleSilicon || report.architecture == .universal2
+                        Text(isSilicon ? "Apple Silicon" : "Rosetta 2")
+                            .font(.caption2.bold())
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(
+                                (isSilicon ? Color.green : Color.orange).opacity(0.15),
+                                in: Capsule()
+                            )
+                            .foregroundStyle(isSilicon ? Color.green : Color.orange)
+                    }
+
+                    Divider()
+
+                    HStack {
+                        Text("Signing").font(.caption).foregroundStyle(.secondary)
+                        Spacer()
+                        Text(report.codeSignAuthority).font(.caption.monospaced()).lineLimit(1)
+                    }
+
+                    if report.isHardenedRuntime {
+                        Divider()
+                        HStack {
+                            Text("Runtime").font(.caption).foregroundStyle(.secondary)
+                            Spacer()
+                            Label("Hardened", systemImage: "lock.shield.fill")
+                                .font(.caption2.bold())
+                                .foregroundStyle(.blue)
+                        }
+                    }
+
+                    Divider()
+
+                    if report.isQuarantined {
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Label("Quarantine Active", systemImage: "exclamationmark.shield.fill")
+                                    .font(.caption.bold())
+                                    .foregroundStyle(.orange)
+                                Spacer()
+                                Button("Remove") {
+                                    securityInspector.removeQuarantine(package: currentPackage, manager: manager)
+                                }
+                                .buttonStyle(.bordered)
+                                .controlSize(.mini)
+                            }
+                            Text("macOS will prompt for approval before launch.")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(6)
+                        .background(Color.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 6))
+                    } else {
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.shield.fill").foregroundStyle(.green).font(.caption2)
+                            Text("Clean Gatekeeper").font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            } else {
+                HStack(spacing: 4) {
+                    Image(systemName: "shield").foregroundStyle(.secondary).font(.caption2)
+                    Text("Standard Security").font(.caption).foregroundStyle(.secondary)
+                }
+            }
+
+            if currentPackage.kind == .formula {
+                Divider()
+                let prefix = manager.brewPrefix ??
+                    (FileManager.default.fileExists(atPath: "/opt/homebrew") ? "/opt/homebrew" : "/usr/local")
+                let integrity = BrewStoreBottleIntegrityAuditor.auditPackage(package: currentPackage, prefix: prefix)
+                HStack {
+                    Image(systemName: integrity.status.icon)
+                        .font(.caption2)
+                        .foregroundStyle(integrity.status == .verifiedBottle ? Color.green : Color.orange)
+                    Text("Bottle Integrity").font(.caption).foregroundStyle(.secondary)
+                    Spacer()
+                    Text(integrity.status == .verifiedBottle ? "Verified" : "Source")
+                        .font(.caption2.bold())
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(
+                            (integrity.status == .verifiedBottle ? Color.green : Color.orange).opacity(0.12),
+                            in: Capsule()
+                        )
+                        .foregroundStyle(integrity.status == .verifiedBottle ? .green : .orange)
+                }
+            }
+
+            let advisories = BrewStoreCVEScanningManager.advisories(for: currentPackage)
+            if !advisories.isEmpty {
+                Divider()
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(advisories) { adv in
+                        HStack(spacing: 4) {
+                            Image(systemName: adv.severity.symbol)
+                                .font(.caption2)
+                                .foregroundStyle(adv.severity.color)
+                            Text(adv.id).font(.caption2.bold())
+                            Spacer()
+                            if let url = URL(string: adv.advisoryURL) {
+                                Link("Advisory", destination: url)
+                                    .font(.caption2)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .brewCardStyle(elevation: .subtle, padding: Spacing.md)
+    }
+
+    private var packageControlsCard: some View {
+        let isPinned = pinningManager.isPinned(packageID: currentPackage.id)
+        let isPinning = pinningManager.isPinningInProgress(packageID: currentPackage.id)
+        let prefix = manager.brewPrefix ??
+            (FileManager.default.fileExists(atPath: "/opt/homebrew") ? "/opt/homebrew" : "/usr/local")
+        let installedVersions = BrewStorePackagePinningManager.installedCellarVersions(
+            for: currentPackage.id,
+            prefix: prefix
+        )
+        let isIgnored = BrewStoreIgnoredUpdatesManager.shared.isIgnored(packageID: currentPackage.id)
+
+        return VStack(alignment: .leading, spacing: 8) {
+            Text("Version Controls").font(.headline)
+
+            VStack(spacing: 6) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(isPinned ? "Version Pinned" : "Version Pinning")
+                            .font(.caption.bold())
+                        Text(isPinned ? "Upgrades locked" : "Receives updates")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button {
+                        pinningManager.togglePin(package: currentPackage, manager: manager)
+                    } label: {
+                        if isPinning {
+                            ProgressView().controlSize(.mini)
+                        } else {
+                            Text(isPinned ? "Unpin" : "Pin")
+                                .font(.caption2.bold())
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.mini)
+                    .disabled(manager.isOperating || isPinning)
+                    .accessibilityIdentifier("PackageDetail.VersionPinButton")
+                }
+
+                if installedVersions.count > 1 {
+                    Divider()
+                    HStack {
+                        Text("Active Version").font(.caption).foregroundStyle(.secondary)
+                        Spacer()
+                        Menu {
+                            ForEach(installedVersions, id: \.self) { ver in
+                                Button("v\(ver)") {
+                                    BrewStorePackagePinningManager.shared.switchActiveVersion(
+                                        packageID: currentPackage.id,
+                                        version: ver,
+                                        manager: manager
+                                    )
+                                }
+                            }
+                        } label: {
+                            Text("v\(currentPackage.version)")
+                                .font(.caption.monospaced())
+                        }
+                        .controlSize(.mini)
+                    }
+                }
+
+                Divider()
+
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Notifications").font(.caption.bold())
+                        Text(isIgnored ? "Updates muted" : "Updates notified")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button {
+                        BrewStoreIgnoredUpdatesManager.shared.toggleIgnore(packageID: currentPackage.id)
+                    } label: {
+                        Text(isIgnored ? "Unmute" : "Mute")
+                            .font(.caption2)
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.mini)
+                }
+            }
+        }
+        .brewCardStyle(elevation: .subtle, padding: Spacing.md)
+    }
+
+    private func systemPermissionsCard(requiredPerms: [TCCPermissionKind]) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label("\(requiredPerms.count) System Permission(s)", systemImage: "hand.raised.square.on.square.fill")
+                .font(.caption.bold())
+                .foregroundStyle(.blue)
+            Button("Review Approvals") {
+                showingSecurityApprovalSheet = true
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+        }
+        .padding(Spacing.sm)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.blue.opacity(0.08), in: RoundedRectangle(cornerRadius: Radius.sm))
     }
 
     // MARK: - Editorial Review Card
@@ -607,95 +1057,6 @@ struct PackageDetailView: View {
                 }
             }
         }
-    }
-
-    private var dependenciesContent: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
-                Text("Required Components (\(currentPackage.dependencies.count))")
-                    .font(.caption.bold())
-                    .foregroundStyle(.secondary)
-
-                Spacer()
-
-                if preferences.enableVisualDependencyGraph {
-                    Button {
-                        showingVisualGraph = true
-                    } label: {
-                        Label("Visual Graph", systemImage: "point.3.connected.trianglepath.dotted")
-                    }
-                    .controlSize(.small)
-                }
-
-                if currentPackage.kind == .formula {
-                    Button(showingDependencyTree ? "Hide Tree" : "Tree View") {
-                        showingDependencyTree.toggle()
-                        if showingDependencyTree, dependencyTree == nil {
-                            Task { dependencyTree = await manager.fetchDependencyTree(for: currentPackage) }
-                        }
-                    }
-                    .controlSize(.small)
-                }
-            }
-
-            // Clickable Dependency Pills
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 140))], alignment: .leading, spacing: 8) {
-                ForEach(currentPackage.dependencies, id: \.self) { depID in
-                    let depPkg = manager.packages.first { $0.id == depID } ?? BrewStorePackage(
-                        id: depID,
-                        name: depID,
-                        description: "",
-                        homepage: "",
-                        version: "",
-                        kind: .formula
-                    )
-                    Button {
-                        selectedDependencyPackage = depPkg
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: depPkg.kind == .cask ? "app.fill" : "terminal.fill")
-                                .font(.system(size: 10))
-                                .foregroundStyle(depPkg.isInstalled ? Color.green : Color.accentColor)
-
-                            Text(depID)
-                                .font(.caption.monospaced().bold())
-                                .foregroundStyle(.primary)
-                                .lineLimit(1)
-
-                            Spacer()
-
-                            if depPkg.isInstalled {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.system(size: 10))
-                                    .foregroundStyle(.green)
-                            }
-                        }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 5)
-                        .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 6))
-                        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.secondary.opacity(0.12), lineWidth: 1))
-                    }
-                    .buttonStyle(.plain)
-                    .help(depPkg.isInstalled ? "\(depID) (Installed) - Click to inspect" : "\(depID) (Available) - Click to inspect")
-                }
-            }
-
-            if showingDependencyTree, let tree = dependencyTree {
-                Text(tree)
-                    .font(.caption.monospaced())
-                    .padding(10)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
-                    .textSelection(.enabled)
-            }
-        }
-    }
-
-    private var dependentsContent: some View {
-        Text(dependents.joined(separator: " · "))
-            .font(.callout)
-            .foregroundStyle(.secondary)
-            .textSelection(.enabled)
     }
 
     private var appStorageInspectorContent: some View {
@@ -936,281 +1297,6 @@ struct PackageDetailView: View {
         }
     }
 
-    private func caveatsContent(caveats: String) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            MarkdownTextView(markdown: caveats, baseFont: .caption, lineSpacing: 3)
-                .padding(10)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
-
-            let exportLines = shellAssistant.extractCaveatExports(from: caveats)
-            if !exportLines.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "terminal.fill").foregroundStyle(.blue).font(.caption)
-                        Text("Shell Environment Configuration Detected")
-                            .font(.caption.bold())
-                    }
-
-                    Text(exportLines.joined(separator: "\n"))
-                        .font(.system(.caption2, design: .monospaced))
-                        .padding(8)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.black.opacity(0.2), in: RoundedRectangle(cornerRadius: 6))
-
-                    HStack {
-                        Button {
-                            let snippet = exportLines.joined(separator: "\n")
-                            if shellAssistant.injectCaveatSnippet(packageName: currentPackage.name, snippet: snippet, manager: manager) {
-                                caveatAppliedSuccess = true
-                            }
-                        } label: {
-                            Label(
-                                caveatAppliedSuccess ? "Applied to .\(shellAssistant.detectedShell)rc" : "1-Click Apply to .\(shellAssistant.detectedShell)rc",
-                                systemImage: caveatAppliedSuccess ? "checkmark.circle.fill" : "arrow.down.doc.fill"
-                            )
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(caveatAppliedSuccess ? .green : .blue)
-                        .controlSize(.small)
-                        .disabled(caveatAppliedSuccess)
-
-                        if let status = shellAssistant.statusMessage {
-                            Text(status)
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                        }
-                    }
-                }
-                .padding(10)
-                .background(Color.blue.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.blue.opacity(0.2), lineWidth: 1))
-            }
-        }
-    }
-
-    private var securityInspectorContent: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            if securityInspector.isInspecting {
-                ProgressView("Inspecting binary signature & architecture…")
-                    .controlSize(.small)
-            } else if let report = securityInspector.report {
-                HStack(spacing: 12) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("Binary Architecture").font(.caption2.bold()).foregroundStyle(.secondary)
-                        Text(report.architecture.rawValue).font(.subheadline.bold())
-                    }
-                    Spacer()
-                    Text(report.architecture == .appleSilicon || report.architecture == .universal2 ? "Apple Silicon Native" : "Rosetta 2")
-                        .font(.caption2.bold())
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(
-                            (report.architecture == .appleSilicon || report.architecture == .universal2 ? Color.green : Color.orange).opacity(0.15),
-                            in: Capsule()
-                        )
-                        .foregroundStyle(report.architecture == .appleSilicon || report.architecture == .universal2 ? Color.green : Color.orange)
-                }
-                .padding(10)
-                .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
-
-                HStack(spacing: 12) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("Code Signing Authority").font(.caption2.bold()).foregroundStyle(.secondary)
-                        Text(report.codeSignAuthority).font(.caption.monospaced()).lineLimit(1)
-                    }
-                    Spacer()
-                    if report.isHardenedRuntime {
-                        Label("Hardened Runtime", systemImage: "lock.shield.fill")
-                            .font(.caption2.bold())
-                            .foregroundStyle(.blue)
-                    }
-                }
-                .padding(10)
-                .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
-
-                if report.isQuarantined {
-                    HStack(spacing: 10) {
-                        Image(systemName: "exclamationmark.shield.fill")
-                            .foregroundStyle(.orange)
-                            .font(.title3)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Gatekeeper Quarantine Active").font(.caption.bold())
-                            Text("macOS will prompt for approval before launching this app.")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        Button("Remove Quarantine") {
-                            securityInspector.removeQuarantine(package: currentPackage, manager: manager)
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
-                    }
-                    .padding(10)
-                    .background(Color.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
-                } else {
-                    HStack(spacing: 6) {
-                        Image(systemName: "checkmark.shield.fill").foregroundStyle(.green).font(.caption)
-                        Text("Clean Gatekeeper Status (No Quarantine)").font(.caption2).foregroundStyle(.secondary)
-                    }
-                }
-
-                // Bottle Receipt & Checksum Integrity Auditor
-                if currentPackage.kind == .formula {
-                    let basePrefix = manager.brewPrefix ?? (FileManager.default.fileExists(atPath: "/opt/homebrew") ? "/opt/homebrew" : "/usr/local")
-                    let integrity = BrewStoreBottleIntegrityAuditor.auditPackage(package: currentPackage, prefix: basePrefix)
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(spacing: 8) {
-                            Image(systemName: integrity.status.icon)
-                                .foregroundStyle(integrity.status == .verifiedBottle ? Color.green : Color.orange)
-                            Text("Bottle Receipt & Checksum").font(.caption.bold())
-                            Spacer()
-                            Text(integrity.status.rawValue)
-                                .font(.caption2.bold())
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(integrity.status == .verifiedBottle ? Color.green.opacity(0.12) : Color.orange.opacity(0.12), in: Capsule())
-                                .foregroundStyle(integrity.status == .verifiedBottle ? .green : .orange)
-                        }
-
-                        if let sha = integrity.bottleSHA256 {
-                            HStack {
-                                Text("Bottle SHA-256:").font(.caption2).foregroundStyle(.secondary)
-                                Text(sha).font(.caption2.monospaced()).textSelection(.enabled)
-                            }
-                        }
-                        if let compiler = integrity.compiler {
-                            Text("Build compiler: \(compiler)").font(.caption2).foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding(10)
-                    .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
-                }
-
-                // Package Version Pinning & Multi-Version Switcher
-                if currentPackage.isInstalled {
-                    let isPinned = pinningManager.isPinned(packageID: currentPackage.id)
-                    let isPinning = pinningManager.isPinningInProgress(packageID: currentPackage.id)
-                    let prefix = manager.brewPrefix ?? (FileManager.default.fileExists(atPath: "/opt/homebrew") ? "/opt/homebrew" : "/usr/local")
-                    let installedVersions = BrewStorePackagePinningManager.installedCellarVersions(for: currentPackage.id, prefix: prefix)
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 8) {
-                            Image(systemName: isPinned ? "pin.fill" : "pin")
-                                .foregroundStyle(isPinned ? Color.purple : Color.secondary)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(isPinned ? "Version Pinned" : "Version Pinning & Switcher").font(.caption.bold())
-                                Text(isPinned ? "Locked at current version. `brew upgrade` will skip this package." : "Unlocked. Will automatically receive upgrades.")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Button {
-                                pinningManager.togglePin(package: currentPackage, manager: manager)
-                            } label: {
-                                if isPinning {
-                                    HStack(spacing: 4) {
-                                        ProgressView().controlSize(.mini)
-                                        Text(isPinned ? "Unpinning…" : "Pinning…")
-                                    }
-                                } else {
-                                    Label(isPinned ? "Unpin Version" : "Pin Version", systemImage: isPinned ? "pin.slash.fill" : "pin.fill")
-                                }
-                            }
-                            .buttonStyle(.bordered)
-                            .controlSize(.small)
-                            .disabled(manager.isOperating || isPinning)
-                            .accessibilityIdentifier("PackageDetail.VersionPinButton")
-                        }
-
-                        if installedVersions.count > 1 {
-                            Divider()
-                            HStack {
-                                Text("Switch Installed Version:").font(.caption2.bold()).foregroundStyle(.secondary)
-                                Spacer()
-                                Menu {
-                                    ForEach(installedVersions, id: \.self) { ver in
-                                        Button("Switch to v\(ver)") {
-                                            BrewStorePackagePinningManager.shared.switchActiveVersion(packageID: currentPackage.id, version: ver, manager: manager)
-                                        }
-                                    }
-                                } label: {
-                                    Label("v\(currentPackage.version)", systemImage: "arrow.triangle.swap")
-                                }
-                                .controlSize(.small)
-                            }
-                        }
-                    }
-                    .padding(10)
-                    .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
-
-                    // Ignore / Unignore Updates
-                    let isIgnored = BrewStoreIgnoredUpdatesManager.shared.isIgnored(packageID: currentPackage.id)
-                    HStack(spacing: 8) {
-                        Image(systemName: isIgnored ? "bell.slash.fill" : "bell")
-                            .foregroundStyle(isIgnored ? Color.purple : Color.secondary)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Update Notifications").font(.caption.bold())
-                            Text(isIgnored ? "Updates are muted for this package." : "Updates are active and will notify you.")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        Button {
-                            BrewStoreIgnoredUpdatesManager.shared.toggleIgnore(packageID: currentPackage.id)
-                        } label: {
-                            Label(isIgnored ? "Unignore Updates" : "Ignore Updates", systemImage: isIgnored ? "bell" : "bell.slash")
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
-                    }
-                    .padding(10)
-                    .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
-                }
-
-                // Known CVE Security Advisories
-                let advisories = BrewStoreCVEScanningManager.advisories(for: currentPackage)
-                if !advisories.isEmpty {
-                    VStack(alignment: .leading, spacing: 6) {
-                        ForEach(advisories) { adv in
-                            HStack(spacing: 8) {
-                                Image(systemName: adv.severity.symbol)
-                                    .foregroundStyle(adv.severity.color)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    HStack(spacing: 6) {
-                                        Text(adv.id).font(.caption.bold())
-                                        Text(adv.severity.rawValue)
-                                            .font(.caption2.bold())
-                                            .padding(.horizontal, 4)
-                                            .padding(.vertical, 1)
-                                            .background(adv.severity.color.opacity(0.15), in: Capsule())
-                                            .foregroundStyle(adv.severity.color)
-                                    }
-                                    Text(adv.title).font(.caption2).foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                if let url = URL(string: adv.advisoryURL) {
-                                    Button("Advisory") {
-                                        NSWorkspace.shared.open(url)
-                                    }
-                                    .controlSize(.small)
-                                }
-                            }
-                            .padding(8)
-                            .background(adv.severity.color.opacity(0.06), in: RoundedRectangle(cornerRadius: 6))
-                        }
-                    }
-                }
-
-                if let status = securityInspector.statusMessage {
-                    Text(status).font(.caption2.bold()).foregroundStyle(.green)
-                }
-            }
-        }
-    }
-
     // MARK: - Analytics & Popularity
 
     private var analyticsDashboardSection: some View {
@@ -1362,45 +1448,6 @@ struct PackageDetailView: View {
                 }
             }
         }
-    }
-
-    // MARK: - App Store Information Table
-
-    private var informationTable: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Information").font(.title3.bold())
-
-            VStack(spacing: 0) {
-                infoRow(title: "Provider / Tap", value: currentPackage.tap ?? "homebrew/core")
-                Divider()
-                infoRow(title: "Kind", value: currentPackage.displayKind)
-                Divider()
-                if let cellar = currentPackage.cellarURL(prefix: manager.brewPrefix) {
-                    infoRow(title: "Cellar Location", value: cellar.path)
-                    Divider()
-                }
-                if let homepage = URL(string: currentPackage.homepage), !currentPackage.homepage.isEmpty {
-                    HStack {
-                        Text("Homepage").font(.caption).foregroundStyle(.secondary)
-                        Spacer()
-                        Link(currentPackage.homepage, destination: homepage)
-                            .font(.caption)
-                    }
-                    .padding(.vertical, 8)
-                }
-            }
-            .padding(.horizontal, 14)
-            .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 10))
-        }
-    }
-
-    private func infoRow(title: String, value: String) -> some View {
-        HStack {
-            Text(title).font(.caption).foregroundStyle(.secondary)
-            Spacer()
-            Text(value).font(.caption.monospaced()).textSelection(.enabled)
-        }
-        .padding(.vertical, 8)
     }
 
     private func scanRemoval() {
