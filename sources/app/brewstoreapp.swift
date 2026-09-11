@@ -41,7 +41,7 @@ struct BrewStoreApp: App {
     @State private var showingHelpSheet = false
 
     var body: some Scene {
-        WindowGroup {
+        WindowGroup(id: "main") {
             if Self.isRunningTests {
                 Text("Running Unit Tests…")
             } else {
@@ -282,14 +282,16 @@ private struct BrewStoreCommands: Commands {
 
 private struct BrewStoreWindowAccessor: NSViewRepresentable {
     func makeNSView(context _: Context) -> NSView {
-        let view = NSView()
-        DispatchQueue.main.async {
-            if let window = view.window {
-                window.setFrameAutosaveName("BrewStoreMainWindow")
-            }
-        }
-        return view
+        WindowTrackingView()
     }
 
     func updateNSView(_: NSView, context _: Context) {}
+}
+
+private final class WindowTrackingView: NSView {
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        guard let window else { return }
+        BrewStoreWindowFrameManager.shared.attach(to: window)
+    }
 }
