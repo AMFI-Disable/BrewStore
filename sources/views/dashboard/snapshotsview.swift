@@ -19,39 +19,43 @@ struct SnapshotsView: View {
         }
     }
 
+    var showHeader: Bool = true
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Snapshots & Sync").font(.largeTitle.bold())
-                    Text("Save snapshots of your installed packages and sync setups between Macs.")
-                        .foregroundStyle(.secondary)
-                }
-                Spacer()
+            if showHeader {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Snapshots & Sync").font(.largeTitle.bold())
+                        Text("Save snapshots of your installed packages and sync setups between Macs.")
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
 
-                if selectedTab == 0 {
-                    HStack(spacing: 8) {
-                        Button {
-                            selectedTab = 1
-                        } label: {
-                            Label("Mac Blueprint", systemImage: "sparkles.rectangle.stack")
-                        }
-                        .buttonStyle(.bordered)
+                    if selectedTab == 0 {
+                        HStack(spacing: 8) {
+                            Button {
+                                selectedTab = 1
+                            } label: {
+                                Label("Mac Blueprint", systemImage: "sparkles.rectangle.stack")
+                            }
+                            .buttonStyle(.bordered)
 
-                        Button {
-                            snapshotManager.createSnapshot(manager: manager)
-                        } label: {
-                            Label("Create Snapshot", systemImage: "camera.fill")
+                            Button {
+                                snapshotManager.createSnapshot(manager: manager)
+                            } label: {
+                                Label("Create Snapshot", systemImage: "camera.fill")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .disabled(manager.isOperating)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(manager.isOperating)
                     }
                 }
+                .padding()
             }
-            .padding()
 
-            HStack(spacing: 12) {
+            HStack(spacing: Spacing.md) {
                 Picker("", selection: $selectedTab) {
                     Text("Package Snapshots (\(snapshotManager.snapshots.count))").tag(0)
                     Text("Mac Blueprint & Transfer").tag(1)
@@ -65,10 +69,21 @@ struct SnapshotsView: View {
                 if selectedTab == 0 {
                     BrewStoreSectionSearchBar(text: $snapshotSearch, placeholder: "Search snapshots & backup packages…", count: filteredSnapshots.count)
                         .frame(minWidth: 200, maxWidth: 280)
+
+                    if !showHeader {
+                        Button {
+                            selectedTab = 1
+                        } label: {
+                            Label("Mac Blueprint", systemImage: "sparkles.rectangle.stack")
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                    }
                 }
             }
-            .padding(.horizontal)
-            .padding(.bottom, 12)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.top, showHeader ? 0 : Spacing.sm)
+            .padding(.bottom, Spacing.sm)
 
             Divider()
 

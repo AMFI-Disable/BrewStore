@@ -21,31 +21,35 @@ struct TapsView: View {
         manager.packages.filter { $0.tap == tap.name }.count
     }
 
+    var showHeader: Bool = true
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Taps").font(.largeTitle.bold())
-                    Text("Manage additional Homebrew repositories.").foregroundStyle(.secondary)
-                }
-                Spacer()
+            if showHeader {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Taps").font(.largeTitle.bold())
+                        Text("Manage additional Homebrew repositories.").foregroundStyle(.secondary)
+                    }
+                    Spacer()
 
-                Button {
-                    showingTapDiscoverySheet = true
-                } label: {
-                    Label("Explore Taps", systemImage: "square.3.layers.3d.down.forward")
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
+                    Button {
+                        showingTapDiscoverySheet = true
+                    } label: {
+                        Label("Explore Taps", systemImage: "square.3.layers.3d.down.forward")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
 
-                Button(action: manager.refresh) {
-                    Label("Refresh", systemImage: "arrow.clockwise")
+                    Button(action: manager.refresh) {
+                        Label("Refresh", systemImage: "arrow.clockwise")
+                    }
+                    .disabled(manager.isLoading || manager.isOperating)
                 }
-                .disabled(manager.isLoading || manager.isOperating)
+                .padding()
             }
-            .padding()
 
-            HStack {
+            HStack(spacing: Spacing.sm) {
                 TextField("user/repository (e.g. homebrew/cask-fonts)", text: $newTap)
                     .textFieldStyle(.roundedBorder)
                 Button("Add Tap") {
@@ -55,9 +59,20 @@ struct TapsView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(manager.isOperating || newTap.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+                if !showHeader {
+                    Button {
+                        showingTapDiscoverySheet = true
+                    } label: {
+                        Label("Explore Taps", systemImage: "square.3.layers.3d.down.forward")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                }
             }
-            .padding(.horizontal)
-            .padding(.bottom, 8)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.top, showHeader ? 0 : Spacing.sm)
+            .padding(.bottom, Spacing.sm)
 
             HStack {
                 BrewStoreSectionSearchBar(text: $search, placeholder: "Search taps & repositories…", count: filteredTaps.count)

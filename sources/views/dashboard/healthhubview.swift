@@ -102,9 +102,9 @@ struct HealthHubView: View {
                     Spacer()
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 10)
-            .padding(.bottom, 8)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.top, Spacing.sm)
+            .padding(.bottom, Spacing.sm)
 
             Divider()
 
@@ -112,11 +112,11 @@ struct HealthHubView: View {
             Group {
                 switch subMode {
                 case .snapshots:
-                    SnapshotsView(manager: manager)
+                    SnapshotsView(manager: manager, showHeader: false)
                 case .doctor:
-                    HealthScoreView(manager: manager)
+                    HealthScoreView(manager: manager, showHeader: false)
                 case .storage:
-                    DiskStorageView(manager: manager)
+                    DiskStorageView(manager: manager, showHeader: false)
                 }
             }
             .id(subMode)

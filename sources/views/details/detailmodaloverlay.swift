@@ -28,13 +28,14 @@ struct DetailModalOverlayModifier<Item: Identifiable, ModalContent: View>: ViewM
                         modalContent(currentItem)
                             .frame(minWidth: 640, idealWidth: 800, maxWidth: 960, minHeight: 480, idealHeight: 660, maxHeight: 820)
                             .background(Color(nsColor: .windowBackgroundColor))
-                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: Radius.modal, style: .continuous))
                             .overlay(
-                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                RoundedRectangle(cornerRadius: Radius.modal, style: .continuous)
                                     .stroke(Color.primary.opacity(0.12), lineWidth: 1)
                             )
                             .shadow(color: Color.black.opacity(0.4), radius: 28, x: 0, y: 14)
-                            .padding(24)
+                            .padding(.horizontal, Spacing.lg)
+                            .padding(.vertical, Spacing.md)
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 // Absorbs clicks on the card itself so they do not fall through to the backdrop

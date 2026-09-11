@@ -14,13 +14,15 @@ struct HealthScoreView: View {
         BrewStoreDoctorParser.parse(manager.outputLog)
     }
 
+    var showHeader: Bool = true
+
     var body: some View {
         VStack(spacing: 0) {
             headerBar
             Divider()
             contentBody
         }
-        .frame(minWidth: 720, minHeight: 560)
+        .frame(minWidth: showHeader ? 720 : nil, minHeight: showHeader ? 560 : nil)
         .onAppear {
             optimizer.evaluateHealth(manager: manager, doctorDiagnostics: doctorDiagnostics)
             doctorManager.diagnose(manager: manager)
@@ -65,49 +67,76 @@ struct HealthScoreView: View {
         }
     }
 
+    @ViewBuilder
     private var headerBar: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "heart.text.square.fill")
-                .font(.title2)
-                .foregroundStyle(.pink)
-                .padding(8)
-                .background(Color.pink.opacity(0.12), in: Circle())
+        if showHeader {
+            HStack(spacing: Spacing.md) {
+                Image(systemName: "heart.text.square.fill")
+                    .font(.title2)
+                    .foregroundStyle(.pink)
+                    .padding(8)
+                    .background(Color.pink.opacity(0.12), in: Circle())
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Homebrew Health & Diagnostics").font(.title2.bold())
-                Text("Check package status, fix broken symlinks, remove unused dependencies, and reclaim disk space.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Homebrew Health & Diagnostics").font(.title2.bold())
+                    Text("Check package status, fix broken symlinks, remove unused dependencies, and reclaim disk space.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                Button {
+                    showingCVESecuritySheet = true
+                } label: {
+                    Label("Security Audit", systemImage: "shield.lefthalf.filled.trianglebadge.exclamationmark")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+
+                Button {
+                    optimizer.evaluateHealth(manager: manager, doctorDiagnostics: doctorDiagnostics)
+                    doctorManager.diagnose(manager: manager)
+                } label: {
+                    Label("Re-Evaluate", systemImage: "arrow.clockwise")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .disabled(optimizer.isEvaluating || doctorManager.isDiagnosing || manager.isOperating)
+
+                Button("Done") {
+                    dismiss()
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
             }
+            .padding()
+            .background(Color.secondary.opacity(0.04))
+        } else {
+            HStack(spacing: Spacing.sm) {
+                Spacer()
 
-            Spacer()
+                Button {
+                    showingCVESecuritySheet = true
+                } label: {
+                    Label("Security Audit", systemImage: "shield.lefthalf.filled.trianglebadge.exclamationmark")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
 
-            Button {
-                showingCVESecuritySheet = true
-            } label: {
-                Label("Security Audit", systemImage: "shield.lefthalf.filled.trianglebadge.exclamationmark")
+                Button {
+                    optimizer.evaluateHealth(manager: manager, doctorDiagnostics: doctorDiagnostics)
+                    doctorManager.diagnose(manager: manager)
+                } label: {
+                    Label("Re-Evaluate", systemImage: "arrow.clockwise")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .disabled(optimizer.isEvaluating || doctorManager.isDiagnosing || manager.isOperating)
             }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-
-            Button {
-                optimizer.evaluateHealth(manager: manager, doctorDiagnostics: doctorDiagnostics)
-                doctorManager.diagnose(manager: manager)
-            } label: {
-                Label("Re-Evaluate", systemImage: "arrow.clockwise")
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-            .disabled(optimizer.isEvaluating || doctorManager.isDiagnosing || manager.isOperating)
-
-            Button("Done") {
-                dismiss()
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.small)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.vertical, Spacing.sm)
         }
-        .padding()
-        .background(Color.secondary.opacity(0.04))
     }
 
     private var contentBody: some View {

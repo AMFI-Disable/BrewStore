@@ -18,36 +18,41 @@ struct DiskStorageView: View {
         }
     }
 
+    var showHeader: Bool = true
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            // Header & Actions
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Disk Storage & Cleanup").font(.headline)
-                    Text("Inspect package storage, download caches, logs, and old versions.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                Spacer()
+        ScrollView {
+            VStack(alignment: .leading, spacing: Spacing.md) {
+                // Header & Actions
+                if showHeader {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Disk Storage & Cleanup").font(.headline)
+                            Text("Inspect package storage, download caches, logs, and old versions.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
 
-                Button {
-                    storageManager.scanStorage(manager: manager)
-                    devCacheManager.scanCaches()
-                } label: {
-                    Label("Re-Scan", systemImage: "arrow.clockwise")
-                }
-                .controlSize(.small)
-                .disabled(storageManager.isScanning || devCacheManager.isScanning || manager.isOperating)
+                        Button {
+                            storageManager.scanStorage(manager: manager)
+                            devCacheManager.scanCaches()
+                        } label: {
+                            Label("Re-Scan", systemImage: "arrow.clockwise")
+                        }
+                        .controlSize(.small)
+                        .disabled(storageManager.isScanning || devCacheManager.isScanning || manager.isOperating)
 
-                Button(role: .destructive) {
-                    storageManager.purgeCache(manager: manager)
-                } label: {
-                    Label("Clean All Caches", systemImage: "trash")
+                        Button(role: .destructive) {
+                            storageManager.purgeCache(manager: manager)
+                        } label: {
+                            Label("Clean All Caches", systemImage: "trash")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                        .disabled(manager.isOperating)
+                    }
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
-                .disabled(manager.isOperating)
-            }
 
             if let rep = storageManager.report {
                 // Reclaimable Hero Banner
@@ -275,16 +280,18 @@ struct DiskStorageView: View {
                 .padding()
             }
         }
-        .detailModalOverlay(item: $selectedPackageForDetail) { pkg in
-            PackageDetailView(manager: manager, package: pkg, onDismiss: {
-                selectedPackageForDetail = nil
-            })
-        }
-        .task {
-            storageManager.scanStorage(manager: manager)
-            devCacheManager.scanCaches()
-        }
+        .padding(Spacing.lg)
     }
+    .detailModalOverlay(item: $selectedPackageForDetail) { pkg in
+        PackageDetailView(manager: manager, package: pkg, onDismiss: {
+            selectedPackageForDetail = nil
+        })
+    }
+    .task {
+        storageManager.scanStorage(manager: manager)
+        devCacheManager.scanCaches()
+    }
+}
 
     @ViewBuilder
     private var developerCachesSection: some View {

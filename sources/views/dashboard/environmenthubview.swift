@@ -120,9 +120,9 @@ struct EnvironmentHubView: View {
                 ToolchainCompanionsCard(manager: manager)
                     .padding(.top, 4)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 10)
-            .padding(.bottom, 8)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.top, Spacing.sm)
+            .padding(.bottom, Spacing.sm)
 
             Divider()
 
@@ -130,9 +130,9 @@ struct EnvironmentHubView: View {
             Group {
                 switch subMode {
                 case .services:
-                    ServicesView(manager: manager)
+                    ServicesView(manager: manager, showHeader: false)
                 case .taps:
-                    TapsView(manager: manager)
+                    TapsView(manager: manager, showHeader: false)
                 case .creator:
                     CreatorStudioView(manager: manager, accountManager: accountManager)
                 }

@@ -172,101 +172,124 @@ struct DiscoveryView: View {
                     Spacer()
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 10)
-            .padding(.bottom, 6)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.top, Spacing.sm)
+            .padding(.bottom, Spacing.xs)
             .animation(.easeInOut(duration: 0.2), value: viewMode)
 
-            // Editor's Pick Hero Spotlight (Featured in Spotlight mode)
-            if viewMode == .spotlight, !isTrendingLeaderboard, search.isEmpty, selectedCategory == "All" {
-                EditorialHeroView(manager: manager) { pick in
-                    if let story = BrewStoreStory.story(containingPackageID: pick.id) {
-                        selectedStory = story
-                    } else if let found = catalog.items.first(where: { $0.id == pick.id }) {
-                        selectedItem = found
-                    } else {
-                        selectedOnlinePackage = BrewStorePackage(
-                            id: pick.id,
-                            name: pick.name,
-                            description: pick.headline,
-                            homepage: "",
-                            version: "",
-                            kind: pick.kind
-                        )
-                    }
-                }
-                .padding(.top, 4)
-
-                // Trending This Week Shelf
-                trendingShelfView
-
-                // Quick Navigation Cards
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: 12) {
-                        browseAppsCard
-                        browseFormulaeCard
-                    }
-
-                    VStack(spacing: 8) {
-                        browseAppsCard
-                        browseFormulaeCard
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 8)
-            }
-
-            // Top 3 Podium Showcase when Leaderboard is active
-            if viewMode == .spotlight, isTrendingLeaderboard, search.isEmpty {
-                trendingPodiumView
-            }
-
-            // Filter & Sort Control Bar
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    if viewMode == .allCatalog {
-                        Picker("Type", selection: $selectedKind) {
-                            Text("All Types").tag(BrewPackageKind?.none)
-                            Text("Apps").tag(Optional(BrewPackageKind.cask))
-                            Text("CLI").tag(Optional(BrewPackageKind.formula))
-                        }
-                        .labelsHidden()
-                        .pickerStyle(.segmented)
-                        .frame(maxWidth: 180)
-                    }
-
-                    Picker("Category", selection: $selectedCategory) {
-                        ForEach(categories, id: \.self) { Text($0).tag($0) }
-                    }
-                    .controlSize(.small)
-
-                    Picker("Status", selection: $selectedStatus) {
-                        ForEach(DiscoveryStatusFilter.allCases, id: \.self) { Text($0.rawValue).tag($0) }
-                    }
-                    .controlSize(.small)
-
-                    Picker("Sort", selection: $selectedSort) {
-                        ForEach(DiscoverySortOrder.allCases, id: \.self) { Text($0.rawValue).tag($0) }
-                    }
-                    .controlSize(.small)
-
-                    if availableTaps.count > 1 {
-                        Picker("Tap", selection: $selectedTap) {
-                            ForEach(availableTaps, id: \.self) { Text($0).tag($0) }
-                        }
-                        .controlSize(.small)
-                    }
-                }
-                .padding(.horizontal, 16)
-            }
-            .padding(.bottom, 6)
-
-            if let error = catalog.errorMessage {
-                Text(error).font(.caption).foregroundStyle(.orange).textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal)
-            }
-
             List {
+                // Editor's Pick Hero Spotlight (Featured in Spotlight mode)
+                if viewMode == .spotlight, !isTrendingLeaderboard, search.isEmpty, selectedCategory == "All" {
+                    Section {
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            EditorialHeroView(manager: manager) { pick in
+                                if let story = BrewStoreStory.story(containingPackageID: pick.id) {
+                                    selectedStory = story
+                                } else if let found = catalog.items.first(where: { $0.id == pick.id }) {
+                                    selectedItem = found
+                                } else {
+                                    selectedOnlinePackage = BrewStorePackage(
+                                        id: pick.id,
+                                        name: pick.name,
+                                        description: pick.headline,
+                                        homepage: "",
+                                        version: "",
+                                        kind: pick.kind
+                                    )
+                                }
+                            }
+                            .padding(.top, Spacing.xs)
+
+                            // Trending This Week Shelf
+                            trendingShelfView
+
+                            // Quick Navigation Cards
+                            ViewThatFits(in: .horizontal) {
+                                HStack(spacing: Spacing.md) {
+                                    browseAppsCard
+                                    browseFormulaeCard
+                                }
+
+                                VStack(spacing: Spacing.sm) {
+                                    browseAppsCard
+                                    browseFormulaeCard
+                                }
+                            }
+                            .padding(.horizontal, Spacing.lg)
+                            .padding(.bottom, Spacing.xs)
+                        }
+                    }
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+                }
+
+                // Top 3 Podium Showcase when Leaderboard is active
+                if viewMode == .spotlight, isTrendingLeaderboard, search.isEmpty {
+                    Section {
+                        trendingPodiumView
+                    }
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+                }
+
+                // Filter & Sort Control Bar
+                Section {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: Spacing.sm) {
+                            if viewMode == .allCatalog {
+                                Picker("Type", selection: $selectedKind) {
+                                    Text("All Types").tag(BrewPackageKind?.none)
+                                    Text("Apps").tag(Optional(BrewPackageKind.cask))
+                                    Text("CLI").tag(Optional(BrewPackageKind.formula))
+                                }
+                                .labelsHidden()
+                                .pickerStyle(.segmented)
+                                .frame(maxWidth: 180)
+                            }
+
+                            Picker("Category", selection: $selectedCategory) {
+                                ForEach(categories, id: \.self) { Text($0).tag($0) }
+                            }
+                            .controlSize(.small)
+
+                            Picker("Status", selection: $selectedStatus) {
+                                ForEach(DiscoveryStatusFilter.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                            }
+                            .controlSize(.small)
+
+                            Picker("Sort", selection: $selectedSort) {
+                                ForEach(DiscoverySortOrder.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                            }
+                            .controlSize(.small)
+
+                            if availableTaps.count > 1 {
+                                Picker("Tap", selection: $selectedTap) {
+                                    ForEach(availableTaps, id: \.self) { Text($0).tag($0) }
+                                }
+                                .controlSize(.small)
+                            }
+                        }
+                        .padding(.horizontal, Spacing.lg)
+                    }
+                    .padding(.vertical, Spacing.xs)
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+
+                if let error = catalog.errorMessage {
+                    Section {
+                        Text(error).font(.caption).foregroundStyle(.orange).textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, Spacing.lg)
+                    }
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+                }
+
                 if viewMode == .spotlight, isTrendingLeaderboard {
                     Section("🔥 Trending Packages #4 to #50 (Top 30-Day Community Installs)") {
                         ForEach(Array(leaderboardItems.dropFirst(3).enumerated()), id: \.element.id) { index, item in

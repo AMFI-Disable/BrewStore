@@ -119,33 +119,34 @@ struct CategoriesGridView: View {
     }
 
     private let columns = [
-        GridItem(.adaptive(minimum: 280, maximum: 420), spacing: 16)
+        GridItem(.adaptive(minimum: 220, maximum: 380), spacing: Spacing.md)
     ]
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: Spacing.md) {
                 // Top Category Selector Pills (Full-Width Horizontal Rail)
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
+                    HStack(spacing: Spacing.sm) {
                         ForEach(Self.categories) { cat in
                             Button {
                                 withAnimation(.easeInOut(duration: 0.2)) {
                                     selectedCategoryID = cat.id
                                 }
                             } label: {
-                                HStack(spacing: 8) {
+                                HStack(spacing: Spacing.sm) {
                                     Image(systemName: cat.systemImage)
                                         .font(.subheadline)
                                     Text(cat.name)
                                         .font(.subheadline.bold())
                                 }
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 8)
+                                .padding(.horizontal, Spacing.md)
+                                .padding(.vertical, Spacing.xs)
                                 .background(
                                     selectedCategoryID == cat.id
                                         ? AnyShapeStyle(LinearGradient(colors: cat.gradient, startPoint: .leading, endPoint: .trailing))
                                         : AnyShapeStyle(Color.secondary.opacity(0.08))
+                                // End background
                                 )
                                 .foregroundStyle(selectedCategoryID == cat.id ? Color.white : Color.primary)
                                 .clipShape(Capsule())
@@ -157,8 +158,8 @@ struct CategoriesGridView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.top, 16)
+                    .padding(.horizontal, Spacing.lg)
+                    .padding(.top, Spacing.sm)
                 }
 
                 // Selected Category Hero Banner (Full-Width)
@@ -168,10 +169,10 @@ struct CategoriesGridView: View {
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
-                    .frame(height: 150)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .frame(height: 125)
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.panel, style: .continuous))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        RoundedRectangle(cornerRadius: Radius.panel, style: .continuous)
                             .stroke(Color.white.opacity(0.15), lineWidth: 1)
                     )
 
@@ -185,7 +186,7 @@ struct CategoriesGridView: View {
 
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(activeCategory.name)
-                                    .font(.title.bold())
+                                    .font(.title2.bold())
                                     .foregroundStyle(.white)
 
                                 Text("\(allPackagesForActiveCategory.count) Packages Available")
@@ -199,12 +200,12 @@ struct CategoriesGridView: View {
                             .foregroundStyle(.white.opacity(0.9))
                             .lineLimit(2)
                     }
-                    .padding(20)
+                    .padding(Spacing.lg)
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, Spacing.lg)
 
                 // Controls & Search Bar: Row 1 Filter Picker, Row 2 Search & Sort
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: Spacing.sm) {
                     Picker("Filter", selection: $filterType) {
                         ForEach(PackageFilterType.allCases) { filter in
                             Text(filter.rawValue).tag(filter)
@@ -214,7 +215,7 @@ struct CategoriesGridView: View {
                     .pickerStyle(.segmented)
                     .fixedSize(horizontal: true, vertical: false)
 
-                    HStack(spacing: 10) {
+                    HStack(spacing: Spacing.sm) {
                         BrewStoreSectionSearchBar(text: $searchQuery, placeholder: "Search \(activeCategory.name) packages…", count: filteredPackages.count)
                             .frame(minWidth: 180, maxWidth: 280)
 
@@ -227,7 +228,7 @@ struct CategoriesGridView: View {
                         .frame(width: 130)
                     }
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, Spacing.lg)
 
                 // Responsive Full-Width Package Wall Grid
                 if filteredPackages.isEmpty {
@@ -242,17 +243,17 @@ struct CategoriesGridView: View {
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity, minHeight: 220)
-                    .padding(24)
+                    .padding(Spacing.lg)
                 } else {
-                    LazyVGrid(columns: columns, spacing: 16) {
+                    LazyVGrid(columns: columns, spacing: Spacing.md) {
                         ForEach(filteredPackages) { pkg in
                             CategoryPackageCard(manager: manager, package: pkg) {
                                 selectedPackageForDetail = pkg
                             }
                         }
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 32)
+                    .padding(.horizontal, Spacing.lg)
+                    .padding(.bottom, Spacing.xl)
                 }
             }
         }

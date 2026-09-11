@@ -63,73 +63,53 @@ struct ServicesView: View {
         }
     }
 
+    var showHeader: Bool = true
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Services & Daemons").font(.largeTitle.bold())
-                    Text("Manage Homebrew background services, macOS launch agents, and startup daemons.")
-                        .foregroundStyle(.secondary)
+            // Standalone Header
+            if showHeader {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Services & Daemons").font(.largeTitle.bold())
+                        Text("Manage Homebrew background services, macOS launch agents, and startup daemons.")
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+
+                    if serviceCategoryTab == 0 {
+                        HStack(spacing: Spacing.xs) {
+                            Circle()
+                                .fill(watchdog.isWatchdogEnabled ? Color.green : Color.secondary)
+                                .frame(width: 8, height: 8)
+                            Text(watchdog.isWatchdogEnabled ? "Monitoring Active" : "Monitoring Inactive")
+                                .font(.caption2.bold())
+                        }
+                        .brewPillStyle()
+
+                        batchControlsMenu
+
+                        Button {
+                            manager.refresh()
+                            telemetry.refreshTelemetry(for: manager.services)
+                        } label: {
+                            Label(telemetry.isRefreshing ? "Refreshing…" : "Refresh", systemImage: "arrow.clockwise")
+                        }
+                        .disabled(manager.isLoading || manager.isOperating || telemetry.isRefreshing)
+                    } else {
+                        Button {
+                            backgroundManager.scanBackgroundItems()
+                        } label: {
+                            Label(backgroundManager.isScanning ? "Scanning…" : "Scan Agents", systemImage: "arrow.clockwise")
+                        }
+                        .disabled(backgroundManager.isScanning)
+                    }
                 }
-                Spacer()
-
-                if serviceCategoryTab == 0 {
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(watchdog.isWatchdogEnabled ? Color.green : Color.secondary)
-                            .frame(width: 8, height: 8)
-                        Text(watchdog.isWatchdogEnabled ? "Monitoring Active" : "Monitoring Inactive")
-                            .font(.caption2.bold())
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.secondary.opacity(0.08), in: Capsule())
-
-                    Menu {
-                        Button {
-                            pendingAction = .batchStart
-                        } label: {
-                            Label("Start All Stopped Daemons", systemImage: "play.fill")
-                        }
-
-                        Button {
-                            pendingAction = .batchStop
-                        } label: {
-                            Label("Stop All Running Daemons", systemImage: "stop.fill")
-                        }
-
-                        Button {
-                            pendingAction = .batchRestart
-                        } label: {
-                            Label("Restart All Active Daemons", systemImage: "arrow.clockwise")
-                        }
-                    } label: {
-                        Label("Batch Controls", systemImage: "slider.horizontal.3")
-                    }
-                    .menuStyle(.borderlessButton)
-                    .fixedSize()
-                    .disabled(manager.isLoading || manager.isOperating)
-
-                    Button {
-                        manager.refresh()
-                        telemetry.refreshTelemetry(for: manager.services)
-                    } label: {
-                        Label(telemetry.isRefreshing ? "Refreshing…" : "Refresh", systemImage: "arrow.clockwise")
-                    }
-                    .disabled(manager.isLoading || manager.isOperating || telemetry.isRefreshing)
-                } else {
-                    Button {
-                        backgroundManager.scanBackgroundItems()
-                    } label: {
-                        Label(backgroundManager.isScanning ? "Scanning…" : "Scan Agents", systemImage: "arrow.clockwise")
-                    }
-                    .disabled(backgroundManager.isScanning)
-                }
+                .padding()
             }
-            .padding()
 
-            HStack(spacing: 12) {
+            // Sub-category Navigation & Compact Actions Bar
+            HStack(spacing: Spacing.md) {
                 Picker("", selection: $serviceCategoryTab) {
                     Text("Homebrew Daemons (\(manager.services.count))").tag(0)
                     Text("macOS LaunchAgents & Login Items (\(backgroundManager.items.count))").tag(1)
@@ -139,9 +119,42 @@ struct ServicesView: View {
                 .fixedSize(horizontal: true, vertical: false)
 
                 Spacer()
+
+                if !showHeader {
+                    if serviceCategoryTab == 0 {
+                        HStack(spacing: Spacing.xs) {
+                            Circle()
+                                .fill(watchdog.isWatchdogEnabled ? Color.green : Color.secondary)
+                                .frame(width: 8, height: 8)
+                            Text(watchdog.isWatchdogEnabled ? "Monitoring Active" : "Monitoring Inactive")
+                                .font(.caption2.bold())
+                        }
+                        .brewPillStyle()
+
+                        batchControlsMenu
+
+                        Button {
+                            manager.refresh()
+                            telemetry.refreshTelemetry(for: manager.services)
+                        } label: {
+                            Label(telemetry.isRefreshing ? "Refreshing…" : "Refresh", systemImage: "arrow.clockwise")
+                        }
+                        .controlSize(.small)
+                        .disabled(manager.isLoading || manager.isOperating || telemetry.isRefreshing)
+                    } else {
+                        Button {
+                            backgroundManager.scanBackgroundItems()
+                        } label: {
+                            Label(backgroundManager.isScanning ? "Scanning…" : "Scan Agents", systemImage: "arrow.clockwise")
+                        }
+                        .controlSize(.small)
+                        .disabled(backgroundManager.isScanning)
+                    }
+                }
             }
-            .padding(.horizontal)
-            .padding(.bottom, 10)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.top, showHeader ? 0 : Spacing.sm)
+            .padding(.bottom, Spacing.sm)
 
             Divider()
 
@@ -244,6 +257,34 @@ struct ServicesView: View {
             telemetry.refreshTelemetry(for: manager.services)
             backgroundManager.scanBackgroundItems()
         }
+    }
+
+    @ViewBuilder
+    private var batchControlsMenu: some View {
+        Menu {
+            Button {
+                pendingAction = .batchStart
+            } label: {
+                Label("Start All Stopped Daemons", systemImage: "play.fill")
+            }
+
+            Button {
+                pendingAction = .batchStop
+            } label: {
+                Label("Stop All Running Daemons", systemImage: "stop.fill")
+            }
+
+            Button {
+                pendingAction = .batchRestart
+            } label: {
+                Label("Restart All Active Daemons", systemImage: "arrow.clockwise")
+            }
+        } label: {
+            Label("Batch Controls", systemImage: "slider.horizontal.3")
+        }
+        .menuStyle(.borderlessButton)
+        .fixedSize()
+        .disabled(manager.isLoading || manager.isOperating)
     }
 
     private var homebrewServicesView: some View {

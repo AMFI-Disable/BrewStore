@@ -164,9 +164,7 @@ struct PackageDetailView: View {
                             Label("Versions (\(siblings.count) Installed)", systemImage: "arrow.triangle.swap")
                                 .font(.headline)
                         }
-                        .padding(10)
-                        .background(Color.secondary.opacity(0.03), in: RoundedRectangle(cornerRadius: 8))
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.08), lineWidth: 1))
+                        .brewCardStyle(elevation: .subtle, padding: Spacing.sm)
                     }
 
                     if !currentPackage.dependencies.isEmpty {
@@ -177,9 +175,7 @@ struct PackageDetailView: View {
                             Label("Dependencies (\(currentPackage.dependencies.count))", systemImage: "point.3.connected.trianglepath.dotted")
                                 .font(.headline)
                         }
-                        .padding(10)
-                        .background(Color.secondary.opacity(0.03), in: RoundedRectangle(cornerRadius: 8))
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.08), lineWidth: 1))
+                        .brewCardStyle(elevation: .subtle, padding: Spacing.sm)
                     }
 
                     if !dependents.isEmpty {
@@ -190,9 +186,7 @@ struct PackageDetailView: View {
                             Label("Used By (\(dependents.count) Packages)", systemImage: "exclamationmark.triangle.fill")
                                 .font(.headline)
                         }
-                        .padding(10)
-                        .background(Color.secondary.opacity(0.03), in: RoundedRectangle(cornerRadius: 8))
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.08), lineWidth: 1))
+                        .brewCardStyle(elevation: .subtle, padding: Spacing.sm)
                     }
 
                     if preferences.enableAppCleaner, currentPackage.isInstalled {
@@ -203,9 +197,7 @@ struct PackageDetailView: View {
                             Label("Storage & Cache Breakdown", systemImage: "internaldrive.fill")
                                 .font(.headline)
                         }
-                        .padding(10)
-                        .background(Color.secondary.opacity(0.03), in: RoundedRectangle(cornerRadius: 8))
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.08), lineWidth: 1))
+                        .brewCardStyle(elevation: .subtle, padding: Spacing.sm)
                     }
 
                     if let caveats = currentPackage.caveats, !caveats.isEmpty {
@@ -216,9 +208,7 @@ struct PackageDetailView: View {
                             Label("Configuration & Shell Setup", systemImage: "terminal")
                                 .font(.headline)
                         }
-                        .padding(10)
-                        .background(Color.secondary.opacity(0.03), in: RoundedRectangle(cornerRadius: 8))
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.08), lineWidth: 1))
+                        .brewCardStyle(elevation: .subtle, padding: Spacing.sm)
                     }
 
                     if currentPackage.isInstalled {
@@ -229,9 +219,7 @@ struct PackageDetailView: View {
                             Label("Security, Architecture & Gatekeeper", systemImage: "shield.lefthalf.filled")
                                 .font(.headline)
                         }
-                        .padding(10)
-                        .background(Color.secondary.opacity(0.03), in: RoundedRectangle(cornerRadius: 8))
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.08), lineWidth: 1))
+                        .brewCardStyle(elevation: .subtle, padding: Spacing.sm)
                     }
                 }
 
@@ -266,9 +254,7 @@ struct PackageDetailView: View {
                     Label("Install Trends & Popularity", systemImage: "chart.bar.xaxis")
                         .font(.headline)
                 }
-                .padding(10)
-                .background(Color.secondary.opacity(0.03), in: RoundedRectangle(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.08), lineWidth: 1))
+                .brewCardStyle(elevation: .subtle, padding: Spacing.sm)
 
                 // App Store Information Table
                 informationTable
@@ -300,7 +286,8 @@ struct PackageDetailView: View {
                         handleDismiss()
                     }
             }
-            .padding(18)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.vertical, Spacing.md)
         }
         .brewStorePackageContextMenu(package: currentPackage, manager: manager)
         .task {

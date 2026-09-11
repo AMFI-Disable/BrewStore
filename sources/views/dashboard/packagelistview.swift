@@ -8,6 +8,7 @@ struct PackageListView: View {
     let title: String
     var updatesOnly = false
     var installedOnly = false
+    var showHeader = true
     @State private var search = ""
     @State private var selectedKindFilter: BrewPackageKind?
     @State private var selectedTap = "All Taps"
@@ -85,34 +86,73 @@ struct PackageListView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(.title2.bold())
-                        .lineLimit(1)
-                    if updatesOnly, packages.isEmpty {
-                        if manager.errorMessage != nil {
-                            Text("Update status unavailable")
-                                .font(.caption)
-                                .foregroundStyle(.red)
-                                .lineLimit(1)
+            if showHeader {
+                HStack(alignment: .firstTextBaseline, spacing: Spacing.md) {
+                    VStack(alignment: .leading, spacing: Spacing.xxs) {
+                        Text(title)
+                            .font(.title2.bold())
+                            .lineLimit(1)
+                        if updatesOnly, packages.isEmpty {
+                            if manager.errorMessage != nil {
+                                Text("Update status unavailable")
+                                    .font(.caption)
+                                    .foregroundStyle(.red)
+                                    .lineLimit(1)
+                            } else {
+                                Text("All \(installedCount) packages are up to date")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
                         } else {
-                            Text("All \(installedCount) packages are up to date")
+                            Text("\(packages.count) packages · \(installedCount) installed")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
                         }
-                    } else {
-                        Text("\(packages.count) packages · \(installedCount) installed")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
                     }
+
+                    Spacer(minLength: Spacing.md)
+
+                    HStack(spacing: Spacing.sm) {
+                        if updatesOnly {
+                            Button {
+                                showingMASSheet = true
+                            } label: {
+                                Label("Mac App Store", systemImage: "apple.logo")
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                        }
+
+                        if !packages.isEmpty {
+                            Button(isSelectionMode ? "Done" : "Select") {
+                                isSelectionMode.toggle()
+                                if !isSelectionMode {
+                                    selectedPackageIDs.removeAll()
+                                }
+                            }
+                            .controlSize(.small)
+                        }
+
+                        Button(action: manager.refresh) { Label("Refresh", systemImage: "arrow.clockwise") }
+                            .controlSize(.small)
+                            .disabled(manager.isLoading || manager.isOperating)
+                    }
+                    .fixedSize(horizontal: true, vertical: false)
                 }
+                .padding(.horizontal, Spacing.lg)
+                .padding(.top, Spacing.md)
+                .padding(.bottom, Spacing.xs)
+            } else if updatesOnly || !packages.isEmpty {
+                HStack(spacing: Spacing.sm) {
+                    Text("\(packages.count) packages · \(installedCount) installed")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
 
-                Spacer(minLength: 12)
+                    Spacer()
 
-                HStack(spacing: 8) {
                     if updatesOnly {
                         Button {
                             showingMASSheet = true
@@ -132,16 +172,10 @@ struct PackageListView: View {
                         }
                         .controlSize(.small)
                     }
-
-                    Button(action: manager.refresh) { Label("Refresh", systemImage: "arrow.clockwise") }
-                        .controlSize(.small)
-                        .disabled(manager.isLoading || manager.isOperating)
                 }
-                .fixedSize(horizontal: true, vertical: false)
+                .padding(.horizontal, Spacing.lg)
+                .padding(.vertical, Spacing.xs)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-            .padding(.bottom, 6)
 
             if installedOnly {
                 AppleSiliconRosettaBannerView(manager: manager)

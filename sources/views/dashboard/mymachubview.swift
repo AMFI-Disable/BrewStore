@@ -63,10 +63,10 @@ struct MyMacHubView: View {
     var body: some View {
         VStack(spacing: 0) {
             // ZONE 1: Hub Header & Anchor Controls
-            VStack(alignment: .leading, spacing: 8) {
-                HStack(alignment: .center, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                HStack(alignment: .center, spacing: Spacing.md) {
+                    VStack(alignment: .leading, spacing: Spacing.xxs) {
+                        HStack(spacing: Spacing.sm) {
                             Image(systemName: "shippingbox.fill")
                                 .font(.title2)
                                 .foregroundStyle(Color.accentColor)
@@ -81,7 +81,7 @@ struct MyMacHubView: View {
                     Spacer()
 
                     // Zone 1 Primary Contextual Action
-                    HStack(spacing: 8) {
+                    HStack(spacing: Spacing.sm) {
                         if subMode == .updates, outdatedCount > 0 {
                             Button {
                                 unifiedManager.upgradeAllSoftware(homebrewManager: manager)
@@ -105,7 +105,7 @@ struct MyMacHubView: View {
                 HStack {
                     Picker("My Mac Navigation", selection: $subMode) {
                         Text("Installed (\(installedCount))").tag(MyMacSubMode.installed)
-                        HStack(spacing: 4) {
+                        HStack(spacing: Spacing.xs) {
                             Text("Updates")
                             if outdatedCount > 0 {
                                 Text("(\(outdatedCount))")
@@ -128,9 +128,9 @@ struct MyMacHubView: View {
                     Spacer()
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 10)
-            .padding(.bottom, 8)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.top, Spacing.sm)
+            .padding(.bottom, Spacing.xs)
 
             Divider()
 
@@ -138,9 +138,9 @@ struct MyMacHubView: View {
             Group {
                 switch subMode {
                 case .installed:
-                    PackageListView(manager: manager, kind: nil, title: "Installed", installedOnly: true)
+                    PackageListView(manager: manager, kind: nil, title: "Installed", installedOnly: true, showHeader: false)
                 case .updates:
-                    PackageListView(manager: manager, kind: nil, title: "Updates", updatesOnly: true)
+                    PackageListView(manager: manager, kind: nil, title: "Updates", updatesOnly: true, showHeader: false)
                 case .wishlist:
                     WishlistView(manager: manager)
                 case .adoption:

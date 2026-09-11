@@ -24,11 +24,11 @@ struct StacksView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: Spacing.md) {
                 // Header Bar
                 HStack(alignment: .center) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Formulae & Cask Bundles").font(.largeTitle.bold())
+                        Text("Formulae & Cask Bundles").font(.title2.bold())
                         Text("Curated open-source software suites and developer environments with batch installation.")
                             .foregroundStyle(.secondary)
                     }
@@ -43,7 +43,7 @@ struct StacksView: View {
                 }
 
                 // Filter & Search Controls: Row 1 Category Picker, Row 2 Search Bar
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: Spacing.sm) {
                     Picker("Category", selection: $selectedType) {
                         ForEach(BundleType.allCases) { type in
                             Text(type.rawValue).tag(type)
@@ -70,9 +70,9 @@ struct StacksView: View {
                         systemImage: "shippingbox",
                         description: Text("Try adjusting your search term or category filter.")
                     )
-                    .padding(.top, 40)
+                    .padding(.top, Spacing.xl)
                 } else {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 380, maximum: 520), spacing: 16)], spacing: 16) {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 280, maximum: 460), spacing: Spacing.md)], spacing: Spacing.md) {
                         ForEach(filteredStacks) { stack in
                             StackCardView(stack: stack, manager: manager) {
                                 stackManager.deleteCustomStack(stack)
@@ -81,7 +81,8 @@ struct StacksView: View {
                     }
                 }
             }
-            .padding(24)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.vertical, Spacing.md)
         }
         .sheet(isPresented: $showingNewStackSheet) {
             NewStackSheet { name, desc, icon, formulae, casks in
