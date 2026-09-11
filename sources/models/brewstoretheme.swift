@@ -21,16 +21,21 @@ enum Spacing {
 enum Radius {
     /// 4pt for small keyboard tags and code badges
     static let mini: CGFloat = 4
+    static let xs: CGFloat = 4
     /// 6pt for capsule-adjacent status chips and button pills
     static let pill: CGFloat = 6
     /// 8pt for disclosure groups, search bars, and compact cells
     static let small: CGFloat = 8
+    static let sm: CGFloat = 8
     /// 10pt for standard cards, list rows, and grid items
     static let card: CGFloat = 10
+    static let md: CGFloat = 10
     /// 14pt for modals, sheets, and floating windows
     static let panel: CGFloat = 14
+    static let lg: CGFloat = 14
     /// 16pt for major hero banners and full-screen cards
     static let modal: CGFloat = 16
+    static let xl: CGFloat = 16
 }
 
 enum BrewCardElevation: Sendable {

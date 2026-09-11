@@ -78,6 +78,15 @@ struct SnapshotsView: View {
                         }
                         .buttonStyle(.bordered)
                         .controlSize(.small)
+
+                        Button {
+                            snapshotManager.createSnapshot(manager: manager)
+                        } label: {
+                            Label("Create Snapshot", systemImage: "camera.fill")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                        .disabled(manager.isOperating)
                     }
                 }
             }
@@ -90,8 +99,9 @@ struct SnapshotsView: View {
             Group {
                 if selectedTab == 1 {
                     ScrollView {
-                        MultiMachineSyncView(manager: manager)
-                            .padding(20)
+                        MultiMachineSyncView(manager: manager, showHeader: false)
+                            .padding(.horizontal, Spacing.lg)
+                            .padding(.vertical, Spacing.md)
                     }
                 } else if snapshotManager.snapshots.isEmpty {
                     VStack(spacing: 12) {

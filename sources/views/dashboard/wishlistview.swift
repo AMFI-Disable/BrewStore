@@ -33,9 +33,13 @@ struct WishlistView: View {
         }
     }
 
+    var showHeader: Bool = true
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            headerBar
+            if showHeader {
+                headerBar
+            }
             tabPicker
             Divider()
 
@@ -59,45 +63,54 @@ struct WishlistView: View {
         }
     }
 
+    private var copyBrewfileButton: some View {
+        Button {
+            let text = wishlistManager.exportToBrewfile(packageIDs: Array(wishlistManager.wishlistIDs), manager: manager)
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(text, forType: .string)
+            copiedBrewfile = true
+            Task {
+                try? await Task.sleep(nanoseconds: 1_500_000_000)
+                copiedBrewfile = false
+            }
+        } label: {
+            Label(copiedBrewfile ? "Copied Brewfile!" : "Copy as Brewfile", systemImage: copiedBrewfile ? "checkmark" : "doc.on.doc")
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.small)
+    }
+
+    @ViewBuilder
+    private var newCollectionButton: some View {
+        if selectedTab == 1 {
+            Button {
+                showingCreateCollectionSheet = true
+            } label: {
+                Label("New Collection", systemImage: "plus")
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
+        }
+    }
+
     private var headerBar: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Spacing.xxs) {
                 Text("Wishlist & Collections").font(.largeTitle.bold())
                 Text("Save tools for later and organize packages into exportable bundles.")
                     .foregroundStyle(.secondary)
             }
             Spacer()
 
-            Button {
-                let text = wishlistManager.exportToBrewfile(packageIDs: Array(wishlistManager.wishlistIDs), manager: manager)
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(text, forType: .string)
-                copiedBrewfile = true
-                Task {
-                    try? await Task.sleep(nanoseconds: 1_500_000_000)
-                    copiedBrewfile = false
-                }
-            } label: {
-                Label(copiedBrewfile ? "Copied Brewfile!" : "Copy as Brewfile", systemImage: copiedBrewfile ? "checkmark" : "doc.on.doc")
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-
-            if selectedTab == 1 {
-                Button {
-                    showingCreateCollectionSheet = true
-                } label: {
-                    Label("New Collection", systemImage: "plus")
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
-            }
+            copyBrewfileButton
+            newCollectionButton
         }
-        .padding()
+        .padding(.horizontal, Spacing.lg)
+        .padding(.vertical, Spacing.md)
     }
 
     private var tabPicker: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Spacing.sm) {
             Picker("View Mode", selection: $selectedTab) {
                 Text("Starred Wishlist (\(wishlistManager.wishlistIDs.count))").tag(0)
                 Text("Custom Collections (\(wishlistManager.collections.count))").tag(1)
@@ -109,10 +122,16 @@ struct WishlistView: View {
             Spacer()
 
             BrewStoreSectionSearchBar(text: $searchQuery, placeholder: "Search saved packages…", count: wishlistedPackages.count)
-                .frame(minWidth: 180, maxWidth: 260)
+                .frame(minWidth: 160, maxWidth: 240)
+
+            if !showHeader {
+                copyBrewfileButton
+                newCollectionButton
+            }
         }
-        .padding(.horizontal)
-        .padding(.bottom, 12)
+        .padding(.horizontal, Spacing.lg)
+        .padding(.top, showHeader ? 0 : Spacing.sm)
+        .padding(.bottom, Spacing.sm)
     }
 
     @ViewBuilder
@@ -123,21 +142,22 @@ struct WishlistView: View {
                 systemImage: "star.slash",
                 description: Text("Click the star icon on any package to save it to your wishlist.")
             )
-            .padding(.top, 40)
+            .padding(.top, Spacing.xl)
         } else if wishlistedPackages.isEmpty {
             ContentUnavailableView(
                 "No Matching Packages",
                 systemImage: "magnifyingglass",
                 description: Text("No wishlisted packages match \"\(searchQuery)\".")
             )
-            .padding(.top, 40)
+            .padding(.top, Spacing.xl)
         } else {
-            LazyVStack(spacing: 8) {
+            LazyVStack(spacing: Spacing.xs) {
                 ForEach(wishlistedPackages) { pkg in
                     wishlistRow(package: pkg)
                 }
             }
-            .padding()
+            .padding(.horizontal, Spacing.lg)
+            .padding(.vertical, Spacing.md)
         }
     }
 
@@ -168,7 +188,7 @@ struct WishlistView: View {
                     if isPinned {
                         Image(systemName: "pin.fill")
                             .font(.caption2)
-                            .foregroundStyle(.purple)
+                            .foregroundStyle(.orange)
                     }
                 }
 
@@ -180,6 +200,24 @@ struct WishlistView: View {
 
             Spacer()
 
+            if package.isInstalled {
+                Button {
+                    pinningManager.togglePin(package: package, manager: manager)
+                } label: {
+                    Image(systemName: isPinned ? "pin.slash" : "pin")
+                }
+                .controlSize(.small)
+                .help(isPinned ? "Unpin this package" : "Pin this package to prevent updates")
+            }
+
+            Button {
+                wishlistManager.toggleWishlist(id: package.id)
+            } label: {
+                Image(systemName: "star.slash")
+            }
+            .controlSize(.small)
+            .help("Remove from wishlist")
+
             Button {
                 selectedPackageForDetail = package
             } label: {
@@ -187,16 +225,14 @@ struct WishlistView: View {
             }
             .controlSize(.small)
 
-            AppStoreActionButton(manager: manager, package: package, size: .small)
-
-            Button {
-                wishlistManager.toggleWishlist(id: package.id)
-            } label: {
-                Image(systemName: "star.fill")
-                    .foregroundStyle(.yellow)
+            if !package.isInstalled {
+                Button("Install") {
+                    manager.perform(package: package, action: .install)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+                .disabled(manager.isOperating)
             }
-            .buttonStyle(.plain)
-            .padding(.leading, 4)
         }
         .padding(10)
         .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
@@ -210,7 +246,7 @@ struct WishlistView: View {
                 systemImage: "folder.badge.plus",
                 description: Text("Group packages into organized stacks like 'Design Rig' or 'DevOps Tools'.")
             )
-            .padding(.top, 40)
+            .padding(.top, Spacing.xl)
         } else {
             let filtered = wishlistManager.collections.filter { col in
                 let q = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -226,14 +262,15 @@ struct WishlistView: View {
                     systemImage: "magnifyingglass",
                     description: Text("No collections match \"\(searchQuery)\".")
                 )
-                .padding(.top, 40)
+                .padding(.top, Spacing.xl)
             } else {
-                LazyVStack(spacing: 16) {
+                LazyVStack(spacing: Spacing.md) {
                     ForEach(filtered) { col in
                         collectionCard(collection: col)
                     }
                 }
-                .padding()
+                .padding(.horizontal, Spacing.lg)
+                .padding(.vertical, Spacing.md)
             }
         }
     }

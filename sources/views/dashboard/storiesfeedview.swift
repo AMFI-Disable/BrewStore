@@ -21,11 +21,12 @@ struct StoriesFeedView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                HStack(alignment: .bottom) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Stories").font(.largeTitle.bold())
+            VStack(alignment: .leading, spacing: Spacing.md) {
+                HStack(alignment: .center) {
+                    VStack(alignment: .leading, spacing: Spacing.xxs) {
+                        Text("Stories").font(.title2.bold())
                         Text("Deep-dive guides, setup walkthroughs, and curated Mac software collections.")
+                            .font(.caption)
                             .foregroundStyle(.secondary)
                     }
 
@@ -36,10 +37,10 @@ struct StoriesFeedView: View {
                         placeholder: "Search stories and featured tools…",
                         count: filteredStories.count
                     )
-                    .frame(minWidth: 220, maxWidth: 320)
+                    .frame(minWidth: 200, maxWidth: 300)
                 }
-                .padding(.horizontal)
-                .padding(.top)
+                .padding(.horizontal, Spacing.lg)
+                .padding(.top, Spacing.sm)
 
                 if filteredStories.isEmpty {
                     ContentUnavailableView(
@@ -47,9 +48,9 @@ struct StoriesFeedView: View {
                         systemImage: "book.closed",
                         description: Text("No stories or featured packages match \"\(searchQuery)\".")
                     )
-                    .padding(.top, 40)
+                    .padding(.top, Spacing.xl)
                 } else {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 380, maximum: 580), spacing: 20)], spacing: 20) {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 280, maximum: 580), spacing: Spacing.md)], spacing: Spacing.md) {
                         ForEach(filteredStories) { story in
                             Button {
                                 selectedStory = story
@@ -59,8 +60,8 @@ struct StoriesFeedView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 24)
+                    .padding(.horizontal, Spacing.lg)
+                    .padding(.bottom, Spacing.md)
                 }
             }
         }
@@ -74,52 +75,52 @@ private struct StoryCard: View {
     let story: BrewStoreStory
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
             ZStack(alignment: .bottomLeading) {
                 LinearGradient(
                     colors: [Color(hex: story.gradientColors.first ?? "#1e293b"), Color(hex: story.gradientColors.last ?? "#0f172a")],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
-                .frame(height: 180)
+                .frame(height: 150)
 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(story.eyebrow)
-                        .font(.caption.monospaced().bold())
+                        .font(.caption2.monospaced().bold())
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)
                         .background(.ultraThinMaterial, in: Capsule())
                         .foregroundStyle(.white)
 
                     Text(story.title)
-                        .font(.title2.bold())
+                        .font(.headline.bold())
                         .foregroundStyle(.white)
                         .shadow(radius: 2)
 
                     Text(story.subtitle)
-                        .font(.caption)
+                        .font(.caption2)
                         .foregroundStyle(.white.opacity(0.85))
                         .lineLimit(2)
                 }
-                .padding(16)
+                .padding(Spacing.md)
             }
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: Radius.md, style: .continuous))
 
             HStack {
                 Text("\(story.readTimeMinutes) min read")
-                    .font(.caption)
+                    .font(.caption2)
                     .foregroundStyle(.secondary)
                 Spacer()
                 Text("Read Story →")
-                    .font(.caption.bold())
+                    .font(.caption2.bold())
                     .foregroundStyle(Color.accentColor)
             }
             .padding(.horizontal, 4)
         }
-        .padding(12)
-        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .padding(Spacing.sm)
+        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: Radius.md, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
+            RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
                 .stroke(Color.secondary.opacity(0.12), lineWidth: 1)
         )
     }

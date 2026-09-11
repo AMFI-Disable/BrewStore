@@ -37,40 +37,22 @@ public struct CommunityShowdownView: View {
 
     public var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
+            VStack(spacing: Spacing.md) {
                 // Header Banner
                 headerBanner
 
-                // Informational Guidance Banner
-                HStack(spacing: 12) {
-                    Image(systemName: "hand.thumbsup.fill")
-                        .font(.title3)
-                        .foregroundStyle(Color.accentColor)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("About Community Picks").font(.subheadline.bold())
-                        Text("Community Picks highlights favorite Homebrew packages voted on by users. Cast your vote to help great open-source tools get noticed.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                }
-                .padding(12)
-                .background(Color.accentColor.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
-                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.accentColor.opacity(0.15), lineWidth: 1))
-
                 // Status message
                 if let message = showdown.statusMessage {
-                    HStack(spacing: 8) {
+                    HStack(spacing: Spacing.xs) {
                         Image(systemName: "info.circle.fill")
                             .foregroundColor(.accentColor)
                         Text(message)
                             .font(.callout)
                         Spacer()
                     }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(Color.accentColor.opacity(0.12))
-                    .cornerRadius(8)
+                    .padding(.horizontal, Spacing.md)
+                    .padding(.vertical, Spacing.xs)
+                    .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: Radius.sm))
                 }
 
                 // Phase Switcher Tab
@@ -81,7 +63,6 @@ public struct CommunityShowdownView: View {
                 }
                 .labelsHidden()
                 .pickerStyle(.segmented)
-                .padding(.horizontal)
 
                 Group {
                     if selectedTab == .qualifying {
@@ -93,7 +74,8 @@ public struct CommunityShowdownView: View {
                 .id(selectedTab)
                 .animation(nil, value: selectedTab)
             }
-            .padding(24)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.vertical, Spacing.md)
         }
         .sheet(isPresented: $isShowingNominateSheet) {
             NominatePackageSheet(manager: manager, showdown: showdown)

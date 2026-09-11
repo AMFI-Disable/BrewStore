@@ -7,39 +7,48 @@ struct DependencyTopologyView: View {
     @State private var searchQuery = ""
     @State private var showingExportSheet = false
 
+    var showHeader: Bool = true
+
+    @ViewBuilder
+    private var actionButtons: some View {
+        HStack(spacing: Spacing.xs) {
+            if topologyManager.isAnalyzing {
+                ProgressView().controlSize(.small)
+            }
+
+            Button {
+                showingExportSheet = true
+            } label: {
+                Label("Export Graph", systemImage: "arrow.down.doc.fill")
+            }
+            .controlSize(.small)
+            .accessibilityIdentifier("Topology.ExportButton")
+
+            Button {
+                topologyManager.analyzeTopology(manager: manager)
+            } label: {
+                Label("Re-Analyze", systemImage: "arrow.clockwise")
+            }
+            .controlSize(.small)
+            .disabled(topologyManager.isAnalyzing || manager.isOperating)
+        }
+    }
+
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: Spacing.md) {
                 // Header
-                HStack(alignment: .center) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Package Dependencies & Integrity").font(.title.bold())
-                        Text("System dependency map, shared libraries, unused packages, and binary links.")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-
-                    HStack(spacing: 8) {
-                        if topologyManager.isAnalyzing {
-                            ProgressView().controlSize(.small)
+                if showHeader {
+                    HStack(alignment: .center) {
+                        VStack(alignment: .leading, spacing: Spacing.xxs) {
+                            Text("Package Dependencies & Integrity").font(.title2.bold())
+                            Text("System dependency map, shared libraries, unused packages, and binary links.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
+                        Spacer()
 
-                        Button {
-                            showingExportSheet = true
-                        } label: {
-                            Label("Export Graph", systemImage: "arrow.down.doc.fill")
-                        }
-                        .controlSize(.small)
-                        .accessibilityIdentifier("Topology.ExportButton")
-
-                        Button {
-                            topologyManager.analyzeTopology(manager: manager)
-                        } label: {
-                            Label("Re-Analyze", systemImage: "arrow.clockwise")
-                        }
-                        .controlSize(.small)
-                        .disabled(topologyManager.isAnalyzing || manager.isOperating)
+                        actionButtons
                     }
                 }
 
@@ -54,7 +63,7 @@ struct DependencyTopologyView: View {
                 // Populated / Content State
                 else if let top = topologyManager.topology {
                     // Summary Stats Cards
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 10)], spacing: 10) {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: Spacing.xs)], spacing: Spacing.xs) {
                         statCard(title: "Dependencies", value: "\(top.totalDependenciesMapped)", icon: "point.3.connected.trianglepath.dotted", color: .blue)
 
                         Button {
@@ -92,7 +101,7 @@ struct DependencyTopologyView: View {
                     }
 
                     // Segmented Tab Switcher and In-Section Search Bar
-                    HStack(spacing: 12) {
+                    HStack(spacing: Spacing.sm) {
                         Picker("Dependency View", selection: $topologyManager.selectedTab) {
                             ForEach(TopologyTab.allCases) { tab in
                                 Text(tab.rawValue).tag(tab)
@@ -100,13 +109,17 @@ struct DependencyTopologyView: View {
                         }
                         .labelsHidden()
                         .pickerStyle(.segmented)
-                        .frame(maxWidth: 480)
+                        .frame(maxWidth: 440)
                         .accessibilityIdentifier("Topology.SegmentedPicker")
 
                         Spacer()
 
                         BrewStoreSectionSearchBar(text: $searchQuery, placeholder: "Search dependency packages…")
-                            .frame(minWidth: 200, maxWidth: 280)
+                            .frame(minWidth: 160, maxWidth: 240)
+
+                        if !showHeader {
+                            actionButtons
+                        }
                     }
 
                     // Tab Content
@@ -126,7 +139,8 @@ struct DependencyTopologyView: View {
                     loadingStateView
                 }
             }
-            .padding(28)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.vertical, Spacing.md)
         }
         .detailModalOverlay(item: $selectedPackageForDetail) { pkg in
             PackageDetailView(manager: manager, package: pkg, onDismiss: {

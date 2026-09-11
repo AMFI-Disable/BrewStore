@@ -6,12 +6,16 @@ struct AppAdoptionView: View {
     @StateObject private var adoptionManager = BrewStoreAppAdoptionManager.shared
     @StateObject private var migrationManager = BrewStoreAppleSiliconMigrationManager.shared
 
+    @AppStorage("BrewStore.dismissedAdoptionGuide") private var dismissedAdoptionGuide = false
+
     @State private var activeHubTab = 0 // 0: Direct Cask Adoption, 1: Open-Source Replacements
     @State private var selectedFilter = 0 // 0: Verified Adoptable, 1: Requires Review, 2: All Scanned, 3: Managed
     @State private var searchText = ""
     @State private var selectedAppIDs: Set<String> = []
     @State private var showingMigrationSheet = false
     @State private var itemPendingReview: ScannedAppItem?
+
+    var showHeader: Bool = true
 
     private var filteredApps: [ScannedAppItem] {
         let baseList: [ScannedAppItem] = switch selectedFilter {
@@ -40,44 +44,48 @@ struct AppAdoptionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            headerBar
-
-            Picker("", selection: $activeHubTab) {
-                Text("Adopt Existing Apps (\(adoptionManager.adoptableApps.count + adoptionManager.reviewRequiredApps.count))").tag(0)
-                Text("Open-Source Alternatives (\(BrewStoreAppReplacementManager.curatedAlternativeCatalog.count))").tag(1)
+            if showHeader {
+                headerBar
             }
-            .labelsHidden()
-            .pickerStyle(.segmented)
-            .padding(.horizontal)
-            .padding(.bottom, 10)
+
+            HStack(spacing: Spacing.sm) {
+                Picker("", selection: $activeHubTab) {
+                    Text("Adopt Existing Apps (\(adoptionManager.adoptableApps.count + adoptionManager.reviewRequiredApps.count))").tag(0)
+                    Text("Open-Source Alternatives (\(BrewStoreAppReplacementManager.curatedAlternativeCatalog.count))").tag(1)
+                }
+                .labelsHidden()
+                .pickerStyle(.segmented)
+                .fixedSize(horizontal: true, vertical: false)
+
+                Spacer()
+
+                if !showHeader {
+                    rosettaIntelBadge
+                    rescanButton
+                    if activeHubTab == 0 {
+                        adoptActions
+                    }
+                }
+            }
+            .padding(.horizontal, Spacing.lg)
+            .padding(.top, showHeader ? 0 : Spacing.sm)
+            .padding(.bottom, Spacing.sm)
 
             Divider()
 
             Group {
                 if activeHubTab == 1 {
                     AppReplacementView(manager: manager)
-                        .padding(20)
                 } else {
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "info.circle.fill").foregroundStyle(Color.accentColor)
-                            Text("How App Adoption Works").font(.subheadline.bold())
-                        }
-                        Text("Adopting links apps already installed on your Mac with Homebrew. This lets BrewStore keep them updated automatically without redownloading. Apps with multiple versions or loose matches are flagged for your review so nothing gets replaced accidentally.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                    if !dismissedAdoptionGuide {
+                        adoptionGuideCard
                     }
-                    .padding(12)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.accentColor.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
-                    .padding(.horizontal)
-                    .padding(.bottom, 6)
 
                     filterBar
                     Divider()
 
                     if adoptionManager.isScanning {
-                        VStack(spacing: 12) {
+                        VStack(spacing: Spacing.md) {
                             ProgressView()
                             Text("Scanning /Applications and ~/Applications for unmanaged macOS apps…")
                                 .font(.callout)
@@ -132,87 +140,129 @@ struct AppAdoptionView: View {
         }
     }
 
+    private var adoptionGuideCard: some View {
+        HStack(alignment: .top, spacing: Spacing.sm) {
+            Image(systemName: "info.circle.fill").foregroundStyle(Color.accentColor)
+            VStack(alignment: .leading, spacing: Spacing.xxs) {
+                Text("How App Adoption Works").font(.subheadline.bold())
+                Text("Adopting links apps already installed on your Mac with Homebrew. This lets BrewStore keep them updated automatically without redownloading. Apps with multiple versions or loose matches are flagged for your review so nothing gets replaced accidentally.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Button {
+                dismissedAdoptionGuide = true
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.caption2.bold())
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+            .help("Dismiss this guide")
+        }
+        .padding(Spacing.sm)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.accentColor.opacity(0.06), in: RoundedRectangle(cornerRadius: Radius.sm))
+        .padding(.horizontal, Spacing.lg)
+        .padding(.top, Spacing.sm)
+        .padding(.bottom, Spacing.xxs)
+    }
+
+    @ViewBuilder
+    private var rosettaIntelBadge: some View {
+        if let count = migrationManager.report?.rosettaIntelCount, count > 0 {
+            Button {
+                showingMigrationSheet = true
+            } label: {
+                Label("\(count) Intel Apps (Rosetta)", systemImage: "bolt.badge.clock.fill")
+                    .font(.caption.bold())
+                    .foregroundStyle(.orange)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.orange.opacity(0.12), in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .help("View Intel apps that can be migrated to Apple Silicon native binaries")
+        }
+    }
+
+    private var rescanButton: some View {
+        Button {
+            adoptionManager.scanApplications(manager: manager)
+        } label: {
+            Label("Rescan Apps", systemImage: "arrow.clockwise")
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.small)
+        .disabled(adoptionManager.isScanning || manager.isOperating)
+    }
+
+    @ViewBuilder
+    private var adoptActions: some View {
+        if !adoptionManager.adoptableApps.isEmpty {
+            if !selectedAppIDs.isEmpty {
+                Button {
+                    let toAdopt = adoptionManager.adoptableApps.filter { selectedAppIDs.contains($0.id) }
+                    BrewStoreActionReviewCoordinator.shared.requestAdopt(items: toAdopt, manager: manager) {
+                        adoptionManager.adoptAll(items: toAdopt, manager: manager)
+                        selectedAppIDs.removeAll()
+                    }
+                } label: {
+                    Label("Adopt Selected (\(selectedAppIDs.count))", systemImage: "checkmark.circle.fill")
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+                .tint(.blue)
+                .disabled(manager.isOperating)
+
+                Button("Deselect All") {
+                    selectedAppIDs.removeAll()
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+            } else {
+                Button("Select All (\(adoptionManager.adoptableApps.count))") {
+                    selectedAppIDs = Set(adoptionManager.adoptableApps.map(\.id))
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+
+                Button {
+                    BrewStoreActionReviewCoordinator.shared.requestAdopt(items: adoptionManager.adoptableApps, manager: manager) {
+                        adoptionManager.adoptAll(items: adoptionManager.adoptableApps, manager: manager)
+                    }
+                } label: {
+                    Label("Adopt Verified (\(adoptionManager.adoptableApps.count))", systemImage: "arrow.down.app.fill")
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+                .disabled(manager.isOperating)
+            }
+        }
+    }
+
     private var headerBar: some View {
         HStack(alignment: .center) {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: Spacing.xxs) {
+                HStack(spacing: Spacing.xs) {
                     Text("App Adoption Hub").font(.largeTitle.bold())
-                    if let count = migrationManager.report?.rosettaIntelCount, count > 0 {
-                        Button {
-                            showingMigrationSheet = true
-                        } label: {
-                            Label("\(count) Intel Apps (Rosetta)", systemImage: "bolt.badge.clock.fill")
-                                .font(.caption.bold())
-                                .foregroundStyle(.orange)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color.orange.opacity(0.12), in: Capsule())
-                        }
-                        .buttonStyle(.plain)
-                        .help("View Intel apps that can be migrated to Apple Silicon native binaries")
-                    }
+                    rosettaIntelBadge
                 }
                 Text("Find apps installed outside Homebrew and manage them here to get automatic updates.")
                     .foregroundStyle(.secondary)
             }
             Spacer()
 
-            Button {
-                adoptionManager.scanApplications(manager: manager)
-            } label: {
-                Label("Rescan Apps", systemImage: "arrow.clockwise")
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-            .disabled(adoptionManager.isScanning || manager.isOperating)
-
-            if !adoptionManager.adoptableApps.isEmpty {
-                if !selectedAppIDs.isEmpty {
-                    Button {
-                        let toAdopt = adoptionManager.adoptableApps.filter { selectedAppIDs.contains($0.id) }
-                        BrewStoreActionReviewCoordinator.shared.requestAdopt(items: toAdopt, manager: manager) {
-                            adoptionManager.adoptAll(items: toAdopt, manager: manager)
-                            selectedAppIDs.removeAll()
-                        }
-                    } label: {
-                        Label("Adopt Selected (\(selectedAppIDs.count))", systemImage: "checkmark.circle.fill")
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
-                    .tint(.blue)
-                    .disabled(manager.isOperating)
-
-                    Button("Deselect All") {
-                        selectedAppIDs.removeAll()
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-                } else {
-                    Button("Select All (\(adoptionManager.adoptableApps.count))") {
-                        selectedAppIDs = Set(adoptionManager.adoptableApps.map(\.id))
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-
-                    Button {
-                        BrewStoreActionReviewCoordinator.shared.requestAdopt(items: adoptionManager.adoptableApps, manager: manager) {
-                            adoptionManager.adoptAll(items: adoptionManager.adoptableApps, manager: manager)
-                        }
-                    } label: {
-                        Label("Adopt Verified (\(adoptionManager.adoptableApps.count))", systemImage: "arrow.down.app.fill")
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
-                    .disabled(manager.isOperating)
-                }
-            }
+            rescanButton
+            adoptActions
         }
-        .padding()
+        .padding(.horizontal, Spacing.lg)
+        .padding(.vertical, Spacing.md)
     }
 
     private var filterBar: some View {
         ViewThatFits(in: .horizontal) {
-            HStack(spacing: 12) {
+            HStack(spacing: Spacing.sm) {
                 Picker("Filter", selection: $selectedFilter) {
                     Text("Verified Ready (\(adoptionManager.adoptableApps.count))").tag(0)
                     Text("Requires Review (\(adoptionManager.reviewRequiredApps.count))").tag(1)
@@ -228,7 +278,7 @@ struct AppAdoptionView: View {
                 searchField
             }
 
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 Picker("Filter", selection: $selectedFilter) {
                     Text("Verified Ready (\(adoptionManager.adoptableApps.count))").tag(0)
                     Text("Requires Review (\(adoptionManager.reviewRequiredApps.count))").tag(1)
@@ -242,8 +292,8 @@ struct AppAdoptionView: View {
                 searchField
             }
         }
-        .padding(.horizontal)
-        .padding(.bottom, 12)
+        .padding(.horizontal, Spacing.lg)
+        .padding(.bottom, Spacing.sm)
     }
 
     private var searchField: some View {

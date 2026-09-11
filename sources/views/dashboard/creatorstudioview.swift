@@ -17,65 +17,79 @@ struct CreatorStudioView: View {
     @State private var isLintPassing: Bool?
     @State private var tapScaffoldMessage: String?
     @State private var repoSearch = ""
+    var showHeader: Bool = true
+
+    @ViewBuilder
+    private var profileOrConnectButton: some View {
+        if accountManager.isAuthenticated, let profile = accountManager.profile {
+            HStack(spacing: Spacing.sm) {
+                if let avatar = profile.avatar_url, let url = URL(string: avatar) {
+                    AsyncImage(url: url) { image in
+                        image.resizable().scaledToFit()
+                    } placeholder: {
+                        Image(systemName: "person.circle.fill")
+                    }
+                    .frame(width: 28, height: 28)
+                    .clipShape(Circle())
+                }
+
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(profile.name ?? profile.login).font(.caption.bold())
+                    Text("@\(profile.login)").font(.caption2).foregroundStyle(.secondary)
+                }
+
+                Button {
+                    if let token = UserDefaults.standard.string(forKey: "BrewStore.github.token") {
+                        Task {
+                            await creatorManager.fetchRepos(token: token)
+                        }
+                    }
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                }
+                .controlSize(.small)
+                .disabled(creatorManager.isLoading)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: Radius.sm))
+        } else {
+            Button {
+                showingGitHubLogin = true
+            } label: {
+                Label("Connect GitHub", systemImage: "person.crop.circle.badge.plus")
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
+        }
+    }
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                // Header Bar
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "hammer.circle.fill")
-                                .font(.title)
-                                .foregroundStyle(Color.accentColor)
-                            Text("Creator Studio").font(.largeTitle.bold())
+            VStack(alignment: .leading, spacing: Spacing.md) {
+                if showHeader {
+                    // Header Bar
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: Spacing.xxs) {
+                            HStack(spacing: Spacing.xs) {
+                                Image(systemName: "hammer.circle.fill")
+                                    .font(.title2)
+                                    .foregroundStyle(Color.accentColor)
+                                Text("Creator Studio").font(.largeTitle.bold())
+                            }
+                            Text("Manage your personal Homebrew taps, monitor repositories, and create Formula and Cask recipes.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
-                        Text("Manage your personal Homebrew taps, monitor repositories, and create Formula and Cask recipes.")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+
+                        Spacer()
+
+                        profileOrConnectButton
                     }
-
-                    Spacer()
-
-                    if accountManager.isAuthenticated, let profile = accountManager.profile {
-                        HStack(spacing: 12) {
-                            if let avatar = profile.avatar_url, let url = URL(string: avatar) {
-                                AsyncImage(url: url) { image in
-                                    image.resizable().scaledToFit()
-                                } placeholder: {
-                                    Image(systemName: "person.circle.fill")
-                                }
-                                .frame(width: 36, height: 36)
-                                .clipShape(Circle())
-                            }
-
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(profile.name ?? profile.login).font(.subheadline.bold())
-                                Text("@\(profile.login)").font(.caption2).foregroundStyle(.secondary)
-                            }
-
-                            Button {
-                                if let token = UserDefaults.standard.string(forKey: "BrewStore.github.token") {
-                                    Task {
-                                        await creatorManager.fetchRepos(token: token)
-                                    }
-                                }
-                            } label: {
-                                Image(systemName: "arrow.clockwise")
-                            }
-                            .controlSize(.small)
-                            .disabled(creatorManager.isLoading)
-                        }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10))
-                    } else {
-                        Button {
-                            showingGitHubLogin = true
-                        } label: {
-                            Label("Connect GitHub", systemImage: "person.crop.circle.badge.plus")
-                        }
-                        .buttonStyle(.borderedProminent)
+                } else {
+                    HStack {
+                        Spacer()
+                        profileOrConnectButton
                     }
                 }
 
@@ -83,20 +97,21 @@ struct CreatorStudioView: View {
                     // Logged Out Promo Card
                     loggedOutPromoCard
                 } else if creatorManager.isLoading {
-                    HStack(spacing: 12) {
+                    HStack(spacing: Spacing.sm) {
                         ProgressView().controlSize(.small)
                         Text("Discovering your GitHub repositories and Homebrew taps…")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(40)
+                    .padding(Spacing.xl)
                 } else {
                     // Authenticated Content
                     creatorDashboardContent
                 }
             }
-            .padding(24)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.vertical, Spacing.md)
         }
         .sheet(isPresented: $showingGitHubLogin) {
             GitHubAccountView(accountManager: accountManager, manager: manager)

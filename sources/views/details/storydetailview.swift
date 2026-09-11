@@ -26,12 +26,12 @@ struct StoryDetailView: View {
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
-                    .frame(height: 240)
+                    .frame(height: 190)
 
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
                         HStack {
                             Text(story.eyebrow)
-                                .font(.caption.monospaced().bold())
+                                .font(.caption2.monospaced().bold())
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 3)
                                 .background(.ultraThinMaterial, in: Capsule())
@@ -40,23 +40,23 @@ struct StoryDetailView: View {
                             Spacer()
 
                             Text("\(story.readTimeMinutes) min read")
-                                .font(.caption)
+                                .font(.caption2)
                                 .foregroundStyle(.white.opacity(0.8))
                         }
 
                         Text(story.title)
-                            .font(.system(size: 28, weight: .bold))
+                            .font(.system(size: 24, weight: .bold))
                             .foregroundStyle(.white)
 
                         Text(story.subtitle)
-                            .font(.headline)
+                            .font(.subheadline)
                             .foregroundStyle(.white.opacity(0.9))
                     }
-                    .padding(24)
+                    .padding(Spacing.lg)
                 }
 
                 // Article Content
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: Spacing.md) {
                     MarkdownTextView(
                         markdown: story.bodyMarkdown,
                         baseFont: .body,
@@ -144,10 +144,11 @@ struct StoryDetailView: View {
                             handleDismiss()
                         }
                 }
-                .padding(28)
+                .padding(.horizontal, Spacing.lg)
+                .padding(.vertical, Spacing.md)
             }
         }
-        .frame(minWidth: 640, minHeight: 520)
+        .frame(minWidth: 600, minHeight: 480)
         .overlay(alignment: .topLeading) {
             Button { handleDismiss() } label: {
                 HStack(spacing: 4) {

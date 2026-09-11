@@ -142,11 +142,11 @@ struct MyMacHubView: View {
                 case .updates:
                     PackageListView(manager: manager, kind: nil, title: "Updates", updatesOnly: true, showHeader: false)
                 case .wishlist:
-                    WishlistView(manager: manager)
+                    WishlistView(manager: manager, showHeader: false)
                 case .adoption:
-                    AppAdoptionView(manager: manager)
+                    AppAdoptionView(manager: manager, showHeader: false)
                 case .topology:
-                    DependencyTopologyView(manager: manager)
+                    DependencyTopologyView(manager: manager, showHeader: false)
                 }
             }
             .id(subMode)

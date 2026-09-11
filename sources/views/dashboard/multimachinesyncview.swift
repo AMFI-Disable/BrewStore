@@ -12,15 +12,19 @@ struct MultiMachineSyncView: View {
     @State private var bootstrapScript = ""
     @State private var copiedBootstrap = false
 
+    var showHeader: Bool = true
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             // Header & Action Bar
             HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Mac Blueprint & Setup Transfer").font(.headline)
-                    Text("Export a complete Mac Blueprint capturing all Homebrew packages, taps, and Mac App Store apps. Bootstrap any Mac with 1 click.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                if showHeader {
+                    VStack(alignment: .leading, spacing: Spacing.xxs) {
+                        Text("Mac Blueprint & Setup Transfer").font(.headline)
+                        Text("Export a complete Mac Blueprint capturing all Homebrew packages, taps, and Mac App Store apps. Bootstrap any Mac with 1 click.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 Spacer()
 

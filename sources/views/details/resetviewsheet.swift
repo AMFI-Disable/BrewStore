@@ -38,15 +38,15 @@ struct ResetViewSheet: View {
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.horizontal, 24)
-            .padding(.top, 20)
-            .padding(.bottom, 16)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.top, Spacing.md)
+            .padding(.bottom, Spacing.sm)
 
             Divider()
 
             // Main Scrollable Console
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: Spacing.md) {
                     if let message = activeStatusToast ?? resetManager.lastResetMessage {
                         HStack(spacing: 8) {
                             Image(systemName: "checkmark.circle.fill")
@@ -103,13 +103,14 @@ struct ResetViewSheet: View {
                         uninstallCategoryCard
                     }
                 }
-                .padding(24)
+                .padding(.horizontal, Spacing.lg)
+                .padding(.vertical, Spacing.md)
             }
 
             Divider()
 
             // Footer
-            HStack(spacing: 12) {
+            HStack(spacing: Spacing.sm) {
                 if !selectedOptions.isEmpty {
                     Text("\(selectedOptions.count) selected")
                         .font(.caption)
@@ -137,10 +138,10 @@ struct ResetViewSheet: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(selectedOptions.isEmpty || resetManager.isResetting)
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 16)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.vertical, Spacing.md)
         }
-        .frame(width: 640, height: 680)
+        .frame(width: 620, height: 640)
         .sheet(isPresented: $showingUninstallSheet) {
             FullSystemUninstallSheet(manager: manager, resetManager: resetManager)
         }

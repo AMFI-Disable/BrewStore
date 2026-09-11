@@ -6,12 +6,12 @@ struct SecurityApprovalSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(spacing: 20) {
-            HStack(spacing: 12) {
+        VStack(spacing: Spacing.md) {
+            HStack(spacing: Spacing.sm) {
                 Image(systemName: "hand.raised.square.on.square.fill")
-                    .font(.system(size: 32))
+                    .font(.system(size: 28))
                     .foregroundStyle(.blue)
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
                     Text("System Permissions Required")
                         .font(.headline)
                     Text(package.name)
@@ -34,15 +34,15 @@ struct SecurityApprovalSheet: View {
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            VStack(spacing: 12) {
+            VStack(spacing: Spacing.xs) {
                 ForEach(permissions) { perm in
-                    HStack(alignment: .top, spacing: 14) {
+                    HStack(alignment: .top, spacing: Spacing.sm) {
                         Image(systemName: perm.systemImage)
-                            .font(.title2)
+                            .font(.title3)
                             .foregroundStyle(.blue)
-                            .frame(width: 28)
+                            .frame(width: 24)
 
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: Spacing.xxs) {
                             Text(perm.rawValue)
                                 .font(.subheadline.bold())
                             Text(perm.explanation)
@@ -61,8 +61,8 @@ struct SecurityApprovalSheet: View {
                         .buttonStyle(.bordered)
                         .controlSize(.small)
                     }
-                    .padding(12)
-                    .background(Color.secondary.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
+                    .padding(Spacing.sm)
+                    .background(Color.secondary.opacity(0.06), in: RoundedRectangle(cornerRadius: Radius.sm))
                 }
             }
 
@@ -77,7 +77,7 @@ struct SecurityApprovalSheet: View {
                 .controlSize(.regular)
             }
         }
-        .padding(24)
-        .frame(minWidth: 520, minHeight: 380)
+        .padding(Spacing.lg)
+        .frame(minWidth: 500, minHeight: 340)
     }
 }

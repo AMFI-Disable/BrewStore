@@ -26,17 +26,23 @@ struct AppReplacementView: View {
         }
     }
 
+    var showHeader: Bool = false
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Header Bar
-            VStack(alignment: .leading, spacing: 10) {
-                VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            if showHeader {
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
                     Text("Open-Source Alternatives").font(.headline)
                     Text("Discover open-source alternatives to everyday commercial software, ready to install with Homebrew.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+                .padding(.horizontal, Spacing.lg)
+                .padding(.top, Spacing.sm)
+            }
 
+            // Controls Bar
+            HStack(spacing: Spacing.sm) {
                 Picker("", selection: $selectedTab) {
                     Text("Suggested Replacements (\(replacementManager.detectedAlternatives.count))").tag(0)
                     Text("Full Directory (\(BrewStoreAppReplacementManager.curatedAlternativeCatalog.count))").tag(1)
@@ -44,30 +50,35 @@ struct AppReplacementView: View {
                 .labelsHidden()
                 .pickerStyle(.segmented)
                 .fixedSize(horizontal: true, vertical: false)
-            }
 
-            // Search Bar
-            HStack {
-                Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                TextField("Search replacements by app or category…", text: $searchText)
-                    .textFieldStyle(.plain)
+                Spacer()
+
+                HStack(spacing: 6) {
+                    Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                    TextField("Search replacements by app or category…", text: $searchText)
+                        .textFieldStyle(.plain)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: Radius.sm))
+                .overlay(
+                    RoundedRectangle(cornerRadius: Radius.sm)
+                        .stroke(Color.secondary.opacity(0.15), lineWidth: 1)
+                )
+                .frame(minWidth: 180, maxWidth: 280)
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.secondary.opacity(0.15), lineWidth: 1)
-            )
+            .padding(.horizontal, Spacing.lg)
+            .padding(.top, showHeader ? 0 : Spacing.sm)
 
             // Replacements List
             ScrollView {
-                LazyVStack(spacing: 14) {
+                LazyVStack(spacing: Spacing.sm) {
                     ForEach(displayedCatalog) { mapping in
                         replacementCard(for: mapping)
                     }
                 }
-                .padding(.vertical, 4)
+                .padding(.horizontal, Spacing.lg)
+                .padding(.vertical, Spacing.sm)
             }
             .id(selectedTab)
             .animation(nil, value: selectedTab)

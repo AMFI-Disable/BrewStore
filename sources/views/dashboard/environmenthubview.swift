@@ -134,7 +134,7 @@ struct EnvironmentHubView: View {
                 case .taps:
                     TapsView(manager: manager, showHeader: false)
                 case .creator:
-                    CreatorStudioView(manager: manager, accountManager: accountManager)
+                    CreatorStudioView(manager: manager, accountManager: accountManager, showHeader: false)
                 }
             }
             .id(subMode)

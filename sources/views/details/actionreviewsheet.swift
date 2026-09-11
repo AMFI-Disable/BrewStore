@@ -6,15 +6,15 @@ struct BrewStoreActionReviewSheet: View {
     let onCancel: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             // Header
-            HStack(spacing: 12) {
+            HStack(spacing: Spacing.sm) {
                 Image(systemName: request.kind.icon)
                     .font(.title)
                     .foregroundStyle(request.accentColor)
 
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 8) {
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
+                    HStack(spacing: Spacing.xs) {
                         Text(request.title)
                             .font(.title2.bold())
 
@@ -40,15 +40,15 @@ struct BrewStoreActionReviewSheet: View {
 
             // Main Content Area
             ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: Spacing.sm) {
                     // Impacted Items Section
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
                         Text("Items (\(request.items.count))")
                             .font(.headline)
 
-                        VStack(spacing: 8) {
+                        VStack(spacing: Spacing.xs) {
                             ForEach(request.items) { item in
-                                HStack(alignment: .center, spacing: 12) {
+                                HStack(alignment: .center, spacing: Spacing.sm) {
                                     Image(systemName: item.icon)
                                         .font(.title3)
                                         .foregroundStyle(item.badgeColor)
@@ -87,22 +87,21 @@ struct BrewStoreActionReviewSheet: View {
                                     }
                                 }
                                 .padding(10)
-                                .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
-                                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.1), lineWidth: 1))
+                                .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: Radius.sm))
                             }
                         }
                     }
 
                     // Command Preview Section
                     if let cmdPreview = request.commandPreview, !cmdPreview.isEmpty {
-                        VStack(alignment: .leading, spacing: 6) {
+                        VStack(alignment: .leading, spacing: Spacing.xxs) {
                             Text("Planned Homebrew Execution")
                                 .font(.caption.bold())
                                 .foregroundStyle(.secondary)
 
                             Text(cmdPreview)
                                 .font(.system(.caption, design: .monospaced))
-                                .padding(10)
+                                .padding(8)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .background(Color.black.opacity(0.06), in: RoundedRectangle(cornerRadius: 6))
                                 .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.secondary.opacity(0.15), lineWidth: 1))
@@ -112,9 +111,9 @@ struct BrewStoreActionReviewSheet: View {
 
                     // Advisory Notes
                     if !request.notes.isEmpty {
-                        VStack(alignment: .leading, spacing: 6) {
+                        VStack(alignment: .leading, spacing: Spacing.xxs) {
                             ForEach(request.notes, id: \.self) { note in
-                                HStack(alignment: .top, spacing: 6) {
+                                HStack(alignment: .top, spacing: Spacing.xs) {
                                     Image(systemName: request.isDestructive ? "exclamationmark.triangle.fill" : "info.circle.fill")
                                         .font(.caption)
                                         .foregroundStyle(request.accentColor)
@@ -128,7 +127,7 @@ struct BrewStoreActionReviewSheet: View {
                         }
                         .padding(10)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(request.accentColor.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
+                        .background(request.accentColor.opacity(0.06), in: RoundedRectangle(cornerRadius: Radius.sm))
                     }
                 }
             }
@@ -146,7 +145,7 @@ struct BrewStoreActionReviewSheet: View {
                     .keyboardShortcut(.defaultAction)
             }
         }
-        .padding(24)
-        .frame(minWidth: 560, minHeight: 420)
+        .padding(Spacing.lg)
+        .frame(minWidth: 540, minHeight: 380)
     }
 }

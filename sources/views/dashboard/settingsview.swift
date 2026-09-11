@@ -78,10 +78,10 @@ struct SettingsView: View {
         VStack(spacing: 0) {
             // Settings Top Header / Tab Bar
             HStack {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
                     Text("Settings").font(.largeTitle.bold())
                     Text("Manage updates, appearance, package sources, backups, and privacy.")
-                        .font(.subheadline)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -103,9 +103,9 @@ struct SettingsView: View {
                 }
                 .controlSize(.small)
             }
-            .padding(.horizontal, 24)
-            .padding(.top, 20)
-            .padding(.bottom, 12)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.top, Spacing.sm)
+            .padding(.bottom, Spacing.xs)
 
             // Segmented Picker (Scrollable horizontally to guarantee tab names never truncate)
             ScrollView(.horizontal, showsIndicators: false) {
@@ -117,15 +117,15 @@ struct SettingsView: View {
                 .labelsHidden()
                 .pickerStyle(.segmented)
                 .fixedSize(horizontal: true, vertical: false)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, Spacing.lg)
             }
-            .padding(.bottom, 16)
+            .padding(.bottom, Spacing.sm)
 
             Divider()
 
             // Tab Content
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: Spacing.md) {
                     switch selectedTab {
                     case .general:
                         generalSection
@@ -143,7 +143,8 @@ struct SettingsView: View {
                         storageSection
                     }
                 }
-                .padding(24)
+                .padding(.horizontal, Spacing.lg)
+                .padding(.vertical, Spacing.md)
                 .frame(maxWidth: .infinity, alignment: .topLeading)
             }
             .id(selectedTab)
