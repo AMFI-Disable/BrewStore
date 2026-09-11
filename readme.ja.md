@@ -11,18 +11,18 @@
 [![Tests: 345 / 345 Passed](https://img.shields.io/badge/テスト-339%20%2F%20339%20合格%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-自動テストと品質保証)
 [![License: MIT](https://img.shields.io/badge/ライセンス-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/価格-100%25%20無料＆オープンソース-success.svg?style=flat-square)](#-なぜ-brewstore-が選ばれるのか)
-[![Zero Telemetry](https://img.shields.io/badge/プライバシー-完全ローカル%20%2F%20テレメトリゼロ-purple.svg?style=flat-square)](#-セキュリティとプライバシー最優先)
+[![Zero Telemetry](https://img.shields.io/badge/プライバシー-完全ローカル%20%2F%20テレメトリゼロ-purple.svg?style=flat-square)](#セキュリティとプライバシー最優先)
 
 ---
 
-### 🌐 言語を選択 / Select Language / 选择语言 / 言語を選択 / Idioma / Langue / Sprache
+## 🌐 言語を選択 / Select Language / 选择语言 / 言語を選択 / Idioma / Langue / Sprache
 
-**[English](readme.md)** • 
-**[简体中文](readme.zh-cn.md)** • 
-**[繁體中文](readme.zh-tw.md)** • 
-**[日本語](readme.ja.md)** • 
-**[Español](readme.es.md)** • 
-**[Français](readme.fr.md)** • 
+**[English](readme.md)** •
+**[简体中文](readme.zh-cn.md)** •
+**[繁體中文](readme.zh-tw.md)** •
+**[日本語](readme.ja.md)** •
+**[Español](readme.es.md)** •
+**[Français](readme.fr.md)** •
 **[Deutsch](readme.de.md)**
 
 ---
@@ -30,14 +30,14 @@
 ### 🧭 クイックナビゲーション
 
 [📥 DMG をダウンロード](website/downloads/brewstore-1.0.0.dmg) •
-[🍺 Homebrew Cask でインストール](#-オプション-1公式-homebrew-cask-推奨) •
+[🍺 Homebrew Cask でインストール](#オプション-1公式-homebrew-cask-推奨) •
 [✨ 主な機能と特徴](#-主な機能と特徴) •
-[⌨️ キーボードショートカット](#-便利なキーボードショートカット) •
+[⌨️ キーボードショートカット](#便利なキーボードショートカット) •
 [💻 CLI ターミナルコンパニオン](#-brewstore-cli-コンパニオン) •
-[🛡️ 安全性とロールバック機構](#-安全性最優先のアーキテクチャ) •
+[🛡️ 安全性とロールバック機構](#安全性最優先のアーキテクチャ) •
 [📊 他ツールとの比較表](#-なぜ-brewstore-が選ばれるのか) •
 [🧪 自動テスト結果](#-自動テストと品質保証) •
-[🗺️ ロードマップ](#-ロードマップ)
+[🗺️ ロードマップ](#ロードマップ)
 
 </div>
 
@@ -48,6 +48,7 @@
 **BrewStore** は、macOS のためにゼロから設計された次世代のパッケージ管理デスクトップアプリケーションです。純粋な **SwiftUI** と **AppKit** で構築されており、Homebrew の持つ柔軟で強力な機能性と、Apple Design Award レベルの美しい App Store 風 UI を高次元で融合しています。
 
 複数ランタイムを切り替えるエンジニア、クリエイティブツールを揃えるデザイナー、システムデーモンを監視するパワーユーザーまで、すべての Mac ユーザーに快適な操作性を提供します：
+
 - **瞬時のインデックス検索**: メモリ内インデックスキャッシュにより、10,000 件以上のパッケージを 20ms 未満で検索。
 - **事前プレビュー付きの安全なアンインストール**: 削除や `autoremove` の実行前に、依存関係の連鎖的な影響を警告。
 - **タイムマシン・スナップショット**: 変更前にシステム状態を自動バックアップし、差分比較付きでワンクリック復元。
@@ -58,7 +59,7 @@
 
 ## ⚡ アーキテクチャ構成
 
-```
+```text
 +-----------------------------------------------------------------------------------------+
 |                               BrewStore ネイティブ GUI 層                                |
 |   +-------------------+  +--------------------+  +-------------------+  +-----------+   |
@@ -115,26 +116,31 @@
    - 冪等性を備えた 1 行のブートストラップ Shell スクリプトを自動生成し、`MultiMachineSyncView` 内で数分で Mac 環境を完全再現可能。
 
 ### 🛍️ 6. Homebrew に現代の App Store 体験を
+
 - **Spotlight ピックアップと独自記事**: 厳選された注目の macOS アプリを特集ストーリーとともに紹介。
 - **コミュニティ投票トーナメント (Community Showdown)**: GitHub Discussions を活用した完全サーバーレスの投票トーナメント。
 - **開発者向けツールキット**: Web 開発、Swift/iOS、DevOps、Rust、データサイエンス、機械学習向けのワンクリック一括導入パッケージ。
 - **ウィッシュリストとお気に入り**: インストール状態とは独立して、気になるツールをブックマーク保存。
 
-### 🛡️ 7. 安全性最優先のアーキテクチャ ＆ ロールバック
+### 🛡️ 7. 安全性最優先のアーキテクチャ ＆ ロールバック <a id="安全性最優先のアーキテクチャ"></a>
+
 - **原子性バージョンピン留め**: 詳細画面やコンテキストメニューから特定バージョンを固定。エラー発生時は自動でロールバック。
 - **事前プレビュー付きアンインストール関門**: 依存関係の連鎖的な影響や孤立パッケージを事前にモーダル表示。
 - **1クリック・スナップショット復元**: 変更前に自動で差分スナップショットを作成し、いつでも直前の状態に復元。
 - **排他制御 (PID ロック協調)**: バックグラウンドの Homebrew プロセスと競合しないよう自動制御。
 
 ### 🌐 8. ミラー速度測定と CDN 切り替え
+
 - **リアルタイム速度ベンチマーク**: 公式 Fastly CDN、中国科大 (USTC)、清華大学 (TUNA)、Aliyun ミラーの Ping 値を計測。
 - **ワンクリック切り替え**: 高速なミラー環境変数をワンタップでシステム全体に反映。
 
 ### 💻 9. メニューバー常駐 ＆ ターミナル CLI
+
 - **歪みのないメニューバー助手**: ウィンドウサイズが崩れない固定ジオメトリ設計。保留中のアップデート確認やワンクリック更新が可能。
 - **フル機能 CLI (`brewstore`)**: ターミナルから直接監査、バージョン切り替え、キャッシュ消去を実行。
 
 ### 🔄 10. マルチプロバイダー Git クラウド同期
+
 - パッケージ構成を `~/Brewfile` に同期。
 - **GitHub Gists**、**GitLab Snippets**、**Codeberg**、**Forgejo**、自前 **Gitea** に対応。
 
@@ -142,7 +148,7 @@
 
 ## ⚡ インストール方法
 
-### オプション 1: 公式 Homebrew Cask（推奨）
+### オプション 1: 公式 Homebrew Cask（推奨） <a id="オプション-1公式-homebrew-cask-推奨"></a>
 
 ```bash
 brew tap amfi-disable/brewstore
@@ -150,6 +156,7 @@ brew install --cask brewstore
 ```
 
 アップデート:
+
 ```bash
 brew upgrade --cask brewstore
 ```
@@ -161,20 +168,25 @@ brew upgrade --cask brewstore
 - **インストーラー DMG**: [`website/downloads/brewstore-1.0.0.dmg`](website/downloads/brewstore-1.0.0.dmg)
 - **バージョン**: `v1.0.0`
 - **検証済み SHA-256 チェックサム**:
-  ```
+
+  ```text
   d702a472a3080cbc246dafe9ea810cdcb6e88b886bdca6c92e934b2c278f33a6
   ```
 
 検証コマンド:
+
 ```bash
 shasum -a 256 website/downloads/brewstore-1.0.0.dmg
 ```
 
 #### 🛡️ macOS Gatekeeper の注意（アドホック署名）
+
 初回起動時に「開発元を検証できない」警告が表示された場合：
+
 ```bash
 xattr -cr /Applications/BrewStore.app
 ```
+
 または Finder で `BrewStore.app` を**右クリック**して**「開く」**を選択してください。
 
 ---
@@ -198,7 +210,7 @@ xcodebuild test -scheme BrewStore -destination 'platform=macOS'
 
 ---
 
-## ⌨️ 便利なキーボードショートカット
+## ⌨️ 便利なキーボードショートカット <a id="便利なキーボードショートカット"></a>
 
 | ショートカット | 機能 | 説明 |
 | :--- | :--- | :--- |
@@ -306,7 +318,7 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
 
 ---
 
-## 🛡️ セキュリティとプライバシー最優先
+## 🛡️ セキュリティとプライバシー最優先 <a id="セキュリティとプライバシー最優先"></a>
 
 - **完全テレメトリゼロ**: 分析トラッキング、サードパーティ SDK、テレメトリ収集は一切含まれていません。
 - **完全ローカル実行**: すべてのコマンドはお手元のローカル Homebrew バイナリ経由で安全に実行されます。
@@ -314,7 +326,7 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
 
 ---
 
-## 🗺️ ロードマップ
+## 🗺️ ロードマップ <a id="ロードマップ"></a>
 
 - [x] **v1.0.0**: ネイティブ SwiftUI による完全刷新、FastCache、⌘K パレット、依存関係キャンバス。
 - [x] **v1.0.5**: マルチプロバイダー Git 同期 (GitLab, Codeberg, Forgejo, Gitea)、コミュニティ対戦ブラケット。

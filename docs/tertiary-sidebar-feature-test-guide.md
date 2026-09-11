@@ -21,6 +21,7 @@ graph TD
 The settings interface is organized into **7 Dedicated Sections** accessible via a responsive tab sidebar:
 
 ### 1.1 `General` (`gearshape.fill`)
+
 - **Launch & Startup**:
   - `Launch BrewStore at Login` toggle (`SMAppService` integration).
   - `Open Minimized to Menu Bar` toggle.
@@ -37,6 +38,7 @@ The settings interface is organized into **7 Dedicated Sections** accessible via
   - `Notify on Service Crashes / Watchdog Events` toggle.
 
 ### 1.2 `Appearance` (`paintbrush.fill`)
+
 - **Theme Palettes (`BrewStoreThemeVibrancyManager`)**:
   - `Amber Brew` (Warm default gold/orange)
   - `Cupertino Blue` (macOS native accent)
@@ -48,6 +50,7 @@ The settings interface is organized into **7 Dedicated Sections** accessible via
   - Sidebar transparency slider.
 
 ### 1.3 `Innovations` (`sparkles`)
+
 - **Feature Flag Toggles**:
   - `Enable AI Package Assistant` toggle.
   - `Enable Curated Editorial Stories` toggle.
@@ -55,6 +58,7 @@ The settings interface is organized into **7 Dedicated Sections** accessible via
   - `Enable Dependency Topology Graphs` toggle.
 
 ### 1.4 `Network & Mirrors` (`network`)
+
 - **Concurrent CDN Speed Benchmark (`BrewStoreMirrorBenchmarkManager`)**:
   - Live latency testing table across Fastly CDN, USTC Mirror, Tsinghua TUNA, and Aliyun.
   - `Test Mirror Latencies` action button with concurrent asynchronous pings.
@@ -66,6 +70,7 @@ The settings interface is organized into **7 Dedicated Sections** accessible via
   - Active prefix switcher with system PATH validation.
 
 ### 1.5 `Snapshots & Brewfile` (`clock.arrow.circlepath`)
+
 - **Automated Snapshots**:
   - `Auto-Create Snapshot Before Upgrades` toggle.
   - `Keep Last N Snapshots` (5, 10, 25, Unlimited).
@@ -73,6 +78,7 @@ The settings interface is organized into **7 Dedicated Sections** accessible via
   - Sync Brewfile backup manifests directly to private GitHub Gists via authenticated GitHub Account.
 
 ### 1.6 `Doctor & Health` (`stethoscope`)
+
 - **Automated Toolchain Diagnostics**:
   - `Run brew doctor` button with live log stream.
   - `Run brew missing` button to detect broken dylib links.
@@ -80,6 +86,7 @@ The settings interface is organized into **7 Dedicated Sections** accessible via
   - Health score summary and grade calculation.
 
 ### 1.7 `Storage & Privacy` (`externaldrive.fill`)
+
 - **Granular Storage Allocation Breakdown**:
   - Displays exact bytes for `Cellar`, `Caskroom`, `Download Cache`, `Build Logs`, and `Total Allocated`.
 - **1-Click Deep Purges (`DiskStorageView`)**:
@@ -98,6 +105,7 @@ The settings interface is organized into **7 Dedicated Sections** accessible via
 The Help Manual is built with a native `NavigationSplitView` featuring a dedicated **7-Topic Left Sidebar** and interactive search bar:
 
 ### 2.1 Help Topic Sidebar Items
+
 1. **`Getting Started` (`sparkles`)**:
    - Welcome overview, macOS App Store design paradigms, and Casks vs Formulae breakdown.
 2. **`Background Services` (`gearshape.2.fill`)**:
@@ -114,6 +122,7 @@ The Help Manual is built with a native `NavigationSplitView` featuring a dedicat
    - Complete cheat sheet of navigation shortcuts (**⌘1**–**⌘9**, **⌘0**, **⌘K**, **⌘?**, **⌥~**, **⌘R**, **⌥⌘U**).
 
 ### 2.2 Interactive Features
+
 - **Searchable Topics**: Instant filtering of topics, headings, and paragraphs via `searchable(text:)`.
 - **Actionable Callout Tips**: GitHub-style warning/tip boxes.
 - **Copyable Code Snippets**: Ready-to-run terminal commands.
@@ -125,6 +134,7 @@ The Help Manual is built with a native `NavigationSplitView` featuring a dedicat
 The lightweight, persistent macOS Menu Bar companion (`BrewStoreMenuBarCompanion`):
 
 ### 3.1 4-Tab Navigation Strip
+
 1. **`Search` (`magnifyingglass`)**: Quick package lookup without opening the main window.
 2. **`Updates` (`arrow.triangle.2.circlepath`)**:
    - Displays pending update badges and 1-Click "Update All" button.

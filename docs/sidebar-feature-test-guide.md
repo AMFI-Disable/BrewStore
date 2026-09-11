@@ -26,6 +26,7 @@ graph TD
 Every button in the top toolbar provides instant access to global modal sheets and utilities:
 
 ### 1. `Import Brewfile` (`doc.badge.plus`)
+
 - **Visual Trigger**: Top toolbar document icon with plus badge.
 - **Action**: Opens `BrewfileImportView` sheet.
 - **Features to Test**:
@@ -35,6 +36,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
   - 1-Click "Import & Install All" batch runner.
 
 ### 2. `Health Score` (`heart.text.square`)
+
 - **Visual Trigger**: Heart square icon in toolbar.
 - **Action**: Opens `HealthScoreView` sheet.
 - **Features to Test**:
@@ -45,6 +47,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
   - **CVE Security Audit**: Opens `CVESecurityView` sheet displaying known CVE vulnerabilities.
 
 ### 3. `AI Assistant` (`wand.and.stars`)
+
 - **Visual Trigger**: Wand and stars icon in toolbar.
 - **Action**: Opens `AISearchView` sheet.
 - **Features to Test**:
@@ -53,6 +56,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
   - Interactive explanation of CLI options and configurations.
 
 ### 4. `Shell Setup` (`terminal`)
+
 - **Visual Trigger**: Terminal prompt icon in toolbar.
 - **Action**: Opens `ShellConfigView` sheet.
 - **Features to Test**:
@@ -61,6 +65,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
   - 1-Click "Append to ~/.zshrc" / "Copy Configuration".
 
 ### 5. `Console Drawer` (`terminal.fill` / `terminal`)
+
 - **Visual Trigger**: Terminal icon in toolbar (or keyboard shortcut **⌥~**).
 - **Action**: Toggles the sliding bottom `ActionConsoleDrawer`.
 - **Features to Test**:
@@ -68,6 +73,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
   - Auto-scroll lock toggle, Clear logs button, and Copy logs button.
 
 ### 6. `Quick Open` (`command`)
+
 - **Visual Trigger**: Command symbol in toolbar (or keyboard shortcut **⌘K**).
 - **Action**: Opens `CommandPaletteView` modal.
 - **Features to Test**:
@@ -76,6 +82,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
   - Shows `star.fill` (yellow) and `pin.fill` (orange) badges next to package results.
 
 ### 7. `Help Manual` (`questionmark.circle`)
+
 - **Visual Trigger**: Question mark circle icon (or keyboard shortcut **⌘?**).
 - **Action**: Opens `HelpManualView` sheet.
 - **Features to Test**:
@@ -86,6 +93,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
 ## 🌟 Section 1: Storefront
 
 ### 1. `Discover` (`sparkles`)
+
 - **Features**:
   - **Editorial Hero Carousel**: Displays Editor's Picks with slide indicator dots, left/right arrows, and a Star/Wishlist toggle button.
   - **Search & Filter Bar**: Instant search across thousands of packages, filtering by *All / Formulae / Casks / Popular*.
@@ -94,11 +102,13 @@ Every button in the top toolbar provides instant access to global modal sheets a
   - **Detail Sheet (`DiscoveryDetailView`)**: Shows complete metadata, licenses, tap sources, dependency pills, Star toggle, and Pin/Unpin button.
 
 ### 2. `Stories` (`book.pages.fill`) *(Toggleable in Settings)*
+
 - **Features**:
   - Rich markdown editorial articles, workflow guides, and featured developer setups.
   - Inline package mention pills with 1-click install action.
 
 ### 3. `Toolkits` / `Stacks` (`square.stack.3d.up.fill`) *(Toggleable in Settings)*
+
 - **Features**:
   - **Curated 100% Free & Open-Source Bundles**: DevOps Kit, AI Engineer Suite, Privacy & Security, Web Developer Toolkit.
   - **Pricing Tier Badges**: Displays `100% Free & FOSS` green badges.
@@ -107,6 +117,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
   - **Batch Actions**: "Install Missing Tools" and "Export Bundle to Brewfile".
 
 ### 4. `Categories` (`square.grid.2x2.fill`)
+
 - **Features**:
   - **Horizontal Category Pills**: 8 categories (CLI Tools, Developer Utilities, Media, Privacy, Web & Cloud, Science, Productivity, System).
   - **Category Hero Banner**: Gradient header with category description and icon.
@@ -117,6 +128,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
 ## 📦 Section 2: Package Library
 
 ### 1. `Installed` (`shippingbox.fill`)
+
 - **Features**:
   - **Filter Tabs**: All Installed, CLI Formulae, GUI Apps, Pinned Only.
   - **Search & Selection Mode**: Checkbox multi-select for batch uninstall and batch pin operations.
@@ -136,18 +148,21 @@ Every button in the top toolbar provides instant access to global modal sheets a
     - Safe Uninstallation Impact Analyzer (`BrewStoreRemovalPlan`).
 
 ### 2. `Adoption & Replacements` (`arrow.down.app.fill`)
+
 - **Features**:
   - **Tab 1: Adopt Unmanaged Apps**: Scans `/Applications` for apps installed outside Homebrew and offers 1-click adoption to Homebrew Cask management.
   - **Tab 2: Open-Source Replacements**: Curated directory suggesting FOSS Homebrew replacements for proprietary software (e.g. `mole` for CleanMyMac, `bitwarden` for 1Password).
   - **Replacement Cards**: Displays proprietary app vs FOSS replacement, advantage bullet points, Star button, Pin badge, and 1-click install.
 
 ### 3. `Dependencies` (`point.3.connected.trianglepath.dotted`)
+
 - **Features**:
   - **Interactive Dependency Topology Graph**: Pan, zoom, and explore node relationships between installed packages.
   - **Inspect Dependents & Dependencies**: Scans upstream requirements and downstream reverse dependencies.
   - **Cyclic Dependency Scanner**: Flags dependency conflicts and circular chains.
 
 ### 4. `Wishlist` (`star.fill`)
+
 - **Features**:
   - **Sidebar Badge**: Displays total wishlisted package count.
   - **Wishlist Rows (`wishlistRow`)**: Lists starred packages with yellow `star.fill` button for 1-click removal, orange `pin.fill` badge if pinned, and `AppStoreActionButton`.
@@ -156,6 +171,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
   - **Custom Collections**: Create named collections of starred tools.
 
 ### 5. `Services` (`gearshape.2.fill`)
+
 - **Features**:
   - **Sidebar Live Badge**: Displays number of currently running background daemons.
   - **Live Service Telemetry**: Displays running status, listening ports (e.g. `:5432`, `:6379`), CPU %, memory footprint, and uptime.
@@ -163,6 +179,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
   - **Registered Ports Inspector**: View all open ports managed by Homebrew services.
 
 ### 6. `Taps` (`square.3.layers.3d.down.forward`)
+
 - **Features**:
   - **Tap Repository List**: Lists all tapped repositories (e.g. `homebrew/core`, `homebrew/cask`).
   - **Tap Ecosystem Graph (`TapGraphView`)**: Visual node graph of packages installed from each tap.
@@ -175,6 +192,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
 ## 🔨 Section 3: Developer & Creator
 
 ### 1. `Creator Studio` (`hammer.circle.fill`)
+
 - **Features**:
   - **Tap Maintainer Workbench**: Telemetry on public GitHub tap repositories, star counts, and local install numbers.
   - **Formula Generator Wizard (`NewFormulaWizardSheet`)**: Step-by-step form to generate ruby formula files (`.rb`) with automatic checksum fetching.
@@ -186,6 +204,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
 ## ⚙️ Section 4: System & Maintenance
 
 ### 1. `Updates` (`arrow.triangle.2.circlepath`)
+
 - **Features**:
   - **Sidebar Outdated Count Badge**: Orange counter badge displaying pending updates.
   - **Batch Upgrade**: 1-Click "Upgrade All Outdated Packages" button.
@@ -193,6 +212,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
   - **Update Muting**: Skip/Mute updates for specific packages (`BrewStoreIgnoredUpdatesManager`).
 
 ### 2. `Backups` (`camera.fill`)
+
 - **Features**:
   - **Time Machine Snapshots (`SnapshotsView`)**: Create, inspect, restore, and delete full Homebrew toolchain snapshots.
   - **Multi-Mac Sync Assistant (`MultiMachineSyncView`)**:
@@ -202,6 +222,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
     - **1-Click Sync**: "Install All Missing" from remote Mac profile.
 
 ### 3. `Settings` (`gearshape.fill`)
+
 - **Features**:
   - **CDN Mirror Benchmarker**: Live ping benchmark for Fastly, USTC, TUNA, and Aliyun mirrors with 1-click active mirror switching.
   - **Background Auto-Update Scheduler**: Configure automatic background scans (Every 1h, 6h, 12h, 24h) and notifications.

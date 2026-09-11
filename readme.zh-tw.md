@@ -10,19 +10,19 @@
 [![Release: v1.0.0](https://img.shields.io/badge/版本-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/amfi-disable/BrewStore/releases)
 [![Tests: 345 / 345 Passed](https://img.shields.io/badge/測試-339%20%2F%20339%20全數通過%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-自動化測試與品質保障)
 [![License: MIT](https://img.shields.io/badge/開源協議-MIT-blue.svg?style=flat-square)](license)
-[![Pricing: Free & Open-Source](https://img.shields.io/badge/價格-100%25%20免費開源-success.svg?style=flat-square)](#-為什麼選擇-brewstore而不是-caskhub-或-taphouse-pro-1999)
-[![Zero Telemetry](https://img.shields.io/badge/隱私-零遙測%20%2F%20100%25%20純本地-purple.svg?style=flat-square)](#-隱私與安全第一原則)
+[![Pricing: Free & Open-Source](https://img.shields.io/badge/價格-100%25%20免費開源-success.svg?style=flat-square)](#為什麼選擇-brewstore而不是-caskhub-或-taphouse-pro-1999)
+[![Zero Telemetry](https://img.shields.io/badge/隱私-零遙測%20%2F%20100%25%20純本地-purple.svg?style=flat-square)](#隱私與安全第一原則)
 
 ---
 
-### 🌐 語言選擇 / Select Language / 选择语言 / 言語を選択 / Idioma / Langue / Sprache
+## 🌐 語言選擇 / Select Language / 选择语言 / 言語を選択 / Idioma / Langue / Sprache
 
-**[English](readme.md)** • 
-**[简体中文](readme.zh-cn.md)** • 
-**[繁體中文](readme.zh-tw.md)** • 
-**[日本語](readme.ja.md)** • 
-**[Español](readme.es.md)** • 
-**[Français](readme.fr.md)** • 
+**[English](readme.md)** •
+**[简体中文](readme.zh-cn.md)** •
+**[繁體中文](readme.zh-tw.md)** •
+**[日本語](readme.ja.md)** •
+**[Español](readme.es.md)** •
+**[Français](readme.fr.md)** •
 **[Deutsch](readme.de.md)**
 
 ---
@@ -30,14 +30,14 @@
 ### 🧭 快捷導覽連結
 
 [📥 下載 DMG 安裝檔](website/downloads/brewstore-1.0.0.dmg) •
-[🍺 Homebrew Cask 安裝](#-選項-1官方-homebrew-cask-推薦) •
+[🍺 Homebrew Cask 安裝](#選項-1官方-homebrew-cask-推薦) •
 [✨ 功能特色亮點](#-功能特色亮點) •
-[⌨️ 快捷鍵速查指南](#-高效鍵盤快捷鍵) •
+[⌨️ 快捷鍵速查指南](#高效鍵盤快捷鍵) •
 [💻 CLI 終端命令列伴侶](#-brewstore-cli-終端命令列伴侶) •
-[🛡️ 安全與回復架構](#-安全第一的系統架構) •
-[📊 橫向功能對比表](#-為什麼選擇-brewstore而不是-caskhub-或-taphouse-pro-1999) •
+[🛡️ 安全與回復架構](#安全第一的系統架構) •
+[📊 橫向功能對比表](#為什麼選擇-brewstore而不是-caskhub-或-taphouse-pro-1999) •
 [🧪 自動化測試驗證](#-自動化測試與品質保障) •
-[🗺️ 開發藍圖](#-開發藍圖)
+[🗺️ 開發藍圖](#開發藍圖)
 
 </div>
 
@@ -48,6 +48,7 @@
 **BrewStore** 是專為 macOS 打造的新一代現代化套件管理器桌面應用程式。完全採用 Apple 原生 **SwiftUI** 與 **AppKit** 精雕細琢而成，將 Homebrew 強大的底層架構與媲美 Apple 設計大獎的 App Store 流暢人機互動體驗完美揉合。
 
 無論您是需要管理多重執行環境的軟體工程師、追求優雅創作工具的設計師，還是需要隨時監控背景行程的資深 Mac 玩家，BrewStore 都能為您提供：
+
 - **閃電般的搜尋速度**：基於本地記憶體分詞索引，在 20ms 內完成破萬款 Formula 與 Cask 軟體的即時搜尋。
 - **預覽優先的安全解除安裝機制**：在執行任何移除或 `autoremove` 操作前，完整呈現連鎖反向相依性與孤立相依性影響分析。
 - **時光機快照還原**：在執行關鍵變更前自動記錄系統快照，支援具備視覺化差異（Diff）的一鍵即時還原。
@@ -58,7 +59,7 @@
 
 ## ⚡ 架構與子系統概覽
 
-```
+```text
 +-----------------------------------------------------------------------------------------+
 |                                  BrewStore 原生 GUI 介面層                              |
 |   +-------------------+  +--------------------+  +-------------------+  +-----------+   |
@@ -115,26 +116,31 @@
    - 自動產生具冪等性的單行 Shell 部署指令碼，並在多裝置同步面板中提供一鍵還原能力，數分鐘內還原全套開發與日常工作環境。
 
 ### 🛍️ 6. 為 Homebrew 注入現代 App Store 級美學體驗
+
 - **Spotlight 焦點故事與精選專欄**：深度探索精選 macOS 優質軟體，圖文並茂展示更新亮點、功能介紹與安裝說明。
 - **社群爭霸賽（Community Showdown）**：基於 GitHub Discussions 的無伺服器零成本社群淘汰賽，民主投票選出季度神級工具。
 - **開發者工具箱（Toolkits）**：針對全端開發、Swift/iOS、DevOps、Rust、資料科學與 AI 機器學習的一鍵式預設組合包。
 - **個人願望清單與收藏夾**：星標保存心儀工具，與系統已安裝狀態完全隔離，便於日後隨時安裝。
 
-### 🛡️ 7. 安全第一的系統架構與時光機快照
+### 🛡️ 7. 安全第一的系統架構與時光機快照 <a id="安全第一的系統架構"></a>
+
 - **原子級版本固定（Pin / Unpin）**：直接在詳情頁或右鍵選單中鎖定相依版本，指令失敗自動原子還原，徹底告別正式環境非預期升級。
 - **預覽優先的安全解除安裝門禁**：所有套件解除安裝與 `autoremove` 均提供非破壞性預覽彈窗，詳盡提示下游受影響的反向相依與孤立殘留。
 - **1 鍵時光機快照還原**：變更前自動拍攝系統環境快照，支援帶版本差異比對的一鍵無損還原。
 - **主動式 Homebrew 行程鎖協調**：即時偵測背景並行的 Homebrew 行程，排隊等待並防止資料庫損壞。
 
 ### ⚙️ 8. 背景服務管理與即時效能遙測
+
 - **全方位執行狀態觀測**：即時呈現 PostgreSQL、Redis、Nginx、MySQL、RabbitMQ 等服務的 CPU 佔比、記憶體 RSS 佔用、執行時長與正在接聽的 TCP 連接埠。
 - **即時操作響應**：秒級執行啟動、停止、重新啟動或設定開機自動啟動，操作反饋靈敏即時。
 
 ### 🌐 9. 鏡像源延遲測速與高速 CDN 切換
+
 - **即時延遲基準測試**：一鍵並行測速 Official Fastly CDN、中國科大（USTC）、清華大學（TUNA）以及阿里雲鏡像源。
 - **一鍵無縫切換**：一鍵更新 `HOMEBREW_API_DOMAIN` 與 `HOMEBREW_BOTTLE_DOMAIN` 環境變數，大幅提升下載速度。
 
 ### 💻 10. 防形變選單列助手與終端 CLI 伴侶
+
 - **無形變選單列浮窗**：常駐頂部選單列，採用固定視窗幾何尺寸，支援快速查收更新、一鍵升級、服務狀態檢視與快捷系統維護。
 - **完整的命令列工具 (`brewstore`)**：在終端中使用 `brewstore` 執行安全掃描、多版本切換、Mac App Store 升級與快取清理。
 
@@ -142,7 +148,7 @@
 
 ## ⚡ 安裝指南
 
-### 選項 1：官方 Homebrew Cask 安裝（推薦）
+### 選項 1：官方 Homebrew Cask 安裝（推薦） <a id="選項-1官方-homebrew-cask-推薦"></a>
 
 ```bash
 brew tap amfi-disable/brewstore
@@ -150,6 +156,7 @@ brew install --cask brewstore
 ```
 
 後續更新只需執行：
+
 ```bash
 brew upgrade --cask brewstore
 ```
@@ -161,20 +168,25 @@ brew upgrade --cask brewstore
 - **DMG 安裝映像檔**：[`website/downloads/brewstore-1.0.0.dmg`](website/downloads/brewstore-1.0.0.dmg)
 - **版本號**：`v1.0.0`
 - **SHA-256 驗證碼**：
-  ```
+
+  ```text
   d702a472a3080cbc246dafe9ea810cdcb6e88b886bdca6c92e934b2c278f33a6
   ```
 
 驗證下載檔案的完整性：
+
 ```bash
 shasum -a 256 website/downloads/brewstore-1.0.0.dmg
 ```
 
 #### 🛡️ macOS Gatekeeper 提示處理說明
+
 若首次啟動出現「無法驗證開發者」提示：
+
 ```bash
 xattr -cr /Applications/BrewStore.app
 ```
+
 或在 Finder 中**右鍵點擊** `BrewStore.app` 並選擇**「打開」**。
 
 ---
@@ -198,7 +210,7 @@ xcodebuild test -scheme BrewStore -destination 'platform=macOS'
 
 ---
 
-## ⌨️ 高效鍵盤快捷鍵
+## ⌨️ 高效鍵盤快捷鍵 <a id="高效鍵盤快捷鍵"></a>
 
 | 快捷鍵 | 功能 | 說明 |
 | :--- | :--- | :--- |
@@ -249,7 +261,7 @@ brewstore launch
 
 ---
 
-## 🌟 為什麼選擇 BrewStore？（對比 CaskHub 與 Taphouse Pro $19.99）
+## 🌟 為什麼選擇 BrewStore？（對比 CaskHub 與 Taphouse Pro $19.99） <a id="為什麼選擇-brewstore而不是-caskhub-或-taphouse-pro-1999"></a>
 
 | 功能維度 | **BrewStore** | **Taphouse Pro** ($19.99) | **CaskHub** |
 | :--- | :---: | :---: | :---: |
@@ -306,7 +318,7 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
 
 ---
 
-## 🛡️ 隱私與安全第一原則
+## 🛡️ 隱私與安全第一原則 <a id="隱私與安全第一原則"></a>
 
 - **零遙測**：BrewStore 不包含任何第三方追蹤分析、零 Google/Firebase SDK，且絕無任何遙測回傳機制。
 - **純本機執行**：所有指令均嚴格透過您本機的 Homebrew 二進位檔執行（Apple Silicon 為 `/opt/homebrew`，Intel 為 `/usr/local`）。
@@ -315,7 +327,7 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
 
 ---
 
-## 🗺️ 開發藍圖
+## 🗺️ 開發藍圖 <a id="開發藍圖"></a>
 
 - [x] **v1.0.0**：純原生 SwiftUI 架構重構、FastCache 極速快取引擎、⌘K 命令面板、互動式相依圖譜。
 - [x] **v1.0.5**：多平台 Git 雲端同步（GitLab、Codeberg、Forgejo、Gitea）、社群淘汰賽爭霸擂台。

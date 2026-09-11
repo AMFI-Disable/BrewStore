@@ -25,6 +25,7 @@ graph TD
 The central workhorse pane for browsing installed packages and pending updates:
 
 ### 1.1 Header Metrics & Action Deck
+
 - **Dynamic Header Count**: Displays total package count and installed package count (e.g. `374 packages · 374 installed`).
 - **Batch Selection Toggle (`Select` / `Done`)**:
   - Toggles checkboxes on all rows for multi-package operations.
@@ -36,6 +37,7 @@ The central workhorse pane for browsing installed packages and pending updates:
   - Opens `MASView` sheet to scan and update apps installed from the Apple Mac App Store via the `mas` CLI.
 
 ### 1.2 Multi-Facet Filtering Bar
+
 - **Package Kind Segmented Picker**:
   - `All`: Combines CLI tools and GUI apps.
   - `Apps (Casks)`: Filters exclusively to GUI `.app` bundles (`/Applications`).
@@ -62,6 +64,7 @@ The central workhorse pane for browsing installed packages and pending updates:
   - Shows interactive pill chips for all active filters with 1-click `xmark.circle.fill` removal.
 
 ### 1.3 Sorting & Grouping Engine
+
 - **Grouping Dropdown Menu (`rectangle.3.group`)**:
   - `No Grouping`: Flat list.
   - `Group by Kind`: Sections for Formulae vs Casks.
@@ -76,7 +79,9 @@ The central workhorse pane for browsing installed packages and pending updates:
   - `30-Day Install Popularity`
 
 ### 1.4 Batch Action Bar (In Selection Mode)
+
 When `Select` is enabled, a bottom floating action toolbar appears:
+
 - **`Select All` / `Deselect All`**: 1-click full selection toggle.
 - **`Batch Pin` (`pin.fill`)**: Pins all selected packages to their current versions.
 - **`Batch Unpin` (`pin.slash.fill`)**: Unpins all selected packages.
@@ -84,6 +89,7 @@ When `Select` is enabled, a bottom floating action toolbar appears:
 - **`Batch Uninstall` (`trash.fill`)**: Opens destructive confirmation dialog listing all impacted packages.
 
 ### 1.5 Package List Row (`PackageListRow`)
+
 - **App Icon**: Real macOS `.icns` application icon for Casks or `terminal.fill` / `app.fill` SF symbol.
 - **Title & Version**: Package name, semantic version number, and tap badge.
 - **Live Reactive Badges**:
@@ -110,6 +116,7 @@ When `Select` is enabled, a bottom floating action toolbar appears:
 The repository management sub-pane for third-party taps:
 
 ### 2.1 Tap List & Quick Actions
+
 - **Header**: Active tap count and "Add Tap" button.
 - **Tap Card / Row**:
   - Repository name (e.g. `homebrew/core`, `homebrew/cask-fonts`, `hashicorp/tap`).
@@ -129,12 +136,14 @@ The repository management sub-pane for third-party taps:
 The disaster recovery and device migration sub-pane:
 
 ### 3.1 Time Machine Snapshot Timeline
+
 - **Snapshot Creation**: "Create Snapshot Now" with custom naming and timestamping.
 - **Snapshot Cards**: Displays snapshot date, total formulae count, cask count, and tap count.
 - **Snapshot Inspection & Diff**: View exact Brewfile manifest diff against current system state.
 - **1-Click Restore**: Restores the entire system state back to any historical snapshot.
 
 ### 3.2 Multi-Mac Transfer Assistant (`MultiMachineSyncView.swift`)
+
 - **1-Command Bootstrap Generator**:
   - Generates zero-dependency standalone bash script to clone the current Mac setup to a brand-new Mac.
   - 1-Click "Copy Script" and "Save to File".
@@ -151,6 +160,7 @@ The disaster recovery and device migration sub-pane:
 The configuration and tuning sub-pane:
 
 ### 4.1 Sub-Navigation Tabs
+
 - **`General`**: Launch at login toggle, notification preferences, default package view.
 - **`CDN Mirrors` (`BrewStoreMirrorManager`)**:
   - Real-time latency benchmark (ping in ms) across Fastly, USTC, TUNA, and Aliyun.
@@ -176,6 +186,7 @@ The configuration and tuning sub-pane:
 The comprehensive package inspection panel:
 
 ### 5.1 App Store Header Deck
+
 - **App Icon**: High-resolution icon with continuous corner radius.
 - **Title, Package ID, and Kind Badge**: Name, formula ID, and `Formula` / `Cask` badge.
 - **Star / Wishlist Button**: Toggles between `star.fill` (yellow) and `star` (secondary).
@@ -184,6 +195,7 @@ The comprehensive package inspection panel:
 - **Native ShareLink**: Shares formula link.
 
 ### 5.2 Version Management & Integrity
+
 - **Version Switcher**: Dropdown menu allowing 1-click switching between installed historical versions (`switchActiveVersion`).
 - **Version Pinning Section**:
   - Status banner indicating whether version upgrades are currently locked.
@@ -194,6 +206,7 @@ The comprehensive package inspection panel:
   - Displays SHA-256 cryptographic bottle hash and macOS deployment target.
 
 ### 5.3 Dependency & Removal Analyzer
+
 - **Interactive Dependency Tree**:
   - Visual tree graph showing upstream dependencies and required build tools.
 - **Safe Removal Impact Plan (`BrewStoreRemovalPlan`)**:

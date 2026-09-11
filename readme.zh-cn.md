@@ -10,19 +10,19 @@
 [![Release: v1.0.0](https://img.shields.io/badge/版本-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/amfi-disable/BrewStore/releases)
 [![Tests: 345 / 345 Passed](https://img.shields.io/badge/测试-339%20%2F%20339%20全数通过-success.svg?style=flat-square&logo=checkmarx)](#-自动化测试与质量保障)
 [![License: MIT](https://img.shields.io/badge/开源协议-MIT-blue.svg?style=flat-square)](license)
-[![Pricing: Free & Open-Source](https://img.shields.io/badge/价格-100%25%20免费开源-success.svg?style=flat-square)](#-为什么选择-brewstore而不是-caskhub-或-taphouse-pro-1999)
-[![Zero Telemetry](https://img.shields.io/badge/隐私-零遥测%20%2F%20100%25%20本地-purple.svg?style=flat-square)](#-隐私与安全第一原则)
+[![Pricing: Free & Open-Source](https://img.shields.io/badge/价格-100%25%20免费开源-success.svg?style=flat-square)](#为什么选择-brewstore而不是-caskhub-或-taphouse-pro-1999)
+[![Zero Telemetry](https://img.shields.io/badge/隐私-零遥测%20%2F%20100%25%20本地-purple.svg?style=flat-square)](#隐私与安全第一原则)
 
 ---
 
-### 🌐 语言选择 / Select Language / 言語を選択 / Idioma / Langue / Sprache
+## 🌐 语言选择 / Select Language / 言語を選択 / Idioma / Langue / Sprache
 
-**[English](readme.md)** • 
-**[简体中文](readme.zh-cn.md)** • 
-**[繁體中文](readme.zh-tw.md)** • 
-**[日本語](readme.ja.md)** • 
-**[Español](readme.es.md)** • 
-**[Français](readme.fr.md)** • 
+**[English](readme.md)** •
+**[简体中文](readme.zh-cn.md)** •
+**[繁體中文](readme.zh-tw.md)** •
+**[日本語](readme.ja.md)** •
+**[Español](readme.es.md)** •
+**[Français](readme.fr.md)** •
 **[Deutsch](readme.de.md)**
 
 ---
@@ -30,14 +30,14 @@
 ### 🧭 快捷导航链接
 
 [📥 下载 DMG 安装包](website/downloads/brewstore-1.0.0.dmg) •
-[🍺 Homebrew Cask 安装](#-选项-1官方-homebrew-cask-推荐) •
+[🍺 Homebrew Cask 安装](#选项-1官方-homebrew-cask-推荐) •
 [✨ 功能特性亮点](#-功能特性亮点) •
-[⌨️ 快捷键速查指南](#-高效键盘快捷键) •
+[⌨️ 快捷键速查指南](#高效键盘快捷键) •
 [💻 CLI 命令行伴侣](#-brewstore-cli-终端命令行伴侣) •
-[🛡️ 安全与回滚架构](#-安全第一的系统架构) •
-[📊 横向功能对比表](#-为什么选择-brewstore而不是-caskhub-或-taphouse-pro-1999) •
+[🛡️ 安全与回滚架构](#安全第一的系统架构) •
+[📊 横向功能对比表](#为什么选择-brewstore而不是-caskhub-或-taphouse-pro-1999) •
 [🧪 自动化测试验证](#-自动化测试与质量保障) •
-[🗺️ 开发路线图](#-开发路线图)
+[🗺️ 开发路线图](#开发路线图)
 
 </div>
 
@@ -48,6 +48,7 @@
 **BrewStore** 是专为 macOS 打造的新一代现代化包管理器桌面应用。完全采用苹果原生 **SwiftUI** 与 **AppKit** 精雕细琢而成，它将 Homebrew 强大的底层能力与媲美 Apple 设计大奖的 App Store 流畅人机交互体验完美融合。
 
 无论您是日常需要管理多套运行环境的软件工程师、追求优雅创作工具的设计师，还是需要监控守护进程的资深极客，BrewStore 都能为您提供：
+
 - **闪电般的检索速度**：基于本地内存分词索引，在 20ms 内完成逾万款 Formula 与 Cask 软件的即时搜索。
 - **预览在先的安全卸载机制**：在执行任何卸载或 `autoremove` 操作前，完整呈现级联反向依赖与孤立依赖影响分析。
 - **时光机快照回滚**：在执行关键变动前自动记录系统快照，支持带可视化差异（Diff）的一键即时回滚。
@@ -58,7 +59,7 @@
 
 ## ⚡ 架构与子系统概览
 
-```
+```text
 +-----------------------------------------------------------------------------------------+
 |                                    BrewStore GUI Layer                                  |
 |   +-------------------+  +--------------------+  +-------------------+  +-----------+   |
@@ -115,30 +116,36 @@
    - 自动生成幂等的单行 Shell 部署脚本，并在多设备同步面板中提供一键恢复能力，数分钟内还原全套开发与日常工作环境。
 
 ### 🛍️ 1. 为 Homebrew 注入现代 App Store 级美学体验
+
 - **Spotlight 焦点故事与精选专栏**：深度探索精选 macOS 优质软件，图文并茂展示更新亮点、功能介绍与安装说明。
 - **社区争霸赛（Community Showdown）**：基于 GitHub Discussions 的无服务器零成本社区淘汰赛，民主投票选出季度神级工具。
 - **开发者工具箱（Toolkits）**：针对全栈开发、Swift/iOS、DevOps、Rust、数据科学与 AI 机器学习的一键式预设组合包。
 - **个人愿望单与收藏夹**：星标保存心仪工具，与系统已安装状态完全隔离，便于日后随时安装。
 
-### 🛡️ 2. 安全第一的系统架构与时光机快照
+### 🛡️ 2. 安全第一的系统架构与时光机快照 <a id="安全第一的系统架构"></a>
+
 - **原子级版本固定（Pin / Unpin）**：直接在详情页或右键菜单中锁定依赖版本，命令失败自动原子回滚，彻底告别生产环境非预期升级。
 - **预览在先的安全卸载门禁**：所有包卸载与 `autoremove` 均提供非破坏性预览弹窗，详尽提示下游受影响的反向依赖与孤儿残留。
 - **1 键时光机快照回滚**：变更前自动拍摄系统环境快照，支持带版本差异对比的一键无损回滚。
 - **主动式 Homebrew 进程锁协调**：实时侦测后台并发的 Homebrew 进程，排队等待并防止数据库损坏。
 
 ### ⚙️ 3. 后台服务管理与实时性能遥测
+
 - **全方位运行状态观测**：实时呈现 PostgreSQL、Redis、Nginx、MySQL、RabbitMQ 等服务的 CPU 占比、内存 RSS 占用、运行时长与正在监听的 TCP 端口。
 - **即时操作响应**：秒级执行启动、停止、重启或配置开机自启，操作反馈灵敏即时。
 
 ### 🌐 4. 镜像源延迟测速与高速 CDN 切换
+
 - **实时延迟基准测试**：一键并行测速 Official Fastly CDN、中国科大（USTC）、清华大学（TUNA）以及阿里云镜像源。
 - **一键无缝切换**：一键更新 `HOMEBREW_API_DOMAIN` 与 `HOMEBREW_BOTTLE_DOMAIN` 环境变量，大幅提升下载速度。
 
 ### 💻 5. 防形变菜单栏助手与终端 CLI 伴侣
+
 - **无形变菜单栏浮窗**：常驻顶部菜单栏，采用固定窗体几何尺寸，支持快速查收更新、一键升级、服务状态查看与快捷系统维护。
 - **完整的命令行工具 (`brewstore`)**：在终端中使用 `brewstore` 运行安全扫描、多版本切换、Mac App Store 升级与缓存清理。
 
 ### 🔄 6. 多平台 Git 云端同步
+
 - 支持一键导出并同步个人环境至 `~/Brewfile`。
 - 原生支持 **GitHub Gists**、**GitLab Snippets**、**Codeberg**、**Forgejo** 以及私有部署的 **Gitea** 实例。
 
@@ -146,7 +153,7 @@
 
 ## ⚡ 安装指南
 
-### 选项 1：官方 Homebrew Cask 安装（推荐）
+### 选项 1：官方 Homebrew Cask 安装（推荐） <a id="选项-1官方-homebrew-cask-推荐"></a>
 
 通过 Homebrew 官方 Cask 一键安装 BrewStore 桌面应用及终端 CLI：
 
@@ -156,6 +163,7 @@ brew install --cask brewstore
 ```
 
 后续更新应用只需运行：
+
 ```bash
 brew upgrade --cask brewstore
 ```
@@ -169,20 +177,25 @@ brew upgrade --cask brewstore
 - **DMG 安装包**：[`website/downloads/brewstore-1.0.0.dmg`](website/downloads/brewstore-1.0.0.dmg)
 - **发布版本**：`v1.0.0`
 - **已校验 SHA-256 校验码**：
-  ```
+
+  ```text
   d702a472a3080cbc246dafe9ea810cdcb6e88b886bdca6c92e934b2c278f33a6
   ```
 
 验证下载文件的完整性：
+
 ```bash
 shasum -a 256 website/downloads/brewstore-1.0.0.dmg
 ```
 
 #### 🛡️ macOS Gatekeeper 提示处理说明
+
 由于 BrewStore 为独立开源项目且未参与 Apple 付费开发者公证计划，首次启动若提示“无法验证开发者”：
+
 ```bash
 xattr -cr /Applications/BrewStore.app
 ```
+
 或在访达（Finder）中**右键点击** `BrewStore.app` 并选择**“打开”**即可。
 
 ---
@@ -206,7 +219,7 @@ xcodebuild test -scheme BrewStore -destination 'platform=macOS'
 
 ---
 
-## ⌨️ 高效键盘快捷键
+## ⌨️ 高效键盘快捷键 <a id="高效键盘快捷键"></a>
 
 | 快捷键 | 功能 | 说明 |
 | :--- | :--- | :--- |
@@ -257,7 +270,7 @@ brewstore launch
 
 ---
 
-## 🌟 为什么选择 BrewStore？（对比 CaskHub 与 Taphouse Pro $19.99）
+## 🌟 为什么选择 BrewStore？（对比 CaskHub 与 Taphouse Pro $19.99） <a id="为什么选择-brewstore而不是-caskhub-或-taphouse-pro-1999"></a>
 
 | 功能维度 | **BrewStore** | **Taphouse Pro** ($19.99) | **CaskHub** |
 | :--- | :---: | :---: | :---: |
@@ -314,7 +327,7 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
 
 ---
 
-## 🛡️ 隐私与安全第一原则
+## 🛡️ 隐私与安全第一原则 <a id="隐私与安全第一原则"></a>
 
 - **绝对零遥测**：BrewStore 不包含任何用户行为追踪 SDK，无 Google/Firebase 依赖，不发送任何遥测数据。
 - **纯本地运行**：所有命令通过您本机的 Homebrew 环境（Apple Silicon 上的 `/opt/homebrew` 或 Intel 上的 `/usr/local`）直接执行。
@@ -323,7 +336,7 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
 
 ---
 
-## 🗺️ 开发路线图
+## 🗺️ 开发路线图 <a id="开发路线图"></a>
 
 - [x] **v1.0.0**：原生 SwiftUI 界面重构、FastCache 极速缓存引擎、⌘K 命令面板与交互式依赖图谱。
 - [x] **v1.0.5**：多源 Git 云端同步（GitLab、Codeberg、Forgejo、Gitea）与社区争霸赛擂台系统。

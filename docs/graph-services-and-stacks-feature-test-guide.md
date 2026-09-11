@@ -1,6 +1,7 @@
 # 🤖 BrewStore Dependency Topology, Background Services, Stories & Stacks: Feature Test Guide
 
 This document details **EVERY SINGLE feature, interactive gesture, service telemetry metric, and curated bundle workflow** across BrewStore's:
+
 1. **Interactive Dependency Topology Graph** (`DependencyTopologyView.swift` & `DependencyGraphView.swift`)
 2. **Background Services & Live Log Inspector** (`ServicesView.swift` & `ServiceLogView.swift`)
 3. **Editorial Stories & Developer Guides** (`StoriesFeedView.swift` & `StoryDetailView.swift`)
@@ -27,6 +28,7 @@ graph TD
 The interactive 2D visual canvas for exploring package dependencies:
 
 ### 1.1 Canvas Navigation & Gestures
+
 - **Interactive Gestures**:
   - **Pan / Drag**: Click and drag anywhere on the canvas to pan across large dependency graphs.
   - **Pinch-to-Zoom / Zoom Slider**: Zoom in and out (0.2x to 3.0x) to inspect dense clusters.
@@ -39,6 +41,7 @@ The interactive 2D visual canvas for exploring package dependencies:
   - `Full Bidirectional Ecosystem`.
 
 ### 1.2 Visual Node Bubbles (`NodeBubble`) & Edges (`EdgeLine`)
+
 - **Color-Coded Node Cards**:
   - Blue: GUI Casks.
   - Green: CLI Formulae.
@@ -57,6 +60,7 @@ The interactive 2D visual canvas for exploring package dependencies:
 The native macOS `launchd` background daemon control suite:
 
 ### 2.1 Live Service Telemetry & Status
+
 - **Daemon Metrics Cards**:
   - Running status dot (Green for active, Gray for stopped, Red for error/exited).
   - Daemon user context (`User: brewuser` vs `Root / System`).
@@ -65,6 +69,7 @@ The native macOS `launchd` background daemon control suite:
   - Service uptime and launchd `.plist` filesystem location (`~/Library/LaunchAgents/`).
 
 ### 2.2 Granular Service Controls
+
 - **1-Click Control Buttons**:
   - `Start`: Launches the daemon via `brew services start <service>`.
   - `Stop`: Stops the daemon cleanly.
@@ -74,6 +79,7 @@ The native macOS `launchd` background daemon control suite:
   - Displays watchdog health status and crash count.
 
 ### 2.3 Live Streaming Service Log Viewer (`ServiceLogView.swift`)
+
 - **Log Stream Window**:
   - Reads standard stdout and stderr logs (`~/Library/Logs/Homebrew/` or service-specific log paths).
   - Auto-scroll lock toggle and log search filter bar.
@@ -87,11 +93,13 @@ The native macOS `launchd` background daemon control suite:
 The App Store-quality curated editorial feed:
 
 ### 3.1 Stories Feed Grid
+
 - **Curated Articles Gallery**:
   - 8 rich editorial guides (e.g. *"Level Up Your Terminal in 5 Minutes"*, *"The Modern Mac Developer Starter Pack"*, *"Supercharge Your Database Workflow"*).
   - Hero header banners, category badges (*Terminal*, *DevOps*, *Productivity*, *Security*), and estimated reading times (*"4 min read"*).
 
 ### 3.2 Story Reader Modal & Inline Package Actions
+
 - **Rich Markdown Reader**:
   - Full article content with syntax-highlighted code blocks, architecture diagrams, and tips.
 - **Inline 1-Click Package Mentions**:
@@ -107,6 +115,7 @@ The App Store-quality curated editorial feed:
 The curated 100% Free & Open-Source (FOSS) bundle deployment center:
 
 ### 4.1 Curated FOSS Bundles
+
 - **Tier 1 Bundles**:
   - *CLI Modern Unix Supercharger* (`bat`, `eza`, `ripgrep`, `fd`, `zoxide`, `fzf`, `starship`, `ghostty`).
   - *AI Engineer Suite* (`ollama`, `python@3.12`, `ffmpeg`, `imagemagick`, `lm-studio`).
@@ -116,6 +125,7 @@ The curated 100% Free & Open-Source (FOSS) bundle deployment center:
   - Every bundle is strictly composed of free, open-source software (with `bitwarden` strictly as the sole permitted freemium package).
 
 ### 4.2 Interactive Flow Chips (`FlowChipsView`)
+
 - **Visual Status Badges**:
   - Green checkmark for installed tools.
   - Yellow `star.fill` for wishlisted tools.
@@ -124,6 +134,7 @@ The curated 100% Free & Open-Source (FOSS) bundle deployment center:
   - Right-click any chip to Star/Unstar, Pin/Unpin, or View Details.
 
 ### 4.3 Custom Stack Creator (`NewStackSheet`) & Batch Deployment
+
 - **Custom Bundle Builder**:
   - Add custom title, SF Symbol icon, and formula/cask IDs.
 - **Batch Actions**:
@@ -137,6 +148,7 @@ The curated 100% Free & Open-Source (FOSS) bundle deployment center:
 The power-user installation flags sheet:
 
 ### 5.1 Custom Build Flags Builder
+
 - **Compilation Options**:
   - `--build-from-source`: Compiles from source code instead of downloading pre-built bottles.
   - `--HEAD`: Installs the latest unreleased Git master/main branch commit.

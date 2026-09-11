@@ -5,6 +5,7 @@
 Complete transformation into the unified Mac Application & Package Manager, combining Homebrew package management, Mac App Store integration, cache cleaning, architecture intelligence, background daemon controls, and machine blueprint replication.
 
 ### The 5 Core Pillars
+
 - **Pillar 1: Unified App Inventory & Dual-Store Management**:
   - Aggregated Homebrew Cask, Formula, Mac App Store (MAS), and unmanaged standalone application inventory.
   - Configurable default source recommendation preference (`.homebrew` vs `.macAppStore`) in General Settings.
@@ -28,6 +29,7 @@ Complete transformation into the unified Mac Application & Package Manager, comb
   - Native in-app blueprint restore ("Bootstrap This Mac") and enhanced Brewfile import/export with `mas` entry support.
 
 ### Granular Developer Cache Cleaner (Option A)
+
 - Specialized disk analyzer scanning major developer tooling caches:
   - Xcode DerivedData, Archives, iOS DeviceSupport, and CoreSimulator caches.
   - Docker layer caches, OrbStack data stores.
@@ -35,6 +37,7 @@ Complete transformation into the unified Mac Application & Package Manager, comb
 - Select All / Deselect All controls with individual target selection and 1-click purge to `~/.Trash`.
 
 ### Menu Bar Companion & ⌘K Command Palette (Option B)
+
 - **Menu Bar Extra**:
   - Persistent lightweight menu bar helper with real-time CPU percentage and memory RSS telemetry for background services.
   - Header warning badge detecting active Rosetta 2 Intel apps with direct navigation to native migration.
@@ -45,6 +48,7 @@ Complete transformation into the unified Mac Application & Package Manager, comb
   - Contextual preview footer with keyboard shortcut indicators and arrow-key auto-scrolling navigation.
 
 ### Bug Fixes & Quality Assurance
+
 - **Crash Fixes**: Resolved fatal index out-of-bounds crash in `CommandPaletteView` by ensuring strict index validation (`filteredItems.indices.contains(selectedIndex)`).
 - **Stuck State Fixes**:
   - Unified Re-Scan button in `DiskStorageView` refreshing both Homebrew and developer caches simultaneously while maintaining proper operating lock states.
@@ -62,17 +66,20 @@ Complete transformation into the unified Mac Application & Package Manager, comb
   - Expanded review quote limit to 3 lines with unbounded horizontal width.
 
 ### CLI Companion & Shell Integration (Option 3)
+
 - Embedded `brewstore` CLI companion tool supporting `adopt`, `switch`, `audit`, `mas`, `health`, `clean`, `devclean`, `blueprint`, `completions`, `install-cli`, and `version`.
 - Automated shell completion generators for Zsh (`_brewstore`), Bash (`brewstore.bash`), and Fish (`brewstore.fish`).
 - `BrewStoreCLIToolManager` and dedicated Settings card providing 1-click symlink installation to `~/.local/bin/brewstore` and shell completions setup.
 
 ### Internal Isolation (Option 4) & UX Polish (Option 2)
+
 - Moved local internal notes (`task.md`, `todo.md`, `report.md`, `report_template.md`) into `docs/internal/` and added to `.gitignore`.
 - Enhanced `CommandPaletteView` with wrap-around arrow navigation, escape-to-close handling, and async focus capture.
 - Added full-row tap gesture and accessibility traits for developer cache checklists in `DiskStorageView`.
 - Added accessibility labels and hints to Menu Bar companion badges and controls.
 
 ### Verification & Test Suite
+
 - Expanded automated unit test suite to **345 tests across 48 test suites with 0 failures (100% passing)**.
 - Full SwiftLint strict compliance with **0 violations across all 201 source files**.
 - Ad-hoc signed release DMG (`website/downloads/brewstore-1.0.0.dmg`) with verified SHA-256 checksum (`d702a472a3080cbc246dafe9ea810cdcb6e88b886bdca6c92e934b2c278f33a6`).

@@ -10,19 +10,19 @@
 [![Release: v1.0.0](https://img.shields.io/badge/release-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/amfi-disable/BrewStore/releases)
 [![Tests: 345 / 345 Passed](https://img.shields.io/badge/tests-339%20%2F%20339%20Passed%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-automated-tests--quality-assurance)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](license)
-[![Pricing: Free & Open-Source](https://img.shields.io/badge/price-100%25%20Free%20%26%20Open%20Source-success.svg?style=flat-square)](#-why-brewstore-over-caskhub--taphouse-pro)
-[![Zero Telemetry](https://img.shields.io/badge/privacy-Zero%20Telemetry%20%2F%20100%25%20Local-purple.svg?style=flat-square)](#-privacy--security-first)
+[![Pricing: Free & Open-Source](https://img.shields.io/badge/price-100%25%20Free%20%26%20Open%20Source-success.svg?style=flat-square)](#why-brewstore-over-caskhub--taphouse-pro)
+[![Zero Telemetry](https://img.shields.io/badge/privacy-Zero%20Telemetry%20%2F%20100%25%20Local-purple.svg?style=flat-square)](#privacy--security-first)
 
 ---
 
-### 🌐 Select Language / 选择语言 / 言語を選択 / Idioma / Langue / Sprache
+## 🌐 Select Language / 选择语言 / 言語を選択 / Idioma / Langue / Sprache
 
-**[English](readme.md)** • 
-**[简体中文](readme.zh-cn.md)** • 
-**[繁體中文](readme.zh-tw.md)** • 
-**[日本語](readme.ja.md)** • 
-**[Español](readme.es.md)** • 
-**[Français](readme.fr.md)** • 
+**[English](readme.md)** •
+**[简体中文](readme.zh-cn.md)** •
+**[繁體中文](readme.zh-tw.md)** •
+**[日本語](readme.ja.md)** •
+**[Español](readme.es.md)** •
+**[Français](readme.fr.md)** •
 **[Deutsch](readme.de.md)**
 
 ---
@@ -30,14 +30,14 @@
 ### 🧭 Quick Directing Links
 
 [📥 Download DMG](website/downloads/brewstore-1.0.0.dmg) •
-[🍺 Homebrew Cask](#-option-1-official-homebrew-cask-recommended) •
+[🍺 Homebrew Cask](#option-1-official-homebrew-cask-recommended) •
 [✨ Feature Highlights](#-feature-highlights) •
-[⌨️ Keyboard Shortcuts](#-power-keyboard-shortcuts) •
+[⌨️ Keyboard Shortcuts](#power-keyboard-shortcuts) •
 [💻 CLI Companion](#-brewstore-cli-companion) •
-[🛡️ Safety & Reliability](#-safety-first-architecture) •
-[📊 Comparison Matrix](#-why-brewstore-over-caskhub--taphouse-pro) •
+[🛡️ Safety & Reliability](#safety-first-architecture) •
+[📊 Comparison Matrix](#why-brewstore-over-caskhub--taphouse-pro) •
 [🧪 Test Suite](#-automated-tests--quality-assurance) •
-[🗺️ Roadmap](#-roadmap)
+[🗺️ Roadmap](#roadmap)
 
 </div>
 
@@ -48,6 +48,7 @@
 **BrewStore** is the definitive desktop application for macOS package management. Built from the ground up in native **SwiftUI** and **AppKit**, it bridges the raw flexibility of Homebrew’s CLI with the elegance, discoverability, and fluid ergonomics of an Apple Design Award-winning App Store experience.
 
 Whether you're a software engineer orchestrating multiple runtimes, a designer configuring creative tools, or a power user auditing system daemons, BrewStore delivers:
+
 - **Instant Discoverability**: Search across 10,000+ formulae and casks in under 20ms using local in-memory tokenized indices.
 - **Preview-First Dry-Run Safety**: Inspect cascaded reverse dependencies and orphan impacts before any removal or update is committed.
 - **Time Machine Snapshots**: Automatic pre-mutation rollback points with visual diffs so you can revert any botched command instantly.
@@ -58,7 +59,7 @@ Whether you're a software engineer orchestrating multiple runtimes, a designer c
 
 ## ⚡ Architecture & Subsystems
 
-```
+```text
 +-----------------------------------------------------------------------------------------+
 |                                    BrewStore GUI Layer                                  |
 |   +-------------------+  +--------------------+  +-------------------+  +-----------+   |
@@ -115,26 +116,31 @@ Whether you're a software engineer orchestrating multiple runtimes, a designer c
    - Generates an idempotent, 1-command bootstrap shell script and provides native in-app restoration in `MultiMachineSyncView` to clone your Mac environment in minutes.
 
 ### 🛍️ 6. Modern App Store Experience for Homebrew
+
 - **Curated Spotlight & Editorial Stories**: Discover top-tier macOS utilities with handcrafted editorial narratives, release breakdowns, and developer highlights.
 - **Community Showdown & Tournament Brackets**: Zero-server community brackets powered by GitHub Discussions. Vote for your favorite tools and follow seasonal matchups.
 - **Developer Toolkits & Stacks**: One-click installation bundles for Full-Stack Web, Swift/iOS, DevOps, Rust, Data Science, and Machine Learning.
 - **Personal Wishlist & Bookmarking**: Star packages and keep a curated wishlist that stays isolated from system state.
 
-### 🛡️ 7. Safety-First Architecture & Rollback Time Machine
+### 🛡️ 7. Safety-First Architecture & Rollback Time Machine <a id="safety-first-architecture"></a>
+
 - **Atomic Version Pinning**: Pin mission-critical packages directly from detail pages, action menus, or the context menu. Automatic rollback handles CLI errors cleanly with immediate UI feedback.
 - **Preview-First Dry-Run Uninstalls**: Every package removal and `autoremove` passes through a non-destructive preview modal detailing reverse-dependency warnings and orphaned packages.
 - **1-Click Snapshot Rollbacks**: BrewStore automatically creates system state snapshots prior to destructive mutations, allowing instant Time Machine rollbacks with full diff visualization.
 - **Proactive Lock Coordination**: Detects concurrent Homebrew processes and provides graceful queueing and timeouts, preventing database locks and corrupted taps.
 
 ### 🌐 8. Mirror Speed Benchmark & CDN Switcher
+
 - **Live Latency Benchmarking**: Ping and measure download speeds across Official Fastly CDN, USTC (University of Science and Technology of China), TUNA (Tsinghua University), and Aliyun mirrors.
 - **1-Click Switcher**: Apply high-speed mirrors globally across `HOMEBREW_API_DOMAIN` and `HOMEBREW_BOTTLE_DOMAIN` with a single tap.
 
 ### 💻 9. Menu Bar Companion & Terminal CLI
+
 - **Zero-Distortion Menu Bar Popover**: Check pending updates, trigger one-click upgrades, monitor active services, and access quick maintenance tools with rigid window geometry.
 - **Full Terminal CLI (`brewstore`)**: Run audits, switch tool versions, manage Mac App Store apps, clean caches, and adopt unmanaged applications directly from terminal shell environments.
 
 ### 🔄 10. Multi-Provider Git Cloud Sync
+
 - Sync your packages, taps, and cask configurations directly to a `~/Brewfile`.
 - First-class support for **GitHub Gists**, **GitLab Snippets**, **Codeberg**, **Forgejo**, and custom self-hosted **Gitea** instances with encrypted personal access tokens.
 
@@ -152,6 +158,7 @@ brew install --cask brewstore
 ```
 
 To update in the future:
+
 ```bash
 brew upgrade --cask brewstore
 ```
@@ -165,20 +172,25 @@ Download the signed disk image directly from the release mirror:
 - **Installer DMG**: [`website/downloads/brewstore-1.0.0.dmg`](website/downloads/brewstore-1.0.0.dmg)
 - **Release Version**: `v1.0.0`
 - **Verified SHA-256 Checksum**:
-  ```
+
+  ```text
   d702a472a3080cbc246dafe9ea810cdcb6e88b886bdca6c92e934b2c278f33a6
   ```
 
 To verify the integrity of your download:
+
 ```bash
 shasum -a 256 website/downloads/brewstore-1.0.0.dmg
 ```
 
 #### 🛡️ macOS Gatekeeper Note (Ad-Hoc Signing)
+
 BrewStore is an independent open-source project. If macOS presents an *"Unverified Developer"* prompt on first launch, clear the quarantine attribute:
+
 ```bash
 xattr -cr /Applications/BrewStore.app
 ```
+
 Alternatively, **Right-Click** `BrewStore.app` in Finder and select **Open**.
 
 ---
@@ -202,7 +214,7 @@ xcodebuild test -scheme BrewStore -destination 'platform=macOS'
 
 ---
 
-## ⌨️ Power Keyboard Shortcuts
+## ⌨️ Power Keyboard Shortcuts <a id="power-keyboard-shortcuts"></a>
 
 BrewStore is designed for keyboard-first efficiency:
 
@@ -255,7 +267,7 @@ brewstore launch
 
 ---
 
-## 🌟 Why BrewStore Over CaskHub & Taphouse Pro ($19.99)
+## 🌟 Why BrewStore Over CaskHub & Taphouse Pro ($19.99) <a id="why-brewstore-over-caskhub--taphouse-pro"></a>
 
 | Feature Vertical | **BrewStore** | **Taphouse Pro** ($19.99) | **CaskHub** |
 | :--- | :---: | :---: | :---: |
@@ -312,7 +324,7 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
 
 ---
 
-## 🛡️ Privacy & Security First
+## 🛡️ Privacy & Security First <a id="privacy--security-first"></a>
 
 - **Zero Telemetry**: BrewStore contains zero tracking analytics, zero Google/Firebase SDKs, and zero telemetry beacons.
 - **Local Execution**: All command executions run strictly through your local Homebrew binary (`/opt/homebrew` on Apple Silicon or `/usr/local` on Intel).
@@ -321,7 +333,7 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
 
 ---
 
-## 🗺️ Roadmap
+## 🗺️ Roadmap <a id="roadmap"></a>
 
 - [x] **v1.0.0**: Native SwiftUI redesign, FastCache engine, ⌘K command palette, and interactive dependency graph.
 - [x] **v1.0.5**: Multi-Provider Git sync (GitLab, Codeberg, Forgejo, Gitea) and Community Showdown bracket tournament engine.

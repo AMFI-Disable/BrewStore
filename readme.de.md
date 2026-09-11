@@ -11,18 +11,18 @@
 [![Tests: 345 / 345 Passed](https://img.shields.io/badge/Tests-339%20%2F%20339%20Bestanden%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-automatisierte-tests-und-qualit%C3%A4tssicherung)
 [![License: MIT](https://img.shields.io/badge/Lizenz-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/Preis-100%25%20Kostenlos%20%26%20Open%20Source-success.svg?style=flat-square)](#-warum-brewstore-im-vergleich-zu-caskhub-und-taphouse-pro-1999)
-[![Zero Telemetry](https://img.shields.io/badge/Datenschutz-Keine%20Telemetrie%20%2F%20100%25%20Lokal-purple.svg?style=flat-square)](#-sicherheit-und-datenschutz-an-erster-stelle)
+[![Zero Telemetry](https://img.shields.io/badge/Datenschutz-Keine%20Telemetrie%20%2F%20100%25%20Lokal-purple.svg?style=flat-square)](#sicherheit-und-datenschutz-an-erster-stelle)
 
 ---
 
-### 🌐 Sprache auswählen / Select Language / 选择语言 / 言語を選択 / Idioma / Langue / Sprache
+## 🌐 Sprache auswählen / Select Language / 选择语言 / 言語を選択 / Idioma / Langue / Sprache
 
-**[English](readme.md)** • 
-**[简体中文](readme.zh-cn.md)** • 
-**[繁體中文](readme.zh-tw.md)** • 
-**[日本語](readme.ja.md)** • 
-**[Español](readme.es.md)** • 
-**[Français](readme.fr.md)** • 
+**[English](readme.md)** •
+**[简体中文](readme.zh-cn.md)** •
+**[繁體中文](readme.zh-tw.md)** •
+**[日本語](readme.ja.md)** •
+**[Español](readme.es.md)** •
+**[Français](readme.fr.md)** •
 **[Deutsch](readme.de.md)**
 
 ---
@@ -30,14 +30,14 @@
 ### 🧭 Schnelle Navigationslinks
 
 [📥 DMG herunterladen](website/downloads/brewstore-1.0.0.dmg) •
-[🍺 Homebrew Cask Installation](#-option-1-offizielles-homebrew-cask-empfohlen) •
+[🍺 Homebrew Cask Installation](#option-1-offizielles-homebrew-cask-empfohlen) •
 [✨ Funktionshighlights](#-funktionshighlights) •
-[⌨️ Tastatur-Kurzbefehle](#-tastatur-kurzbefehle) •
+[⌨️ Tastatur-Kurzbefehle](#tastatur-kurzbefehle) •
 [💻 CLI-Terminalbegleiter](#-brewstore-cli-begleiter) •
-[🛡️ Sicherheit & Rollback](#-sicherheit-an-erster-stelle) •
+[🛡️ Sicherheit & Rollback](#sicherheit-an-erster-stelle) •
 [📊 Vergleichstabelle](#-warum-brewstore-im-vergleich-zu-caskhub-und-taphouse-pro-1999) •
 [🧪 Automatisierte Tests](#-automatisierte-tests-und-qualit%C3%A4tssicherung) •
-[🗺️ Roadmap](#-roadmap)
+[🗺️ Roadmap](#roadmap)
 
 </div>
 
@@ -57,7 +57,7 @@
 
 ## ⚡ Architektur & Teilsysteme
 
-```
+```text
 +-----------------------------------------------------------------------------------------+
 |                                  BrewStore GUI-Ebene                                    |
 |   +-------------------+  +--------------------+  +-------------------+  +-----------+   |
@@ -114,26 +114,31 @@
    - Erzeugt ein idempotentes 1-Befehl-Bootstrap-Shellskript sowie In-App-Wiederherstellung in `MultiMachineSyncView`, um Ihren Mac in wenigen Minuten einzurichten.
 
 ### 🛍️ 6. Moderne App Store Erfahrung für Homebrew
+
 - **Spotlight & Redaktionelle Geschichten**: Entdecken Sie handverlesene macOS-Tools mit Vorstellungen und Versionsdetails.
 - **Community Showdown**: Serverlose Turnier-Runden auf Basis von GitHub Discussions für das beste Tool der Saison.
 - **Entwickler-Toolkits**: 1-Klick-Paketbündel für Full-Stack, Swift/iOS, DevOps, Rust, Data Science und Machine Learning.
 - **Merkliste & Favoriten**: Pakete vormerken, unabhängig vom Installationsstatus.
 
-### 🛡️ 7. Sicherheit an erster Stelle & Rollback Time Machine
+### 🛡️ 7. Sicherheit an erster Stelle & Rollback Time Machine <a id="sicherheit-an-erster-stelle"></a>
+
 - **Atomares Versions-Anheften (Pin/Unpin)**: Fixieren Sie kritische Versionen direkt in der Detailansicht oder dem Kontextmenü. Automatisches Rollback bei Fehlern.
 - **Deinstallations-Vorschau**: Zeigt vor jeder Löschung oder jedem `autoremove` inverse Abhängigkeiten und verwaiste Pakete an.
 - **1-Klick-Snapshot-Wiederherstellung**: Erstellt vor Änderungen automatisch Snapshots für sofortige Wiederherstellung mit Diff-Vergleich.
 - **Proaktive PID-Sperrkoordination**: Verhindert Konflikte mit laufenden Homebrew-Befehlen.
 
 ### 🌐 8. Mirror-Geschwindigkeitstest & CDN-Umschalter
+
 - **Live-Latenzmessung**: Testen Sie Übertragungszeiten für das offizielle Fastly CDN, USTC, TUNA und Aliyun.
 - **1-Klick-Umschaltung**: Schnelle Mirrors direkt systemweit für `HOMEBREW_API_DOMAIN` und `HOMEBREW_BOTTLE_DOMAIN` aktivieren.
 
 ### 💻 9. Menüleisten-Begleiter & Terminal CLI
+
 - **Verzerrungsfreies Menüleisten-Widget**: Feste Geometrie für ausstehende Updates, Ein-Klick-Aktualisierungen und Dienststatus.
 - **Vollwertige CLI (`brewstore`)**: Führen Sie Audits durch, wechseln Sie Versionen und leeren Sie Caches direkt im Terminal.
 
 ### 🔄 10. Multi-Provider Git Cloud-Synchronisierung
+
 - Synchronisiert Ihre Pakete und Casks direkt in ein `~/Brewfile`.
 - Volle Unterstützung für **GitHub Gists**, **GitLab Snippets**, **Codeberg**, **Forgejo** und selbst gehostetes **Gitea**.
 
@@ -141,7 +146,7 @@
 
 ## ⚡ Installation
 
-### Option 1: Offizielles Homebrew Cask (Empfohlen)
+### Option 1: Offizielles Homebrew Cask (Empfohlen) <a id="option-1-offizielles-homebrew-cask-empfohlen"></a>
 
 ```bash
 brew tap amfi-disable/brewstore
@@ -149,6 +154,7 @@ brew install --cask brewstore
 ```
 
 Aktualisieren:
+
 ```bash
 brew upgrade --cask brewstore
 ```
@@ -160,20 +166,25 @@ brew upgrade --cask brewstore
 - **Installations-DMG**: [`website/downloads/brewstore-1.0.0.dmg`](website/downloads/brewstore-1.0.0.dmg)
 - **Version**: `v1.0.0`
 - **Geprüfte SHA-256 Prüfsumme**:
-  ```
+
+  ```text
   d702a472a3080cbc246dafe9ea810cdcb6e88b886bdca6c92e934b2c278f33a6
   ```
 
 Prüfsumme verifizieren:
+
 ```bash
 shasum -a 256 website/downloads/brewstore-1.0.0.dmg
 ```
 
 #### 🛡️ macOS Gatekeeper Hinweis (Ad-Hoc Signierung)
+
 Sollte macOS beim ersten Start einen Hinweis auf einen *„nicht verifizierten Entwickler“* anzeigen:
+
 ```bash
 xattr -cr /Applications/BrewStore.app
 ```
+
 Alternativ im Finder einen **Rechtsklick** auf `BrewStore.app` ausführen und **Öffnen** wählen.
 
 ---
@@ -197,12 +208,12 @@ xcodebuild test -scheme BrewStore -destination 'platform=macOS'
 
 ---
 
-## ⌨️ Tastatur-Kurzbefehle
+## ⌨️ Tastatur-Kurzbefehle <a id="tastatur-kurzbefehle"></a>
 
 | Kurzbefehl | Aktion | Beschreibung |
 | :--- | :--- | :--- |
 | <kbd>⌘ K</kbd> | **Befehlspalette** | Schnellstarter (`> upgrade all`, `> cleanup`, `> benchmark`) und Gesamtsuche |
-| <kbd>⌘ R</kbd> | **Katalog aktualisieren**| Lokale Pakete, Dienste und ausstehende Updates neu einlesen |
+| <kbd>⌘ R</kbd> | **Katalog aktualisieren** | Lokale Pakete, Dienste und ausstehende Updates neu einlesen |
 | <kbd>⌘ F</kbd> | **Suchen** | Sofort in das Suchfeld des aktuellen Bereichs springen |
 | <kbd>⌘ ,</kbd> | **Einstellungen** | Einstellungen, Mirror-Benchmarks und Cloud-Synchronisierung |
 | <kbd>⌘ 1</kbd> | **Entdecken** | Zu Spotlight-Empfehlungen und Trends springen |
@@ -261,14 +272,14 @@ brewstore launch
 | **1-Befehl Mac Blueprint Engine** | **✅ Formeln, Casks, MAS & Präferenzen** | ❌ Nein | ❌ Nein |
 | **Dual-Store Inventar & Empfehlung** | **✅ Homebrew-Empfehlung bevorzugt** | ❌ Nein | ❌ Nein |
 | **Deinstallations-Vorschau** | **✅ Kaskadierende Warnungen** | ❌ Nein | ❌ Nein |
-| **1-Klick-Wiederherstellung** | **✅ Automatische Snapshots mit Diff**| ⚠️ Nur Ansicht | ❌ Nein |
+| **1-Klick-Wiederherstellung** | **✅ Automatische Snapshots mit Diff** | ⚠️ Nur Ansicht | ❌ Nein |
 | **Atomares Versions-Anheften** | **✅ Mit Rollback bei Fehlern** | ⚠️ Nur Formeln | ❌ Nein |
 | **Dienste-Telemetrie** | **✅ Live CPU, RAM & Ports** | ⚠️ Nur Status | ❌ Nein |
 | **Mirror-Benchmark-Test** | **✅ Fastly, USTC, TUNA, Aliyun** | ❌ Nein | ❌ Nein |
 | **Multi-Cloud Git-Sync** | **✅ GitHub, GitLab, Codeberg, Gitea** | ❌ Nur GitHub | ❌ Nein |
-| **Interaktiver Abhängigkeitsgraf**| **✅ Bidirektionaler Graph** | ⚠️ Statischer Baum | ❌ Nein |
+| **Interaktiver Abhängigkeitsgraf** | **✅ Bidirektionaler Graph** | ⚠️ Statischer Baum | ❌ Nein |
 | **Menüleisten-Widget** | **✅ Verzerrungsfreie Festgröße** | ⚠️ Einfach | ❌ Nein |
-| **Terminal CLI-Tool** | **✅ Enthalten (`brewstore`-Befehl)**| ❌ Nein | ❌ Nein |
+| **Terminal CLI-Tool** | **✅ Enthalten (`brewstore`-Befehl)** | ❌ Nein | ❌ Nein |
 | **Kaltstartzeit** | **⚡ &lt;20ms (Schneller Index)** | 🐢 2–3 Sek. | 🐢 2–3 Sek. |
 
 ---
@@ -305,7 +316,7 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
 
 ---
 
-## 🛡️ Sicherheit und Datenschutz an erster Stelle
+## 🛡️ Sicherheit und Datenschutz an erster Stelle <a id="sicherheit-und-datenschutz-an-erster-stelle"></a>
 
 - **Keine Telemetrie**: BrewStore enthält keinerlei Analysedienste, Google/Firebase SDKs oder Tracking-Mechanismen.
 - **Lokale Ausführung**: Sämtliche Befehle laufen direkt über Ihr lokales Homebrew-Programm.
@@ -313,7 +324,7 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
 
 ---
 
-## 🗺️ Roadmap
+## 🗺️ Roadmap <a id="roadmap"></a>
 
 - [x] **v1.0.0**: Natives SwiftUI Redesign, FastCache Engine, ⌘K Befehlspalette und interaktiver Abhängigkeitsgraph.
 - [x] **v1.0.5**: Multi-Provider Git-Synchronisierung und Community-Showdown Turnier-Engine.

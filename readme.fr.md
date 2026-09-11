@@ -10,19 +10,19 @@
 [![Release: v1.0.0](https://img.shields.io/badge/Version-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/amfi-disable/BrewStore/releases)
 [![Tests: 345 / 345 Passed](https://img.shields.io/badge/Tests-339%20%2F%20339%20R%C3%A9ussis%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-tests-automatis%C3%A9s-et-assurance-qualit%C3%A9)
 [![License: MIT](https://img.shields.io/badge/Licence-MIT-blue.svg?style=flat-square)](license)
-[![Pricing: Free & Open-Source](https://img.shields.io/badge/Prix-100%25%20Gratuit%20%26%20Open%20Source-success.svg?style=flat-square)](#-pourquoi-brewstore-face-%C3%A0-caskhub-et-taphouse-pro-1999)
-[![Zero Telemetry](https://img.shields.io/badge/Confidentialit%C3%A9-Z%C3%A9ro%20T%C3%A9l%C3%A9m%C3%A9trie%20%2F%20100%25%20Local-purple.svg?style=flat-square)](#-confidentialit%C3%A9-et-s%C3%A9curit%C3%A9-dabord)
+[![Pricing: Free & Open-Source](https://img.shields.io/badge/Prix-100%25%20Gratuit%20%26%20Open%20Source-success.svg?style=flat-square)](#pourquoi-brewstore-face-a-caskhub-et-taphouse-pro-1999)
+[![Zero Telemetry](https://img.shields.io/badge/Confidentialit%C3%A9-Z%C3%A9ro%20T%C3%A9l%C3%A9m%C3%A9trie%20%2F%20100%25%20Local-purple.svg?style=flat-square)](#confidentialite-et-securite-dabord)
 
 ---
 
-### 🌐 Sélectionner la Langue / Select Language / 选择语言 / 言語を選択 / Idioma / Langue / Sprache
+## 🌐 Sélectionner la Langue / Select Language / 选择语言 / 言語を選択 / Idioma / Langue / Sprache
 
-**[English](readme.md)** • 
-**[简体中文](readme.zh-cn.md)** • 
-**[繁體中文](readme.zh-tw.md)** • 
-**[日本語](readme.ja.md)** • 
-**[Español](readme.es.md)** • 
-**[Français](readme.fr.md)** • 
+**[English](readme.md)** •
+**[简体中文](readme.zh-cn.md)** •
+**[繁體中文](readme.zh-tw.md)** •
+**[日本語](readme.ja.md)** •
+**[Español](readme.es.md)** •
+**[Français](readme.fr.md)** •
 **[Deutsch](readme.de.md)**
 
 ---
@@ -30,14 +30,14 @@
 ### 🧭 Liens Directs & Navigation Rapide
 
 [📥 Télécharger le DMG](website/downloads/brewstore-1.0.0.dmg) •
-[🍺 Installation Homebrew Cask](#-option-1-cask-homebrew-officiel-recommand%C3%A9) •
+[🍺 Installation Homebrew Cask](#option-1-cask-homebrew-officiel-recommande) •
 [✨ Fonctionnalités Principales](#-fonctionnalit%C3%A9s-principales) •
-[⌨️ Raccourcis Clavier](#-raccourcis-clavier) •
+[⌨️ Raccourcis Clavier](#raccourcis-clavier) •
 [💻 Compagnon CLI Terminal](#-compagnon-cli-brewstore) •
-[🛡️ Sécurité & Restauration](#-architecture-ax%C3%A9e-sur-la-s%C3%A9curit%C3%A9) •
-[📊 Tableau Comparatif](#-pourquoi-brewstore-face-%C3%A0-caskhub-et-taphouse-pro-1999) •
+[🛡️ Sécurité & Restauration](#architecture-axee-sur-la-securite) •
+[📊 Tableau Comparatif](#pourquoi-brewstore-face-a-caskhub-et-taphouse-pro-1999) •
 [🧪 Tests Automatisés](#-tests-automatis%C3%A9s-et-assurance-qualit%C3%A9) •
-[🗺️ Feuille de Route](#-feuille-de-route)
+[🗺️ Feuille de Route](#feuille-de-route)
 
 </div>
 
@@ -57,7 +57,7 @@
 
 ## ⚡ Architecture & Composants
 
-```
+```text
 +-----------------------------------------------------------------------------------------+
 |                               Couche d'Interface GUI Native                             |
 |   +-------------------+  +--------------------+  +-------------------+  +-----------+   |
@@ -114,26 +114,31 @@
    - Génère un script Shell d'amorçage idempotent et offre une restauration intégrée dans `MultiMachineSyncView` pour cloner votre environnement en quelques minutes.
 
 ### 🛍️ 6. Expérience App Store Moderne pour Homebrew
+
 - **Sélection Spotlight & Articles Éditoriaux** : Découvrez des utilitaires triés sur le volet avec des résumés de versions détaillés.
 - **Community Showdown** : Tournois communautaires sans serveur basés sur GitHub Discussions pour élire les meilleurs outils.
 - **Boîtes à Outils Développeurs** : Packs complets en 1 clic pour Full-Stack Web, Swift/iOS, DevOps, Rust, Data Science et Machine Learning.
 - **Favoris & Liste d'Envies** : Sauvegardez des paquets dans une liste de souhaits indépendante de l'état système.
 
-### 🛡️ 7. Architecture Axée sur la Sécurité & Instantanés Time Machine
+### 🛡️ 7. Architecture Axée sur la Sécurité & Instantanés Time Machine <a id="architecture-axee-sur-la-securite"></a>
+
 - **Épinglage Atomique de Version** : Fixez les versions critiques depuis la fiche détaillée. Rollback automatique en cas d'erreur.
 - **Prévisualisation de Désinstallation** : Analyse préalable montrant les dépendances inverses affectées et paquets orphelins.
 - **Instantanés et Restauration en 1 Clic** : Sauvegarde automatique de l'état du système avant toute modification avec affichage du diff.
 - **Coordination des Verrous PID** : Évite les conflits de processus concurrents avec Homebrew.
 
 ### 🌐 8. Banc d'Essai des Miroirs CDN & Bascule Rapide
+
 - **Mesure de Latence en Direct** : Testez les vitesses du CDN officiel Fastly, USTC, TUNA et Aliyun.
 - **Bascule en 1 Clic** : Appliquez les miroirs les plus rapides sur `HOMEBREW_API_DOMAIN` et `HOMEBREW_BOTTLE_DOMAIN`.
 
 ### 💻 9. Compagnon Barre des Menus & CLI Terminal
+
 - **Widget de Barre des Menus Sans Distorsion** : Géométrie rigide et stable pour consulter les mises à jour et l'état des services.
 - **CLI Terminal Complet (`brewstore`)** : Lancez audits de sécurité, bascules de versions et nettoyages de caches directement dans le terminal.
 
 ### 🔄 10. Synchronisation Git Cloud Multi-Fournisseurs
+
 - Sauvegarde de vos paquets dans un fichier `~/Brewfile`.
 - Support de premier ordre pour **GitHub Gists**, **GitLab Snippets**, **Codeberg**, **Forgejo** et **Gitea** auto-hébergé.
 
@@ -141,7 +146,7 @@
 
 ## ⚡ Installation
 
-### Option 1 : Cask Homebrew Officiel (Recommandé)
+### Option 1 : Cask Homebrew Officiel (Recommandé) <a id="option-1-cask-homebrew-officiel-recommande"></a>
 
 ```bash
 brew tap amfi-disable/brewstore
@@ -149,6 +154,7 @@ brew install --cask brewstore
 ```
 
 Mise à jour :
+
 ```bash
 brew upgrade --cask brewstore
 ```
@@ -160,20 +166,25 @@ brew upgrade --cask brewstore
 - **Fichier DMG** : [`website/downloads/brewstore-1.0.0.dmg`](website/downloads/brewstore-1.0.0.dmg)
 - **Version** : `v1.0.0`
 - **Empreinte SHA-256 Vérifiée** :
-  ```
+
+  ```text
   d702a472a3080cbc246dafe9ea810cdcb6e88b886bdca6c92e934b2c278f33a6
   ```
 
 Vérifier le fichier :
+
 ```bash
 shasum -a 256 website/downloads/brewstore-1.0.0.dmg
 ```
 
 #### 🛡️ Note macOS Gatekeeper (Signature Ad-Hoc)
+
 Si macOS affiche un message *« Développeur non vérifié »* au premier lancement :
+
 ```bash
 xattr -cr /Applications/BrewStore.app
 ```
+
 Ou effectuez un **clic droit** sur `BrewStore.app` dans le Finder et sélectionnez **Ouvrir**.
 
 ---
@@ -197,7 +208,7 @@ xcodebuild test -scheme BrewStore -destination 'platform=macOS'
 
 ---
 
-## ⌨️ Raccourcis Clavier
+## ⌨️ Raccourcis Clavier <a id="raccourcis-clavier"></a>
 
 | Raccourci | Action | Description |
 | :--- | :--- | :--- |
@@ -248,26 +259,26 @@ brewstore launch
 
 ---
 
-## 🌟 Pourquoi BrewStore face à CaskHub et Taphouse Pro ($19.99) ?
+## 🌟 Pourquoi BrewStore face à CaskHub et Taphouse Pro ($19.99) ? <a id="pourquoi-brewstore-face-a-caskhub-et-taphouse-pro-1999"></a>
 
 | Critère | **BrewStore** | **Taphouse Pro** ($19.99) | **CaskHub** |
 | :--- | :---: | :---: | :---: |
 | **Prix & Licence** | **100% Gratuit & Open Source MIT** | 19,99 $ Propriétaire | Gratuit |
 | **Confidentialité** | **Zéro Télémétrie / 100% Local** | Traceurs tiers | Inconnue |
-| **Couverture de Tests** | **345 Méthodes XCTest (100% Réussite)**| Non communiquée | Faible |
+| **Couverture de Tests** | **345 Méthodes XCTest (100% Réussite)** | Non communiquée | Faible |
 | **Nettoyeur de Cache par App** | **✅ Non-destructif (~/.Trash)** | ❌ Non | ❌ Non |
-| **Apple Silicon vs Rosetta 2** | **✅ Détection auto & migration 1 clic**| ❌ Non | ❌ Non |
-| **LaunchAgents & Éléments d'Ouverture**| **✅ Télémétrie & suivi PID/RAM** | ⚠️ Services seuls | ❌ Non |
+| **Apple Silicon vs Rosetta 2** | **✅ Détection auto & migration 1 clic** | ❌ Non | ❌ Non |
+| **LaunchAgents & Éléments d'Ouverture** | **✅ Télémétrie & suivi PID/RAM** | ⚠️ Services seuls | ❌ Non |
 | **Moteur de Blueprint en 1 Commande** | **✅ Formules, Casks, MAS & Réglages** | ❌ Non | ❌ Non |
-| **Inventaire Double-Store & Recommandation**| **✅ Recommandation Homebrew** | ❌ Non | ❌ Non |
-| **Prévisualisation de Désinstallation**| **✅ Avertissements de cascade** | ❌ Non | ❌ Non |
-| **Instantanés en 1 Clic** | **✅ Restauration automatique avec diff**| ⚠️ Lecture seule | ❌ Non |
+| **Inventaire Double-Store & Recommandation** | **✅ Recommandation Homebrew** | ❌ Non | ❌ Non |
+| **Prévisualisation de Désinstallation** | **✅ Avertissements de cascade** | ❌ Non | ❌ Non |
+| **Instantanés en 1 Clic** | **✅ Restauration automatique avec diff** | ⚠️ Lecture seule | ❌ Non |
 | **Épinglage Atomique de Version** | **✅ Avec rollback en cas d'erreur** | ⚠️ Formules uniquement | ❌ Non |
 | **Télémétrie des Services** | **✅ CPU, RAM et Ports en direct** | ⚠️ Statut simple | ❌ Non |
 | **Banc d'Essai des Miroirs CDN** | **✅ Fastly, USTC, TUNA, Aliyun** | ❌ Non | ❌ Non |
 | **Synchronisation Git Multi-Cloud** | **✅ GitHub, GitLab, Codeberg, Gitea** | ❌ GitHub uniquement | ❌ Non |
-| **Graphe Interactif de Dépendances**| **✅ Graphe bidirectionnel** | ⚠️ Arborescence statique| ❌ Non |
-| **Barre des Menus** | **✅ Fenêtre rigide sans distorsion**| ⚠️ Basique | ❌ Non |
+| **Graphe Interactif de Dépendances** | **✅ Graphe bidirectionnel** | ⚠️ Arborescence statique | ❌ Non |
+| **Barre des Menus** | **✅ Fenêtre rigide sans distorsion** | ⚠️ Basique | ❌ Non |
 | **Compagnon Terminal CLI** | **✅ Inclus (binaire `brewstore`)** | ❌ Non | ❌ Non |
 | **Temps de Lancement à Froid** | **⚡ &lt;20ms (Index mémoire)** | 🐢 2–3 s | 🐢 2–3 s |
 
@@ -305,7 +316,7 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
 
 ---
 
-## 🛡️ Confidentialité et Sécurité d'Abord
+## 🛡️ Confidentialité et Sécurité d'Abord <a id="confidentialite-et-securite-dabord"></a>
 
 - **Zéro Télémétrie** : Aucun outil d'analyse, aucun SDK tiers et aucune collecte de données.
 - **Exécution Locale** : Toutes les commandes s'exécutent directement via votre binaire local Homebrew.
@@ -313,7 +324,7 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
 
 ---
 
-## 🗺️ Feuille de Route
+## 🗺️ Feuille de Route <a id="feuille-de-route"></a>
 
 - [x] **v1.0.0** : Réécriture complète en SwiftUI natif, moteur FastCache, palette de commandes ⌘K, graphe de dépendances.
 - [x] **v1.0.5** : Synchronisation Git multi-fournisseurs et tournois communautaires.

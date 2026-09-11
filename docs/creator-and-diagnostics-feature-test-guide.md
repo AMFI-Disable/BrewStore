@@ -22,6 +22,7 @@ graph TD
 The specialized workbench for tap maintainers and formula authors:
 
 ### 1.1 Maintainer Telemetry & Repository Dashboard
+
 - **GitHub Star & Analytics Overview**:
   - Live star counts, fork metrics, and open issue counters for tapped repositories.
   - Local installation telemetry (e.g. `321 active installations`).
@@ -31,6 +32,7 @@ The specialized workbench for tap maintainers and formula authors:
   - 1-Click "Reveal in Finder" and "Open in Terminal".
 
 ### 1.2 Formula Generator Wizard (`NewFormulaWizardSheet.swift`)
+
 - **Step-by-Step Formula Scaffolding**:
   - Input project name, upstream release tarball URL, and homepage.
   - 1-Click "Fetch SHA-256 Checksum" from remote release URL.
@@ -41,12 +43,14 @@ The specialized workbench for tap maintainers and formula authors:
   - 1-Click "Save to Local Tap" or "Copy Formula Code".
 
 ### 1.3 Formula Linter & Auditor (`brew audit`)
+
 - **Automated Quality Checks**:
   - Runs `brew audit --strict --online <formula>` directly from the UI.
   - Categorizes findings into *Errors*, *Warnings*, and *Style Suggestions*.
   - 1-Click "Fix Formatting" suggestions.
 
 ### 1.4 Custom Tap Repository Scaffolder
+
 - **1-Click Tap Creation**:
   - Generates the standard Homebrew tap directory structure (`Formula/`, `Casks/`, `README.md`, `.github/workflows/tests.yml`).
 
@@ -57,11 +61,13 @@ The specialized workbench for tap maintainers and formula authors:
 The offline-capable, intent-based natural language recommendation engine:
 
 ### 2.1 Natural Language Query Input
+
 - **Search Prompt Bar**:
   - Free-form text input accepting tasks and descriptions (e.g. *"Batch convert HEIC photos to PNG"*, *"GPU accelerated terminal emulator"*, *"Run local AI and LLMs on Mac"*).
   - `Ask Assistant` button and input clear button.
 
 ### 2.2 8 Quick Prompt Workflow Pills
+
 - Horizontal pill strip featuring pre-indexed workflows:
   1. *"Batch convert HEIC photos to PNG"*
   2. *"Convert MKV video to MP4 with subtitles"*
@@ -73,6 +79,7 @@ The offline-capable, intent-based natural language recommendation engine:
   8. *"Encrypt files simply with SSH keys"*
 
 ### 2.3 Scored Recommendation Cards
+
 - **Match Confidence Percentage**: Displays percentage match badge (e.g. `95% match`).
 - **Classification Pill**: Identifies whether the solution is a `CLI Tool` or `macOS App`.
 - **Headline & Rationale**: Explains *why* the tool is recommended.
@@ -86,6 +93,7 @@ The offline-capable, intent-based natural language recommendation engine:
 The keyboard-first, spotlight-style command and navigation hub (triggered via **⌘K** or toolbar):
 
 ### 3.1 Global Search & Fuzzy Matching
+
 - **Package Results Section**:
   - Searches across all installed and catalog packages.
   - Displays icon, name, ID, and installed badge.
@@ -96,6 +104,7 @@ The keyboard-first, spotlight-style command and navigation hub (triggered via **
   - Trigger maintenance actions (`Upgrade All Packages`, `Run Doctor Diagnostics`, `Clean Cache`, `Benchmark CDN Mirrors`).
 
 ### 3.2 Keyboard Navigation
+
 - Arrow Up/Down navigation across results.
 - `Escape` key dismisses palette instantly.
 - `Return` activates the selected action or package.
@@ -107,10 +116,12 @@ The keyboard-first, spotlight-style command and navigation hub (triggered via **
 The comprehensive diagnostic and security hardening suite:
 
 ### 4.1 System Health Score (0–100) & Grade
+
 - Dynamic score computation factoring in pending updates, cache size, broken symlinks, and doctor warnings.
 - Grade display (A / B / C / D) with color-coded status rings.
 
 ### 4.2 Toolchain Dependency Doctor (`BrewStoreDependencyDoctorManager`)
+
 - **Automated Issue Detection**:
   - Orphaned packages (`brew autoremove`).
   - Unlinked Cellar binaries.
@@ -119,6 +130,7 @@ The comprehensive diagnostic and security hardening suite:
   - Sequentially executes link repair, unneeded dependency removal, and cleanup.
 
 ### 4.3 CVE Security Vulnerability Scanner (`CVESecurityView`)
+
 - Scans installed packages against known CVE vulnerability advisories.
 - Displays severity level (*Critical*, *High*, *Medium*, *Low*), affected versions, and 1-click update triggers.
 
@@ -129,12 +141,14 @@ The comprehensive diagnostic and security hardening suite:
 The migration engine for bringing external apps under Homebrew management and replacing paid software:
 
 ### 5.1 Adopt Unmanaged Apps Tab
+
 - **Local Application Scanner (`BrewStoreAppAdoptionManager`)**:
   - Scans `/Applications` for GUI apps installed outside Homebrew (e.g. from web DMGs).
   - Matches bundle identifiers against Homebrew Cask database.
   - 1-Click "Adopt All" or individual "Adopt to Homebrew Cask".
 
 ### 5.2 Open-Source Replacements Tab (`AppReplacementView.swift`)
+
 - **Curated FOSS Alternatives Directory**:
   - Suggests 100% Free & Open-Source Homebrew replacements for proprietary/paid apps (e.g. `mole` for CleanMyMac, `bitwarden` for 1Password, `iina` for QuickTime/VLC, `blender` for Maya, `inkscape` for Illustrator).
 - **Replacement Cards**:
