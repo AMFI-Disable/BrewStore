@@ -279,7 +279,12 @@ struct BrewStoreRootView: View {
         )) { request in
             BrewStoreUninstallPreviewView(
                 request: request,
-                onConfirm: uninstallCoordinator.confirm,
+                onConfirm: {
+                    uninstallCoordinator.confirm()
+                },
+                onConfirmSelection: { urls in
+                    uninstallCoordinator.confirm(selectedResidualURLs: urls)
+                },
                 onCancel: uninstallCoordinator.cancel
             )
         }

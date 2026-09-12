@@ -1,3 +1,4 @@
+import AppKit
 @testable import BrewStore
 import XCTest
 
@@ -6,6 +7,7 @@ final class UninstallCoordinatorTests: XCTestCase {
     private func package(
         id: String,
         installed: Bool = true,
+        kind: BrewPackageKind = .formula,
         dependencies: [String] = []
     ) -> BrewStorePackage {
         BrewStorePackage(
@@ -14,7 +16,7 @@ final class UninstallCoordinatorTests: XCTestCase {
             description: "",
             homepage: "",
             version: "1.0",
-            kind: .formula,
+            kind: kind,
             isInstalled: installed,
             dependencies: dependencies
         )
@@ -105,5 +107,67 @@ final class UninstallCoordinatorTests: XCTestCase {
 
         XCTAssertTrue(didExecute)
         XCTAssertNil(coordinator.pendingRequest)
+    }
+
+    func testConfirmTrashesSelectedResidualCandidates() {
+        var trashedPlans: [BrewStoreRemovalPlan] = []
+        var executedPackages: [BrewStorePackage] = []
+
+        let coordinator = BrewStoreUninstallCoordinator(
+            executeUninstall: { _, pkgs in
+                executedPackages = pkgs
+            },
+            executeTrash: { plan in
+                trashedPlans.append(plan)
+                let manifest = BrewStoreRemovalManifest(
+                    id: UUID(),
+                    planID: plan.id,
+                    application: plan.application,
+                    movedURLs: plan.selectedCandidates.map(\.url),
+                    failures: [],
+                    createdAt: Date()
+                )
+                return .completed(manifest: manifest)
+            }
+        )
+
+        let manager = HomebrewManager()
+        let caskPkg = package(id: "testapp", installed: true, kind: .cask)
+        coordinator.requestUninstall(package: caskPkg, manager: manager)
+
+        guard var request = coordinator.pendingRequest else {
+            XCTFail("Pending request must not be nil")
+            return
+        }
+
+        let fakeURL1 = URL(fileURLWithPath: "/tmp/testapp/Library/Caches")
+        let fakeURL2 = URL(fileURLWithPath: "/tmp/testapp/Library/Logs")
+        let identity = BrewStoreAppIdentity(name: "TestApp", bundleIdentifier: "com.test.app", applicationURL: URL(fileURLWithPath: "/Applications/TestApp.app"))
+        let candidates = [
+            BrewStoreRemovalCandidate(url: fakeURL1, kind: .cache, size: 1024, confidence: .exactBundleIdentifier, isSelected: true),
+            BrewStoreRemovalCandidate(url: fakeURL2, kind: .log, size: 2048, confidence: .exactBundleIdentifier, isSelected: false)
+        ]
+        let plan = BrewStoreRemovalPlan(application: identity, candidates: candidates)
+        request.removalPlans = [plan]
+        coordinator.pendingRequest = request
+
+        XCTAssertEqual(coordinator.pendingRequest?.totalResidualBytes, 1024)
+        XCTAssertTrue(coordinator.pendingRequest?.hasResiduals == true)
+
+        // Confirm with specific selection
+        coordinator.confirm(selectedResidualURLs: [fakeURL1])
+
+        XCTAssertEqual(executedPackages.map(\.id), ["testapp"])
+        XCTAssertEqual(trashedPlans.count, 1)
+        XCTAssertEqual(trashedPlans.first?.selectedCandidates.map(\.url), [fakeURL1])
+        XCTAssertNil(coordinator.pendingRequest)
+    }
+
+    func testCandidateKindMetadata() {
+        XCTAssertEqual(BrewStoreRemovalCandidateKind.cache.displayName, "Caches & Data")
+        XCTAssertEqual(BrewStoreRemovalCandidateKind.applicationSupport.displayName, "Application Support")
+        XCTAssertEqual(BrewStoreRemovalCandidateKind.preference.displayName, "Preferences")
+        XCTAssertEqual(BrewStoreRemovalCandidateKind.cache.systemImage, "internaldrive")
+        XCTAssertEqual(BrewStoreRemovalCandidateKind.applicationSupport.systemImage, "folder.fill.badge.gear")
     }
 }
