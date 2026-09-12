@@ -2108,15 +2108,16 @@ final class HomebrewManagerTests: XCTestCase {
     @MainActor
     func testBrewStoreSplitViewManagerOptimalWidthAndSnap() {
         let optimal = BrewStoreSplitViewManager.optimalSidebarWidth
-        XCTAssertEqual(optimal, 226.0)
-        XCTAssertEqual(BrewStoreSplitViewManager.maxSidebarWidth, 228.0)
-        XCTAssertEqual(BrewStoreSplitViewManager.minSidebarWidth, 180.0)
+        XCTAssertEqual(optimal, 248.0)
+        XCTAssertEqual(BrewStoreSplitViewManager.fixedSidebarWidth, 248.0)
+        XCTAssertEqual(BrewStoreSplitViewManager.maxSidebarWidth, 248.0)
+        XCTAssertEqual(BrewStoreSplitViewManager.minSidebarWidth, 248.0)
 
-        // Verify that 226.0 pt comfortably accommodates the longest sidebar element ("Adoption & Replacements")
+        // Verify that 248.0 pt comfortably accommodates the longest sidebar element ("Adoption & Replacements")
         let font = NSFont.systemFont(ofSize: NSFont.systemFontSize(for: .regular))
         let longestTextWidth = ("Adoption & Replacements" as NSString).size(withAttributes: [.font: font]).width
         let neededWidth = 18.0 + 8.0 + longestTextWidth // icon + spacing + text
-        XCTAssertLessThan(neededWidth, optimal, "Optimal width 226 must accommodate longest element with breathing room")
+        XCTAssertLessThan(neededWidth, optimal, "Optimal width 248 must accommodate longest element with breathing room")
 
         // Verify split view configuration and snap-to-optimal behavior
         let splitVC = NSSplitViewController()
@@ -2137,12 +2138,18 @@ final class HomebrewManagerTests: XCTestCase {
         let manager = BrewStoreSplitViewManager.shared
         manager.configure(splitView: splitView)
 
-        XCTAssertTrue(sidebarItem.canCollapse)
-        XCTAssertEqual(sidebarItem.minimumThickness, 180)
-        XCTAssertEqual(sidebarItem.maximumThickness, 228)
+        XCTAssertFalse(sidebarItem.canCollapse)
+        XCTAssertEqual(sidebarItem.minimumThickness, 248.0)
+        XCTAssertEqual(sidebarItem.maximumThickness, 248.0)
+        XCTAssertEqual(sidebarItem.holdingPriority, NSLayoutConstraint.Priority(1000))
 
-        // When sidebar is at 260 (not optimal 226), snapToOptimalWidthOrToggle moves it to 226
+        // Verify that NSSplitViewController swizzling returns zero effective rect for divider 0
+        let proposedRect = NSRect(x: 247, y: 0, width: 2, height: 600)
+        let effectiveRect = (splitVC as NSSplitViewDelegate).splitView?(splitView, effectiveRect: proposedRect, forDrawnRect: proposedRect, ofDividerAt: 0)
+        XCTAssertEqual(effectiveRect, .zero)
+
+        // When snapToOptimalWidthOrToggle is invoked, width is set to 248
         manager.snapToOptimalWidthOrToggle(splitView: splitView)
-        XCTAssertEqual(BrewStoreSplitViewManager.optimalSidebarWidth, 226.0)
+        XCTAssertEqual(BrewStoreSplitViewManager.optimalSidebarWidth, 248.0)
     }
 }

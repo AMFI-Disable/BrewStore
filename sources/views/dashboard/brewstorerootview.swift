@@ -72,17 +72,8 @@ struct BrewStoreRootView: View {
 
                 sidebarFooter
             }
-            .overlay(alignment: .trailing) {
-                // Interactive hit area on the trailing separation edge of the sidebar for instant double-click
-                Color.clear
-                    .frame(width: 8)
-                    .contentShape(Rectangle())
-                    .onTapGesture(count: 2) {
-                        BrewStoreSplitViewManager.shared.snapToOptimalWidthOrToggle()
-                    }
-            }
-            .frame(minWidth: BrewStoreSplitViewManager.minSidebarWidth, idealWidth: BrewStoreSplitViewManager.optimalSidebarWidth, maxWidth: BrewStoreSplitViewManager.maxSidebarWidth)
-            .navigationSplitViewColumnWidth(min: BrewStoreSplitViewManager.minSidebarWidth, ideal: BrewStoreSplitViewManager.optimalSidebarWidth, max: BrewStoreSplitViewManager.maxSidebarWidth)
+            .frame(width: BrewStoreSplitViewManager.fixedSidebarWidth)
+            .navigationSplitViewColumnWidth(min: BrewStoreSplitViewManager.fixedSidebarWidth, ideal: BrewStoreSplitViewManager.fixedSidebarWidth, max: BrewStoreSplitViewManager.fixedSidebarWidth)
             .background(BrewStoreSplitViewAccessor())
             .navigationTitle("BrewStore")
             .toolbar {
@@ -420,6 +411,8 @@ struct BrewStoreRootView: View {
                     Text(hub.rawValue)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(selection?.hub == hub ? Color.primary : .secondary)
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
                 }
                 .contentShape(Rectangle())
             }
@@ -446,6 +439,8 @@ struct BrewStoreRootView: View {
                     .padding(.horizontal, 5)
                     .padding(.vertical, 1)
                     .background(Color.secondary.opacity(0.1), in: Capsule())
+                    .lineLimit(1)
+                    .fixedSize()
             }
         case .myMac:
             let outdatedCount = manager.packages.filter(\.isOutdated).count
@@ -456,6 +451,8 @@ struct BrewStoreRootView: View {
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
                     .background(Color.orange, in: Capsule())
+                    .lineLimit(1)
+                    .fixedSize()
             } else {
                 let count = manager.packages.filter(\.isInstalled).count
                 if count > 0 {
@@ -465,6 +462,8 @@ struct BrewStoreRootView: View {
                         .padding(.horizontal, 5)
                         .padding(.vertical, 1)
                         .background(Color.secondary.opacity(0.1), in: Capsule())
+                        .lineLimit(1)
+                        .fixedSize()
                 }
             }
         case .environment:
@@ -475,6 +474,8 @@ struct BrewStoreRootView: View {
                     Text("\(running)")
                         .font(.caption2.bold())
                         .foregroundStyle(.green)
+                        .lineLimit(1)
+                        .fixedSize()
                 }
                 .padding(.horizontal, 5)
                 .padding(.vertical, 1)
@@ -507,6 +508,8 @@ struct BrewStoreRootView: View {
                         .padding(.horizontal, 5)
                         .padding(.vertical, 1)
                         .background(Color.secondary.opacity(0.1), in: Capsule())
+                        .lineLimit(1)
+                        .fixedSize()
                 }
             case .allFormulae:
                 let count = discovery.items.filter { $0.kind == .formula }.count
@@ -517,6 +520,8 @@ struct BrewStoreRootView: View {
                         .padding(.horizontal, 5)
                         .padding(.vertical, 1)
                         .background(Color.secondary.opacity(0.1), in: Capsule())
+                        .lineLimit(1)
+                        .fixedSize()
                 }
             case .updates:
                 let outdatedCount = manager.packages.filter(\.isOutdated).count
@@ -527,6 +532,8 @@ struct BrewStoreRootView: View {
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
                         .background(Color.orange, in: Capsule())
+                        .lineLimit(1)
+                        .fixedSize()
                 }
             case .installed:
                 let count = manager.packages.filter(\.isInstalled).count
@@ -537,6 +544,8 @@ struct BrewStoreRootView: View {
                         .padding(.horizontal, 5)
                         .padding(.vertical, 1)
                         .background(Color.secondary.opacity(0.1), in: Capsule())
+                        .lineLimit(1)
+                        .fixedSize()
                 }
             case .adoption:
                 let count = BrewStoreAppAdoptionManager.shared.adoptableApps.count
@@ -547,6 +556,8 @@ struct BrewStoreRootView: View {
                         .padding(.horizontal, 6)
                         .padding(.vertical, 1)
                         .background(Color.blue.opacity(0.12), in: Capsule())
+                        .lineLimit(1)
+                        .fixedSize()
                 }
             case .wishlist:
                 let count = BrewStoreWishlistManager.shared.wishlistIDs.count
@@ -557,13 +568,19 @@ struct BrewStoreRootView: View {
                         .padding(.horizontal, 6)
                         .padding(.vertical, 1)
                         .background(Color.secondary.opacity(0.12), in: Capsule())
+                        .lineLimit(1)
+                        .fixedSize()
                 }
             case .services:
                 let running = manager.services.filter(\.isRunning).count
                 if running > 0 {
                     HStack(spacing: 3) {
                         Circle().fill(Color.green).frame(width: 5, height: 5)
-                        Text("\(running) running").font(.caption2.bold()).foregroundStyle(.green)
+                        Text("\(running) running")
+                            .font(.caption2.bold())
+                            .foregroundStyle(.green)
+                            .lineLimit(1)
+                            .fixedSize()
                     }
                     .padding(.horizontal, 6)
                     .padding(.vertical, 1)
@@ -579,6 +596,8 @@ struct BrewStoreRootView: View {
                         .padding(.horizontal, 5)
                         .padding(.vertical, 1)
                         .background(Color.secondary.opacity(0.1), in: Capsule())
+                        .lineLimit(1)
+                        .fixedSize()
                 }
             case .creator:
                 if githubAccount.isAuthenticated {
@@ -590,6 +609,8 @@ struct BrewStoreRootView: View {
                             .padding(.horizontal, 5)
                             .padding(.vertical, 1)
                             .background(Color.accentColor.opacity(0.12), in: Capsule())
+                            .lineLimit(1)
+                            .fixedSize()
                     }
                 }
             default:
@@ -763,19 +784,20 @@ struct BrewStoreRootView: View {
     }
 }
 
-// MARK: - Sidebar Split View Manager & Double-Click Auto-Fit
+// MARK: - Sidebar Split View Manager & Fixed Non-Draggable Sizing
 
 @MainActor
 final class BrewStoreSplitViewManager: ObservableObject {
     static let shared = BrewStoreSplitViewManager()
 
-    /// The exact optimal width calculated for all sidebar items and footer elements
-    /// Designed so everything just fits with zero wasted blank space.
-    static let optimalSidebarWidth: CGFloat = 226.0
-    static let maxSidebarWidth: CGFloat = 228.0
-    static let minSidebarWidth: CGFloat = 180.0
+    /// The exact fixed width calculated so all sidebar items and badges comfortably fit with zero truncation and zero wasted blank space.
+    static let fixedSidebarWidth: CGFloat = 248.0
 
-    private var eventMonitor: Any?
+    /// Backward compatibility aliases for existing callers and tests
+    static var optimalSidebarWidth: CGFloat { fixedSidebarWidth }
+    static var maxSidebarWidth: CGFloat { fixedSidebarWidth }
+    static var minSidebarWidth: CGFloat { fixedSidebarWidth }
+
     private weak var splitView: NSSplitView?
 
     private init() {}
@@ -783,105 +805,54 @@ final class BrewStoreSplitViewManager: ObservableObject {
     func configure(splitView: NSSplitView) {
         self.splitView = splitView
 
-        // Enable collapse on the sidebar split view item if managed by NSSplitViewController
+        // Swizzle NSSplitViewController's divider effective rect so divider 0 has zero hit area
+        NSSplitViewController.swizzleEffectiveRectIfNeeded()
+
+        // Lock sidebar item to the exact fixed width and disable drag collapse
         if let splitVC = splitView.delegate as? NSSplitViewController,
            let item = splitVC.splitViewItems.first {
-            item.canCollapse = true
-            item.minimumThickness = Self.minSidebarWidth
-            item.maximumThickness = Self.maxSidebarWidth
-            item.holdingPriority = NSLayoutConstraint.Priority.defaultLow
+            item.canCollapse = false
+            item.minimumThickness = Self.fixedSidebarWidth
+            item.maximumThickness = Self.fixedSidebarWidth
+            item.holdingPriority = NSLayoutConstraint.Priority(1000)
         }
 
-        // Clamp divider to optimal snug width where all items just fit without blanks
-        splitView.setPosition(Self.optimalSidebarWidth, ofDividerAt: 0)
-
-        // Install local mouse double-click monitor on the divider
-        installDividerMonitorIfNeeded(splitView: splitView)
-    }
-
-    private func installDividerMonitorIfNeeded(splitView: NSSplitView) {
-        guard eventMonitor == nil else { return }
-
-        eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self, weak splitView] event in
-            guard let self,
-                  event.clickCount == 2
-            else {
-                return event
-            }
-
-            // Obtain split view reference (cached or retrieved on demand)
-            guard let targetSplit = splitView ?? self.splitView ?? event.window?.contentView?.findFirstSplitView(),
-                  let window = targetSplit.window,
-                  event.window == window,
-                  targetSplit.isVertical,
-                  let sidebarView = targetSplit.subviews.first
-            else {
-                return event
-            }
-
-            let locationInSplit = targetSplit.convert(event.locationInWindow, from: nil)
-            let dividerX = sidebarView.frame.maxX
-            let hitMargin: CGFloat = 12.0 // 24pt interactive hit region centered on the divider line
-
-            let isNearDivider = abs(locationInSplit.x - dividerX) <= hitMargin
-            let isWithinVerticalBounds = locationInSplit.y >= 0 && locationInSplit.y <= targetSplit.bounds.height
-
-            if isNearDivider, isWithinVerticalBounds {
-                self.snapToOptimalWidthOrToggle(splitView: targetSplit)
-                return nil // Consumed double click
-            }
-
-            return event
-        }
+        // Lock divider to the fixed snug width
+        splitView.setPosition(Self.fixedSidebarWidth, ofDividerAt: 0)
     }
 
     func snapToOptimalWidthOrToggle(splitView customSplitView: NSSplitView? = nil) {
-        guard let splitView = customSplitView ?? self.splitView ?? NSApp.keyWindow?.contentView?.findFirstSplitView() ?? NSApp.mainWindow?.contentView?.findFirstSplitView(),
-              let sidebarView = splitView.subviews.first
-        else {
-            NSApp.sendAction(#selector(NSSplitViewController.toggleSidebar(_:)), to: nil, from: nil)
+        guard let splitView = customSplitView ?? self.splitView ?? NSApp.keyWindow?.contentView?.findFirstSplitView() ?? NSApp.mainWindow?.contentView?.findFirstSplitView() else {
             return
         }
+        splitView.setPosition(Self.fixedSidebarWidth, ofDividerAt: 0)
+    }
+}
 
-        let currentWidth = sidebarView.frame.width
-        let isCollapsed = splitView.isSubviewCollapsed(sidebarView) || currentWidth < 30.0
-        let optimal = Self.optimalSidebarWidth
+// MARK: - NSSplitViewController Swizzling (Disables Divider Dragging)
 
-        if isCollapsed {
-            // If collapsed, expand directly to optimal width
-            if let splitVC = splitView.delegate as? NSSplitViewController {
-                splitVC.toggleSidebar(nil)
-            }
-            NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.22
-                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                splitView.animator().setPosition(optimal, ofDividerAt: 0)
-            }
-        } else if abs(currentWidth - optimal) > 4.0 {
-            // User had dragged it wider or narrower: snap directly to optimal content width!
-            NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.22
-                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                splitView.animator().setPosition(optimal, ofDividerAt: 0)
-            }
-        } else {
-            // Already at optimal width: collapse it!
-            if let splitVC = splitView.delegate as? NSSplitViewController {
-                splitVC.toggleSidebar(nil)
-            } else {
-                NSAnimationContext.runAnimationGroup { context in
-                    context.duration = 0.22
-                    context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                    splitView.animator().setPosition(0, ofDividerAt: 0)
-                }
-            }
+extension NSSplitViewController {
+    private static var hasSwizzledEffectiveRect = false
+
+    static func swizzleEffectiveRectIfNeeded() {
+        guard !hasSwizzledEffectiveRect else { return }
+        hasSwizzledEffectiveRect = true
+
+        let originalSelector = #selector(NSSplitViewDelegate.splitView(_:effectiveRect:forDrawnRect:ofDividerAt:))
+        let swizzledSelector = #selector(NSSplitViewController.brewstore_splitView(_:effectiveRect:forDrawnRect:ofDividerAt:))
+
+        if let originalMethod = class_getInstanceMethod(NSSplitViewController.self, originalSelector),
+           let swizzledMethod = class_getInstanceMethod(NSSplitViewController.self, swizzledSelector) {
+            method_exchangeImplementations(originalMethod, swizzledMethod)
         }
     }
 
-    deinit {
-        if let monitor = eventMonitor {
-            NSEvent.removeMonitor(monitor)
+    @objc func brewstore_splitView(_ splitView: NSSplitView, effectiveRect proposedEffectiveRect: NSRect, forDrawnRect drawnRect: NSRect, ofDividerAt dividerIndex: Int) -> NSRect {
+        if dividerIndex == 0, splitView.isVertical {
+            // Zero hit rect disables mouse dragging and cursor change on the sidebar divider
+            return .zero
         }
+        return self.brewstore_splitView(splitView, effectiveRect: proposedEffectiveRect, forDrawnRect: drawnRect, ofDividerAt: dividerIndex)
     }
 }
 
