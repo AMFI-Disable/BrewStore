@@ -139,6 +139,8 @@ private struct BrewStoreCommands: Commands {
         CommandMenu("Navigate") {
             Button("Discover") { selection = .discover }
                 .keyboardShortcut("1", modifiers: .command)
+            Button("Community Picks") { selection = .showdown }
+                .keyboardShortcut("p", modifiers: [.command, .shift])
             Button("Stories") { selection = .stories }
                 .keyboardShortcut("2", modifiers: .command)
             Button("Toolkits") { selection = .toolkits }

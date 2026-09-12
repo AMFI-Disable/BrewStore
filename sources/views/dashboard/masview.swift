@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 
 struct MASView: View {
+    @Environment(\.dismiss) private var dismiss
     @ObservedObject var manager: HomebrewManager
     @StateObject private var masManager = BrewStoreMASManager.shared
     @State private var searchText = ""
@@ -88,6 +89,14 @@ struct MASView: View {
                     .disabled(masManager.isOperating)
                 }
             }
+
+            Button("Done") {
+                dismiss()
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
+            .keyboardShortcut(.defaultAction)
+            .accessibilityIdentifier("MASView.DoneButton")
         }
         .padding()
         .background(Color.secondary.opacity(0.04))

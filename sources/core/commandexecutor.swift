@@ -93,6 +93,14 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
             )
         }
 
+        try? outputPipe.fileHandleForWriting.close()
+        try? errorPipe.fileHandleForWriting.close()
+
+        let exitSemaphore = DispatchSemaphore(value: 0)
+        process.terminationHandler = { _ in
+            exitSemaphore.signal()
+        }
+
         let group = DispatchGroup()
         let output = BrewStoreOutputBuffer(onOutput: onOutput)
         let error = BrewStoreOutputBuffer(onOutput: onOutput)
@@ -109,12 +117,20 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
         let deadline = Date().addingTimeInterval(timeout.isFinite ? max(timeout, 0) : 30)
         var wasCancelled = cancellationCheck?() == true
 
-        while process.isRunning && Date() < deadline {
-            if cancellationCheck?() == true {
-                wasCancelled = true
-                break
+        if wasCancelled {
+            process.terminate()
+        } else {
+            let waitStep: DispatchTimeInterval = cancellationCheck != nil ? .milliseconds(20) : .milliseconds(min(Int(max(timeout, 0.05) * 1000), 30_000))
+            while process.isRunning && Date() < deadline {
+                if cancellationCheck?() == true {
+                    wasCancelled = true
+                    process.terminate()
+                    break
+                }
+                if exitSemaphore.wait(timeout: .now() + waitStep) == .success {
+                    break
+                }
             }
-            Thread.sleep(forTimeInterval: 0.03)
         }
 
         let didTimeOut = process.isRunning && !wasCancelled && Date() >= deadline
@@ -128,7 +144,6 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
                 let pid = process.processIdentifier
                 if pid > 1, pid != getpid() {
                     kill(pid, SIGKILL)
-                    kill(-pid, SIGKILL)
                 }
                 let killDeadline = Date().addingTimeInterval(0.2)
                 while process.isRunning, Date() < killDeadline {

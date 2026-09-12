@@ -1553,6 +1553,20 @@ final class HomebrewManagerTests: XCTestCase {
         XCTAssertFalse(report.formattedReclaimable.isEmpty)
         XCTAssertFalse(report.formattedTotalLogs.isEmpty)
         XCTAssertFalse(report.formattedInactiveVersions.isEmpty)
+
+        // Verify zero-byte formatting standardizes to "0 KB" without literal "Zero"
+        let zeroReport = StorageReport(
+            totalCellarBytes: 0,
+            totalCacheBytes: 0,
+            totalLogsBytes: 0,
+            inactiveVersionsBytes: 0,
+            items: [],
+            topHogs: []
+        )
+        XCTAssertEqual(zeroReport.formattedInactiveVersions, "0 KB")
+        XCTAssertEqual(zeroReport.formattedTotalLogs, "0 KB")
+        XCTAssertFalse(zeroReport.formattedInactiveVersions.contains("Zero"))
+        XCTAssertFalse(zeroReport.formattedTotalLogs.contains("Zero"))
     }
 
     func testDependencyDoctorReportScoreCalculation() {

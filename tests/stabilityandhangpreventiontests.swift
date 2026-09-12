@@ -23,17 +23,20 @@ final class StabilityAndHangPreventionTests: XCTestCase {
 
     func testCommandExecutorCancellationTerminatesSafely() {
         let executor = BrewStoreCommandExecutor()
-        var cancelNow = false
-        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 0.05) {
-            cancelNow = true
-        }
+        let lock = NSLock()
+        var checkCount = 0
 
         let result = executor.run(
             executablePath: "/bin/sleep",
             arguments: ["5"],
             timeout: 5.0,
             category: .readOnly,
-            cancellationCheck: { cancelNow }
+            cancellationCheck: {
+                lock.lock()
+                defer { lock.unlock() }
+                checkCount += 1
+                return checkCount >= 2
+            }
         )
 
         XCTAssertTrue(result.wasCancelled)

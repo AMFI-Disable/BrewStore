@@ -35,6 +35,7 @@ struct StorageReport: Hashable, Codable {
         let formatter = ByteCountFormatter()
         formatter.allowedUnits = [.useMB, .useGB]
         formatter.countStyle = .file
+        formatter.allowsNonnumericFormatting = false
         return formatter.string(fromByteCount: totalCellarBytes)
     }
 
@@ -42,6 +43,7 @@ struct StorageReport: Hashable, Codable {
         let formatter = ByteCountFormatter()
         formatter.allowedUnits = [.useMB, .useGB]
         formatter.countStyle = .file
+        formatter.allowsNonnumericFormatting = false
         return formatter.string(fromByteCount: totalCacheBytes)
     }
 
@@ -49,13 +51,15 @@ struct StorageReport: Hashable, Codable {
         let formatter = ByteCountFormatter()
         formatter.allowedUnits = [.useMB, .useGB, .useKB]
         formatter.countStyle = .file
+        formatter.allowsNonnumericFormatting = false
         return formatter.string(fromByteCount: totalLogsBytes)
     }
 
     var formattedInactiveVersions: String {
         let formatter = ByteCountFormatter()
-        formatter.allowedUnits = [.useMB, .useGB]
+        formatter.allowedUnits = [.useMB, .useGB, .useKB]
         formatter.countStyle = .file
+        formatter.allowsNonnumericFormatting = false
         return formatter.string(fromByteCount: inactiveVersionsBytes)
     }
 
@@ -63,6 +67,7 @@ struct StorageReport: Hashable, Codable {
         let formatter = ByteCountFormatter()
         formatter.allowedUnits = [.useMB, .useGB]
         formatter.countStyle = .file
+        formatter.allowsNonnumericFormatting = false
         return formatter.string(fromByteCount: reclaimableBytes)
     }
 }
