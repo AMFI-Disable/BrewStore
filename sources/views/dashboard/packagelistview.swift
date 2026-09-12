@@ -135,9 +135,18 @@ struct PackageListView: View {
                             .controlSize(.small)
                         }
 
-                        Button(action: manager.refresh) { Label("Refresh", systemImage: "arrow.clockwise") }
-                            .controlSize(.small)
-                            .disabled(manager.isLoading || manager.isOperating)
+                        Button(action: manager.refresh) {
+                            if manager.isBackgroundSyncing {
+                                HStack(spacing: 4) {
+                                    ProgressView().controlSize(.mini)
+                                    Text("Syncing…")
+                                }
+                            } else {
+                                Label("Refresh", systemImage: "arrow.clockwise")
+                            }
+                        }
+                        .controlSize(.small)
+                        .disabled(manager.isLoading || manager.isOperating)
                     }
                     .fixedSize(horizontal: true, vertical: false)
                 }
@@ -150,6 +159,15 @@ struct PackageListView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
+
+                    if manager.isBackgroundSyncing {
+                        HStack(spacing: 4) {
+                            ProgressView().controlSize(.mini)
+                            Text("Syncing…")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
 
                     Spacer()
 
@@ -431,7 +449,7 @@ struct PackageListView: View {
             .accessibilityLabel("\(title) packages list, \(packages.count) total items")
             .searchable(text: $search, prompt: "Search \(title.lowercased())")
             .overlay {
-                if manager.isLoading {
+                if manager.isLoading && packages.isEmpty {
                     ProgressView("Refreshing Homebrew…")
                 } else if packages.isEmpty, let error = manager.errorMessage {
                     ContentUnavailableView {

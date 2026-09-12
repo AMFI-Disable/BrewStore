@@ -150,14 +150,16 @@ final class BrewStoreDiscoveryCatalog: ObservableObject {
             ?? URL(fileURLWithPath: NSTemporaryDirectory())
         let support = baseDir.appendingPathComponent("BrewStore", isDirectory: true)
         cacheURL = support.appendingPathComponent("discovery-cache.json")
+        loadCache()
+        hasLoaded = true
     }
 
     func load(force: Bool = false) {
         guard !isLoading else { return }
         if !hasLoaded {
             loadCache()
+            hasLoaded = true
         }
-        hasLoaded = true
         isLoading = true
         errorMessage = nil
 

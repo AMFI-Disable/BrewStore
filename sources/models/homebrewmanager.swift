@@ -72,6 +72,7 @@ final class HomebrewManager: ObservableObject {
     @Published private(set) var storageUsage = BrewStoreStorageUsage()
     @Published private(set) var isAnalyticsEnabled: Bool?
     @Published private(set) var isLoading = false
+    @Published private(set) var isBackgroundSyncing = false
     @Published private(set) var isOperating = false
     @Published private(set) var isBootstrapping = false
     @Published var statusMessage = ""
@@ -297,56 +298,143 @@ final class HomebrewManager: ObservableObject {
 
         refreshGeneration &+= 1
         let generation = refreshGeneration
+        let isInitialColdStart = packages.isEmpty
         isLoading = true
+        isBackgroundSyncing = !isInitialColdStart
         errorMessage = nil
         catalogRefreshError = nil
-        statusMessage = "Refreshing Homebrew data…"
+        statusMessage = isInitialColdStart ? "Refreshing Homebrew data…" : "Syncing Homebrew data in background…"
 
         refreshTask = Task.detached(priority: .userInitiated) { [self, executor, brewPath, brewPrefix = self.brewPrefix] in
             let isCacheFresh = await MainActor.run {
                 !force && !executor.hasCustomHandler && BrewStoreFastCacheEngine.isCatalogCacheFresh(prefix: brewPrefix) && !self.packages.isEmpty
             }
 
-            let listCaskResult = executor.run(executablePath: brewPath, arguments: ["list", "--cask", "--versions"], timeout: 10)
-            let listFormulaResult = executor.run(executablePath: brewPath, arguments: ["list", "--formula", "--versions"], timeout: 10)
-            let pinnedResult = executor.run(executablePath: brewPath, arguments: ["list", "--pinned"], timeout: 10)
-            let outdatedResult = executor.run(executablePath: brewPath, arguments: ["outdated", "--json=v2"], timeout: 15)
             let catalogOutputLimit = 40_000_000
 
+            let listCaskResult: BrewStoreCommandResult
+            let listFormulaResult: BrewStoreCommandResult
+            let pinnedResult: BrewStoreCommandResult
+            let outdatedResult: BrewStoreCommandResult
             let casks: BrewStoreCommandResult
             let formulae: BrewStoreCommandResult
+            let serviceResult: BrewStoreCommandResult
+            let tapResult: BrewStoreCommandResult
 
-            if isCacheFresh {
-                casks = BrewStoreCommandResult(
-                    standardOutput: "",
-                    standardError: "",
-                    terminationStatus: 0,
-                    wasTerminated: false,
-                    didTimeOut: false,
-                    wasCancelled: false,
-                    standardOutputWasTruncated: false,
-                    standardErrorWasTruncated: false,
-                    category: .readOnly,
-                    launchErrorDescription: nil
-                )
-                formulae = casks
+            if executor.hasCustomHandler {
+                listCaskResult = executor.run(executablePath: brewPath, arguments: ["list", "--cask", "--versions"], timeout: 10)
+                listFormulaResult = executor.run(executablePath: brewPath, arguments: ["list", "--formula", "--versions"], timeout: 10)
+                pinnedResult = executor.run(executablePath: brewPath, arguments: ["list", "--pinned"], timeout: 10)
+                outdatedResult = executor.run(executablePath: brewPath, arguments: ["outdated", "--json=v2"], timeout: 15)
+
+                if isCacheFresh {
+                    casks = BrewStoreCommandResult(
+                        standardOutput: "",
+                        standardError: "",
+                        terminationStatus: 0,
+                        wasTerminated: false,
+                        didTimeOut: false,
+                        wasCancelled: false,
+                        standardOutputWasTruncated: false,
+                        standardErrorWasTruncated: false,
+                        category: .readOnly,
+                        launchErrorDescription: nil
+                    )
+                    formulae = casks
+                } else {
+                    casks = executor.run(
+                        executablePath: brewPath,
+                        arguments: ["info", "--json=v2", "--cask"],
+                        timeout: 15,
+                        maximumOutputBytes: catalogOutputLimit
+                    )
+                    formulae = executor.run(
+                        executablePath: brewPath,
+                        arguments: ["info", "--json=v2", "--formula"],
+                        timeout: 15,
+                        maximumOutputBytes: catalogOutputLimit
+                    )
+                }
+
+                serviceResult = executor.run(executablePath: brewPath, arguments: ["services", "list", "--json"], timeout: 10)
+                tapResult = executor.run(executablePath: brewPath, arguments: ["tap"], timeout: 10)
             } else {
-                casks = executor.run(
-                    executablePath: brewPath,
-                    arguments: ["info", "--json=v2", "--cask"],
-                    timeout: 15,
-                    maximumOutputBytes: catalogOutputLimit
-                )
-                formulae = executor.run(
-                    executablePath: brewPath,
-                    arguments: ["info", "--json=v2", "--formula"],
-                    timeout: 15,
-                    maximumOutputBytes: catalogOutputLimit
-                )
-            }
+                async let listCaskTask = Task.detached {
+                    executor.run(executablePath: brewPath, arguments: ["list", "--cask", "--versions"], timeout: 10)
+                }.value
+                async let listFormulaTask = Task.detached {
+                    executor.run(executablePath: brewPath, arguments: ["list", "--formula", "--versions"], timeout: 10)
+                }.value
+                async let pinnedTask = Task.detached {
+                    executor.run(executablePath: brewPath, arguments: ["list", "--pinned"], timeout: 10)
+                }.value
+                async let outdatedTask = Task.detached {
+                    executor.run(executablePath: brewPath, arguments: ["outdated", "--json=v2"], timeout: 15)
+                }.value
+                async let serviceTask = Task.detached {
+                    executor.run(executablePath: brewPath, arguments: ["services", "list", "--json"], timeout: 10)
+                }.value
+                async let tapTask = Task.detached {
+                    executor.run(executablePath: brewPath, arguments: ["tap"], timeout: 10)
+                }.value
 
-            let serviceResult = executor.run(executablePath: brewPath, arguments: ["services", "list", "--json"], timeout: 10)
-            let tapResult = executor.run(executablePath: brewPath, arguments: ["tap"], timeout: 10)
+                async let casksTask = Task.detached { () -> BrewStoreCommandResult in
+                    if isCacheFresh {
+                        return BrewStoreCommandResult(
+                            standardOutput: "",
+                            standardError: "",
+                            terminationStatus: 0,
+                            wasTerminated: false,
+                            didTimeOut: false,
+                            wasCancelled: false,
+                            standardOutputWasTruncated: false,
+                            standardErrorWasTruncated: false,
+                            category: .readOnly,
+                            launchErrorDescription: nil
+                        )
+                    } else {
+                        return executor.run(
+                            executablePath: brewPath,
+                            arguments: ["info", "--json=v2", "--cask"],
+                            timeout: 15,
+                            maximumOutputBytes: catalogOutputLimit
+                        )
+                    }
+                }.value
+
+                async let formulaeTask = Task.detached { () -> BrewStoreCommandResult in
+                    if isCacheFresh {
+                        return BrewStoreCommandResult(
+                            standardOutput: "",
+                            standardError: "",
+                            terminationStatus: 0,
+                            wasTerminated: false,
+                            didTimeOut: false,
+                            wasCancelled: false,
+                            standardOutputWasTruncated: false,
+                            standardErrorWasTruncated: false,
+                            category: .readOnly,
+                            launchErrorDescription: nil
+                        )
+                    } else {
+                        return executor.run(
+                            executablePath: brewPath,
+                            arguments: ["info", "--json=v2", "--formula"],
+                            timeout: 15,
+                            maximumOutputBytes: catalogOutputLimit
+                        )
+                    }
+                }.value
+
+                listCaskResult = await listCaskTask
+                listFormulaResult = await listFormulaTask
+                pinnedResult = await pinnedTask
+                outdatedResult = await outdatedTask
+                casks = await casksTask
+                formulae = await formulaeTask
+                serviceResult = await serviceTask
+                tapResult = await tapTask
+            }
 
             // Validate list commands (authoritative sources)
             if listCaskResult.standardOutputWasTruncated {
@@ -561,6 +649,7 @@ final class HomebrewManager: ObservableObject {
                 guard self.refreshGeneration == generation else { return }
                 self.refreshTask = nil
                 self.isLoading = false
+                self.isBackgroundSyncing = false
                 self.consecutiveRefreshFailures = 0
                 self.catalogRefreshError = nil
                 self.errorMessage = nil
@@ -585,6 +674,7 @@ final class HomebrewManager: ObservableObject {
         guard refreshGeneration == generation else { return }
         refreshTask = nil
         self.isLoading = false
+        self.isBackgroundSyncing = false
         self.consecutiveRefreshFailures += 1
         self.catalogRefreshError = error
         self.errorMessage = error.displayMessage
