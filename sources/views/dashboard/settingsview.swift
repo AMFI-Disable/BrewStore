@@ -1223,6 +1223,27 @@ struct SettingsView: View {
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
+
+            cardSection(title: "Clean Interface & Decluttering", icon: "eye.slash") {
+                Toggle("Hide 100% Completed Bundles", isOn: $preferences.hideCompletedBundles)
+                Text("Automatically hide developer bundles and toolkits when all contained formulae and casks are installed.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+
+                Divider()
+
+                Toggle("Hide Installed Wishlist Items", isOn: $preferences.hideInstalledWishlist)
+                Text("Keep your starred wishlist focused on pending tools by hiding packages already installed.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+
+                Divider()
+
+                Toggle("Hide In-Sync Snapshots (0 Differences)", isOn: $preferences.hideIdenticalSnapshots)
+                Text("Only display snapshots that have differences from your current system state.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 

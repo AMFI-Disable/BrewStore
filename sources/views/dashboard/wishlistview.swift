@@ -5,6 +5,7 @@ struct WishlistView: View {
     @ObservedObject var manager: HomebrewManager
     @ObservedObject private var wishlistManager = BrewStoreWishlistManager.shared
     @ObservedObject private var pinningManager = BrewStorePackagePinningManager.shared
+    @ObservedObject private var preferences = BrewStorePreferences.shared
 
     @State private var selectedTab = 0 // 0: Wishlist, 1: Collections
     @State private var selectedPackageForDetail: BrewStorePackage?
@@ -23,7 +24,7 @@ struct WishlistView: View {
         }.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
-    private var wishlistedPackages: [BrewStorePackage] {
+    private var searchedWishlistedPackages: [BrewStorePackage] {
         let q = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard !q.isEmpty else { return allWishlistedPackages }
         return allWishlistedPackages.filter {
@@ -31,6 +32,17 @@ struct WishlistView: View {
                 $0.id.lowercased().contains(q) ||
                 $0.description.lowercased().contains(q)
         }
+    }
+
+    private var installedWishlistCount: Int {
+        searchedWishlistedPackages.filter(\.isInstalled).count
+    }
+
+    private var wishlistedPackages: [BrewStorePackage] {
+        if preferences.hideInstalledWishlist {
+            return searchedWishlistedPackages.filter { !$0.isInstalled }
+        }
+        return searchedWishlistedPackages
     }
 
     var showHeader: Bool = true
@@ -112,7 +124,9 @@ struct WishlistView: View {
     private var tabPicker: some View {
         HStack(spacing: Spacing.sm) {
             Picker("View Mode", selection: $selectedTab) {
-                Text("Starred Wishlist (\(wishlistManager.wishlistIDs.count))").tag(0)
+                Text(preferences.hideInstalledWishlist && installedWishlistCount > 0
+                    ? "Starred Wishlist (\(wishlistedPackages.count)/\(wishlistManager.wishlistIDs.count))"
+                    : "Starred Wishlist (\(wishlistManager.wishlistIDs.count))").tag(0)
                 Text("Custom Collections (\(wishlistManager.collections.count))").tag(1)
             }
             .labelsHidden()
@@ -120,6 +134,26 @@ struct WishlistView: View {
             .fixedSize(horizontal: true, vertical: false)
 
             Spacer()
+
+            if selectedTab == 0 && installedWishlistCount > 0 {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        preferences.hideInstalledWishlist.toggle()
+                    }
+                } label: {
+                    Label(
+                        preferences.hideInstalledWishlist
+                            ? "Hidden Installed (\(installedWishlistCount))"
+                            : "Hide Installed (\(installedWishlistCount))",
+                        systemImage: preferences.hideInstalledWishlist ? "eye.slash.fill" : "eye"
+                    )
+                    .font(.caption.bold())
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .tint(preferences.hideInstalledWishlist ? .accentColor : .secondary)
+                .help(preferences.hideInstalledWishlist ? "Show installed items in wishlist" : "Hide already installed items to declutter wishlist")
+            }
 
             BrewStoreSectionSearchBar(text: $searchQuery, placeholder: "Search saved packages…", count: wishlistedPackages.count)
                 .frame(minWidth: 160, maxWidth: 240)
@@ -142,6 +176,29 @@ struct WishlistView: View {
                 systemImage: "star.slash",
                 description: Text("Click the star icon on any package to save it to your wishlist.")
             )
+            .padding(.top, Spacing.xl)
+        } else if preferences.hideInstalledWishlist && wishlistedPackages.isEmpty && installedWishlistCount > 0 {
+            VStack(spacing: Spacing.sm) {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.system(size: 40))
+                    .foregroundStyle(.green)
+                Text("All Wishlist Items Installed")
+                    .font(.title3.bold())
+                Text("All \(installedWishlistCount) wishlisted package\(installedWishlistCount == 1 ? " is" : "s are") already installed and hidden to avoid clutter.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        preferences.hideInstalledWishlist = false
+                    }
+                } label: {
+                    Label("Show Installed Items", systemImage: "eye")
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.regular)
+                .padding(.top, Spacing.xs)
+            }
+            .frame(maxWidth: .infinity)
             .padding(.top, Spacing.xl)
         } else if wishlistedPackages.isEmpty {
             ContentUnavailableView(

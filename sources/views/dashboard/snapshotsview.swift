@@ -4,11 +4,12 @@ import SwiftUI
 struct SnapshotsView: View {
     @ObservedObject var manager: HomebrewManager
     @StateObject private var snapshotManager = BrewStoreSnapshotManager()
+    @ObservedObject private var preferences = BrewStorePreferences.shared
     @State private var selectedSnapshot: BrewStoreSnapshot?
     @State private var selectedTab = 0 // 0: Local Snapshots, 1: Multi-Machine Sync
     @State private var snapshotSearch = ""
 
-    private var filteredSnapshots: [BrewStoreSnapshot] {
+    private var baseSnapshots: [BrewStoreSnapshot] {
         let q = snapshotSearch.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard !q.isEmpty else { return snapshotManager.snapshots }
         return snapshotManager.snapshots.filter {
@@ -17,6 +18,23 @@ struct SnapshotsView: View {
                 $0.casks.contains { $0.lowercased().contains(q) } ||
                 $0.formulae.contains { $0.lowercased().contains(q) }
         }
+    }
+
+    private var inSyncSnapshotsCount: Int {
+        baseSnapshots.filter { snapshot in
+            let diff = snapshotManager.computeDiff(for: snapshot, currentPackages: manager.packages, currentTaps: manager.taps)
+            return !diff.hasDifferences
+        }.count
+    }
+
+    private var filteredSnapshots: [BrewStoreSnapshot] {
+        if preferences.hideIdenticalSnapshots {
+            return baseSnapshots.filter { snapshot in
+                let diff = snapshotManager.computeDiff(for: snapshot, currentPackages: manager.packages, currentTaps: manager.taps)
+                return diff.hasDifferences
+            }
+        }
+        return baseSnapshots
     }
 
     var showHeader: Bool = true
@@ -104,7 +122,27 @@ struct SnapshotsView: View {
 
                 if selectedTab == 0 {
                     BrewStoreSectionSearchBar(text: $snapshotSearch, placeholder: "Search snapshots & backup packages…", count: filteredSnapshots.count)
-                        .frame(minWidth: 200, maxWidth: 280)
+                        .frame(minWidth: 180, maxWidth: 260)
+
+                    if inSyncSnapshotsCount > 0 {
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                preferences.hideIdenticalSnapshots.toggle()
+                            }
+                        } label: {
+                            Label(
+                                preferences.hideIdenticalSnapshots
+                                    ? "Hidden In-Sync (\(inSyncSnapshotsCount))"
+                                    : "Hide In-Sync (\(inSyncSnapshotsCount))",
+                                systemImage: preferences.hideIdenticalSnapshots ? "eye.slash.fill" : "eye"
+                            )
+                            .font(.caption.bold())
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        .tint(preferences.hideIdenticalSnapshots ? .accentColor : .secondary)
+                        .help(preferences.hideIdenticalSnapshots ? "Show in-sync/identical snapshots" : "Hide snapshots that match current system state")
+                    }
 
                     if !showHeader {
                         Menu {
@@ -175,6 +213,39 @@ struct SnapshotsView: View {
                         Spacer()
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if filteredSnapshots.isEmpty {
+                    if preferences.hideIdenticalSnapshots && inSyncSnapshotsCount > 0 {
+                        VStack(spacing: 12) {
+                            Spacer()
+                            Image(systemName: "checkmark.seal.fill")
+                                .font(.system(size: 48))
+                                .foregroundStyle(.green)
+                            Text("All Snapshots In-Sync")
+                                .font(.title3.bold())
+                            Text("All \(inSyncSnapshotsCount) recorded snapshot\(inSyncSnapshotsCount == 1 ? " is" : "s are") identical to your current system state and hidden to avoid clutter.")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    preferences.hideIdenticalSnapshots = false
+                                }
+                            } label: {
+                                Label("Show In-Sync Snapshots", systemImage: "eye")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            Spacer()
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        ContentUnavailableView(
+                            "No Matching Snapshots",
+                            systemImage: "magnifyingglass",
+                            description: Text("No snapshots match \"\(snapshotSearch)\".")
+                        )
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
                 } else {
                     HSplitView {
                         // Left Snapshot List
@@ -254,10 +325,15 @@ struct SnapshotsView: View {
             .animation(nil, value: selectedTab)
         }
         .onAppear {
-            if selectedSnapshot == nil {
-                selectedSnapshot = snapshotManager.snapshots.first
+            if selectedSnapshot == nil || (selectedSnapshot != nil && !filteredSnapshots.contains(where: { $0.id == selectedSnapshot?.id })) {
+                selectedSnapshot = filteredSnapshots.first
             }
             snapshotManager.checkScheduledBackup(manager: manager)
+        }
+        .onChange(of: preferences.hideIdenticalSnapshots) { _ in
+            if let selected = selectedSnapshot, !filteredSnapshots.contains(where: { $0.id == selected.id }) {
+                selectedSnapshot = filteredSnapshots.first
+            }
         }
     }
 

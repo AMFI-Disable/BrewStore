@@ -68,6 +68,24 @@ final class BrewStorePreferences: ObservableObject {
         static let confirmOperationsBeforeExecution = "pref_confirm_operations_before_execution"
         static let defaultUninstallMode = "pref_default_uninstall_mode"
         static let defaultAppSourcePreference = "pref_default_app_source_preference"
+
+        // Decluttering & Hiding
+        static let hideCompletedBundles = "pref_hide_completed_bundles"
+        static let hideInstalledWishlist = "pref_hide_installed_wishlist"
+        static let hideIdenticalSnapshots = "pref_hide_identical_snapshots"
+    }
+
+    /// Decluttering & Hiding Preferences
+    @Published var hideCompletedBundles: Bool {
+        didSet { defaults.set(hideCompletedBundles, forKey: Keys.hideCompletedBundles) }
+    }
+
+    @Published var hideInstalledWishlist: Bool {
+        didSet { defaults.set(hideInstalledWishlist, forKey: Keys.hideInstalledWishlist) }
+    }
+
+    @Published var hideIdenticalSnapshots: Bool {
+        didSet { defaults.set(hideIdenticalSnapshots, forKey: Keys.hideIdenticalSnapshots) }
     }
 
     @Published var defaultAppSourcePreference: AppSourcePreference {
@@ -211,9 +229,16 @@ final class BrewStorePreferences: ObservableObject {
             Keys.hideDockIconWhenWindowClosed: true,
             Keys.confirmOperationsBeforeExecution: true,
             Keys.defaultUninstallMode: BrewStoreAppUninstallMode.preserveData.rawValue,
-            Keys.defaultAppSourcePreference: AppSourcePreference.homebrew.rawValue
+            Keys.defaultAppSourcePreference: AppSourcePreference.homebrew.rawValue,
+            Keys.hideCompletedBundles: false,
+            Keys.hideInstalledWishlist: false,
+            Keys.hideIdenticalSnapshots: false
         ]
         defaults.register(defaults: registeredDefaults)
+
+        self.hideCompletedBundles = defaults.bool(forKey: Keys.hideCompletedBundles)
+        self.hideInstalledWishlist = defaults.bool(forKey: Keys.hideInstalledWishlist)
+        self.hideIdenticalSnapshots = defaults.bool(forKey: Keys.hideIdenticalSnapshots)
 
         self.confirmOperationsBeforeExecution = defaults.object(forKey: Keys.confirmOperationsBeforeExecution) != nil ? defaults.bool(forKey: Keys.confirmOperationsBeforeExecution) : true
         if let savedSource = defaults.string(forKey: Keys.defaultAppSourcePreference),
@@ -281,6 +306,9 @@ final class BrewStorePreferences: ObservableObject {
         confirmOperationsBeforeExecution = true
         defaultUninstallMode = .preserveData
         defaultAppSourcePreference = .homebrew
+        hideCompletedBundles = false
+        hideInstalledWishlist = false
+        hideIdenticalSnapshots = false
     }
 }
 

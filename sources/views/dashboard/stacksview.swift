@@ -4,11 +4,12 @@ import SwiftUI
 struct StacksView: View {
     @ObservedObject var manager: HomebrewManager
     @StateObject private var stackManager = BrewStoreStackManager.shared
+    @ObservedObject private var preferences = BrewStorePreferences.shared
     @State private var selectedType: BundleType = .all
     @State private var searchQuery = ""
     @State private var showingNewStackSheet = false
 
-    private var filteredStacks: [BrewStoreStack] {
+    private var baseStacks: [BrewStoreStack] {
         let base = stackManager.stacks(for: selectedType)
         if searchQuery.trimmingCharacters(in: .whitespaces).isEmpty {
             return base
@@ -20,6 +21,17 @@ struct StacksView: View {
                 $0.formulae.contains(where: { $0.lowercased().contains(q) }) ||
                 $0.casks.contains(where: { $0.lowercased().contains(q) })
         }
+    }
+
+    private var completedBundlesCount: Int {
+        baseStacks.filter { $0.isFullyInstalled(in: manager.packages) }.count
+    }
+
+    private var filteredStacks: [BrewStoreStack] {
+        if preferences.hideCompletedBundles {
+            return baseStacks.filter { !$0.isFullyInstalled(in: manager.packages) }
+        }
+        return baseStacks
     }
 
     var body: some View {
@@ -42,7 +54,7 @@ struct StacksView: View {
                     .controlSize(.small)
                 }
 
-                // Filter & Search Controls: Row 1 Category Picker, Row 2 Search Bar
+                // Filter & Search Controls: Row 1 Category Picker, Row 2 Search Bar & Filter Toggle
                 VStack(alignment: .leading, spacing: Spacing.sm) {
                     Picker("Category", selection: $selectedType) {
                         ForEach(BundleType.allCases) { type in
@@ -53,9 +65,29 @@ struct StacksView: View {
                     .pickerStyle(.segmented)
                     .fixedSize(horizontal: true, vertical: false)
 
-                    HStack {
+                    HStack(spacing: Spacing.sm) {
                         BrewStoreSectionSearchBar(text: $searchQuery, placeholder: "Search bundles & package tools…", count: filteredStacks.count)
                             .frame(maxWidth: 320)
+
+                        if completedBundlesCount > 0 {
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    preferences.hideCompletedBundles.toggle()
+                                }
+                            } label: {
+                                Label(
+                                    preferences.hideCompletedBundles
+                                        ? "Hidden 100% Completed (\(completedBundlesCount))"
+                                        : "Hide 100% Completed (\(completedBundlesCount))",
+                                    systemImage: preferences.hideCompletedBundles ? "eye.slash.fill" : "eye"
+                                )
+                                .font(.caption.bold())
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                            .tint(preferences.hideCompletedBundles ? .accentColor : .secondary)
+                            .help(preferences.hideCompletedBundles ? "Show 100% completed bundles" : "Hide 100% completed bundles to declutter")
+                        }
 
                         Spacer()
                     }
@@ -65,12 +97,37 @@ struct StacksView: View {
 
                 // Grid of Bundles
                 if filteredStacks.isEmpty {
-                    ContentUnavailableView(
-                        "No Matching Bundles",
-                        systemImage: "shippingbox",
-                        description: Text("Try adjusting your search term or category filter.")
-                    )
-                    .padding(.top, Spacing.xl)
+                    if preferences.hideCompletedBundles && completedBundlesCount > 0 {
+                        VStack(spacing: Spacing.sm) {
+                            Image(systemName: "checkmark.seal.fill")
+                                .font(.system(size: 40))
+                                .foregroundStyle(.green)
+                            Text("All Bundles Completed")
+                                .font(.title3.bold())
+                            Text("All \(completedBundlesCount) bundle\(completedBundlesCount == 1 ? " is" : "s are") 100% installed and hidden to avoid clutter.")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    preferences.hideCompletedBundles = false
+                                }
+                            } label: {
+                                Label("Show Completed Bundles", systemImage: "eye")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.regular)
+                            .padding(.top, Spacing.xs)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, Spacing.xl)
+                    } else {
+                        ContentUnavailableView(
+                            "No Matching Bundles",
+                            systemImage: "shippingbox",
+                            description: Text("Try adjusting your search term or category filter.")
+                        )
+                        .padding(.top, Spacing.xl)
+                    }
                 } else {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 280, maximum: 460), spacing: Spacing.md)], spacing: Spacing.md) {
                         ForEach(filteredStacks) { stack in
@@ -178,7 +235,7 @@ private struct StackCardView: View {
                         .foregroundStyle(.secondary)
                     Spacer()
                     if isFullyInstalled {
-                        Label("All Installed", systemImage: "checkmark.circle.fill")
+                        Label("100% Completed", systemImage: "checkmark.circle.fill")
                             .font(.caption2.bold())
                             .foregroundStyle(.green)
                     }

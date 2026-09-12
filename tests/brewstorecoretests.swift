@@ -118,4 +118,95 @@ final class BrewStoreCoreTests: XCTestCase {
         XCTAssertEqual(decoded.formatted30d, "45.0K")
         XCTAssertEqual(decoded.formatted365d, "500.0K")
     }
+
+    @MainActor
+    func testDeclutteringAndHidingPreferences() {
+        let prefs = BrewStorePreferences.shared
+
+        // Test toggling and defaults
+        prefs.hideCompletedBundles = true
+        prefs.hideInstalledWishlist = true
+        prefs.hideIdenticalSnapshots = true
+
+        XCTAssertTrue(prefs.hideCompletedBundles)
+        XCTAssertTrue(prefs.hideInstalledWishlist)
+        XCTAssertTrue(prefs.hideIdenticalSnapshots)
+
+        prefs.resetToDefaults()
+
+        XCTAssertFalse(prefs.hideCompletedBundles)
+        XCTAssertFalse(prefs.hideInstalledWishlist)
+        XCTAssertFalse(prefs.hideIdenticalSnapshots)
+    }
+
+    func testStack100PercentCompletionDetection() {
+        let stack = BrewStoreStack(
+            id: "test-stack",
+            name: "Test Developer Suite",
+            description: "A test bundle",
+            icon: "shippingbox",
+            bundleType: .hybrid,
+            pricingTier: .freeFOSS,
+            formulae: ["git", "node"],
+            casks: ["ghostty"],
+            isCustom: false
+        )
+
+        let partiallyInstalled = [
+            BrewStorePackage(id: "git", name: "git", description: "", homepage: "", version: "2.40.0", kind: .formula, isInstalled: true),
+            BrewStorePackage(id: "ghostty", name: "ghostty", description: "", homepage: "", version: "1.0.0", kind: .cask, isInstalled: true)
+        ]
+
+        XCTAssertEqual(stack.installedCount(in: partiallyInstalled), 2)
+        XCTAssertFalse(stack.isFullyInstalled(in: partiallyInstalled))
+        XCTAssertEqual(stack.missingPackages(in: partiallyInstalled).formulae, ["node"])
+        XCTAssertTrue(stack.missingPackages(in: partiallyInstalled).casks.isEmpty)
+
+        let fullyInstalled = [
+            BrewStorePackage(id: "git", name: "git", description: "", homepage: "", version: "2.40.0", kind: .formula, isInstalled: true),
+            BrewStorePackage(id: "node", name: "node", description: "", homepage: "", version: "20.0.0", kind: .formula, isInstalled: true),
+            BrewStorePackage(id: "ghostty", name: "ghostty", description: "", homepage: "", version: "1.0.0", kind: .cask, isInstalled: true)
+        ]
+
+        XCTAssertEqual(stack.installedCount(in: fullyInstalled), 3)
+        XCTAssertTrue(stack.isFullyInstalled(in: fullyInstalled))
+        XCTAssertTrue(stack.missingPackages(in: fullyInstalled).formulae.isEmpty)
+        XCTAssertTrue(stack.missingPackages(in: fullyInstalled).casks.isEmpty)
+    }
+
+    @MainActor
+    func testSnapshotInSyncDiffComputation() {
+        let snapshotManager = BrewStoreSnapshotManager()
+        let url = URL(fileURLWithPath: "/tmp/snapshot_test.json")
+        let snapshot = BrewStoreSnapshot(
+            id: "test-snapshot",
+            timestamp: Date(),
+            name: "Test Snapshot",
+            fileURL: url,
+            formulae: ["zsh", "tmux"],
+            casks: ["docker"],
+            taps: ["homebrew/core"]
+        )
+
+        let matchingPackages = [
+            BrewStorePackage(id: "zsh", name: "zsh", description: "", homepage: "", version: "5.9", kind: .formula, isInstalled: true),
+            BrewStorePackage(id: "tmux", name: "tmux", description: "", homepage: "", version: "3.3a", kind: .formula, isInstalled: true),
+            BrewStorePackage(id: "docker", name: "docker", description: "", homepage: "", version: "4.0", kind: .cask, isInstalled: true)
+        ]
+        let matchingTaps = [BrewStoreTap(id: "homebrew/core", name: "homebrew/core")]
+
+        let inSyncDiff = snapshotManager.computeDiff(for: snapshot, currentPackages: matchingPackages, currentTaps: matchingTaps)
+        XCTAssertFalse(inSyncDiff.hasDifferences)
+        XCTAssertEqual(inSyncDiff.totalChanges, 0)
+        XCTAssertEqual(inSyncDiff.identicalCount, 3)
+
+        // Adding an extra package should produce differences
+        let alteredPackages = matchingPackages + [
+            BrewStorePackage(id: "ripgrep", name: "ripgrep", description: "", homepage: "", version: "14.0", kind: .formula, isInstalled: true)
+        ]
+        let differingDiff = snapshotManager.computeDiff(for: snapshot, currentPackages: alteredPackages, currentTaps: matchingTaps)
+        XCTAssertTrue(differingDiff.hasDifferences)
+        XCTAssertEqual(differingDiff.totalChanges, 1)
+        XCTAssertEqual(differingDiff.addedFormulae, ["ripgrep"])
+    }
 }
