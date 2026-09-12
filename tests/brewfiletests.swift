@@ -45,4 +45,32 @@ final class BrewfileTests: XCTestCase {
         XCTAssertTrue(generated.contains("brew \"ripgrep\""))
         XCTAssertFalse(generated.contains("uninstalled-pkg"))
     }
+
+    func testBackupFrequencyIntervals() {
+        XCTAssertEqual(SnapshotBackupFrequency.manual.intervalSeconds, 0)
+        XCTAssertEqual(SnapshotBackupFrequency.daily.intervalSeconds, 86400)
+        XCTAssertEqual(SnapshotBackupFrequency.weekly.intervalSeconds, 604800)
+        XCTAssertEqual(SnapshotBackupFrequency.monthly.intervalSeconds, 2592000)
+    }
+
+    @MainActor
+    func testScheduledBackupTriggering() throws {
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let snapshotManager = BrewStoreSnapshotManager(directory: tempDir)
+        snapshotManager.backupFrequency = .daily
+        snapshotManager.lastScheduledBackupDate = nil
+
+        let homebrewManager = HomebrewManager()
+
+        XCTAssertTrue(snapshotManager.snapshots.isEmpty)
+
+        snapshotManager.checkScheduledBackup(manager: homebrewManager)
+        XCTAssertEqual(snapshotManager.snapshots.count, 1)
+
+        snapshotManager.checkScheduledBackup(manager: homebrewManager)
+        XCTAssertEqual(snapshotManager.snapshots.count, 1)
+    }
 }

@@ -34,6 +34,7 @@ struct EnvironmentHubView: View {
     @ObservedObject var accountManager: GitHubAccountManager
 
     @State private var subMode: EnvironmentSubMode = .services
+    @State private var showingVersionSwitcher = false
 
     private var runningServicesCount: Int {
         manager.services.filter(\.isRunning).count
@@ -82,6 +83,13 @@ struct EnvironmentHubView: View {
                             .controlSize(.small)
                             .disabled(manager.isOperating)
                         }
+
+                        Button {
+                            showingVersionSwitcher = true
+                        } label: {
+                            Label("Version Switcher", systemImage: "arrow.triangle.swap")
+                        }
+                        .controlSize(.small)
 
                         Button(action: manager.refresh) {
                             Label("Refresh", systemImage: "arrow.clockwise")
@@ -140,6 +148,9 @@ struct EnvironmentHubView: View {
             .id(subMode)
             .animation(nil, value: subMode)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .sheet(isPresented: $showingVersionSwitcher) {
+            VersionLinkView(manager: manager)
         }
         .onAppear {
             syncFromSelection()

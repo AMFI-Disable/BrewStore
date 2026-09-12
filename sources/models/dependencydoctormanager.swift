@@ -87,7 +87,23 @@ final class BrewStoreDependencyDoctorManager: ObservableObject {
                 }
             }
 
-            // 2. Scan missing dependencies if brew available
+            // 2. Scan dangling symlinks
+            let dangling = BrewStoreDoctorRemediationManager.shared.scanDanglingSymlinks(prefixPath: prefix)
+            if !dangling.isEmpty {
+                let count = dangling.count
+                let names = dangling.prefix(3).map(\.lastPathComponent).joined(separator: ", ")
+                foundIssues.append(ToolchainIssue(
+                    id: "broken-symlinks",
+                    title: "Broken Symlinks (\(count) found)",
+                    description: "Orphaned symlinks in \(prefix)/bin pointing to missing files: \(names)",
+                    kind: .doctor,
+                    severity: "warning",
+                    recommendedAction: "Prune Broken Symlinks",
+                    packageID: nil
+                ))
+            }
+
+            // 3. Scan missing dependencies if brew available
             if let brewPath {
                 let missingResult = BrewStoreCommandExecutor.shared.run(
                     executablePath: brewPath,
@@ -112,7 +128,7 @@ final class BrewStoreDependencyDoctorManager: ObservableObject {
                     }
                 }
 
-                // 3. Scan autoremove orphans (dry-run)
+                // 4. Scan autoremove orphans (dry-run)
                 let autoResult = BrewStoreCommandExecutor.shared.run(
                     executablePath: brewPath,
                     arguments: ["autoremove", "-n"],
@@ -166,12 +182,13 @@ final class BrewStoreDependencyDoctorManager: ObservableObject {
 
     func autoHealToolchain(manager: HomebrewManager) {
         guard let brewPath = manager.brewPath else { return }
+        let prefix = manager.brewPrefix ?? (FileManager.default.fileExists(atPath: "/opt/homebrew") ? "/opt/homebrew" : "/usr/local")
         isHealing = true
         healStatusMessage = "Starting maintenance repairs…"
 
         Task.detached(priority: .userInitiated) {
             // Step 1: Link broken formulae
-            await MainActor.run { self.healStatusMessage = "Step 1/3: Repairing broken symlinks…" }
+            await MainActor.run { self.healStatusMessage = "Step 1/4: Repairing broken symlinks…" }
             _ = BrewStoreCommandExecutor.shared.run(
                 executablePath: brewPath,
                 arguments: ["link", "--overwrite", "--quiet"],
@@ -179,8 +196,13 @@ final class BrewStoreDependencyDoctorManager: ObservableObject {
                 category: .reversibleMutation
             )
 
-            // Step 2: Prune orphans
-            await MainActor.run { self.healStatusMessage = "Step 2/3: Removing unused dependencies…" }
+            // Step 2: Prune dangling symlinks
+            await MainActor.run { self.healStatusMessage = "Step 2/4: Pruning orphaned symlinks…" }
+            let broken = BrewStoreDoctorRemediationManager.shared.scanDanglingSymlinks(prefixPath: prefix)
+            _ = BrewStoreDoctorRemediationManager.shared.pruneBrokenSymlinks(links: broken)
+
+            // Step 3: Prune orphans
+            await MainActor.run { self.healStatusMessage = "Step 3/4: Removing unused dependencies…" }
             _ = BrewStoreCommandExecutor.shared.run(
                 executablePath: brewPath,
                 arguments: ["autoremove"],
@@ -188,8 +210,8 @@ final class BrewStoreDependencyDoctorManager: ObservableObject {
                 category: .reversibleMutation
             )
 
-            // Step 3: Run cleanup
-            await MainActor.run { self.healStatusMessage = "Step 3/3: Cleaning download caches…" }
+            // Step 4: Run cleanup
+            await MainActor.run { self.healStatusMessage = "Step 4/4: Cleaning download caches…" }
             _ = BrewStoreCommandExecutor.shared.run(
                 executablePath: brewPath,
                 arguments: ["cleanup", "-s"],
@@ -206,7 +228,19 @@ final class BrewStoreDependencyDoctorManager: ObservableObject {
         }
     }
 
+    func pruneDanglingSymlinks(manager: HomebrewManager, prefixPath: String? = nil) {
+        let prefix = prefixPath ?? manager.brewPrefix ?? (FileManager.default.fileExists(atPath: "/opt/homebrew") ? "/opt/homebrew" : "/usr/local")
+        let broken = BrewStoreDoctorRemediationManager.shared.scanDanglingSymlinks(prefixPath: prefix)
+        _ = BrewStoreDoctorRemediationManager.shared.pruneBrokenSymlinks(links: broken)
+        diagnose(manager: manager)
+        manager.refresh()
+    }
+
     func fixIssue(_ issue: ToolchainIssue, manager: HomebrewManager) {
+        if issue.id == "broken-symlinks" {
+            pruneDanglingSymlinks(manager: manager)
+            return
+        }
         guard let brewPath = manager.brewPath, let pkgID = issue.packageID else { return }
         Task.detached(priority: .userInitiated) {
             var args: [String] = []

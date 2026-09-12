@@ -71,6 +71,15 @@ struct HealthHubView: View {
                             .controlSize(.small)
 
                             Button {
+                                doctorManager.pruneDanglingSymlinks(manager: manager)
+                            } label: {
+                                Label("Prune Symlinks", systemImage: "link.badge.plus")
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                            .disabled(doctorManager.isHealing || manager.isOperating)
+
+                            Button {
                                 doctorManager.autoHealToolchain(manager: manager)
                             } label: {
                                 Label("Repair Common Issues", systemImage: "wrench.and.screwdriver.fill")

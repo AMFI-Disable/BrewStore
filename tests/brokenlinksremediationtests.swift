@@ -33,4 +33,20 @@ final class BrokenLinksRemediationTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: brokenLink.path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: validLink.path))
     }
+
+    func testDoctorManagerPrunesBrokenSymlinks() throws {
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let binDir = tempDir.appendingPathComponent("bin", isDirectory: true)
+        try FileManager.default.createDirectory(at: binDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let missingTarget = tempDir.appendingPathComponent("nonexistent.txt")
+        let brokenLink = binDir.appendingPathComponent("orphan_tool")
+        try FileManager.default.createSymbolicLink(at: brokenLink, withDestinationURL: missingTarget)
+
+        let homebrewManager = HomebrewManager()
+
+        BrewStoreDependencyDoctorManager.shared.pruneDanglingSymlinks(manager: homebrewManager, prefixPath: tempDir.path)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: brokenLink.path))
+    }
 }

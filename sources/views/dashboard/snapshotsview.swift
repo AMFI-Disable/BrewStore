@@ -35,6 +35,42 @@ struct SnapshotsView: View {
 
                     if selectedTab == 0 {
                         HStack(spacing: 8) {
+                            Menu {
+                                Button {
+                                    snapshotManager.exportCurrentState(manager: manager)
+                                } label: {
+                                    Label("Export Current System Brewfile…", systemImage: "square.and.arrow.up")
+                                }
+                                if let selected = selectedSnapshot {
+                                    Button {
+                                        snapshotManager.exportSnapshot(selected)
+                                    } label: {
+                                        Label("Export Selected Snapshot…", systemImage: "doc.badge.arrow.up")
+                                    }
+                                }
+                            } label: {
+                                Label("Export Brewfile", systemImage: "square.and.arrow.up")
+                            }
+                            .menuStyle(.borderedButton)
+
+                            Menu {
+                                ForEach(SnapshotBackupFrequency.allCases) { freq in
+                                    Button {
+                                        snapshotManager.backupFrequency = freq
+                                    } label: {
+                                        HStack {
+                                            Text(freq.rawValue)
+                                            if snapshotManager.backupFrequency == freq {
+                                                Image(systemName: "checkmark")
+                                            }
+                                        }
+                                    }
+                                }
+                            } label: {
+                                Label("Backup: \(snapshotManager.backupFrequency.rawValue)", systemImage: "clock.badge.checkmark")
+                            }
+                            .menuStyle(.borderedButton)
+
                             Button {
                                 selectedTab = 1
                             } label: {
@@ -71,6 +107,25 @@ struct SnapshotsView: View {
                         .frame(minWidth: 200, maxWidth: 280)
 
                     if !showHeader {
+                        Menu {
+                            Button {
+                                snapshotManager.exportCurrentState(manager: manager)
+                            } label: {
+                                Label("Export Current System Brewfile…", systemImage: "square.and.arrow.up")
+                            }
+                            if let selected = selectedSnapshot {
+                                Button {
+                                    snapshotManager.exportSnapshot(selected)
+                                } label: {
+                                    Label("Export Selected Snapshot…", systemImage: "doc.badge.arrow.up")
+                                }
+                            }
+                        } label: {
+                            Label("Export", systemImage: "square.and.arrow.up")
+                        }
+                        .menuStyle(.borderedButton)
+                        .controlSize(.small)
+
                         Button {
                             selectedTab = 1
                         } label: {
@@ -139,6 +194,10 @@ struct SnapshotsView: View {
                             .tag(snapshot)
                             .padding(.vertical, 4)
                             .contextMenu {
+                                Button("Export Brewfile…") {
+                                    snapshotManager.exportSnapshot(snapshot)
+                                }
+
                                 Button("Restore (Install Missing Packages)") {
                                     triggerRestore(for: snapshot)
                                 }
@@ -173,6 +232,9 @@ struct SnapshotsView: View {
                                     snapshotManager.deleteSnapshot(snapshot)
                                     selectedSnapshot = nil
                                 },
+                                onExport: {
+                                    snapshotManager.exportSnapshot(snapshot)
+                                },
                                 onRestore: {
                                     triggerRestore(for: snapshot)
                                 }
@@ -195,6 +257,7 @@ struct SnapshotsView: View {
             if selectedSnapshot == nil {
                 selectedSnapshot = snapshotManager.snapshots.first
             }
+            snapshotManager.checkScheduledBackup(manager: manager)
         }
     }
 
@@ -214,6 +277,7 @@ private struct SnapshotDetailInspector: View {
     let diff: BrewStoreSnapshotDiff
     @ObservedObject var manager: HomebrewManager
     let onDelete: () -> Void
+    let onExport: () -> Void
     let onRestore: () -> Void
 
     @State private var packageQuery = ""
@@ -261,6 +325,14 @@ private struct SnapshotDetailInspector: View {
                             .foregroundStyle(.secondary)
                     }
                     Spacer()
+
+                    Button {
+                        onExport()
+                    } label: {
+                        Label("Export Brewfile…", systemImage: "square.and.arrow.up")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
 
                     Button("Reveal in Finder") {
                         NSWorkspace.shared.activateFileViewerSelecting([snapshot.fileURL])

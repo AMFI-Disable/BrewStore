@@ -159,6 +159,16 @@ struct HealthScoreView: View {
                 Label("Diagnostics & Fixes (\(report.issues.count) Issues Found)", systemImage: "wrench.and.screwdriver.fill")
                     .font(.headline)
                 Spacer()
+
+                Button {
+                    doctorManager.pruneDanglingSymlinks(manager: manager)
+                } label: {
+                    Label("Prune Symlinks", systemImage: "link.badge.plus")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .disabled(doctorManager.isHealing || manager.isOperating)
+
                 Button {
                     showingAutoHealConfirmation = true
                 } label: {
@@ -267,6 +277,18 @@ struct HealthScoreView: View {
                     .tint(.green)
                     .controlSize(.small)
                     .disabled(manager.isOperating)
+
+                    if (doctorManager.report?.issues.isEmpty == false) || !assessment.issues.isEmpty {
+                        Button {
+                            showingAutoHealConfirmation = true
+                        } label: {
+                            Label("Auto-Fix Issues", systemImage: "wrench.and.screwdriver.fill")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.purple)
+                        .controlSize(.small)
+                        .disabled(doctorManager.isHealing || manager.isOperating)
+                    }
 
                     if !showHeader {
                         Button {

@@ -10,6 +10,7 @@ struct ActionConsoleDrawer: View {
     @State private var copiedLog = false
     @State private var customCommand = ""
     @State private var showingClearLocksConfirmation = false
+    @AppStorage("BrewStore.consoleExpanded") private var isExpanded = false
 
     private var filteredLogLines: [String] {
         let lines = manager.outputLog.components(separatedBy: .newlines)
@@ -38,6 +39,14 @@ struct ActionConsoleDrawer: View {
                             .lineLimit(1)
                             .truncationMode(.tail)
                             .frame(maxWidth: 150, alignment: .leading)
+
+                        Button("Cancel", role: .destructive) {
+                            manager.cancelCurrentOperation()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.red)
+                        .controlSize(.mini)
+                        .help("Cancel running operation")
                     } else {
                         Text("Ready")
                             .font(.caption2)
@@ -119,6 +128,18 @@ struct ActionConsoleDrawer: View {
                     }
                     .buttonStyle(.borderless)
                     .help("Clear Output Log")
+
+                    // Resize Toggle
+                    Button {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                            isExpanded.toggle()
+                        }
+                    } label: {
+                        Image(systemName: isExpanded ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                            .font(.caption2)
+                    }
+                    .buttonStyle(.borderless)
+                    .help(isExpanded ? "Compact Console (210pt)" : "Expand Console (380pt)")
 
                     // Close Drawer Button
                     Button {
@@ -204,7 +225,7 @@ struct ActionConsoleDrawer: View {
             .padding(.vertical, 5)
             .background(Color(nsColor: .windowBackgroundColor))
         }
-        .frame(height: 210)
+        .frame(height: isExpanded ? 380 : 210)
         .overlay(
             Rectangle()
                 .frame(height: 1)
