@@ -53,16 +53,11 @@ final class BrewStoreSecurityInspector: ObservableObject {
                     }
                 }
             } else {
-                // Formula binary
-                let path = "/opt/homebrew/bin/\(package.name)"
-                if FileManager.default.fileExists(atPath: path) {
-                    targetPath = path
-                } else {
-                    let usrPath = "/usr/local/bin/\(package.name)"
-                    if FileManager.default.fileExists(atPath: usrPath) {
-                        targetPath = usrPath
-                    }
-                }
+                targetPath = Self.findFormulaBinaryPath(
+                    id: package.id,
+                    name: package.name,
+                    cellarURL: package.cellarURL()
+                )
             }
 
             guard let validPath = targetPath else {
@@ -190,5 +185,58 @@ final class BrewStoreSecurityInspector: ObservableObject {
         }
         let execPath = (macosDir as NSString).appendingPathComponent(first)
         return inspectBinaryArchitecture(at: execPath)
+    }
+
+    nonisolated static func findFormulaBinaryPath(id: String, name: String, cellarURL: URL? = nil) -> String? {
+        let optCandidates = [
+            "/opt/homebrew/opt/\(id)/bin",
+            "/usr/local/opt/\(id)/bin",
+            "/opt/homebrew/opt/\(name)/bin",
+            "/usr/local/opt/\(name)/bin"
+        ]
+        for optDir in optCandidates {
+            if let files = try? FileManager.default.contentsOfDirectory(atPath: optDir) {
+                if files.contains(name) {
+                    return (optDir as NSString).appendingPathComponent(name)
+                }
+                if files.contains(id) {
+                    return (optDir as NSString).appendingPathComponent(id)
+                }
+                if let first = files.first {
+                    return (optDir as NSString).appendingPathComponent(first)
+                }
+            }
+        }
+
+        let standardCandidates = [
+            "/opt/homebrew/bin/\(name)",
+            "/opt/homebrew/bin/\(id)",
+            "/usr/local/bin/\(name)",
+            "/usr/local/bin/\(id)"
+        ]
+        for path in standardCandidates where FileManager.default.isExecutableFile(atPath: path) {
+            return path
+        }
+
+        if let cellar = cellarURL {
+            if let versionDirs = try? FileManager.default.contentsOfDirectory(atPath: cellar.path) {
+                for versionDir in versionDirs {
+                    let binDir = cellar.appendingPathComponent(versionDir).appendingPathComponent("bin")
+                    if let files = try? FileManager.default.contentsOfDirectory(atPath: binDir.path) {
+                        if files.contains(name) {
+                            return binDir.appendingPathComponent(name).path
+                        }
+                        if files.contains(id) {
+                            return binDir.appendingPathComponent(id).path
+                        }
+                        if let first = files.first {
+                            return binDir.appendingPathComponent(first).path
+                        }
+                    }
+                }
+            }
+        }
+
+        return nil
     }
 }

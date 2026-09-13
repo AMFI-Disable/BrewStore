@@ -82,9 +82,15 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
         process.standardOutput = outputPipe
         process.standardError = errorPipe
 
+        let exitSemaphore = DispatchSemaphore(value: 0)
+        process.terminationHandler = { _ in
+            exitSemaphore.signal()
+        }
+
         do {
             try process.run()
         } catch {
+            process.terminationHandler = nil
             return BrewStoreCommandResult(
                 standardOutput: "", standardError: "", terminationStatus: nil,
                 wasTerminated: false, didTimeOut: false, wasCancelled: false,
@@ -95,11 +101,6 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
 
         try? outputPipe.fileHandleForWriting.close()
         try? errorPipe.fileHandleForWriting.close()
-
-        let exitSemaphore = DispatchSemaphore(value: 0)
-        process.terminationHandler = { _ in
-            exitSemaphore.signal()
-        }
 
         let group = DispatchGroup()
         let output = BrewStoreOutputBuffer(onOutput: onOutput)
@@ -120,7 +121,7 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
         if wasCancelled {
             process.terminate()
         } else {
-            let waitStep: DispatchTimeInterval = cancellationCheck != nil ? .milliseconds(20) : .milliseconds(min(Int(max(timeout, 0.05) * 1000), 30_000))
+            let waitStep: DispatchTimeInterval = .milliseconds(25)
             while process.isRunning && Date() < deadline {
                 if cancellationCheck?() == true {
                     wasCancelled = true
@@ -128,6 +129,9 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
                     break
                 }
                 if exitSemaphore.wait(timeout: .now() + waitStep) == .success {
+                    break
+                }
+                if group.wait(timeout: .now()) == .success {
                     break
                 }
             }
@@ -159,7 +163,7 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
                 Thread.sleep(forTimeInterval: 0.02)
             }
         }
-        if !process.isRunning {
+        if !process.isRunning || group.wait(timeout: .now()) == .success {
             process.waitUntilExit()
         }
 

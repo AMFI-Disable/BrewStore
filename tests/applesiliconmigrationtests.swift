@@ -62,4 +62,25 @@ final class AppleSiliconMigrationTests: XCTestCase {
         XCTAssertEqual(manager.architecture(for: "old-intel-cli"), .intel)
         XCTAssertNil(manager.architecture(for: "unknown-package"))
     }
+
+    func testFindFormulaBinaryPathInVersionedCellar() throws {
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let versionDir = tempDir.appendingPathComponent("1.2.3")
+        let binDir = versionDir.appendingPathComponent("bin")
+        try FileManager.default.createDirectory(at: binDir, withIntermediateDirectories: true)
+
+        let execURL = binDir.appendingPathComponent("customcli")
+        FileManager.default.createFile(atPath: execURL.path, contents: Data("#!/bin/sh\necho hi\n".utf8))
+
+        let found = BrewStoreSecurityInspector.findFormulaBinaryPath(
+            id: "customcli",
+            name: "customcli",
+            cellarURL: tempDir
+        )
+
+        XCTAssertEqual(found, execURL.path)
+
+        // Clean up
+        try? FileManager.default.removeItem(at: tempDir)
+    }
 }

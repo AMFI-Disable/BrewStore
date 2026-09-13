@@ -66,21 +66,9 @@ final class BrewStoreAppleSiliconMigrationManager: ObservableObject {
                 var targetPath: String?
 
                 if pkg.kind == .formula {
-                    if let cellar = pkg.cellarURL() {
-                        let binURL = cellar.appendingPathComponent("bin")
-                        if let files = try? FileManager.default.contentsOfDirectory(atPath: binURL.path) {
-                            for file in files {
-                                let execPath = binURL.appendingPathComponent(file).path
-                                let detectedArch = BrewStoreSecurityInspector.inspectBinaryArchitecture(at: execPath)
-                                if detectedArch != .unknown {
-                                    targetPath = execPath
-                                    arch = detectedArch
-                                    if detectedArch == .appleSilicon || detectedArch == .universal2 {
-                                        break
-                                    }
-                                }
-                            }
-                        }
+                    if let binary = BrewStoreSecurityInspector.findFormulaBinaryPath(id: pkg.id, name: pkg.name, cellarURL: pkg.cellarURL()) {
+                        targetPath = binary
+                        arch = BrewStoreSecurityInspector.inspectBinaryArchitecture(at: binary)
                     }
                 } else {
                     let candidatesPaths = [

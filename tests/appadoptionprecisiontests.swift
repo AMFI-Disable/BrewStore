@@ -144,4 +144,10 @@ final class AppAdoptionPrecisionTests: XCTestCase {
         XCTAssertEqual(adoptionManager.reviewRequiredApps.count, 1)
         XCTAssertEqual(adoptionManager.reviewRequiredApps.first?.id, "/Applications/Firefox.app")
     }
+
+    func testEvaluateArchitectureCompatibilityNonExistent() {
+        let result = BrewStoreAppAdoptionManager.evaluateArchitectureCompatibility(appPath: "/NonExistent/App.app")
+        XCTAssertTrue(result.isCompatible)
+        XCTAssertNil(result.reason)
+    }
 }

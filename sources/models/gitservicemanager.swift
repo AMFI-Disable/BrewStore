@@ -16,7 +16,7 @@ public enum GitServiceProvider: String, CaseIterable, Identifiable, Codable, Sen
         case .github: "GitHub"
         case .gitlab: "GitLab"
         case .codeberg: "Codeberg"
-        case .custom: "Custom Git"
+        case .custom: "Forgejo / Gitea (Self-Hosted)"
         }
     }
 
@@ -34,7 +34,7 @@ public enum GitServiceProvider: String, CaseIterable, Identifiable, Codable, Sen
         case .github: "https://api.github.com"
         case .gitlab: "https://gitlab.com"
         case .codeberg: "https://codeberg.org"
-        case .custom: "https://"
+        case .custom: "https://git.example.com"
         }
     }
 
@@ -47,7 +47,7 @@ public enum GitServiceProvider: String, CaseIterable, Identifiable, Codable, Sen
         case .codeberg:
             "Access Token with 'read:user' and 'write:repository' scopes."
         case .custom:
-            "Personal Access Token from your self-hosted instance."
+            "Personal Access Token with 'read:user' and 'write:repository' scopes from your Forgejo or Gitea instance."
         }
     }
 
@@ -158,6 +158,38 @@ public final class GitServiceManager: ObservableObject {
         UserDefaults.standard.set(activeAccountID, forKey: activeIDKey)
     }
 
+    private func gistStorageKey(for accountID: String) -> String {
+        "BrewStore.git.gistID.\(accountID)"
+    }
+
+    private func snippetStorageKey(for accountID: String) -> String {
+        "BrewStore.git.snippetID.\(accountID)"
+    }
+
+    public func getSavedGistID(for accountID: String) -> String? {
+        UserDefaults.standard.string(forKey: gistStorageKey(for: accountID))
+    }
+
+    public func setSavedGistID(_ gistID: String?, for accountID: String) {
+        if let gistID {
+            UserDefaults.standard.set(gistID, forKey: gistStorageKey(for: accountID))
+        } else {
+            UserDefaults.standard.removeObject(forKey: gistStorageKey(for: accountID))
+        }
+    }
+
+    public func getSavedSnippetID(for accountID: String) -> String? {
+        UserDefaults.standard.string(forKey: snippetStorageKey(for: accountID))
+    }
+
+    public func setSavedSnippetID(_ snippetID: String?, for accountID: String) {
+        if let snippetID {
+            UserDefaults.standard.set(snippetID, forKey: snippetStorageKey(for: accountID))
+        } else {
+            UserDefaults.standard.removeObject(forKey: snippetStorageKey(for: accountID))
+        }
+    }
+
     public func setActiveAccount(id: String) {
         if accounts.contains(where: { $0.id == id }) {
             self.activeAccountID = id
@@ -171,12 +203,18 @@ public final class GitServiceManager: ObservableObject {
             activeAccountID = accounts.first?.id
         }
         saveAccounts()
+        setSavedGistID(nil, for: id)
+        setSavedSnippetID(nil, for: id)
         if accounts.isEmpty {
             UserDefaults.standard.removeObject(forKey: legacyGitHubTokenKey)
         }
     }
 
     public func disconnectAllAccounts() {
+        for acc in accounts {
+            setSavedGistID(nil, for: acc.id)
+            setSavedSnippetID(nil, for: acc.id)
+        }
         accounts.removeAll()
         activeAccountID = nil
         saveAccounts()
@@ -342,9 +380,9 @@ public final class GitServiceManager: ObservableObject {
         do {
             let syncURL: URL = switch account.provider {
             case .github:
-                try await syncToGitHubGist(token: account.token, content: brewfileContent)
+                try await syncToGitHubGist(accountID: account.id, token: account.token, content: brewfileContent)
             case .gitlab:
-                try await syncToGitLabSnippet(host: account.host, token: account.token, content: brewfileContent)
+                try await syncToGitLabSnippet(accountID: account.id, host: account.host, token: account.token, content: brewfileContent)
             case .codeberg, .custom:
                 try await syncToForgejoRepo(host: account.host, user: account.login, token: account.token, content: brewfileContent)
             }
@@ -361,6 +399,46 @@ public final class GitServiceManager: ObservableObject {
     }
 
     public func syncToGitHubGist(token: String, content: String) async throws -> URL {
+        try await syncToGitHubGist(accountID: nil, token: token, content: content)
+    }
+
+    public func syncToGitHubGist(accountID: String?, token: String, content: String) async throws -> URL {
+        if let accountID, let existingID = getSavedGistID(for: accountID), !existingID.isEmpty {
+            if let patchURL = URL(string: "https://api.github.com/gists/\(existingID)") {
+                var patchReq = URLRequest(url: patchURL)
+                patchReq.httpMethod = "PATCH"
+                patchReq.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                patchReq.setValue("application/vnd.github.v3+json", forHTTPHeaderField: "Accept")
+                patchReq.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                patchReq.setValue("BrewStore-macOS", forHTTPHeaderField: "User-Agent")
+
+                let patchPayload: [String: Any] = [
+                    "description": "BrewStore Automatic macOS Package Backup",
+                    "files": [
+                        "Brewfile": ["content": content]
+                    ]
+                ]
+                patchReq.httpBody = try? JSONSerialization.data(withJSONObject: patchPayload)
+
+                if let (respData, resp) = try? await URLSession.shared.data(for: patchReq),
+                   let http = resp as? HTTPURLResponse {
+                    if http.statusCode == 200 {
+                        if let json = try? JSONSerialization.jsonObject(with: respData) as? [String: Any],
+                           let htmlURL = json["html_url"] as? String,
+                           let gistURL = URL(string: htmlURL) {
+                            return gistURL
+                        }
+                    } else if http.statusCode == 404 {
+                        setSavedGistID(nil, for: accountID)
+                    } else {
+                        throw NSError(domain: "BrewStoreGit", code: http.statusCode, userInfo: [
+                            NSLocalizedDescriptionKey: "GitHub Gist update error (HTTP \(http.statusCode))."
+                        ])
+                    }
+                }
+            }
+        }
+
         guard let url = URL(string: "https://api.github.com/gists") else {
             throw URLError(.badURL)
         }
@@ -382,19 +460,65 @@ public final class GitServiceManager: ObservableObject {
 
         let (respData, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse, (200 ... 201).contains(http.statusCode) else {
-            throw NSError(domain: "BrewStoreGit", code: 500, userInfo: [NSLocalizedDescriptionKey: "GitHub Gist API error."])
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 500
+            throw NSError(domain: "BrewStoreGit", code: code, userInfo: [
+                NSLocalizedDescriptionKey: "GitHub Gist API error (HTTP \(code))."
+            ])
         }
 
-        if let json = try? JSONSerialization.jsonObject(with: respData) as? [String: Any],
-           let htmlURL = json["html_url"] as? String,
-           let gistURL = URL(string: htmlURL) {
-            return gistURL
+        if let json = try? JSONSerialization.jsonObject(with: respData) as? [String: Any] {
+            if let accountID, let newID = json["id"] as? String {
+                setSavedGistID(newID, for: accountID)
+            }
+            if let htmlURL = json["html_url"] as? String,
+               let gistURL = URL(string: htmlURL) {
+                return gistURL
+            }
         }
         throw URLError(.cannotParseResponse)
     }
 
     public func syncToGitLabSnippet(host: String, token: String, content: String) async throws -> URL {
+        try await syncToGitLabSnippet(accountID: nil, host: host, token: token, content: content)
+    }
+
+    public func syncToGitLabSnippet(accountID: String?, host: String, token: String, content: String) async throws -> URL {
         let base = host.isEmpty ? "https://gitlab.com" : host
+
+        if let accountID, let existingID = getSavedSnippetID(for: accountID), !existingID.isEmpty {
+            if let putURL = URL(string: "\(base)/api/v4/snippets/\(existingID)") {
+                var putReq = URLRequest(url: putURL)
+                putReq.httpMethod = "PUT"
+                putReq.setValue(token, forHTTPHeaderField: "PRIVATE-TOKEN")
+                putReq.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                putReq.setValue("BrewStore-macOS", forHTTPHeaderField: "User-Agent")
+
+                let putPayload: [String: Any] = [
+                    "title": "BrewStore Automatic macOS Package Backup",
+                    "file_name": "Brewfile",
+                    "content": content
+                ]
+                putReq.httpBody = try? JSONSerialization.data(withJSONObject: putPayload)
+
+                if let (respData, resp) = try? await URLSession.shared.data(for: putReq),
+                   let http = resp as? HTTPURLResponse {
+                    if http.statusCode == 200 {
+                        if let json = try? JSONSerialization.jsonObject(with: respData) as? [String: Any],
+                           let webURL = json["web_url"] as? String,
+                           let snippetURL = URL(string: webURL) {
+                            return snippetURL
+                        }
+                    } else if http.statusCode == 404 {
+                        setSavedSnippetID(nil, for: accountID)
+                    } else {
+                        throw NSError(domain: "BrewStoreGit", code: http.statusCode, userInfo: [
+                            NSLocalizedDescriptionKey: "GitLab Snippet update error (HTTP \(http.statusCode))."
+                        ])
+                    }
+                }
+            }
+        }
+
         guard let url = URL(string: "\(base)/api/v4/snippets") else {
             throw URLError(.badURL)
         }
@@ -415,13 +539,24 @@ public final class GitServiceManager: ObservableObject {
 
         let (respData, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse, (200 ... 201).contains(http.statusCode) else {
-            throw NSError(domain: "BrewStoreGit", code: 500, userInfo: [NSLocalizedDescriptionKey: "GitLab Snippets API error."])
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 500
+            throw NSError(domain: "BrewStoreGit", code: code, userInfo: [
+                NSLocalizedDescriptionKey: "GitLab Snippets API error (HTTP \(code))."
+            ])
         }
 
-        if let json = try? JSONSerialization.jsonObject(with: respData) as? [String: Any],
-           let webURL = json["web_url"] as? String,
-           let snippetURL = URL(string: webURL) {
-            return snippetURL
+        if let json = try? JSONSerialization.jsonObject(with: respData) as? [String: Any] {
+            if let accountID {
+                if let intID = json["id"] as? Int {
+                    setSavedSnippetID(String(intID), for: accountID)
+                } else if let strID = json["id"] as? String {
+                    setSavedSnippetID(strID, for: accountID)
+                }
+            }
+            if let webURL = json["web_url"] as? String,
+               let snippetURL = URL(string: webURL) {
+                return snippetURL
+            }
         }
         throw URLError(.cannotParseResponse)
     }
@@ -446,33 +581,68 @@ public final class GitServiceManager: ObservableObject {
         createReq.httpBody = try? JSONSerialization.data(withJSONObject: repoPayload)
         _ = try? await URLSession.shared.data(for: createReq)
 
-        // Upload Brewfile
         guard let fileURL = URL(string: "\(base)/api/v1/repos/\(user)/\(repoName)/contents/Brewfile") else {
             throw URLError(.badURL)
         }
+
+        // Check if Brewfile already exists via GET to retrieve its SHA
+        var getReq = URLRequest(url: fileURL)
+        getReq.httpMethod = "GET"
+        getReq.setValue("token \(token)", forHTTPHeaderField: "Authorization")
+        getReq.setValue("application/json", forHTTPHeaderField: "Accept")
+        getReq.setValue("BrewStore-macOS", forHTTPHeaderField: "User-Agent")
+
+        var existingSHA: String?
+        if let (getData, getResp) = try? await URLSession.shared.data(for: getReq),
+           let getHTTP = getResp as? HTTPURLResponse {
+            if getHTTP.statusCode == 200 {
+                if let getJSON = try? JSONSerialization.jsonObject(with: getData) as? [String: Any],
+                   let sha = getJSON["sha"] as? String {
+                    existingSHA = sha
+                }
+            } else if getHTTP.statusCode != 404 {
+                throw NSError(domain: "BrewStoreGit", code: getHTTP.statusCode, userInfo: [
+                    NSLocalizedDescriptionKey: "Failed checking repository contents on \(base) (HTTP \(getHTTP.statusCode))."
+                ])
+            }
+        }
+
+        let base64Content = Data(content.utf8).base64EncodedString()
         var fileReq = URLRequest(url: fileURL)
-        fileReq.httpMethod = "POST"
         fileReq.setValue("token \(token)", forHTTPHeaderField: "Authorization")
         fileReq.setValue("application/json", forHTTPHeaderField: "Content-Type")
         fileReq.setValue("BrewStore-macOS", forHTTPHeaderField: "User-Agent")
 
-        let base64Content = Data(content.utf8).base64EncodedString()
-        let filePayload: [String: Any] = [
-            "message": "Update Brewfile backup",
+        var filePayload: [String: Any] = [
             "content": base64Content
         ]
+
+        if let existingSHA {
+            fileReq.httpMethod = "PUT"
+            filePayload["message"] = "Update Brewfile backup"
+            filePayload["sha"] = existingSHA
+        } else {
+            fileReq.httpMethod = "POST"
+            filePayload["message"] = "Create Brewfile backup"
+        }
+
         fileReq.httpBody = try JSONSerialization.data(withJSONObject: filePayload)
 
         let (fileData, fileResp) = try await URLSession.shared.data(for: fileReq)
-        if let http = fileResp as? HTTPURLResponse, (200 ... 201).contains(http.statusCode),
-           let json = try? JSONSerialization.jsonObject(with: fileData) as? [String: Any],
+        guard let http = fileResp as? HTTPURLResponse, (200 ... 201).contains(http.statusCode) else {
+            let code = (fileResp as? HTTPURLResponse)?.statusCode ?? 500
+            throw NSError(domain: "BrewStoreGit", code: code, userInfo: [
+                NSLocalizedDescriptionKey: "Failed saving Brewfile to \(base) (HTTP \(code))."
+            ])
+        }
+
+        if let json = try? JSONSerialization.jsonObject(with: fileData) as? [String: Any],
            let contentObj = json["content"] as? [String: Any],
            let htmlURL = contentObj["html_url"] as? String,
            let finalURL = URL(string: htmlURL) {
             return finalURL
         }
 
-        // Fallback to the repo URL
         if let fallbackURL = URL(string: "\(base)/\(user)/\(repoName)") {
             return fallbackURL
         }

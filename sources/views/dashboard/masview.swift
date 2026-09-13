@@ -22,12 +22,12 @@ struct MASView: View {
             headerBar
             Divider()
 
-            if !masManager.isMASInstalled {
+            if !masManager.isMASInstalled && masManager.installedApps.isEmpty {
                 installMASPromptView
             } else if masManager.isRefreshing {
                 VStack(spacing: 12) {
                     ProgressView()
-                    Text("Reading Mac App Store installations via mas-cli…")
+                    Text(masManager.isMASInstalled ? "Reading Mac App Store installations via mas-cli…" : "Scanning installed Mac App Store receipts…")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
@@ -45,7 +45,7 @@ struct MASView: View {
         }
         .frame(minWidth: 700, minHeight: 500)
         .onAppear {
-            if masManager.isMASInstalled, masManager.installedApps.isEmpty {
+            if masManager.installedApps.isEmpty {
                 masManager.refresh()
             }
         }
@@ -163,6 +163,37 @@ struct MASView: View {
 
             Divider()
 
+            if !masManager.isMASInstalled {
+                HStack(spacing: 12) {
+                    Image(systemName: "info.circle.fill")
+                        .foregroundStyle(.blue)
+                        .font(.title3)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Discovered via Native App Receipts")
+                            .font(.subheadline.bold())
+                        Text("Install the 'mas' CLI via Homebrew to enable 1-click updates and command-line management.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    Button {
+                        masManager.installMAS(manager: manager)
+                    } label: {
+                        Label("Install mas CLI", systemImage: "plus.circle.fill")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                    .disabled(manager.isOperating)
+                }
+                .padding(12)
+                .background(Color.blue.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
+                .padding(.horizontal)
+                .padding(.top, 8)
+            }
+
             ScrollView {
                 LazyVStack(spacing: 10) {
                     ForEach(filteredApps) { app in
@@ -194,7 +225,15 @@ struct MASView: View {
 
                             Spacer()
 
-                            if app.isOutdated {
+                            if !masManager.isMASInstalled {
+                                Button("Open in App Store") {
+                                    if let url = URL(string: "macappstore://apps.apple.com/app/id\(app.id)") {
+                                        NSWorkspace.shared.open(url)
+                                    }
+                                }
+                                .buttonStyle(.bordered)
+                                .controlSize(.small)
+                            } else if app.isOutdated {
                                 Button("Update") {
                                     masManager.upgradeApp(app)
                                 }

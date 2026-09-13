@@ -401,12 +401,19 @@ final class BrewStoreAppAdoptionManager: ObservableObject {
     }
 
     nonisolated static func evaluateArchitectureCompatibility(appPath: String) -> (isCompatible: Bool, reason: String?) {
-        // Safe check for valid executable path
         let fileManager = FileManager.default
         let execDir = (appPath as NSString).appendingPathComponent("Contents/MacOS")
         guard fileManager.fileExists(atPath: execDir) else {
             return (true, nil)
         }
+
+        #if arch(arm64)
+        let detectedArch = BrewStoreSecurityInspector.inspectAppBundleArchitecture(at: appPath)
+        if detectedArch == .intel {
+            return (false, "App is currently running under Rosetta 2 (Intel x86_64). Adopting Cask can upgrade to native Apple Silicon.")
+        }
+        #endif
+
         return (true, nil)
     }
 

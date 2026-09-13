@@ -6,7 +6,7 @@ final class GitServiceManagerTests: XCTestCase {
         XCTAssertEqual(GitServiceProvider.github.displayName, "GitHub")
         XCTAssertEqual(GitServiceProvider.gitlab.displayName, "GitLab")
         XCTAssertEqual(GitServiceProvider.codeberg.displayName, "Codeberg")
-        XCTAssertEqual(GitServiceProvider.custom.displayName, "Custom Git")
+        XCTAssertEqual(GitServiceProvider.custom.displayName, "Forgejo / Gitea (Self-Hosted)")
 
         XCTAssertTrue(GitServiceProvider.github.defaultHost.contains("github.com"))
         XCTAssertTrue(GitServiceProvider.gitlab.defaultHost.contains("gitlab.com"))
@@ -114,5 +114,24 @@ final class GitServiceManagerTests: XCTestCase {
         let result = await manager.connectAccount(provider: .github, host: nil, token: "   ")
         XCTAssertFalse(result)
         XCTAssertEqual(manager.statusMessage, "Please enter a valid personal access token.")
+    }
+
+    @MainActor
+    func testGistAndSnippetIDPersistence() {
+        let manager = GitServiceManager()
+        let accountID = "github:testuser@github.com"
+
+        manager.setSavedGistID("gist_123456", for: accountID)
+        XCTAssertEqual(manager.getSavedGistID(for: accountID), "gist_123456")
+
+        manager.setSavedSnippetID("snippet_78910", for: accountID)
+        XCTAssertEqual(manager.getSavedSnippetID(for: accountID), "snippet_78910")
+
+        // Clearing removes from UserDefaults
+        manager.setSavedGistID(nil, for: accountID)
+        XCTAssertNil(manager.getSavedGistID(for: accountID))
+
+        manager.setSavedSnippetID(nil, for: accountID)
+        XCTAssertNil(manager.getSavedSnippetID(for: accountID))
     }
 }
