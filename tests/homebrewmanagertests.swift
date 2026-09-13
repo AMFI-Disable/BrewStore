@@ -408,7 +408,7 @@ final class HomebrewManagerTests: XCTestCase {
     }
 
     func testHelpManualTopics() {
-        XCTAssertEqual(HelpManualView.topics.count, 7)
+        XCTAssertEqual(HelpManualView.topics.count, 8)
         for topic in HelpManualView.topics {
             XCTAssertFalse(topic.id.isEmpty)
             XCTAssertFalse(topic.title.isEmpty)
@@ -1886,9 +1886,10 @@ final class HomebrewManagerTests: XCTestCase {
 
     @MainActor
     func testHelpManualTopicsCountAndContent() {
-        XCTAssertEqual(HelpManualView.topics.count, 7)
+        XCTAssertEqual(HelpManualView.topics.count, 8)
         let topicIDs = Set(HelpManualView.topics.map(\.id))
         XCTAssertTrue(topicIDs.contains("getting-started"))
+        XCTAssertTrue(topicIDs.contains("v1-changelog"))
         XCTAssertTrue(topicIDs.contains("services"))
         XCTAssertTrue(topicIDs.contains("app-cleaner"))
         XCTAssertTrue(topicIDs.contains("snapshots"))

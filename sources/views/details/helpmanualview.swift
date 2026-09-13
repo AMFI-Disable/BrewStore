@@ -62,6 +62,68 @@ struct HelpManualView: View {
             ]
         ),
         HelpTopic(
+            id: "v1-changelog",
+            title: "What's New in v1.0.0",
+            icon: "sparkles.rectangle.stack.fill",
+            subtitle: "Exhaustive directory of all features across every page",
+            sections: [
+                HelpSection(
+                    heading: "Storefront: Discover, Showdowns & Toolkits",
+                    paragraphs: [
+                        "• Discover: Editorial Hero spotlight carousel with adaptive full-screen width, curated shelves, category tags, and instant GET action pills.",
+                        "• Community Picks: Head-to-head showdowns (Ghostty vs Alacritty, Neovim vs Helix, OrbStack vs Docker) with live voting and spec comparison matrix.",
+                        "• All Applications & CLI Tools: Full directories of 4,500+ Casks and 7,500+ Formulae with real-time app icon extraction and bottle status.",
+                        "• Stories & Toolkits: Curated editorial guides with inline package installers, plus turnkey developer stacks with 1-click batch installation."
+                    ],
+                    tip: nil,
+                    codeSnippet: nil
+                ),
+                HelpSection(
+                    heading: "Library: Installed, Adoption & Dependencies",
+                    paragraphs: [
+                        "• Installed Wall: Tri-source inventory (Homebrew Casks, Formulae, Mac App Store apps) with Mach-O architecture badges (ARM64, Universal, Rosetta 2).",
+                        "• Adoption & Replacements: 1-Click adoption of unmanaged DMG/PKG apps into Homebrew, MAS-to-Cask conversion, and modern CLI tool suggestions.",
+                        "• Topology & Dependencies: Interactive visual DAG graph and 'Why is this installed?' reverse dependency inspector.",
+                        "• Updates & Wishlist: Centralized update reconciler and personal package bookmark collection."
+                    ],
+                    tip: nil,
+                    codeSnippet: nil
+                ),
+                HelpSection(
+                    heading: "Environment: Daemons, Taps & Creator Studio",
+                    paragraphs: [
+                        "• Services & Daemons: Triple-domain management of Homebrew daemons, user LaunchAgents, and LaunchDaemons with live CPU/RAM telemetry and log streaming.",
+                        "• Taps & Health: Tap registry, discovery of official/community taps, and connection health diagnostics.",
+                        "• Creator Studio: Scaffolding Ruby DSL manifests, automatic SHA-256 calculation, and strict brew audit linting in an isolated test sandbox."
+                    ],
+                    tip: nil,
+                    codeSnippet: nil
+                ),
+                HelpSection(
+                    heading: "Health & Maintenance: Snapshots, Sync, Cache & Doctor",
+                    paragraphs: [
+                        "• Time-Machine Snapshots: Pre-operation state capture with 3-way visual diffing and 1-click system rollback.",
+                        "• Multi-Machine Git Sync: Brewfile backup across GitHub, GitLab, Codeberg, Forgejo/Gitea, Gists, and automated bootstrap.sh script generation.",
+                        "• Developer Cache Cleaner: Granular cleaning for Xcode, Docker, npm, Yarn, Cargo, Gradle, and Homebrew caches safely to ~/.Trash.",
+                        "• Doctor & Security: Health score 0-100%, 1-click automated repairs, and real-time CVE vulnerability scanning with CVSS ratings."
+                    ],
+                    tip: nil,
+                    codeSnippet: nil
+                ),
+                HelpSection(
+                    heading: "Global Overlays, CLI & Menu Bar Companion",
+                    paragraphs: [
+                        "• Action Console Drawer (⌥~): Real-time ANSI color terminal output streaming for all Homebrew actions.",
+                        "• ⌘K Command Palette: Raycast-style universal launcher searching packages, services, actions, and settings.",
+                        "• Menu Bar Extra: 340px companion with live daemon telemetry, Rosetta 2 alert, and quick maintenance.",
+                        "• Developer CLI: Embedded 'brewstore' command-line companion with shell auto-completions."
+                    ],
+                    tip: "View the complete documentation in changelog.md in the project root.",
+                    codeSnippet: "brewstore version"
+                )
+            ]
+        ),
+        HelpTopic(
             id: "services",
             title: "Background Services",
             icon: "gearshape.2.fill",
