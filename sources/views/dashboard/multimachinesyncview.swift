@@ -80,13 +80,19 @@ struct MultiMachineSyncView: View {
                 Button {
                     let currentBundle = transferManager.createRigBundle(manager: manager, name: Host.current().localizedName ?? "My Mac")
                     if let fileURL = transferManager.exportBundleToFile(bundle: currentBundle) {
-                        let picker = NSSharingServicePicker(items: [fileURL])
-                        if let window = NSApp.keyWindow, let contentView = window.contentView {
-                            picker.show(relativeTo: .zero, of: contentView, preferredEdge: .minY)
+                        let savePanel = NSSavePanel()
+                        savePanel.title = "Export Machine Blueprint"
+                        savePanel.nameFieldStringValue = fileURL.lastPathComponent
+                        savePanel.allowedContentTypes = [.json]
+                        savePanel.canCreateDirectories = true
+                        if savePanel.runModal() == .OK, let targetURL = savePanel.url {
+                            try? FileManager.default.removeItem(at: targetURL)
+                            try? FileManager.default.copyItem(at: fileURL, to: targetURL)
+                            NSWorkspace.shared.activateFileViewerSelecting([targetURL])
                         }
                     }
                 } label: {
-                    Label("Export Blueprint", systemImage: "arrow.up.doc.fill")
+                    Label("Export Blueprint…", systemImage: "arrow.up.doc.fill")
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
@@ -209,14 +215,16 @@ struct MultiMachineSyncView: View {
                                 Spacer()
 
                                 Button("Install All Missing") {
+                                    var toInstall: [BrewStorePackage] = []
                                     for id in diff.missingOnLocalFormulae {
                                         let pkg = manager.packages.first(where: { $0.id == id }) ?? BrewStorePackage(id: id, name: id, description: "", homepage: "", version: "", kind: .formula)
-                                        manager.perform(package: pkg, action: .install)
+                                        toInstall.append(pkg)
                                     }
                                     for id in diff.missingOnLocalCasks {
                                         let pkg = manager.packages.first(where: { $0.id == id }) ?? BrewStorePackage(id: id, name: id, description: "", homepage: "", version: "", kind: .cask)
-                                        manager.perform(package: pkg, action: .install)
+                                        toInstall.append(pkg)
                                     }
+                                    manager.batchPerform(packages: toInstall, action: .install)
                                 }
                                 .buttonStyle(.borderedProminent)
                                 .controlSize(.small)

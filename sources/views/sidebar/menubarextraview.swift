@@ -475,6 +475,8 @@ struct MenuBarExtraView: View {
                 icon: "app.badge.checkmark"
             ) {
                 BrewStoreDockLifecycleManager.shared.showMainWindowAndDock()
+                BrewStoreURLSchemeRouter.shared.activeRoute = .adopt
+                BrewStoreAppAdoptionManager.shared.scanApplications(manager: manager)
                 BrewStoreMenuBarCompanionManager.shared.closeMenuBarPanel()
             }
         }

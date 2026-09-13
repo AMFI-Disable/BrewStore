@@ -195,23 +195,20 @@ struct ServicesView: View {
                     }
                 case .batchStart:
                     Button("Start All Stopped Daemons") {
-                        for service in manager.services where !service.isRunning {
-                            manager.perform(service: service, action: .start)
-                        }
+                        let stopped = manager.services.filter { !$0.isRunning }
+                        manager.batchPerform(services: stopped, action: .start)
                         pendingAction = nil
                     }
                 case .batchStop:
                     Button("Stop All Running Daemons", role: .destructive) {
-                        for service in manager.services where service.isRunning {
-                            manager.perform(service: service, action: .stop)
-                        }
+                        let running = manager.services.filter { $0.isRunning }
+                        manager.batchPerform(services: running, action: .stop)
                         pendingAction = nil
                     }
                 case .batchRestart:
                     Button("Restart All Active Daemons") {
-                        for service in manager.services where service.isRunning {
-                            manager.perform(service: service, action: .restart)
-                        }
+                        let running = manager.services.filter { $0.isRunning }
+                        manager.batchPerform(services: running, action: .restart)
                         pendingAction = nil
                     }
                 case let .autoFixErrored(svcs):
@@ -219,9 +216,7 @@ struct ServicesView: View {
                         ? "Restart \(svcs.first?.name ?? "Service")"
                         : "Restart \(svcs.count) Errored Services"
                     Button(title) {
-                        for service in svcs {
-                            manager.perform(service: service, action: .restart)
-                        }
+                        manager.batchPerform(services: svcs, action: .restart)
                         pendingAction = nil
                     }
                 }

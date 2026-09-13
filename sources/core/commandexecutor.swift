@@ -105,16 +105,24 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
         let group = DispatchGroup()
         let output = BrewStoreOutputBuffer(onOutput: onOutput)
         let error = BrewStoreOutputBuffer(onOutput: onOutput)
+
         group.enter()
-        DispatchQueue.global(qos: .userInitiated).async {
+        let outputThread = Thread {
             output.capture(from: outputPipe, maximumBytes: maximumOutputBytes)
             group.leave()
         }
+        outputThread.name = "BrewStore.CommandExecutor.Output"
+        outputThread.qualityOfService = .userInitiated
+        outputThread.start()
+
         group.enter()
-        DispatchQueue.global(qos: .userInitiated).async {
+        let errorThread = Thread {
             error.capture(from: errorPipe, maximumBytes: maximumOutputBytes)
             group.leave()
         }
+        errorThread.name = "BrewStore.CommandExecutor.Error"
+        errorThread.qualityOfService = .userInitiated
+        errorThread.start()
         let deadline = Date().addingTimeInterval(timeout.isFinite ? max(timeout, 0) : 30)
         var wasCancelled = cancellationCheck?() == true
 
@@ -137,21 +145,28 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
             }
         }
 
+        // Safely reap process if it has completed normally
+        if !wasCancelled && !process.isRunning {
+            process.waitUntilExit()
+        }
+
         let didTimeOut = process.isRunning && !wasCancelled && Date() >= deadline
-        if process.isRunning {
-            process.terminate()
-            let gracefulDeadline = Date().addingTimeInterval(0.2)
-            while process.isRunning, Date() < gracefulDeadline {
-                Thread.sleep(forTimeInterval: 0.02)
-            }
+        if wasCancelled || didTimeOut {
             if process.isRunning {
-                let pid = process.processIdentifier
-                if pid > 1, pid != getpid() {
-                    kill(pid, SIGKILL)
-                }
-                let killDeadline = Date().addingTimeInterval(0.2)
-                while process.isRunning, Date() < killDeadline {
+                process.terminate()
+                let gracefulDeadline = Date().addingTimeInterval(0.2)
+                while process.isRunning, Date() < gracefulDeadline {
                     Thread.sleep(forTimeInterval: 0.02)
+                }
+                if process.isRunning {
+                    let pid = process.processIdentifier
+                    if pid > 1, pid != getpid() {
+                        kill(pid, SIGKILL)
+                    }
+                    let killDeadline = Date().addingTimeInterval(0.2)
+                    while process.isRunning, Date() < killDeadline {
+                        Thread.sleep(forTimeInterval: 0.02)
+                    }
                 }
             }
         }

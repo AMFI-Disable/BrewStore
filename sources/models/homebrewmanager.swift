@@ -1004,6 +1004,46 @@ final class HomebrewManager: ObservableObject {
         }
     }
 
+    func batchPerform(services: [BrewStoreService], action: ServiceAction) {
+        guard let brewPath, !isOperating, !services.isEmpty else { return }
+        isOperating = true
+        isCancelled = false
+        let title = "\(action.rawValue.capitalized) \(services.count) services"
+        activeOperationTitle = title
+        statusMessage = "Starting batch service operation…"
+        errorMessage = nil
+
+        Task.detached(priority: .userInitiated) { [executor, brewPath, services, action, title] in
+            var allSucceeded = true
+            var outputLogs: [String] = []
+            for (index, service) in services.enumerated() {
+                await MainActor.run { [weak self] in
+                    self?.statusMessage = "\(action.rawValue.capitalized) service (\(index + 1)/\(services.count)): \(service.name)…"
+                }
+                let arguments = ["services", action.rawValue, service.name]
+                let result = executor.run(executablePath: brewPath, arguments: arguments, timeout: 60, category: .reversibleMutation)
+                if !result.succeeded {
+                    allSucceeded = false
+                }
+                if !result.standardOutput.isEmpty {
+                    outputLogs.append("[\(service.name)] \(result.standardOutput)")
+                }
+                if !result.standardError.isEmpty {
+                    outputLogs.append("[\(service.name) err] \(result.standardError)")
+                }
+            }
+
+            await MainActor.run { [weak self] in
+                guard let self else { return }
+                self.isOperating = false
+                self.activeOperationTitle = nil
+                self.statusMessage = allSucceeded ? "All service operations completed." : "Some service operations failed."
+                self.recordOperation(title: title, succeeded: allSucceeded, detail: outputLogs.joined(separator: "\n"))
+                self.refresh()
+            }
+        }
+    }
+
     func addTap(_ name: String) {
         runTapCommand(["tap", name])
     }

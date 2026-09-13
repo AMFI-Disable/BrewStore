@@ -227,7 +227,10 @@ struct MASView: View {
 
                             if !masManager.isMASInstalled {
                                 Button("Open in App Store") {
-                                    if let url = URL(string: "macappstore://apps.apple.com/app/id\(app.id)") {
+                                    if let trackID = Int(app.id), let url = URL(string: "macappstore://apps.apple.com/app/id\(trackID)") {
+                                        NSWorkspace.shared.open(url)
+                                    } else if let encodedName = app.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+                                              let url = URL(string: "macappstore://search.itunes.apple.com/WebObjects/MZSearch.woa/wa/search?q=\(encodedName)") {
                                         NSWorkspace.shared.open(url)
                                     }
                                 }

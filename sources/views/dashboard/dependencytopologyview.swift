@@ -6,6 +6,7 @@ struct DependencyTopologyView: View {
     @State private var selectedPackageForDetail: BrewStorePackage?
     @State private var searchQuery = ""
     @State private var showingExportSheet = false
+    @State private var showAllFoundations = false
 
     var showHeader: Bool = true
 
@@ -270,7 +271,7 @@ struct DependencyTopologyView: View {
 
     private func foundationsList(foundations: [SharedFoundationLibrary], totalCount: Int) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Top Shared Foundation Libraries (\(foundations.count))")
+            Text(showAllFoundations || foundations.count <= 50 ? "Shared Foundation Libraries (\(foundations.count))" : "Top Shared Foundation Libraries (Showing 50 of \(foundations.count))")
                 .font(.headline)
 
             Text("These packages act as the bedrock for other tools on your Mac. Removing them directly would break multiple dependents.")
@@ -297,8 +298,9 @@ struct DependencyTopologyView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color.secondary.opacity(0.05), in: RoundedRectangle(cornerRadius: 8))
             } else {
+                let displayedFoundations = showAllFoundations ? foundations : Array(foundations.prefix(50))
                 VStack(spacing: 8) {
-                    ForEach(Array(foundations.prefix(50).enumerated()), id: \.element.id) { index, lib in
+                    ForEach(Array(displayedFoundations.enumerated()), id: \.element.id) { index, lib in
                         HStack(spacing: 14) {
                             Text("#\(index + 1)")
                                 .font(.caption.monospaced().bold())
@@ -350,6 +352,22 @@ struct DependencyTopologyView: View {
                         }
                         .padding(12)
                         .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
+                    }
+
+                    if foundations.count > 50 {
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                showAllFoundations.toggle()
+                            }
+                        } label: {
+                            Label(
+                                showAllFoundations ? "Show Top 50 Only" : "Show All \(foundations.count) Foundation Libraries…",
+                                systemImage: showAllFoundations ? "chevron.up" : "chevron.down"
+                            )
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        .padding(.top, 4)
                     }
                 }
             }

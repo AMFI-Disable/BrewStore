@@ -13,7 +13,7 @@ struct AppReplacementView: View {
     @State private var sheetAppURL: URL?
 
     private var displayedCatalog: [OpenSourceAlternativeMapping] {
-        let base = selectedTab == 0 ? (replacementManager.detectedAlternatives.isEmpty ? BrewStoreAppReplacementManager.curatedAlternativeCatalog : replacementManager.detectedAlternatives) : BrewStoreAppReplacementManager.curatedAlternativeCatalog
+        let base = selectedTab == 0 ? replacementManager.detectedAlternatives : BrewStoreAppReplacementManager.curatedAlternativeCatalog
         if searchText.trimmingCharacters(in: .whitespaces).isEmpty {
             return base
         }
@@ -72,13 +72,37 @@ struct AppReplacementView: View {
 
             // Replacements List
             ScrollView {
-                LazyVStack(spacing: Spacing.sm) {
-                    ForEach(displayedCatalog) { mapping in
-                        replacementCard(for: mapping)
+                if selectedTab == 0 && replacementManager.detectedAlternatives.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 32))
+                            .foregroundStyle(.secondary)
+                        Text("No Proprietary App Matches Detected")
+                            .font(.headline)
+                        Text("None of your currently installed applications match our curated proprietary-to-open-source directory.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: 420)
+
+                        Button("Browse Full Directory (\(BrewStoreAppReplacementManager.curatedAlternativeCatalog.count))") {
+                            selectedTab = 1
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                        .padding(.top, 4)
                     }
+                    .frame(maxWidth: .infinity, minHeight: 220)
+                    .padding(Spacing.lg)
+                } else {
+                    LazyVStack(spacing: Spacing.sm) {
+                        ForEach(displayedCatalog) { mapping in
+                            replacementCard(for: mapping)
+                        }
+                    }
+                    .padding(.horizontal, Spacing.lg)
+                    .padding(.vertical, Spacing.sm)
                 }
-                .padding(.horizontal, Spacing.lg)
-                .padding(.vertical, Spacing.sm)
             }
             .id(selectedTab)
             .animation(nil, value: selectedTab)

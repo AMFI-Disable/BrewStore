@@ -35,7 +35,7 @@ struct CVESecurityView: View {
                 .scaleEffect(1.2)
             Text("Checking installed packages for security advisories…")
                 .font(.headline)
-            Text("Checking installed packages for security vulnerabilities, deprecations, and configuration warnings.")
+            Text("Cross-referencing GitHub Advisory Database, Homebrew deprecation notices, and local audit warnings.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

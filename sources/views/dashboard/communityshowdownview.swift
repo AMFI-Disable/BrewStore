@@ -155,7 +155,7 @@ public struct CommunityShowdownView: View {
                         } label: {
                             HStack(spacing: 6) {
                                 Image(systemName: "person.crop.circle.badge.plus")
-                                Text("Sign In with GitHub")
+                                Text("Connect Git Account")
                             }
                             .padding(.horizontal, 10)
                             .padding(.vertical, 6)

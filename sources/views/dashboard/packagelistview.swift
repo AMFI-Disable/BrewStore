@@ -56,7 +56,7 @@ struct PackageListView: View {
     }
 
     private var installedCount: Int {
-        packages.filter(\.isInstalled).count
+        basePackages.filter(\.isInstalled).count
     }
 
     private var selectedPackages: [BrewStorePackage] {

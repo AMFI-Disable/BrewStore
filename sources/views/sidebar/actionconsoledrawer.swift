@@ -58,29 +58,21 @@ struct ActionConsoleDrawer: View {
                 Spacer(minLength: 12)
 
                 HStack(spacing: 8) {
-                    // Quick Diagnostics (hidden while operating to prevent overflow)
+                    // Quick Diagnostics (grouped in a Menu to prevent toolbar overflow)
                     if !manager.isOperating {
-                        HStack(spacing: 3) {
-                            Button("doctor") { runDiagnostic("doctor") }
-                                .buttonStyle(.bordered)
-                                .controlSize(.mini)
-
-                            Button("config") { runDiagnostic("config") }
-                                .buttonStyle(.bordered)
-                                .controlSize(.mini)
-
-                            Button("missing") { runDiagnostic("missing") }
-                                .buttonStyle(.bordered)
-                                .controlSize(.mini)
-
-                            Button("cleanup -n") { manager.runCustomBrewCommand("cleanup -n") }
-                                .buttonStyle(.bordered)
-                                .controlSize(.mini)
-
-                            Button("clear locks") { showingClearLocksConfirmation = true }
-                                .buttonStyle(.bordered)
-                                .controlSize(.mini)
+                        Menu {
+                            Button("brew doctor") { runDiagnostic("doctor") }
+                            Button("brew config") { runDiagnostic("config") }
+                            Button("brew missing") { runDiagnostic("missing") }
+                            Button("brew cleanup -n") { manager.runCustomBrewCommand("cleanup -n") }
+                            Divider()
+                            Button("Clear Homebrew Locks…") { showingClearLocksConfirmation = true }
+                        } label: {
+                            Label("Diagnostics", systemImage: "wrench.and.screwdriver")
+                                .font(.caption2)
                         }
+                        .menuStyle(.borderlessButton)
+                        .fixedSize()
 
                         Divider().frame(height: 14)
                     }
