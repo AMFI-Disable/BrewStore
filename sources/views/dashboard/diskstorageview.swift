@@ -46,7 +46,7 @@ struct DiskStorageView: View {
                         Button(role: .destructive) {
                             storageManager.purgeCache(manager: manager)
                         } label: {
-                            Label("Clean All Caches", systemImage: "trash")
+                            Label("Clean Homebrew Cache", systemImage: "trash")
                         }
                         .buttonStyle(.borderedProminent)
                         .controlSize(.small)
@@ -222,8 +222,22 @@ struct DiskStorageView: View {
 
                 // Package Filter & List
                 VStack(alignment: .leading, spacing: 10) {
+                    let filteredItems = rep.items.filter { item in
+                        switch selectedFilter {
+                        case .all: true
+                        case .formulae: item.kind == .formula
+                        case .casks: item.kind == .cask
+                        }
+                    }
+
                     HStack {
-                        Text("Packages by Disk Usage").font(.subheadline.bold())
+                        if filteredItems.count > 20 {
+                            Text("Top 20 Packages by Disk Usage (of \(filteredItems.count))")
+                                .font(.subheadline.bold())
+                        } else {
+                            Text("Packages by Disk Usage (\(filteredItems.count))")
+                                .font(.subheadline.bold())
+                        }
                         Spacer()
                         Picker("Filter", selection: $selectedFilter) {
                             ForEach(StorageFilter.allCases) { filter in
@@ -233,14 +247,6 @@ struct DiskStorageView: View {
                         .labelsHidden()
                         .pickerStyle(.segmented)
                         .frame(width: 240)
-                    }
-
-                    let filteredItems = rep.items.filter { item in
-                        switch selectedFilter {
-                        case .all: true
-                        case .formulae: item.kind == .formula
-                        case .casks: item.kind == .cask
-                        }
                     }
 
                     ForEach(filteredItems.prefix(20)) { item in

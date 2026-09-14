@@ -368,6 +368,13 @@ final class BrewStoreDiscoveryCatalog: ObservableObject {
         }
     }
 
+    func findItem(id: String) -> BrewStoreDiscoveryItem? {
+        let bare = id.lowercased()
+        return items.first { item in
+            item.id.lowercased() == bare || item.aliases.contains(where: { $0.lowercased() == bare })
+        }
+    }
+
     private func saveCache() {
         let cache = Cache(
             items: items,

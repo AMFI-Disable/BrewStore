@@ -33,7 +33,7 @@ struct MultiMachineSyncView: View {
                     syncManager.saveProfile(current)
                     selectedRemoteProfile = current
                 } label: {
-                    Label("Save Profile", systemImage: "plus.rectangle.on.rectangle")
+                    Label("Save Current Mac Profile", systemImage: "plus.rectangle.on.rectangle")
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
@@ -43,7 +43,7 @@ struct MultiMachineSyncView: View {
                     bootstrapScript = transferManager.generateBootstrapScript(bundle: bundle)
                     showingBootstrapSheet = true
                 } label: {
-                    Label("Setup Script", systemImage: "terminal.fill")
+                    Label("Bootstrap Script", systemImage: "terminal.fill")
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)

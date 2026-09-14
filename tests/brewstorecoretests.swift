@@ -209,4 +209,23 @@ final class BrewStoreCoreTests: XCTestCase {
         XCTAssertEqual(differingDiff.totalChanges, 1)
         XCTAssertEqual(differingDiff.addedFormulae, ["ripgrep"])
     }
+
+    @MainActor
+    func testDiscoveryCatalogFindItem() {
+        let catalog = BrewStoreDiscoveryCatalog.shared
+        let pkg = BrewStorePackage(
+            id: "test-cask",
+            name: "Test Cask",
+            description: "A test description",
+            homepage: "https://example.com",
+            version: "2.0.0",
+            kind: .cask,
+            isInstalled: true,
+            isOutdated: false
+        )
+        catalog.mergeLocalPackages([pkg])
+        let found = catalog.findItem(id: "test-cask")
+        XCTAssertNotNil(found)
+        XCTAssertEqual(found?.id, "test-cask")
+    }
 }

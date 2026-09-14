@@ -252,6 +252,9 @@ struct ServicesView: View {
             telemetry.refreshTelemetry(for: manager.services)
             backgroundManager.scanBackgroundItems()
         }
+        .onChange(of: manager.services) { _, newServices in
+            telemetry.refreshTelemetry(for: newServices)
+        }
     }
 
     @ViewBuilder

@@ -9,6 +9,7 @@ struct TapsView: View {
     @State private var tapToAdd: String?
     @State private var showingRemoveConfirmation = false
     @State private var showingTapDiscoverySheet = false
+    @State private var tapInputError: String?
 
     private var filteredTaps: [BrewStoreTap] {
         if search.isEmpty {
@@ -52,10 +53,11 @@ struct TapsView: View {
             HStack(spacing: Spacing.sm) {
                 TextField("user/repository (e.g. homebrew/cask-fonts)", text: $newTap)
                     .textFieldStyle(.roundedBorder)
+                    .onSubmit {
+                        submitNewTap()
+                    }
                 Button("Add Tap") {
-                    let value = newTap.trimmingCharacters(in: .whitespacesAndNewlines)
-                    guard value.range(of: #"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"#, options: .regularExpression) != nil else { return }
-                    tapToAdd = value
+                    submitNewTap()
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(manager.isOperating || newTap.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -72,7 +74,20 @@ struct TapsView: View {
             }
             .padding(.horizontal, Spacing.lg)
             .padding(.top, showHeader ? 0 : Spacing.sm)
-            .padding(.bottom, Spacing.sm)
+            .padding(.bottom, tapInputError == nil ? Spacing.sm : Spacing.xxs)
+
+            if let tapInputError {
+                HStack(spacing: Spacing.xs) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.red)
+                    Text(tapInputError)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                    Spacer()
+                }
+                .padding(.horizontal, Spacing.lg)
+                .padding(.bottom, Spacing.xs)
+            }
 
             HStack {
                 BrewStoreSectionSearchBar(text: $search, placeholder: "Search taps & repositories…", count: filteredTaps.count)
@@ -224,6 +239,22 @@ struct TapsView: View {
         .sheet(isPresented: $showingTapDiscoverySheet) {
             TapDiscoveryView(manager: manager)
         }
+        .onChange(of: newTap) { _, _ in
+            if tapInputError != nil {
+                tapInputError = nil
+            }
+        }
+    }
+
+    private func submitNewTap() {
+        let value = newTap.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return }
+        guard value.range(of: #"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"#, options: .regularExpression) != nil else {
+            tapInputError = "Tap must be in 'user/repo' format (e.g. homebrew/cask-fonts)"
+            return
+        }
+        tapInputError = nil
+        tapToAdd = value
     }
 
     private func localTapURL(for tap: BrewStoreTap) -> URL? {

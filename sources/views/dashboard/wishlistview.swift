@@ -3,6 +3,7 @@ import SwiftUI
 
 struct WishlistView: View {
     @ObservedObject var manager: HomebrewManager
+    var catalog: BrewStoreDiscoveryCatalog = BrewStoreDiscoveryCatalog.shared
     @ObservedObject private var wishlistManager = BrewStoreWishlistManager.shared
     @ObservedObject private var pinningManager = BrewStorePackagePinningManager.shared
     @ObservedObject private var preferences = BrewStorePreferences.shared
@@ -16,12 +17,24 @@ struct WishlistView: View {
     @State private var searchQuery = ""
 
     private var allWishlistedPackages: [BrewStorePackage] {
-        wishlistManager.wishlistIDs.compactMap { id in
+        var result: [BrewStorePackage] = []
+        for id in wishlistManager.wishlistIDs {
             if let installed = manager.packages.first(where: { $0.id == id }) {
-                return installed
+                result.append(installed)
+            } else if let disc = catalog.findItem(id: id) {
+                result.append(BrewStorePackage(
+                    id: disc.id,
+                    name: disc.name,
+                    description: disc.description,
+                    homepage: disc.homepage,
+                    version: disc.version,
+                    kind: disc.kind
+                ))
+            } else {
+                result.append(BrewStorePackage(id: id, name: id, description: "", homepage: "", version: "", kind: .formula))
             }
-            return BrewStorePackage(id: id, name: id, description: "", homepage: "", version: "", kind: .formula)
-        }.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        }
+        return result.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
     private var searchedWishlistedPackages: [BrewStorePackage] {
@@ -75,9 +88,17 @@ struct WishlistView: View {
         }
     }
 
+    private var knownCaskIDs: Set<String> {
+        Set(catalog.items.filter { $0.kind == .cask }.map(\.id))
+    }
+
     private var copyBrewfileButton: some View {
         Button {
-            let text = wishlistManager.exportToBrewfile(packageIDs: Array(wishlistManager.wishlistIDs), manager: manager)
+            let text = wishlistManager.exportToBrewfile(
+                packageIDs: Array(wishlistManager.wishlistIDs),
+                manager: manager,
+                knownCaskIDs: knownCaskIDs
+            )
             NSPasteboard.general.clearContents()
             NSPasteboard.general.setString(text, forType: .string)
             copiedBrewfile = true
@@ -366,7 +387,11 @@ struct WishlistView: View {
                 }
 
                 Button {
-                    let text = wishlistManager.exportToBrewfile(packageIDs: collection.packageIDs, manager: manager)
+                    let text = wishlistManager.exportToBrewfile(
+                        packageIDs: collection.packageIDs,
+                        manager: manager,
+                        knownCaskIDs: knownCaskIDs
+                    )
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString(text, forType: .string)
                 } label: {

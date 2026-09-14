@@ -73,4 +73,18 @@ final class BrewfileTests: XCTestCase {
         snapshotManager.checkScheduledBackup(manager: homebrewManager)
         XCTAssertEqual(snapshotManager.snapshots.count, 1)
     }
+
+    @MainActor
+    func testWishlistManagerExportToBrewfileHandlesUninstalledCasks() {
+        let wishlistManager = BrewStoreWishlistManager.shared
+        let manager = HomebrewManager()
+        let result = wishlistManager.exportToBrewfile(
+            packageIDs: ["ripgrep", "google-chrome"],
+            manager: manager,
+            knownCaskIDs: ["google-chrome"]
+        )
+
+        XCTAssertTrue(result.contains("cask \"google-chrome\""))
+        XCTAssertTrue(result.contains("brew \"ripgrep\""))
+    }
 }

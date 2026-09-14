@@ -104,6 +104,11 @@ struct PackageListView: View {
                                     .foregroundStyle(.secondary)
                                     .lineLimit(1)
                             }
+                        } else if updatesOnly {
+                            Text("\(packages.count) update\(packages.count == 1 ? "" : "s") available · \(installedCount) installed")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
                         } else {
                             Text("\(packages.count) packages · \(installedCount) installed")
                                 .font(.caption)

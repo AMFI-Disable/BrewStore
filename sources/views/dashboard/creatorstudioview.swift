@@ -119,6 +119,15 @@ struct CreatorStudioView: View {
         .sheet(item: $repoForScaffolding) { repo in
             FormulaScaffolderModal(repo: repo, owner: accountManager.profile?.login ?? "user", manager: manager)
         }
+        .onAppear {
+            if accountManager.isAuthenticated, creatorManager.repos.isEmpty, !creatorManager.isLoading {
+                if let token = UserDefaults.standard.string(forKey: "BrewStore.github.token") {
+                    Task {
+                        await creatorManager.fetchRepos(token: token)
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - Logged Out Promo Card

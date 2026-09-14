@@ -120,6 +120,9 @@ struct AppReplacementView: View {
             }
             replacementManager.scanForReplacements(scannedApps: adoptionManager.scannedApps)
         }
+        .onChange(of: adoptionManager.scannedApps) { _, newApps in
+            replacementManager.scanForReplacements(scannedApps: newApps)
+        }
     }
 
     @ViewBuilder
