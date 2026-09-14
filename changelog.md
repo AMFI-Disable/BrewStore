@@ -66,6 +66,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
 ### 1. Storefront Hub
 
 #### Discover (`/discover`)
+
 - **Editorial Hero Carousel (`EditorialHeroView`)**:
   - Full-bleed, auto-scrolling and manually interactive spotlight carousel showcasing featured applications, notable open-source releases, and major ecosystem updates.
   - Adaptive responsive layout expanding across the full width of the window in fullscreen mode, without artificial aspect-ratio truncation.
@@ -85,6 +86,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Clicking any card presents a floating, blurred-backdrop quick-look modal displaying full package details, README summaries, and dependencies without losing the user's scroll position.
 
 #### Community Picks / Showdown (`/showdown`)
+
 - **Head-to-Head Showdowns**:
   - Curated developer debates and direct comparisons pitting leading software against each other:
     - *Terminal Emulators*: Ghostty vs. Alacritty vs. Kitty
@@ -101,6 +103,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Direct GET/Install triggers located inside comparison cards for rapid testing and benchmarking.
 
 #### All Applications (`/allApps`)
+
 - **Complete Cask Catalog Browser**:
   - Search and browse through 4,500+ macOS GUI applications packaged as Homebrew Casks.
 - **Real-Time Local Icon Extraction (`AppIconResolver`)**:
@@ -113,6 +116,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Multi-select checkboxes enabling one-click batch installation of multiple GUI apps at once.
 
 #### All CLI Tools (`/allFormulae`)
+
 - **Complete Formula Catalog**:
   - Search and browse through 7,500+ command-line tools, language runtimes, compilers, libraries, and utilities.
 - **Pre-Compiled Bottle Availability Indicators**:
@@ -123,6 +127,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Trigger CLI formula installations with live, real-time command output streaming directly into the Action Console Drawer.
 
 #### Editorial Stories (`/stories`)
+
 - **Magazine-Style Layout (`StoriesFeedView`)**:
   - Curated, long-form developer articles, setup guides, and ecosystem deep-dives (e.g., *"Modern Rust Systems Programming on Apple Silicon"*, *"Hardening macOS Workstations for Security Engineers"*).
 - **Rich Interactive Story Reader (`StoryDetailView`)**:
@@ -133,6 +138,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Story footers include direct links to pre-configured developer toolkits and bundles related to the article topic.
 
 #### Toolkits & Developer Stacks (`/toolkits`)
+
 - **Curated Turnkey Stacks (`StacksView`)**:
   - Complete, opinionated developer environments ready for single-click deployment:
     - *Full-Stack Web Developer* (Node.js, pnpm, Bun, Visual Studio Code, Docker/OrbStack, Postman)
@@ -149,6 +155,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Assemble, name, and export custom stacks to share with teams or use for bootstrapping new team members.
 
 #### Categories Grid (`/categories`)
+
 - **12 Dedicated Category Hubs (`CategoriesGridView`)**:
   - Visual grid covering Development, Utilities, Productivity, Design & Graphics, Audio & Video, Security & Privacy, Networking & Cloud, Science & Math, System Tools, Communication, Gaming, and Education.
 - **Live Inventory Counters**:
@@ -161,6 +168,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
 ### 2. Package Library & My Mac Hub
 
 #### Installed Software Wall (`/installed`)
+
 - **Unified Tri-Source Inventory**:
   - Aggregates software from three distinct ecosystems into one unified library:
     1. Homebrew Casks (`/Applications`, `~/Applications`)
@@ -187,6 +195,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Sort by Application Name, Disk Space Footprint, Installation Date, and Package Source.
 
 #### Adoption & Replacements (`/adoption`)
+
 - **Unmanaged Standalone App Scanner (`AppAdoptionView`)**:
   - Scans `/Applications` and `~/Applications` for standalone applications installed via manual DMG drag-and-drop, PKG installers, or direct web downloads.
 - **1-Click Homebrew Adoption**:
@@ -211,6 +220,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
     - *Bottom / Htop* replacing Top (interactive process graphs)
 
 #### Dependency Topology & Visual Graph (`/topology`)
+
 - **Interactive Dependency DAG (`DependencyTopologyView`, `DependencyGraphView`)**:
   - Interactive directed acyclic graph mapping the full hierarchy of direct and transitive dependencies across all installed formulae.
 - **Reverse Dependency Inspector ("Why is this installed?")**:
@@ -222,6 +232,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Detects duplicate linked versions, unlinked keg conflicts, and cyclic dependency trees before they cause runtime compilation errors.
 
 #### Wishlist & Bookmarks (`/wishlist`)
+
 - **Personal Package Bookmarking (`WishlistView`)**:
   - Save interesting packages and tools to a persistent wishlist for later review.
 - **Live Status Tracking**:
@@ -230,6 +241,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - 1-Click export of the entire wishlist as a standard `Brewfile` or shareable markdown checklist.
 
 #### Updates & Outdated Packages (`/updates`)
+
 - **Unified Update Control Center**:
   - Consolidates pending updates for Homebrew Formulae, Homebrew Casks, and Mac App Store applications into a single view.
 - **"Update All Software" Engine**:
@@ -244,6 +256,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
 ### 3. Environment Hub
 
 #### Background Services & Daemons (`/services`)
+
 - **Triple-Domain Service Management (`ServicesView`)**:
   - Full visibility and control over:
     1. Homebrew background daemons (`brew services`)
@@ -261,6 +274,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Scans for invalid or orphaned launch agent property lists pointing to nonexistent executables and routes them safely to `~/.Trash`.
 
 #### Taps & Third-Party Repositories (`/taps`)
+
 - **Active Tap Registry (`TapsView`)**:
   - Complete list of all configured Homebrew git taps, showing local clone paths, remote URLs, total packages provided, and branch status.
 - **Tap Discovery Catalog (`TapDiscoveryView`)**:
@@ -275,6 +289,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Add third-party or private taps with support for custom git URLs and private GitHub Personal Access Token authentication.
 
 #### Creator Studio & Scaffolding (`/creator`)
+
 - **Developer Authoring Workshop (`CreatorStudioView`)**:
   - Integrated development environment for authoring, linting, and testing custom Homebrew Formulae and Casks.
 - **Ruby DSL Scaffolding Generator (`CreatorRepoManager`)**:
@@ -291,6 +306,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
 ### 4. Health & Maintenance Hub
 
 #### Time-Machine Snapshots & Rollback (`/backups` -> Snapshots)
+
 - **Automated State Snapshots (`SnapshotManager`)**:
   - Automatically captures full environment snapshots (all formulae, casks, taps, and pin states) before major batch operations or upgrades.
   - Manual *"Create Snapshot"* button with custom naming and timestamp tags.
@@ -305,6 +321,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Generates standard `Brewfile` and version-locked `Brewfile.lock.json` with architecture metadata (`arm64_sequoia`, etc.).
 
 #### Multi-Machine Git Sync & Dotfiles (`/backups` -> Sync)
+
 - **Multi-Provider Git Cloud Sync (`GitServiceManager`, `MultiMachineSyncView`)**:
   - Seamless backup and synchronization of Brewfiles across:
     - **GitHub** (Personal Repositories & Private Gists)
@@ -322,6 +339,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Generates an idempotent, 1-command `bootstrap.sh` bash script to automatically set up a brand-new or wiped Mac from scratch in minutes.
 
 #### Granular Developer Cache Cleaner (`/backups` -> Storage)
+
 - **Developer Tooling Cache Analyzer (`DeveloperCacheManager`, `DiskStorageView`)**:
   - Deep scanning across major developer toolchain caches:
     - **Xcode**: DerivedData, Archives, iOS DeviceSupport, and CoreSimulator caches.
@@ -333,6 +351,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - All cache purges route safely through `BrewStoreTrashExecutor` to `~/.Trash`, ensuring no irreversible `rm -rf` operations take place.
 
 #### Per-App Storage Inspector (`/backups` -> App Breakdown)
+
 - **Exact Per-App Disk Usage Breakdown (`AppStorageInspectorManager`)**:
   - Inspects every installed application to display a three-part storage breakdown:
     1. **Application Binary**: The `.app` bundle size in `/Applications`.
@@ -344,6 +363,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - When uninstalling an application, automatically scans for orphaned preference files (`~/Library/Preferences/*.plist`), application support directories, and crash logs to perform a truly clean uninstall.
 
 #### Health Score & Doctor Diagnostics (`/backups` -> Doctor)
+
 - **macOS & Homebrew Health Score (`HealthScoreView`, `HealthOptimizer`)**:
   - Visual 0-100% health meter evaluating package hygiene, unlinked kegs, broken symlinks, outdated packages, and security advisories.
 - **Intelligent `brew doctor` Parser (`DoctorParser`, `DoctorRemediationManager`)**:
@@ -358,6 +378,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Verifies cryptographic SHA-256 signatures of installed bottles to detect corrupted or tampered local binaries.
 
 #### CVE Security Vulnerability Scanner (`/backups` -> Security)
+
 - **Real-Time Vulnerability Database (`CVESecurityScanner`, `CVESecurityView`)**:
   - Scans all installed packages against the NIST National Vulnerability Database (NVD), Open Source Vulnerabilities (OSV), and GitHub Advisory Database.
 - **CVSS Severity Ranking**:
@@ -370,6 +391,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
 ### 5. Settings Hub
 
 #### General Settings
+
 - **Default Package Source Recommendation**:
   - Configure whether BrewStore prefers Homebrew Casks or Mac App Store apps when both sources offer the same software.
 - **Launch at Login**:
@@ -378,6 +400,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Set automated background update check intervals (Hourly, Daily, Weekly) and dock icon badge preferences.
 
 #### Appearance & Themes
+
 - **6 Handcrafted Themes (`BrewStoreTheme`, `ThemeVibrancyManager`)**:
   1. *System Default* (Adapts dynamically to macOS Light/Dark mode)
   2. *Dark Mode* (Modern deep charcoal glass)
@@ -391,6 +414,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Toggle between Standard Spacious rows and Compact Information-Dense rows.
 
 #### Features & Modular Toggles
+
 - **AI Search Assistant Toggle**: Enable or disable the natural-language search assistant.
 - **Rosetta 2 Migration Banner**: Toggle the Apple Silicon alert banner for legacy Intel applications.
 - **CoreSpotlight Indexing**: Enable macOS Spotlight indexing for all installed packages.
@@ -398,6 +422,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
 - **Action Console Drawer**: Toggle visibility of the streaming bottom terminal drawer.
 
 #### Network, Mirrors & Latency Benchmark
+
 - **Homebrew Bottle Mirror Selector (`MirrorManager`)**:
   - Switch between official Homebrew GitHub servers and leading regional university mirrors:
     - *Official Homebrew (GitHub GHCR)*
@@ -410,6 +435,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Support for custom proxy routing (`ALL_PROXY`, `HTTP_PROXY`, `HTTPS_PROXY`).
 
 #### Snapshots, Brewfile & Cloud Git Sync
+
 - **Automated Snapshot Scheduling**:
   - Configure auto-snapshots prior to uninstallation and upgrades.
 - **Cloud Git Authentication Manager (`GitHubAccountManager`, `GitServiceManager`)**:
@@ -417,24 +443,28 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Boosts GitHub API rate limit from 60 to 5,000 requests per hour.
 
 #### Doctor, Automation & Maintenance
+
 - **Automated Maintenance Routines**:
   - Schedule automated background `brew cleanup` routines to purge old bottle downloads older than 30 days.
 - **Log Retention Policies**:
   - Configure automated rotation and cleanup of BrewStore operation logs.
 
 #### Storage, Privacy & Safety Guards
+
 - **Protected Root Safety Validator (`PathSafetyValidator`, `ExecutionSecurityBoundary`)**:
   - Hardened security validator strictly preventing accidental modification or deletion of protected macOS system directories (`/System`, `/Library`, `/usr`, `/bin`, `/sbin`, `/private`).
 - **Trash Confirmation Dialogs**:
   - Configurable safety prompts before moving files to `~/.Trash`.
 
 #### CLI Companion & Shell Completions
+
 - **1-Click Symlink Installer (`CLIToolManager`)**:
   - Automatically symlinks the embedded `brewstore` executable to `~/.local/bin/brewstore`.
 - **Automated Shell Completion Installation**:
   - Generates and installs native auto-completions for Zsh (`_brewstore`), Bash (`brewstore.bash`), and Fish (`brewstore.fish`).
 
 #### Factory Reset & Cache Purge
+
 - **Granular Reset Manager (`ResetManager`, `ResetViewSheet`)**:
   - Safe, selective reset utility allowing users to:
     - Clear image and icon caches
@@ -447,6 +477,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
 ### 6. Global Overlays, System Tools & Menus
 
 #### Action Console Drawer (`⌥~`)
+
 - **Persistent Sliding Console (`ActionConsoleDrawer`)**:
   - Bottom terminal drawer accessible via `⌥~` or toolbar icon, streaming real-time stdout and stderr output during all package operations.
 - **ANSI Color & Control Sequence Rendering**:
@@ -457,6 +488,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - 1-Click copy-to-clipboard or export log file for troubleshooting.
 
 #### ⌘K Universal Command Palette
+
 - **Raycast-Style Launcher (`CommandPaletteView`)**:
   - System-wide modal search accessible anywhere via `⌘K`.
 - **Fuzzy Search Across 12,000+ Items (`FuzzySearchEngine`)**:
@@ -471,6 +503,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Full arrow-key navigation with active scroll tracking, Return to execute, and Escape to dismiss.
 
 #### Persistent 340px Menu Bar Companion
+
 - **Real-Time Telemetry (`MenuBarExtraView`)**:
   - Compact 340px menu bar extra monitoring active background Homebrew daemons with live CPU % and Memory RSS readouts.
 - **Active Rosetta 2 Warning Badge**:
@@ -479,12 +512,14 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Instant access to *Clean Developer Caches*, *Check for Software Updates*, *Export Blueprint*, and *Toggle Action Console*.
 
 #### AI Package Discovery Assistant
+
 - **Natural Language Query Engine (`AISearchView`, `AISearchAssistant`)**:
   - Enter conversational queries (e.g., *"I need a modern video player that supports subtitle sync and hardware acceleration"* or *"Find me a lightweight alternative to Postman"*).
 - **Semantic Intent Analysis**:
   - Parses intent, queries the catalog, and returns curated recommendations with reasoned feature comparisons.
 
 #### Shell Environment Assistant & PATH Doctor
+
 - **Environment Diagnostic (`ShellConfigView`, `ShellConfigAssistant`)**:
   - Scans `~/.zshrc`, `~/.bashrc`, and `~/.config/fish/config.fish`.
   - Verifies presence of official Homebrew `PATH` exports (`/opt/homebrew/bin` on Apple Silicon, `/usr/local/bin` on Intel) and compiler flags.
@@ -492,6 +527,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - Automatically appends missing environment initialization commands while safely generating a timestamped backup of the user's original shell configuration.
 
 #### Universal Package Detail Modal & Overlay
+
 - **Comprehensive Package Inspector (`PackageDetailView`)**:
   - Displays package title, tap origin, version, author homepage, license, and GitHub repository links.
   - Mach-O binary architecture pill (`ARM64 Native`, `Universal`, `Rosetta 2`).
@@ -501,6 +537,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
   - 1-Click Cellar reveal, version pinning toggle, and complete uninstall.
 
 #### First-Run Guided Onboarding Wizard
+
 - **Automated Homebrew Detection (`HomebrewSetupView`)**:
   - Automatically detects whether Homebrew and Xcode Command Line Tools are present.
   - Provides a guided, 1-click automated installer that fetches and executes the official Homebrew installation script with live progress reporting.
@@ -511,7 +548,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
 
 BrewStore embeds a standalone, highly capable command-line utility located inside its application bundle at `Contents/Resources/bin/brewstore`:
 
-```
+```sh
 brewstore <subcommand> [options]
 ```
 
@@ -553,4 +590,3 @@ brewstore <subcommand> [options]
 
 ---
 *BrewStore — The Native Mac Application & Package Manager.*
-
