@@ -73,9 +73,7 @@ struct EnvironmentHubView: View {
                         if subMode == .services, erroredServicesCount > 0 {
                             Button {
                                 let errored = manager.services.filter(\.isError)
-                                for service in errored {
-                                    manager.perform(service: service, action: .restart)
-                                }
+                                manager.batchPerform(services: errored, action: .restart)
                             } label: {
                                 Label("Restart Failed (\(erroredServicesCount))", systemImage: "arrow.clockwise")
                             }

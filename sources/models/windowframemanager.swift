@@ -43,8 +43,10 @@ final class BrewStoreWindowFrameManager: NSObject, @unchecked Sendable {
             object: window,
             queue: .main
         ) { [weak self, weak window] _ in
-            guard let self, let window else { return }
-            self.saveFrame(for: window)
+            MainActor.assumeIsolated {
+                guard let self, let window else { return }
+                self.saveFrame(for: window)
+            }
         }
 
         let moveObs = center.addObserver(
@@ -52,8 +54,10 @@ final class BrewStoreWindowFrameManager: NSObject, @unchecked Sendable {
             object: window,
             queue: .main
         ) { [weak self, weak window] _ in
-            guard let self, let window else { return }
-            self.saveFrame(for: window)
+            MainActor.assumeIsolated {
+                guard let self, let window else { return }
+                self.saveFrame(for: window)
+            }
         }
 
         let closeObs = center.addObserver(
@@ -61,8 +65,10 @@ final class BrewStoreWindowFrameManager: NSObject, @unchecked Sendable {
             object: window,
             queue: .main
         ) { [weak self, weak window] _ in
-            guard let self, let window else { return }
-            self.saveFrame(for: window)
+            MainActor.assumeIsolated {
+                guard let self, let window else { return }
+                self.saveFrame(for: window)
+            }
         }
 
         let termObs = center.addObserver(
@@ -70,8 +76,10 @@ final class BrewStoreWindowFrameManager: NSObject, @unchecked Sendable {
             object: nil,
             queue: .main
         ) { [weak self, weak window] _ in
-            guard let self, let window else { return }
-            self.saveFrame(for: window)
+            MainActor.assumeIsolated {
+                guard let self, let window else { return }
+                self.saveFrame(for: window)
+            }
         }
 
         observers = [resizeObs, moveObs, closeObs, termObs]

@@ -213,19 +213,32 @@ final class BrewStoreCoreTests: XCTestCase {
     @MainActor
     func testDiscoveryCatalogFindItem() {
         let catalog = BrewStoreDiscoveryCatalog.shared
-        let pkg = BrewStorePackage(
-            id: "test-cask",
-            name: "Test Cask",
-            description: "A test description",
-            homepage: "https://example.com",
-            version: "2.0.0",
-            kind: .cask,
-            isInstalled: true,
-            isOutdated: false
-        )
-        catalog.mergeLocalPackages([pkg])
-        let found = catalog.findItem(id: "test-cask")
-        XCTAssertNotNil(found)
-        XCTAssertEqual(found?.id, "test-cask")
+        if catalog.items.isEmpty {
+            let pkg = BrewStorePackage(
+                id: "test-cask",
+                name: "Test Cask",
+                description: "A test description",
+                homepage: "https://example.com",
+                version: "2.0.0",
+                kind: .cask,
+                isInstalled: true,
+                isOutdated: false
+            )
+            catalog.mergeLocalPackages([pkg])
+        }
+        guard let sample = catalog.items.first else {
+            XCTFail("Catalog should have at least one item")
+            return
+        }
+        let foundExact = catalog.findItem(id: sample.id)
+        XCTAssertNotNil(foundExact)
+        XCTAssertEqual(foundExact?.id, sample.id)
+
+        let foundUpper = catalog.findItem(id: sample.id.uppercased())
+        XCTAssertNotNil(foundUpper)
+        XCTAssertEqual(foundUpper?.id, sample.id)
+
+        let notFound = catalog.findItem(id: "nonexistent-item-\(UUID().uuidString)")
+        XCTAssertNil(notFound)
     }
 }
