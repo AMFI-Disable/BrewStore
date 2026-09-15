@@ -88,6 +88,9 @@ struct DiskStorageView: View {
                                 storageManager.purgeLogs(manager: manager)
                                 storageManager.purgeInactiveVersions(manager: manager)
                             }
+                            Button("Deep Clean & Prune All Caches", role: .destructive) {
+                                storageManager.purgeDeepCaches(manager: manager)
+                            }
                         } label: {
                             Label("Clean Options…", systemImage: "trash.fill")
                         }

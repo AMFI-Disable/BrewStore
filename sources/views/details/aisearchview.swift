@@ -14,14 +14,15 @@ struct AISearchView: View {
         "cask browser",
         "formula python",
         "cask:ghostty",
-        "Batch convert HEIC photos to PNG",
-        "Convert MKV video to MP4 with subtitles",
-        "GPU accelerated terminal emulator",
+        "Kubernetes & Terraform toolkit",
         "Run local AI and LLMs on Mac",
         "Fastest Docker container engine",
         "Database GUI for PostgreSQL & Redis",
+        "GPU accelerated terminal emulator",
+        "Batch convert HEIC photos to PNG",
+        "Convert MKV video to MP4 with subtitles",
         "Search code recursively like lightning",
-        "clean disk cache (mole)",
+        "Purge developer and disk cache",
         "what is a cask?"
     ]
 
@@ -204,6 +205,28 @@ struct AISearchView: View {
                             Text("\(assistant.recommendations.count) results")
                                 .font(.caption.monospaced())
                                 .foregroundStyle(.secondary)
+                        }
+
+                        let uninstalledRecs = assistant.recommendations.filter { rec in
+                            manager.packages.first(where: { $0.id == rec.packageID })?.isInstalled != true
+                        }
+                        if uninstalledRecs.count > 1 {
+                            HStack {
+                                Label("Install all \(uninstalledRecs.count) recommended packages", systemImage: "arrow.down.circle.fill")
+                                    .font(.subheadline.bold())
+                                    .foregroundStyle(.purple)
+                                Spacer()
+                                Button("Install All (\(uninstalledRecs.count))") {
+                                    batchInstallRecommendations(uninstalledRecs)
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(.purple)
+                                .controlSize(.small)
+                                .disabled(manager.isOperating)
+                            }
+                            .padding(12)
+                            .background(Color.purple.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
+                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.purple.opacity(0.2), lineWidth: 1))
                         }
 
                         ForEach(assistant.recommendations) { rec in
@@ -437,5 +460,22 @@ struct AISearchView: View {
             RoundedRectangle(cornerRadius: 10)
                 .stroke(Color.secondary.opacity(0.12), lineWidth: 1)
         )
+    }
+
+    private func batchInstallRecommendations(_ recs: [AIPackageRecommendation]) {
+        let pkgs = recs.map { rec in
+            manager.packages.first(where: { $0.id == rec.packageID }) ??
+                BrewStorePackage(
+                    id: rec.packageID,
+                    name: rec.name,
+                    description: rec.headline,
+                    homepage: "",
+                    version: "",
+                    kind: rec.kind
+                )
+        }
+        BrewStoreActionReviewCoordinator.shared.requestInstall(packages: pkgs, manager: manager) {
+            manager.batchPerform(packages: pkgs, action: .install)
+        }
     }
 }

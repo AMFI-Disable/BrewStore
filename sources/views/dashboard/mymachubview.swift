@@ -105,13 +105,7 @@ struct MyMacHubView: View {
                 HStack {
                     Picker("My Mac Navigation", selection: $subMode) {
                         Text("Installed (\(installedCount))").tag(MyMacSubMode.installed)
-                        HStack(spacing: Spacing.xs) {
-                            Text("Updates")
-                            if outdatedCount > 0 {
-                                Text("(\(outdatedCount))")
-                                    .bold()
-                            }
-                        }.tag(MyMacSubMode.updates)
+                        Text(outdatedCount > 0 ? "Updates (\(outdatedCount))" : "Updates").tag(MyMacSubMode.updates)
                         Text("Wishlist (\(wishlistCount))").tag(MyMacSubMode.wishlist)
                         Text("Adoption (\(adoptableCount))").tag(MyMacSubMode.adoption)
                         Text("Dependencies").tag(MyMacSubMode.topology)

@@ -69,6 +69,9 @@ struct SettingsView: View {
     @State private var showingResetPinsConfirm = false
     @State private var showingClearLogsConfirm = false
     @State private var showingResetAppearanceConfirm = false
+    @State private var isTestingWebhook = false
+    @State private var webhookTestResult: (success: Bool, message: String)?
+    @State private var copiedSchemeURL: String?
 
     private var doctorDiagnostics: [BrewStoreDoctorDiagnostic] {
         BrewStoreDoctorParser.parse(manager.outputLog)
@@ -637,6 +640,69 @@ struct SettingsView: View {
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                     }
+                }
+            }
+
+            cardSection(title: "Webhooks & Automation", icon: "antenna.radiowaves.left.and.right") {
+                Toggle("Enable Webhook Notifications", isOn: $preferences.webhookEnabled)
+
+                Text("Send JSON notifications to Discord, Slack, or a custom automation endpoint when updates are available or auto-upgrades finish.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+
+                if preferences.webhookEnabled {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Webhook Endpoint URL").font(.caption.bold())
+                        TextField("https://discord.com/api/webhooks/... or https://hooks.slack.com/...", text: $preferences.webhookURL)
+                            .textFieldStyle(.roundedBorder)
+                    }
+
+                    Toggle("Send notification when new updates are found", isOn: $preferences.webhookNotifyOnUpdatesFound)
+
+                    HStack {
+                        Button(isTestingWebhook ? "Sending Test…" : "Send Test Webhook") {
+                            isTestingWebhook = true
+                            webhookTestResult = nil
+                            Task {
+                                let result = await BrewStoreAutoUpdateScheduler.testWebhook(urlString: preferences.webhookURL)
+                                isTestingWebhook = false
+                                webhookTestResult = result
+                            }
+                        }
+                        .controlSize(.small)
+                        .disabled(isTestingWebhook || preferences.webhookURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+                        if isTestingWebhook {
+                            ProgressView().controlSize(.small)
+                        }
+
+                        Spacer()
+
+                        if let res = webhookTestResult {
+                            HStack(spacing: 4) {
+                                Image(systemName: res.success ? "checkmark.circle.fill" : "xmark.circle.fill")
+                                    .foregroundStyle(res.success ? .green : .red)
+                                Text(res.message)
+                                    .font(.caption2.bold())
+                                    .foregroundStyle(res.success ? .green : .red)
+                            }
+                        }
+                    }
+                }
+            }
+
+            cardSection(title: "Raycast, Alfred & Shortcuts Deep-Linking", icon: "link.circle.fill") {
+                Text("Control BrewStore directly from macOS Shortcuts, Raycast Quicklinks, Alfred, or terminal scripts using the native `brewstore://` URL scheme.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                VStack(spacing: 8) {
+                    schemeRow(label: "Upgrade All Packages", url: "brewstore://update-all", desc: "Launches BrewStore and runs brew upgrade on all outdated packages.")
+                    schemeRow(label: "Deep Clean Caches", url: "brewstore://clean", desc: "Runs brew cleanup to prune downloads and stale build artifacts.")
+                    schemeRow(label: "Search Packages", url: "brewstore://search?q=ripgrep", desc: "Opens BrewStore directly to search results for a given query.")
+                    schemeRow(label: "Inspect Formula / Cask", url: "brewstore://package?id=docker", desc: "Navigates straight to the package detail modal.")
+                    schemeRow(label: "Open Blueprints & Stacks", url: "brewstore://blueprints", desc: "Navigates to developer toolkits and blueprint captures.")
+                    schemeRow(label: "Batch Install Packages", url: "brewstore://quick-install?packages=bat,eza,fzf", desc: "Queues a comma-separated list of packages for 1-click installation.")
                 }
             }
 
@@ -1430,6 +1496,30 @@ struct SettingsView: View {
             let rem = seconds % 60
             return "\(mins)m \(rem)s"
         }
+    }
+
+    private func schemeRow(label: String, url: String, desc: String) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(label).font(.caption.bold())
+                    Text(url).font(.caption2.monospaced()).foregroundStyle(.secondary)
+                }
+                Text(desc).font(.caption2).foregroundStyle(.secondary)
+            }
+            Spacer()
+            Button(copiedSchemeURL == url ? "Copied" : "Copy") {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(url, forType: .string)
+                copiedSchemeURL = url
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    if copiedSchemeURL == url { copiedSchemeURL = nil }
+                }
+            }
+            .controlSize(.mini)
+        }
+        .padding(8)
+        .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 6))
     }
 }
 

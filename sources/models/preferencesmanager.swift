@@ -39,7 +39,7 @@ final class BrewStorePreferences: ObservableObject {
     private let defaults = UserDefaults.standard
 
     /// Keys
-    private enum Keys {
+    enum Keys {
         static let isAutoCheckEnabled = "pref_auto_check_enabled"
         static let checkIntervalHours = "pref_check_interval_hours"
         static let autoFetchMetadata = "pref_auto_fetch_metadata"
@@ -73,6 +73,24 @@ final class BrewStorePreferences: ObservableObject {
         static let hideCompletedBundles = "pref_hide_completed_bundles"
         static let hideInstalledWishlist = "pref_hide_installed_wishlist"
         static let hideIdenticalSnapshots = "pref_hide_identical_snapshots"
+
+        // Webhooks & Automation
+        static let webhookURL = "pref_webhook_url"
+        static let webhookEnabled = "pref_webhook_enabled"
+        static let webhookNotifyOnUpdatesFound = "pref_webhook_notify_on_updates_found"
+    }
+
+    /// Webhooks & Automation Preferences
+    @Published var webhookURL: String {
+        didSet { defaults.set(webhookURL, forKey: Keys.webhookURL) }
+    }
+
+    @Published var webhookEnabled: Bool {
+        didSet { defaults.set(webhookEnabled, forKey: Keys.webhookEnabled) }
+    }
+
+    @Published var webhookNotifyOnUpdatesFound: Bool {
+        didSet { defaults.set(webhookNotifyOnUpdatesFound, forKey: Keys.webhookNotifyOnUpdatesFound) }
     }
 
     /// Decluttering & Hiding Preferences
@@ -232,7 +250,10 @@ final class BrewStorePreferences: ObservableObject {
             Keys.defaultAppSourcePreference: AppSourcePreference.homebrew.rawValue,
             Keys.hideCompletedBundles: false,
             Keys.hideInstalledWishlist: false,
-            Keys.hideIdenticalSnapshots: false
+            Keys.hideIdenticalSnapshots: false,
+            Keys.webhookURL: "",
+            Keys.webhookEnabled: false,
+            Keys.webhookNotifyOnUpdatesFound: true
         ]
         defaults.register(defaults: registeredDefaults)
 
@@ -277,6 +298,10 @@ final class BrewStorePreferences: ObservableObject {
         self.enableAppCleaner = defaults.bool(forKey: Keys.enableAppCleaner)
         self.enableAutoSnapshotBeforeMutations = defaults.bool(forKey: Keys.enableAutoSnapshotBeforeMutations)
         self.enableAutoGistCloudSync = defaults.bool(forKey: Keys.enableAutoGistCloudSync)
+
+        self.webhookURL = defaults.string(forKey: Keys.webhookURL) ?? ""
+        self.webhookEnabled = defaults.bool(forKey: Keys.webhookEnabled)
+        self.webhookNotifyOnUpdatesFound = defaults.object(forKey: Keys.webhookNotifyOnUpdatesFound) != nil ? defaults.bool(forKey: Keys.webhookNotifyOnUpdatesFound) : true
     }
 
     func resetToDefaults() {
@@ -309,6 +334,10 @@ final class BrewStorePreferences: ObservableObject {
         hideCompletedBundles = false
         hideInstalledWishlist = false
         hideIdenticalSnapshots = false
+
+        webhookURL = ""
+        webhookEnabled = false
+        webhookNotifyOnUpdatesFound = true
     }
 }
 

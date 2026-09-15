@@ -136,6 +136,28 @@ final class BrewStoreDiskStorageAnalyzerManager: ObservableObject {
         }
     }
 
+    func purgeDeepCaches(manager: HomebrewManager) {
+        guard let brewPath = manager.brewPath else { return }
+        Task.detached(priority: .userInitiated) {
+            _ = BrewStoreCommandExecutor.shared.run(
+                executablePath: brewPath,
+                arguments: ["cleanup", "--prune=all", "-s"],
+                timeout: 45
+            )
+            let logsURL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Homebrew")
+            if let files = try? FileManager.default.contentsOfDirectory(at: logsURL, includingPropertiesForKeys: [.isSymbolicLinkKey]) {
+                for file in files {
+                    if file.path.hasPrefix(logsURL.path), (try? file.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) != true {
+                        try? FileManager.default.removeItem(at: file)
+                    }
+                }
+            }
+            await MainActor.run {
+                self.scanStorage(manager: manager)
+            }
+        }
+    }
+
     nonisolated static func computeStorageReport(prefix: String) -> StorageReport {
         let fm = FileManager.default
         let cellarURL = URL(fileURLWithPath: prefix).appendingPathComponent("Cellar")

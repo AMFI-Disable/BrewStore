@@ -333,6 +333,24 @@ struct BrewStoreRootView: View {
             selection = .toolkits
         case .stories:
             selection = .stories
+        case .updateAll:
+            selection = .updates
+            if !manager.isOperating {
+                manager.upgradeAllPackages()
+            }
+        case .clean:
+            manager.cleanup()
+        case .blueprint:
+            selection = .toolkits
+        case let .quickInstall(ids):
+            let pkgsToInstall = ids.map { id in
+                manager.packages.first(where: { $0.id.lowercased() == id.lowercased() }) ??
+                    BrewStorePackage(id: id, name: id, description: "", homepage: "", version: "", kind: .formula)
+            }
+            guard !pkgsToInstall.isEmpty else { break }
+            actionReviewCoordinator.requestInstall(packages: pkgsToInstall, manager: manager) {
+                manager.batchPerform(packages: pkgsToInstall, action: .install)
+            }
         case .open:
             if selection == nil {
                 selection = .discover
@@ -433,53 +451,33 @@ struct BrewStoreRootView: View {
         case .storefront:
             let count = discovery.items.count
             if count > 0 {
-                Text("\(count)")
-                    .font(.caption2.monospaced())
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 5)
-                    .padding(.vertical, 1)
-                    .background(Color.secondary.opacity(0.1), in: Capsule())
-                    .lineLimit(1)
-                    .fixedSize()
+                SidebarCountBadge(text: "\(count)")
             }
         case .myMac:
             let outdatedCount = manager.packages.filter(\.isOutdated).count
             if outdatedCount > 0 {
-                Text("\(outdatedCount)")
-                    .font(.caption2.bold())
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.orange, in: Capsule())
-                    .lineLimit(1)
-                    .fixedSize()
+                SidebarCountBadge(
+                    text: "\(outdatedCount)",
+                    foregroundColor: .white,
+                    backgroundColor: .orange,
+                    isAccentOrProminent: true
+                )
             } else {
                 let count = manager.packages.filter(\.isInstalled).count
                 if count > 0 {
-                    Text("\(count)")
-                        .font(.caption2.monospaced())
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 1)
-                        .background(Color.secondary.opacity(0.1), in: Capsule())
-                        .lineLimit(1)
-                        .fixedSize()
+                    SidebarCountBadge(text: "\(count)")
                 }
             }
         case .environment:
             let running = manager.services.filter(\.isRunning).count
             if running > 0 {
-                HStack(spacing: 3) {
-                    Circle().fill(Color.green).frame(width: 5, height: 5)
-                    Text("\(running)")
-                        .font(.caption2.bold())
-                        .foregroundStyle(.green)
-                        .lineLimit(1)
-                        .fixedSize()
-                }
-                .padding(.horizontal, 5)
-                .padding(.vertical, 1)
-                .background(Color.green.opacity(0.12), in: Capsule())
+                SidebarCountBadge(
+                    text: "\(running)",
+                    foregroundColor: .green,
+                    backgroundColor: Color.green.opacity(0.12),
+                    isAccentOrProminent: true,
+                    leadingDotColor: .green
+                )
             }
         case .health, .settings:
             EmptyView()
@@ -502,115 +500,70 @@ struct BrewStoreRootView: View {
             case .allApps:
                 let count = discovery.items.filter { $0.kind == .cask }.count
                 if count > 0 {
-                    Text("\(count)")
-                        .font(.caption2.monospaced())
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 1)
-                        .background(Color.secondary.opacity(0.1), in: Capsule())
-                        .lineLimit(1)
-                        .fixedSize()
+                    SidebarCountBadge(text: "\(count)")
                 }
             case .allFormulae:
                 let count = discovery.items.filter { $0.kind == .formula }.count
                 if count > 0 {
-                    Text("\(count)")
-                        .font(.caption2.monospaced())
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 1)
-                        .background(Color.secondary.opacity(0.1), in: Capsule())
-                        .lineLimit(1)
-                        .fixedSize()
+                    SidebarCountBadge(text: "\(count)")
                 }
             case .updates:
                 let outdatedCount = manager.packages.filter(\.isOutdated).count
                 if outdatedCount > 0 {
-                    Text("\(outdatedCount)")
-                        .font(.caption2.bold())
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.orange, in: Capsule())
-                        .lineLimit(1)
-                        .fixedSize()
+                    SidebarCountBadge(
+                        text: "\(outdatedCount)",
+                        foregroundColor: .white,
+                        backgroundColor: .orange,
+                        isAccentOrProminent: true
+                    )
                 }
             case .installed:
                 let count = manager.packages.filter(\.isInstalled).count
                 if count > 0 {
-                    Text("\(count)")
-                        .font(.caption2.monospaced())
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 1)
-                        .background(Color.secondary.opacity(0.1), in: Capsule())
-                        .lineLimit(1)
-                        .fixedSize()
+                    SidebarCountBadge(text: "\(count)")
                 }
             case .adoption:
                 let count = BrewStoreAppAdoptionManager.shared.adoptableApps.count
                 if count > 0 {
-                    Text("\(count)")
-                        .font(.caption2.bold())
-                        .foregroundStyle(.blue)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 1)
-                        .background(Color.blue.opacity(0.12), in: Capsule())
-                        .lineLimit(1)
-                        .fixedSize()
+                    SidebarCountBadge(
+                        text: "\(count)",
+                        foregroundColor: .blue,
+                        backgroundColor: Color.blue.opacity(0.12),
+                        isAccentOrProminent: true
+                    )
                 }
             case .wishlist:
                 let count = BrewStoreWishlistManager.shared.wishlistIDs.count
                 if count > 0 {
-                    Text("\(count)")
-                        .font(.caption2.monospaced())
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 1)
-                        .background(Color.secondary.opacity(0.12), in: Capsule())
-                        .lineLimit(1)
-                        .fixedSize()
+                    SidebarCountBadge(text: "\(count)")
                 }
             case .services:
                 let running = manager.services.filter(\.isRunning).count
                 if running > 0 {
-                    HStack(spacing: 3) {
-                        Circle().fill(Color.green).frame(width: 5, height: 5)
-                        Text("\(running) running")
-                            .font(.caption2.bold())
-                            .foregroundStyle(.green)
-                            .lineLimit(1)
-                            .fixedSize()
-                    }
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 1)
-                    .background(Color.green.opacity(0.12), in: Capsule())
+                    SidebarCountBadge(
+                        text: "\(running) running",
+                        foregroundColor: .green,
+                        backgroundColor: Color.green.opacity(0.12),
+                        isAccentOrProminent: true,
+                        leadingDotColor: .green
+                    )
                     .accessibilityLabel("\(running) running")
                 }
             case .taps:
                 let count = manager.taps.count
                 if count > 0 {
-                    Text("\(count)")
-                        .font(.caption2.monospaced())
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 1)
-                        .background(Color.secondary.opacity(0.1), in: Capsule())
-                        .lineLimit(1)
-                        .fixedSize()
+                    SidebarCountBadge(text: "\(count)")
                 }
             case .creator:
                 if githubAccount.isAuthenticated {
                     let tapCount = BrewStoreCreatorRepoManager.shared.taps.count
                     if tapCount > 0 {
-                        Text("\(tapCount) taps")
-                            .font(.caption2.bold())
-                            .foregroundStyle(Color.accentColor)
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 1)
-                            .background(Color.accentColor.opacity(0.12), in: Capsule())
-                            .lineLimit(1)
-                            .fixedSize()
+                        SidebarCountBadge(
+                            text: "\(tapCount) taps",
+                            foregroundColor: Color.accentColor,
+                            backgroundColor: Color.accentColor.opacity(0.12),
+                            isAccentOrProminent: true
+                        )
                     }
                 }
             default:
@@ -1001,6 +954,33 @@ final class BrewStoreSidebarOutlineManager: NSObject, NSOutlineViewDelegate {
             return orig.outlineView?(outlineView, selectionIndexesForProposedSelection: allowed) ?? allowed
         }
         return allowed
+    }
+}
+
+struct SidebarCountBadge: View {
+    let text: String
+    var foregroundColor: Color = .secondary
+    var backgroundColor: Color = Color.secondary.opacity(0.12)
+    var isAccentOrProminent: Bool = false
+    var leadingDotColor: Color? = nil
+
+    var body: some View {
+        HStack(spacing: 3) {
+            if let leadingDotColor {
+                Circle()
+                    .fill(leadingDotColor)
+                    .frame(width: 5, height: 5)
+            }
+            Text(text)
+                .font(.system(size: 10.5, weight: isAccentOrProminent ? .bold : .medium, design: .rounded).monospacedDigit())
+                .foregroundStyle(foregroundColor)
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .frame(minWidth: 20, minHeight: 18)
+        .background(backgroundColor, in: Capsule())
+        .fixedSize()
     }
 }
 

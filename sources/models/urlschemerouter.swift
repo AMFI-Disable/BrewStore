@@ -13,6 +13,10 @@ enum BrewStoreURLRoute: Equatable {
     case services
     case stacks
     case stories
+    case updateAll
+    case clean
+    case blueprint(id: String?)
+    case quickInstall(ids: [String])
     case open
 }
 
@@ -106,6 +110,24 @@ final class BrewStoreURLSchemeRouter: ObservableObject {
 
         case "stories", "editorial":
             return .stories
+
+        case "update-all", "upgrade-all", "update":
+            return .updateAll
+
+        case "clean", "cleanup", "purge":
+            return .clean
+
+        case "blueprint", "blueprints", "stack":
+            let blueprintID = queryValue(for: ["id", "name", "stack"]) ?? pathComponents.first
+            return .blueprint(id: blueprintID)
+
+        case "quick-install", "batch-install":
+            let packagesString = queryValue(for: ["packages", "pkgs", "items"]) ?? pathComponents.joined(separator: ",")
+            let ids = packagesString.split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+            if !ids.isEmpty {
+                return .quickInstall(ids: ids)
+            }
+            return nil
 
         default:
             // Fallback for direct host names e.g. brewstore://docker -> package(docker)

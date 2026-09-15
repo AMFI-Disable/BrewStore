@@ -8,6 +8,8 @@ struct StacksView: View {
     @State private var selectedType: BundleType = .all
     @State private var searchQuery = ""
     @State private var showingNewStackSheet = false
+    @State private var importErrorMessage: String?
+    @State private var showingImportErrorAlert = false
 
     private var baseStacks: [BrewStoreStack] {
         let base = stackManager.stacks(for: selectedType)
@@ -45,13 +47,32 @@ struct StacksView: View {
                             .foregroundStyle(.secondary)
                     }
                     Spacer()
-                    Button {
-                        showingNewStackSheet = true
-                    } label: {
-                        Label("New Custom Bundle", systemImage: "plus")
+                    HStack(spacing: 8) {
+                        Menu {
+                            Button {
+                                captureSetup()
+                            } label: {
+                                Label("Capture Local Setup as Blueprint", systemImage: "laptopcomputer")
+                            }
+
+                            Button {
+                                importBlueprintFile()
+                            } label: {
+                                Label("Import Blueprint File…", systemImage: "square.and.arrow.down")
+                            }
+                        } label: {
+                            Label("Blueprints", systemImage: "doc.badge.gearshape")
+                        }
+                        .controlSize(.small)
+
+                        Button {
+                            showingNewStackSheet = true
+                        } label: {
+                            Label("New Custom Bundle", systemImage: "plus")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
                 }
 
                 // Filter & Search Controls: Row 1 Category Picker, Row 2 Search Bar & Filter Toggle
@@ -144,6 +165,38 @@ struct StacksView: View {
         .sheet(isPresented: $showingNewStackSheet) {
             NewStackSheet { name, desc, icon, formulae, casks in
                 stackManager.addCustomStack(name: name, description: desc, icon: icon, formulae: formulae, casks: casks)
+            }
+        }
+        .alert("Import Failed", isPresented: $showingImportErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(importErrorMessage ?? "Unable to import blueprint file.")
+        }
+    }
+
+    private func captureSetup() {
+        let macName = Host.current().localizedName ?? "My Mac"
+        _ = stackManager.generateBlueprintFromInstalled(
+            name: "\(macName) Setup",
+            description: "Workstation snapshot generated from installed packages",
+            manager: manager
+        )
+    }
+
+    private func importBlueprintFile() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.json]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.prompt = "Import Blueprint"
+        panel.message = "Choose a .brewstore-blueprint or JSON file to import"
+        if panel.runModal() == .OK, let url = panel.url {
+            do {
+                let data = try Data(contentsOf: url)
+                _ = try stackManager.importBlueprint(data: data)
+            } catch {
+                importErrorMessage = error.localizedDescription
+                showingImportErrorAlert = true
             }
         }
     }
@@ -291,20 +344,30 @@ private struct StackCardView: View {
                     .disabled(manager.isOperating)
                 }
 
-                Button {
-                    let brewfile = stack.exportToBrewfile()
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(brewfile, forType: .string)
-                    copiedBrewfile = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                        copiedBrewfile = false
+                Menu {
+                    Button {
+                        let brewfile = stack.exportToBrewfile()
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(brewfile, forType: .string)
+                        copiedBrewfile = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            copiedBrewfile = false
+                        }
+                    } label: {
+                        Label("Copy Brewfile", systemImage: "doc.on.doc")
+                    }
+
+                    Button {
+                        exportBlueprintFile()
+                    } label: {
+                        Label("Export Blueprint File…", systemImage: "square.and.arrow.up")
                     }
                 } label: {
-                    Label(copiedBrewfile ? "Copied!" : "Brewfile", systemImage: copiedBrewfile ? "checkmark" : "doc.on.doc")
+                    Label(copiedBrewfile ? "Copied!" : "Export…", systemImage: copiedBrewfile ? "checkmark" : "square.and.arrow.up")
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.regular)
-                .help("Copy Bundle Brewfile specification to clipboard")
+                .help("Export bundle as Brewfile or .brewstore-blueprint file")
             }
         }
         .padding(16)
@@ -331,10 +394,30 @@ private struct StackCardView: View {
                 Label("Copy Bundle Brewfile", systemImage: "doc.on.doc")
             }
 
+            Button {
+                exportBlueprintFile()
+            } label: {
+                Label("Export Blueprint File…", systemImage: "square.and.arrow.up")
+            }
+
             if stack.isCustom {
                 Divider()
                 Button("Delete Custom Bundle", role: .destructive, action: onDelete)
             }
+        }
+    }
+
+    private func exportBlueprintFile() {
+        let savePanel = NSSavePanel()
+        savePanel.allowedContentTypes = [.json]
+        let safeName = stack.name.lowercased()
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { !$0.isEmpty }
+            .joined(separator: "-")
+        savePanel.nameFieldStringValue = "\(safeName).brewstore-blueprint"
+        savePanel.prompt = "Export Blueprint"
+        if savePanel.runModal() == .OK, let url = savePanel.url, let data = BrewStoreStackManager.shared.exportBlueprint(stack: stack) {
+            try? data.write(to: url)
         }
     }
 

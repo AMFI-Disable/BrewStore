@@ -357,6 +357,82 @@ final class BrewStoreStackManager: ObservableObject {
         customStacks = decoded
     }
 
+enum BrewStoreStackImportError: LocalizedError, Equatable {
+    case emptyData
+    case invalidName
+
+    var errorDescription: String? {
+        switch self {
+        case .emptyData:
+            "The blueprint file is empty."
+        case .invalidName:
+            "The blueprint package stack must have a valid non-empty name."
+        }
+    }
+}
+
+    func exportBlueprint(stack: BrewStoreStack) -> Data? {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return try? encoder.encode(stack)
+    }
+
+    func importBlueprint(data: Data) throws -> BrewStoreStack {
+        guard !data.isEmpty else {
+            throw BrewStoreStackImportError.emptyData
+        }
+        let decoder = JSONDecoder()
+        let decoded = try decoder.decode(BrewStoreStack.self, from: data)
+        let trimmedName = decoded.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else {
+            throw BrewStoreStackImportError.invalidName
+        }
+        let imported = BrewStoreStack(
+            id: UUID().uuidString,
+            name: trimmedName,
+            description: decoded.description.trimmingCharacters(in: .whitespacesAndNewlines),
+            icon: decoded.icon.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "shippingbox.fill" : decoded.icon.trimmingCharacters(in: .whitespacesAndNewlines),
+            bundleType: decoded.bundleType,
+            pricingTier: decoded.pricingTier,
+            formulae: decoded.formulae.sorted(),
+            casks: decoded.casks.sorted(),
+            isCustom: true
+        )
+        customStacks.append(imported)
+        saveCustomStacks()
+        return imported
+    }
+
+    func generateBlueprintFromInstalled(name: String, description: String, manager: HomebrewManager) -> BrewStoreStack {
+        let installed = manager.packages.filter(\.isInstalled)
+        let formulae = installed.filter { $0.kind == .formula }.map(\.id).sorted()
+        let casks = installed.filter { $0.kind == .cask }.map(\.id).sorted()
+
+        let bundleType: BundleType = if casks.isEmpty, !formulae.isEmpty {
+            .formulae
+        } else if formulae.isEmpty, !casks.isEmpty {
+            .casks
+        } else {
+            .hybrid
+        }
+
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let newStack = BrewStoreStack(
+            id: UUID().uuidString,
+            name: trimmedName.isEmpty ? "My Machine Blueprint" : trimmedName,
+            description: description.isEmpty ? "Snapshot of \(installed.count) packages from local machine" : description,
+            icon: "laptopcomputer",
+            bundleType: bundleType,
+            pricingTier: .freeFOSS,
+            formulae: formulae,
+            casks: casks,
+            isCustom: true
+        )
+        customStacks.append(newStack)
+        saveCustomStacks()
+        return newStack
+    }
+
     private func saveCustomStacks() {
         guard let data = try? JSONEncoder().encode(customStacks) else { return }
         UserDefaults.standard.set(data, forKey: storageKey)

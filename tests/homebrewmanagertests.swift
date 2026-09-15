@@ -930,6 +930,145 @@ final class HomebrewManagerTests: XCTestCase {
         XCTAssertNil(BrewStoreURLSchemeRouter.parse(url: invalidSchemeURL))
     }
 
+    func testURLSchemeRouterNewRoutes() {
+        let updateAllURL = URL(string: "brewstore://update-all")!
+        XCTAssertEqual(BrewStoreURLSchemeRouter.parse(url: updateAllURL), .updateAll)
+
+        let upgradeAllURL = URL(string: "brewstore://upgrade-all")!
+        XCTAssertEqual(BrewStoreURLSchemeRouter.parse(url: upgradeAllURL), .updateAll)
+
+        let cleanURL = URL(string: "brewstore://clean")!
+        XCTAssertEqual(BrewStoreURLSchemeRouter.parse(url: cleanURL), .clean)
+
+        let cleanupURL = URL(string: "brewstore://cleanup")!
+        XCTAssertEqual(BrewStoreURLSchemeRouter.parse(url: cleanupURL), .clean)
+
+        let blueprintWithIDURL = URL(string: "brewstore://blueprint?id=my-dev-stack")!
+        XCTAssertEqual(BrewStoreURLSchemeRouter.parse(url: blueprintWithIDURL), .blueprint(id: "my-dev-stack"))
+
+        let blueprintNoIDURL = URL(string: "brewstore://blueprints")!
+        XCTAssertEqual(BrewStoreURLSchemeRouter.parse(url: blueprintNoIDURL), .blueprint(id: nil))
+
+        let quickInstallURL = URL(string: "brewstore://quick-install?packages=bat,eza,fzf")!
+        XCTAssertEqual(BrewStoreURLSchemeRouter.parse(url: quickInstallURL), .quickInstall(ids: ["bat", "eza", "fzf"]))
+
+        let quickInstallWhitespaceURL = URL(string: "brewstore://quick-install?packages=%20bat%20,%20eza%20,%20%20")!
+        XCTAssertEqual(BrewStoreURLSchemeRouter.parse(url: quickInstallWhitespaceURL), .quickInstall(ids: ["bat", "eza"]))
+
+        if let quickInstallEmptyURL = URL(string: "brewstore://quick-install?packages=") {
+            XCTAssertNil(BrewStoreURLSchemeRouter.parse(url: quickInstallEmptyURL))
+        }
+    }
+
+    @MainActor
+    func testStackBlueprintExportAndImportRoundtrip() throws {
+        let stack = BrewStoreStack(
+            id: "test-blueprint-stack",
+            name: "Dev Stack",
+            description: "Custom workstation setup",
+            icon: "laptopcomputer",
+            bundleType: .hybrid,
+            pricingTier: .freeFOSS,
+            formulae: ["ripgrep", "bat"],
+            casks: ["visual-studio-code"],
+            isCustom: true
+        )
+
+        let stackManager = BrewStoreStackManager.shared
+        guard let data = stackManager.exportBlueprint(stack: stack) else {
+            XCTFail("Failed to export blueprint stack")
+            return
+        }
+
+        let imported = try stackManager.importBlueprint(data: data)
+        XCTAssertEqual(imported.name, "Dev Stack")
+        XCTAssertEqual(imported.description, "Custom workstation setup")
+        XCTAssertEqual(imported.formulae, ["bat", "ripgrep"])
+        XCTAssertEqual(imported.casks, ["visual-studio-code"])
+        XCTAssertTrue(imported.isCustom)
+
+        XCTAssertThrowsError(try stackManager.importBlueprint(data: Data()))
+
+        let invalidNameJSON = Data("""
+        {
+            "id": "123",
+            "name": "   ",
+            "description": "test",
+            "icon": "shippingbox",
+            "bundleType": "hybrid",
+            "pricingTier": "freeFOSS",
+            "formulae": [],
+            "casks": [],
+            "isCustom": true
+        }
+        """.utf8)
+        XCTAssertThrowsError(try stackManager.importBlueprint(data: invalidNameJSON))
+    }
+
+    @MainActor
+    func testBlueprintGenerationFromInstalledPackages() {
+        let mockExecutor = BrewStoreCommandExecutor(customHandler: { _, _, _, _, _, _, _ in
+            BrewStoreCommandResult(
+                standardOutput: "", standardError: "", terminationStatus: 0,
+                wasTerminated: false, didTimeOut: false, wasCancelled: false,
+                standardOutputWasTruncated: false, standardErrorWasTruncated: false,
+                category: .readOnly, launchErrorDescription: nil
+            )
+        })
+        let manager = HomebrewManager(executor: mockExecutor)
+        manager.packages = [
+            BrewStorePackage(id: "ripgrep", name: "ripgrep", description: "", homepage: "", version: "14.1.0", kind: .formula, isInstalled: true),
+            BrewStorePackage(id: "bat", name: "bat", description: "", homepage: "", version: "0.24.0", kind: .formula, isInstalled: true),
+            BrewStorePackage(id: "docker", name: "Docker", description: "", homepage: "", version: "4.28.0", kind: .cask, isInstalled: true),
+            BrewStorePackage(id: "wget", name: "wget", description: "", homepage: "", version: "1.24.5", kind: .formula, isInstalled: false)
+        ]
+
+        let stackManager = BrewStoreStackManager.shared
+        let generated = stackManager.generateBlueprintFromInstalled(
+            name: "Workstation Blueprints",
+            description: "Captured local packages",
+            manager: manager
+        )
+
+        XCTAssertEqual(generated.name, "Workstation Blueprints")
+        XCTAssertEqual(generated.formulae, ["bat", "ripgrep"])
+        XCTAssertEqual(generated.casks, ["docker"])
+        XCTAssertEqual(generated.bundleType, .hybrid)
+        XCTAssertTrue(generated.isCustom)
+    }
+
+    @MainActor
+    func testWebhookPreferencesRegistrationAndReset() {
+        let preferences = BrewStorePreferences.shared
+        preferences.webhookURL = "https://discord.com/api/webhooks/test"
+        preferences.webhookEnabled = true
+        preferences.webhookNotifyOnUpdatesFound = false
+
+        XCTAssertEqual(preferences.webhookURL, "https://discord.com/api/webhooks/test")
+        XCTAssertTrue(preferences.webhookEnabled)
+        XCTAssertFalse(preferences.webhookNotifyOnUpdatesFound)
+
+        preferences.resetToDefaults()
+
+        XCTAssertEqual(preferences.webhookURL, "")
+        XCTAssertFalse(preferences.webhookEnabled)
+        XCTAssertTrue(preferences.webhookNotifyOnUpdatesFound)
+    }
+
+    func testWebhookURLValidation() async {
+        let emptyResult = await BrewStoreAutoUpdateScheduler.testWebhook(urlString: "")
+        XCTAssertFalse(emptyResult.success)
+
+        let whitespaceResult = await BrewStoreAutoUpdateScheduler.testWebhook(urlString: "   ")
+        XCTAssertFalse(whitespaceResult.success)
+
+        let ftpResult = await BrewStoreAutoUpdateScheduler.testWebhook(urlString: "ftp://example.com/webhook")
+        XCTAssertFalse(ftpResult.success)
+
+        let invalidResult = await BrewStoreAutoUpdateScheduler.testWebhook(urlString: "not-a-valid-url")
+        XCTAssertFalse(invalidResult.success)
+    }
+
     func testAnalyticsJSONParsingAndVelocity() {
         let jsonStr = """
         {
