@@ -266,4 +266,17 @@ final class FastCacheEngineTests: XCTestCase {
         XCTAssertFalse(manager.isLoading)
         XCTAssertFalse(manager.isBackgroundSyncing)
     }
+
+    func testFastCacheEngineAutoPurgesCorruptCacheOnDisk() throws {
+        let dir = BrewStoreFastCacheEngine.cacheDirectoryURL
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let corruptData = Data("corrupted invalid json content".utf8)
+        try corruptData.write(to: BrewStoreFastCacheEngine.cacheFileURL)
+
+        XCTAssertTrue(FileManager.default.fileExists(atPath: BrewStoreFastCacheEngine.cacheFileURL.path))
+
+        let loaded = BrewStoreFastCacheEngine.loadCacheSynchronously()
+        XCTAssertNil(loaded)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: BrewStoreFastCacheEngine.cacheFileURL.path), "Corrupted cache file must be automatically removed from disk")
+    }
 }

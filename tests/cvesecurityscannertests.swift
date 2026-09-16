@@ -245,4 +245,54 @@ final class CVESecurityScannerTests: XCTestCase {
         XCTAssertEqual(scanner.scanError, .commandFailed(exitCode: 128, message: "fatal: not a git repository"))
         XCTAssertTrue(scanner.scanError?.recoverySuggestion?.contains("Doctor") == true)
     }
+
+    @MainActor
+    func testCuratedAdvisoriesSkipPatchedInstalledPackages() async {
+        let emptyRunner: BrewStoreCVESecurityScanner.CommandRunner = { _, _, _, _ in
+            BrewStoreCommandResult(
+                standardOutput: "",
+                standardError: "",
+                terminationStatus: 0,
+                wasTerminated: false,
+                didTimeOut: false,
+                wasCancelled: false,
+                standardOutputWasTruncated: false,
+                standardErrorWasTruncated: false,
+                category: .readOnly,
+                launchErrorDescription: nil
+            )
+        }
+
+        let scanner = BrewStoreCVESecurityScanner(commandRunner: emptyRunner)
+        let manager = HomebrewManager()
+
+        guard let sampleAdv = BrewStoreCVEScanningManager.knownAdvisories.first else {
+            return
+        }
+
+        let patchedPackage = BrewStorePackage(
+            id: sampleAdv.packageID,
+            name: sampleAdv.packageID,
+            description: "",
+            homepage: "",
+            version: sampleAdv.fixedVersion,
+            kind: .formula,
+            isInstalled: true,
+            installedVersion: sampleAdv.fixedVersion
+        )
+        manager.packages = [patchedPackage]
+
+        scanner.scanSecurity(manager: manager)
+
+        var attempts = 0
+        while scanner.isScanning, attempts < 50 {
+            try? await Task.sleep(nanoseconds: 50_000_000)
+            attempts += 1
+        }
+
+        XCTAssertFalse(scanner.isScanning)
+        if let report = scanner.report {
+            XCTAssertFalse(report.issues.contains { $0.cveIdentifier == sampleAdv.id }, "Patched package must not be flagged as vulnerable")
+        }
+    }
 }

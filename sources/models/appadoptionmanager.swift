@@ -126,6 +126,10 @@ final class BrewStoreAppAdoptionManager: ObservableObject {
                 for item in contents where item.hasSuffix(".app") {
                     let fullPath = (searchPath as NSString).appendingPathComponent(item)
                     guard !fullPath.hasPrefix("/System"), !seenPaths.contains(fullPath) else { continue }
+                    let itemURL = URL(fileURLWithPath: fullPath)
+                    if (try? itemURL.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) == true {
+                        continue
+                    }
                     seenPaths.insert(fullPath)
 
                     let infoPlistPath = (fullPath as NSString).appendingPathComponent("Contents/Info.plist")
@@ -155,7 +159,8 @@ final class BrewStoreAppAdoptionManager: ObservableObject {
                     )
 
                     let isAlreadyManaged: Bool = if let matched = matchResult.cask {
-                        installedCaskIDs.contains(matched.id)
+                        installedCaskIDs.contains(matched.id) ||
+                            installedCaskIDs.contains(where: { $0.hasSuffix("/\(matched.id)") })
                     } else {
                         false
                     }

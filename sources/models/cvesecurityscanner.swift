@@ -302,8 +302,10 @@ final class BrewStoreCVESecurityScanner: ObservableObject {
 
             // Merge curated high-impact advisories if audit was limited or offline
             for adv in BrewStoreCVEScanningManager.knownAdvisories {
-                if installed.contains(where: { $0.id.lowercased() == adv.packageID.lowercased() }) {
-                    if !issues.contains(where: { $0.cveIdentifier == adv.id }) {
+                if let matchingPkg = installed.first(where: { $0.id.lowercased() == adv.packageID.lowercased() }) {
+                    let currentVer = matchingPkg.installedVersion ?? matchingPkg.version
+                    let isStillVulnerable = BrewStoreAppUpdateChecker.isNewerVersion(remote: adv.fixedVersion, local: currentVer)
+                    if isStillVulnerable, !issues.contains(where: { $0.cveIdentifier == adv.id }) {
                         issues.append(CVESecurityIssue(
                             id: UUID().uuidString,
                             packageName: adv.packageID,

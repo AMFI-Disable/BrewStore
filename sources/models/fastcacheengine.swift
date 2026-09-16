@@ -102,7 +102,12 @@ enum BrewStoreFastCacheEngine {
     static func loadCacheSynchronously() -> FastCachePayload? {
         let file = cacheFileURL
         guard let data = try? Data(contentsOf: file) else { return nil }
-        return try? JSONDecoder().decode(FastCachePayload.self, from: data)
+        if let payload = try? JSONDecoder().decode(FastCachePayload.self, from: data) {
+            return payload
+        } else {
+            clearCache()
+            return nil
+        }
     }
 
     static func clearCache() {

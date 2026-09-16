@@ -71,18 +71,23 @@ struct PackageInstallAnalytics: Codable, Hashable {
     var velocityPercent: Double {
         guard install90d > 0 else { return 0 }
         let expected30d = Double(install90d) / 3.0
-        return ((Double(install30d) - expected30d) / expected30d) * 100.0
+        let v = ((Double(install30d) - expected30d) / expected30d) * 100.0
+        return (v.isFinite && !v.isNaN) ? v : 0
     }
 
     /// Ratio of direct on-request installs vs automatic dependency installs (0.0 to 1.0)
     var directRequestRatio: Double {
         guard install30d > 0 else { return 1.0 }
         let onRequest = Double(installOnRequest30d ?? install30d)
-        return min(max(onRequest / Double(install30d), 0.0), 1.0)
+        let ratio = onRequest / Double(install30d)
+        return (ratio.isFinite && !ratio.isNaN) ? min(max(ratio, 0.0), 1.0) : 1.0
     }
 
     var momentumBadge: (title: String, symbol: String, isPositive: Bool) {
         let v = velocityPercent
+        guard v.isFinite, !v.isNaN else {
+            return ("Steady Growth", "equal.circle.fill", true)
+        }
         if v >= 10.0 {
             return ("Fast Growing (+\(String(format: "%.1f", v))%)", "arrow.up.right.circle.fill", true)
         } else if v <= -10.0 {
