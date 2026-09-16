@@ -118,7 +118,7 @@ struct StacksView: View {
 
                 // Grid of Bundles
                 if filteredStacks.isEmpty {
-                    if preferences.hideCompletedBundles && completedBundlesCount > 0 {
+                    if preferences.hideCompletedBundles, completedBundlesCount > 0 {
                         VStack(spacing: Spacing.sm) {
                             Image(systemName: "checkmark.seal.fill")
                                 .font(.system(size: 40))

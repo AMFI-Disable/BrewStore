@@ -2,9 +2,9 @@ import AppKit
 import Foundation
 
 public enum ShowdownPhase: String, Codable, Sendable {
-    case qualifying = "qualifying"
-    case showdown = "showdown"
-    case completed = "completed"
+    case qualifying
+    case showdown
+    case completed
 
     public var displayName: String {
         switch self {

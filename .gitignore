@@ -1,11 +1,40 @@
 # ==============================================================================
 # BrewStore .gitignore
-# Controls visibility of project files, preventing leaks of build artifacts,
-# system metadata, credentials, user configs, and local audit documents.
+# ==============================================================================
+# Controls file visibility and repository hygiene:
+# - Hides transient build artifacts, machine-specific caches, editor states, and secrets.
+# - Preserves active working files, configuration definitions, and distribution assets.
+# ==============================================================================
+
+# ==============================================================================
+# SECTION 1: WORKING & PRESERVED FILES (Explicit Whitelists)
+# (Guarantees vital project sources, configs, and assets are preserved)
+# ==============================================================================
+
+# Core Project Configuration
+!project.yml
+!.gitignore
+!.swiftformat
+!.markdownlint.json
+
+# Documentation & Readmes
+!readme*.md
+!changelog.md
+!license
+
+# Whitelist Public Distribution Artifacts (overriding binary archive rules below)
+!website/downloads/
+!website/downloads/*.dmg
+!website/downloads/*.sha256
+!website/downloads/appcast.xml
+
+# ==============================================================================
+# SECTION 2: HIDDEN & IGNORED ARTIFACTS
+# (Local caches, intermediate builds, user states, credentials, diagnostics)
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
-# macOS System & Filesystem Metadata
+# 2.1 macOS System & Volume Metadata
 # ------------------------------------------------------------------------------
 .DS_Store
 .DS_Store?
@@ -17,10 +46,12 @@
 Icon?
 
 # ------------------------------------------------------------------------------
-# Xcode, XcodeGen & Developer User State
-# Note: project.yml is the sole source of truth for generating Xcode projects.
+# 2.2 Xcode Generated Projects, Workspaces & User State
+# Note: project.yml is the sole source of truth for Xcode project generation.
 # ------------------------------------------------------------------------------
+*.xcodeproj/
 *.xcodeproj
+*.xcworkspace/
 *.xcworkspace
 *.xcuserdata/
 xcuserdata/
@@ -29,21 +60,19 @@ xcuserdata/
 *.xccheckout
 *.moved-aside
 *.pbxuser
-!default.pbxuser
 *.mode1v3
-!default.mode1v3
 *.mode2v3
-!default.mode2v3
 *.perspectivev3
-!default.perspectivev3
 
-# Swift Package Manager & Tooling
+# ------------------------------------------------------------------------------
+# 2.3 Swift Package Manager & Tooling Caches
+# ------------------------------------------------------------------------------
 .build/
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .swiftpm/xcode/xcuserdata/
 
 # ------------------------------------------------------------------------------
-# Build Products, Intermediate Compilation Outputs & DerivedData
+# 2.4 Build Products, Compilation Outputs & DerivedData
 # ------------------------------------------------------------------------------
 build/
 Build/
@@ -61,7 +90,8 @@ DerivedData/
 *.coverage
 
 # ------------------------------------------------------------------------------
-# Release Archives & Binaries (with Website Downloads Whitelist)
+# 2.5 Package Distribution & Release Archives
+# (Except website/downloads whitelisted in Section 1)
 # ------------------------------------------------------------------------------
 *.dmg
 *.zip
@@ -69,14 +99,13 @@ DerivedData/
 *.tar.gz
 *.tgz
 
-# Allow public distribution artifacts in website/downloads
-!website/downloads/
+# Re-apply website downloads whitelist
 !website/downloads/*.dmg
 !website/downloads/*.sha256
 !website/downloads/appcast.xml
 
 # ------------------------------------------------------------------------------
-# Secrets, Private Keys, Certificates & Tokens
+# 2.6 Environment Secrets, Private Keys & Tokens
 # ------------------------------------------------------------------------------
 .env
 .env.*
@@ -98,7 +127,7 @@ token.json
 *ed25519_priv*
 
 # ------------------------------------------------------------------------------
-# Local Logs, Crash Reports & Diagnostics
+# 2.7 Diagnostics, Crash Logs & Local Telemetry
 # ------------------------------------------------------------------------------
 *.log
 logs/
@@ -108,19 +137,19 @@ crash_reports/
 *.diag
 
 # ------------------------------------------------------------------------------
-# Hosting, Web & Deployment
+# 2.8 Package Managers & Web Hosting Scaffolding
 # ------------------------------------------------------------------------------
-.vercel
-.netlify
 node_modules/
 .npm
 .yarn
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.vercel
+.netlify
 
 # ------------------------------------------------------------------------------
-# IDEs, Code Editors & AI Agent Contexts
+# 2.9 IDEs, Text Editors & AI Agent Working Contexts
 # ------------------------------------------------------------------------------
 .vscode/
 .idea/
@@ -131,9 +160,10 @@ yarn-error.log*
 .claude/
 .cursor/
 .windsurf/
+.omp/
 
 # ------------------------------------------------------------------------------
-# Temporary, Scratch & Local Internal Audit Documents
+# 2.10 Temporary Files, Local Scratchpads & Local Internal Documents
 # ------------------------------------------------------------------------------
 *.tmp
 *.temp
@@ -141,6 +171,7 @@ yarn-error.log*
 tmp/
 temp/
 scratch/
+local/
 docs/internal/
 task.md
 todo.md

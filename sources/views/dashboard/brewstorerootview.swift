@@ -101,6 +101,7 @@ struct BrewStoreRootView: View {
 
                     Menu {
                         Button {
+                            dismissSecondarySheets()
                             showingHealthSheet = true
                         } label: {
                             Label("Health Score & Optimizer", systemImage: "heart.text.square")
@@ -108,6 +109,7 @@ struct BrewStoreRootView: View {
                         .accessibilityIdentifier("Toolbar.HealthScore")
 
                         Button {
+                            dismissSecondarySheets()
                             showingAISheet = true
                         } label: {
                             Label("AI Package Assistant", systemImage: "wand.and.stars")
@@ -115,6 +117,7 @@ struct BrewStoreRootView: View {
                         .accessibilityIdentifier("Toolbar.AIAssistant")
 
                         Button {
+                            dismissSecondarySheets()
                             showingBrewfileImportSheet = true
                         } label: {
                             Label("Import Brewfile…", systemImage: "doc.badge.plus")
@@ -122,12 +125,12 @@ struct BrewStoreRootView: View {
                         .accessibilityIdentifier("Toolbar.ImportBrewfile")
 
                         Button {
+                            dismissSecondarySheets()
                             showingShellConfigSheet = true
                         } label: {
                             Label("Shell Environment Assistant…", systemImage: "terminal")
                         }
                         .accessibilityIdentifier("Toolbar.ShellSetup")
-
                         Divider()
 
                         Button {
@@ -308,8 +311,33 @@ struct BrewStoreRootView: View {
         .tint(themeManager.currentTheme.color)
     }
 
+    private func dismissSecondarySheets() {
+        if showingCommandPalette {
+            showingCommandPalette = false
+        }
+        if showingGitHubSheet {
+            showingGitHubSheet = false
+        }
+        if showingHelpSheet {
+            showingHelpSheet = false
+        }
+        if showingAISheet {
+            showingAISheet = false
+        }
+        if showingShellConfigSheet {
+            showingShellConfigSheet = false
+        }
+        if showingHealthSheet {
+            showingHealthSheet = false
+        }
+        if showingBrewfileImportSheet {
+            showingBrewfileImportSheet = false
+        }
+    }
+
     private func handleIncomingURL(_ url: URL) {
         guard let route = BrewStoreURLSchemeRouter.parse(url: url) else { return }
+        dismissSecondarySheets()
         switch route {
         case let .package(id, kind), let .install(id, kind):
             let targetPkg = manager.packages.first(where: { $0.id.lowercased() == id.lowercased() }) ??
@@ -747,9 +775,17 @@ final class BrewStoreSplitViewManager: ObservableObject {
     static let fixedSidebarWidth: CGFloat = 248.0
 
     /// Backward compatibility aliases for existing callers and tests
-    static var optimalSidebarWidth: CGFloat { fixedSidebarWidth }
-    static var maxSidebarWidth: CGFloat { fixedSidebarWidth }
-    static var minSidebarWidth: CGFloat { fixedSidebarWidth }
+    static var optimalSidebarWidth: CGFloat {
+        fixedSidebarWidth
+    }
+
+    static var maxSidebarWidth: CGFloat {
+        fixedSidebarWidth
+    }
+
+    static var minSidebarWidth: CGFloat {
+        fixedSidebarWidth
+    }
 
     private weak var splitView: NSSplitView?
 
@@ -962,7 +998,7 @@ struct SidebarCountBadge: View {
     var foregroundColor: Color = .secondary
     var backgroundColor: Color = Color.secondary.opacity(0.12)
     var isAccentOrProminent: Bool = false
-    var leadingDotColor: Color? = nil
+    var leadingDotColor: Color?
 
     var body: some View {
         HStack(spacing: 3) {

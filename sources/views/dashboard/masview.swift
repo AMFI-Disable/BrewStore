@@ -22,7 +22,7 @@ struct MASView: View {
             headerBar
             Divider()
 
-            if !masManager.isMASInstalled && masManager.installedApps.isEmpty {
+            if !masManager.isMASInstalled, masManager.installedApps.isEmpty {
                 installMASPromptView
             } else if masManager.isRefreshing {
                 VStack(spacing: 12) {

@@ -67,11 +67,13 @@ final class BrewStoreMenuBarCompanionManager: ObservableObject {
         if window.maxSize != fixedSize {
             window.maxSize = fixedSize
         }
-        if window.frame.size != fixedSize {
+        let widthDiff = abs(window.frame.width - fixedSize.width)
+        let heightDiff = abs(window.frame.height - fixedSize.height)
+        if widthDiff > 0.5 || heightDiff > 0.5 {
             let currentFrame = window.frame
             let newY = currentFrame.maxY - targetHeight
             let newFrame = NSRect(x: currentFrame.origin.x, y: newY, width: Self.panelWidth, height: targetHeight)
-            window.setFrame(newFrame, display: true, animate: false)
+            window.setFrame(newFrame, display: false, animate: false)
         }
     }
 }

@@ -4,9 +4,9 @@ import Foundation
 
 /// Defines uninstallation strategies when removing or replacing applications.
 enum BrewStoreAppUninstallMode: String, CaseIterable, Identifiable, Codable, Sendable {
-    case preserveData = "preserveData"
-    case purgeAllData = "purgeAllData"
-    case keepExisting = "keepExisting"
+    case preserveData
+    case purgeAllData
+    case keepExisting
 
     var id: String {
         rawValue

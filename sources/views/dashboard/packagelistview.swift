@@ -454,7 +454,7 @@ struct PackageListView: View {
             .accessibilityLabel("\(title) packages list, \(packages.count) total items")
             .searchable(text: $search, prompt: "Search \(title.lowercased())")
             .overlay {
-                if manager.isLoading && packages.isEmpty {
+                if manager.isLoading, packages.isEmpty {
                     ProgressView("Refreshing Homebrew…")
                 } else if packages.isEmpty, let error = manager.errorMessage {
                     ContentUnavailableView {

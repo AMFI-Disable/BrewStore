@@ -77,11 +77,12 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
         process.executableURL = URL(fileURLWithPath: executablePath)
         process.arguments = arguments
         process.environment = ExecutionSecurityBoundary.sanitizeEnvironment(ProcessInfo.processInfo.environment)
+        let inputPipe = Pipe()
         let outputPipe = Pipe()
         let errorPipe = Pipe()
+        process.standardInput = inputPipe
         process.standardOutput = outputPipe
         process.standardError = errorPipe
-
         let exitSemaphore = DispatchSemaphore(value: 0)
         process.terminationHandler = { _ in
             exitSemaphore.signal()
@@ -91,6 +92,7 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
             try process.run()
         } catch {
             process.terminationHandler = nil
+            try? inputPipe.fileHandleForWriting.close()
             return BrewStoreCommandResult(
                 standardOutput: "", standardError: "", terminationStatus: nil,
                 wasTerminated: false, didTimeOut: false, wasCancelled: false,
@@ -99,9 +101,9 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
             )
         }
 
+        try? inputPipe.fileHandleForWriting.close()
         try? outputPipe.fileHandleForWriting.close()
         try? errorPipe.fileHandleForWriting.close()
-
         let group = DispatchGroup()
         let output = BrewStoreOutputBuffer(onOutput: onOutput)
         let error = BrewStoreOutputBuffer(onOutput: onOutput)
@@ -130,7 +132,7 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
             process.terminate()
         } else {
             let waitStep: DispatchTimeInterval = .milliseconds(25)
-            while process.isRunning && Date() < deadline {
+            while process.isRunning, Date() < deadline {
                 if cancellationCheck?() == true {
                     wasCancelled = true
                     process.terminate()
@@ -198,9 +200,12 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
         let outputSnapshot = output.snapshot()
         let errorSnapshot = error.snapshot()
 
+        let rawStdOut = String(data: outputSnapshot.data, encoding: .utf8) ?? ""
+        let rawStdErr = String(data: errorSnapshot.data, encoding: .utf8) ?? ""
+
         return BrewStoreCommandResult(
-            standardOutput: String(data: outputSnapshot.data, encoding: .utf8) ?? "",
-            standardError: String(data: errorSnapshot.data, encoding: .utf8) ?? "",
+            standardOutput: rawStdOut.strippingANSIEscapeCodes(),
+            standardError: rawStdErr.strippingANSIEscapeCodes(),
             terminationStatus: exitCode,
             wasTerminated: didTimeOut || wasCancelled || wasTerminatedBySignal,
             didTimeOut: didTimeOut,
@@ -248,7 +253,7 @@ private final class BrewStoreOutputBuffer: @unchecked Sendable {
                 didTruncate = true
             }
             if let str = String(data: chunk, encoding: .utf8), !str.isEmpty {
-                onOutput?(str)
+                onOutput?(str.strippingANSIEscapeCodes())
             }
         }
         lock.lock()
@@ -261,5 +266,16 @@ private final class BrewStoreOutputBuffer: @unchecked Sendable {
         lock.lock()
         defer { lock.unlock() }
         return (data, truncated)
+    }
+}
+
+private extension String {
+    func strippingANSIEscapeCodes() -> String {
+        guard self.contains("\u{001B}") else { return self }
+        return self.replacingOccurrences(
+            of: #"\x1B\[[0-9;]*[a-zA-Z]"#,
+            with: "",
+            options: .regularExpression
+        )
     }
 }

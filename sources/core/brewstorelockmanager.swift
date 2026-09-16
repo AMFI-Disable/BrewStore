@@ -65,6 +65,10 @@ final class BrewStoreLockManager: @unchecked Sendable {
 
     /// Inspects the Homebrew locks directory for any actively held locks.
     func checkLockState(prefix: String, targetPackage: String? = nil) -> HomebrewLockState {
+        if BrewStoreFixtureMode.isEnabled, !prefix.contains("brewstore_fixture") {
+            return .free
+        }
+
         let locksDir = (prefix as NSString).appendingPathComponent("var/homebrew/locks")
         let fileManager = FileManager.default
 
@@ -72,15 +76,23 @@ final class BrewStoreLockManager: @unchecked Sendable {
             return .free
         }
 
-        // If a specific target package was requested, prioritize its specific lockfile
-        var candidateFiles = lockFiles
-        if let target = targetPackage?.lowercased() {
-            let specific = "\(target).formula.lock"
-            if candidateFiles.contains(specific) {
-                candidateFiles = [specific] + candidateFiles.filter { $0 != specific }
-            }
-        }
+        let trimmedTarget = targetPackage?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
 
+        let candidateFiles: [String]
+        if let target = trimmedTarget, !target.isEmpty {
+            let relevantSuffixes = [
+                "\(target).formula.lock",
+                "\(target).cask.lock",
+                "\(target).lock"
+            ]
+            candidateFiles = lockFiles.filter { file in
+                file == "update" ||
+                    relevantSuffixes.contains(file.lowercased()) ||
+                    file.lowercased().contains(target)
+            }
+        } else {
+            candidateFiles = lockFiles
+        }
         for file in candidateFiles {
             guard file.hasSuffix(".lock") || file == "update" else { continue }
             let fullPath = (locksDir as NSString).appendingPathComponent(file)
@@ -128,6 +140,9 @@ final class BrewStoreLockManager: @unchecked Sendable {
 
     /// Returns all lock file names currently present in the locks directory.
     func allLockFiles(prefix: String) -> [String] {
+        if BrewStoreFixtureMode.isEnabled, !prefix.contains("brewstore_fixture") {
+            return []
+        }
         let locksDir = (prefix as NSString).appendingPathComponent("var/homebrew/locks")
         guard let files = try? FileManager.default.contentsOfDirectory(atPath: locksDir) else {
             return []

@@ -380,7 +380,7 @@ final class HomebrewManager: ObservableObject {
 
                 async let casksTask = Task.detached { () -> BrewStoreCommandResult in
                     if isCacheFresh {
-                        return BrewStoreCommandResult(
+                        BrewStoreCommandResult(
                             standardOutput: "",
                             standardError: "",
                             terminationStatus: 0,
@@ -393,7 +393,7 @@ final class HomebrewManager: ObservableObject {
                             launchErrorDescription: nil
                         )
                     } else {
-                        return executor.run(
+                        executor.run(
                             executablePath: brewPath,
                             arguments: ["info", "--json=v2", "--cask"],
                             timeout: 15,
@@ -404,7 +404,7 @@ final class HomebrewManager: ObservableObject {
 
                 async let formulaeTask = Task.detached { () -> BrewStoreCommandResult in
                     if isCacheFresh {
-                        return BrewStoreCommandResult(
+                        BrewStoreCommandResult(
                             standardOutput: "",
                             standardError: "",
                             terminationStatus: 0,
@@ -417,7 +417,7 @@ final class HomebrewManager: ObservableObject {
                             launchErrorDescription: nil
                         )
                     } else {
-                        return executor.run(
+                        executor.run(
                             executablePath: brewPath,
                             arguments: ["info", "--json=v2", "--formula"],
                             timeout: 15,
@@ -708,7 +708,7 @@ final class HomebrewManager: ObservableObject {
 
         Task.detached(priority: .userInitiated) { [self, executor, brewPath, brewPrefix = self.brewPrefix, arguments, action, packageName = package.name, packageID = package.id, cancellationState] in
             // 1. Proactive Lock Coordination
-            if let prefix = brewPrefix {
+            if let prefix = brewPrefix, !BrewStoreFixtureMode.isEnabled {
                 let lockState = BrewStoreLockManager.shared.checkLockState(prefix: prefix, targetPackage: packageID)
                 if case let .locked(lockFile, pid, _) = lockState {
                     await MainActor.run {
@@ -1032,13 +1032,14 @@ final class HomebrewManager: ObservableObject {
                     outputLogs.append("[\(service.name) err] \(result.standardError)")
                 }
             }
-
+            let finalSucceeded = allSucceeded
+            let finalLogs = outputLogs
             await MainActor.run { [weak self] in
                 guard let self else { return }
                 self.isOperating = false
                 self.activeOperationTitle = nil
-                self.statusMessage = allSucceeded ? "All service operations completed." : "Some service operations failed."
-                self.recordOperation(title: title, succeeded: allSucceeded, detail: outputLogs.joined(separator: "\n"))
+                self.statusMessage = finalSucceeded ? "All service operations completed." : "Some service operations failed."
+                self.recordOperation(title: title, succeeded: finalSucceeded, detail: finalLogs.joined(separator: "\n"))
                 self.refresh()
             }
         }

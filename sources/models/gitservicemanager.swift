@@ -2,10 +2,10 @@ import AppKit
 import Foundation
 
 public enum GitServiceProvider: String, CaseIterable, Identifiable, Codable, Sendable {
-    case github = "github"
-    case gitlab = "gitlab"
-    case codeberg = "codeberg"
-    case custom = "custom"
+    case github
+    case gitlab
+    case codeberg
+    case custom
 
     public var id: String {
         rawValue

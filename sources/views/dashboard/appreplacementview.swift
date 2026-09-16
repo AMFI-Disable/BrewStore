@@ -72,7 +72,7 @@ struct AppReplacementView: View {
 
             // Replacements List
             ScrollView {
-                if selectedTab == 0 && replacementManager.detectedAlternatives.isEmpty {
+                if selectedTab == 0, replacementManager.detectedAlternatives.isEmpty {
                     VStack(spacing: 12) {
                         Image(systemName: "sparkles")
                             .font(.system(size: 32))

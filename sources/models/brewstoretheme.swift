@@ -68,11 +68,11 @@ struct BrewCardModifier: ViewModifier {
     private var backgroundStyle: some ShapeStyle {
         switch elevation {
         case .flat:
-            return AnyShapeStyle(Color(nsColor: .controlBackgroundColor).opacity(0.4))
+            AnyShapeStyle(Color(nsColor: .controlBackgroundColor).opacity(0.4))
         case .subtle:
-            return AnyShapeStyle(Color(nsColor: .controlBackgroundColor).opacity(0.65))
+            AnyShapeStyle(Color(nsColor: .controlBackgroundColor).opacity(0.65))
         case .elevated:
-            return AnyShapeStyle(.ultraThinMaterial)
+            AnyShapeStyle(.ultraThinMaterial)
         }
     }
 

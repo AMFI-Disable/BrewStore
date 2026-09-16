@@ -357,19 +357,19 @@ final class BrewStoreStackManager: ObservableObject {
         customStacks = decoded
     }
 
-enum BrewStoreStackImportError: LocalizedError, Equatable {
-    case emptyData
-    case invalidName
+    enum BrewStoreStackImportError: LocalizedError, Equatable {
+        case emptyData
+        case invalidName
 
-    var errorDescription: String? {
-        switch self {
-        case .emptyData:
-            "The blueprint file is empty."
-        case .invalidName:
-            "The blueprint package stack must have a valid non-empty name."
+        var errorDescription: String? {
+            switch self {
+            case .emptyData:
+                "The blueprint file is empty."
+            case .invalidName:
+                "The blueprint package stack must have a valid non-empty name."
+            }
         }
     }
-}
 
     func exportBlueprint(stack: BrewStoreStack) -> Data? {
         let encoder = JSONEncoder()

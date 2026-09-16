@@ -89,6 +89,13 @@ enum ExecutionSecurityBoundary {
             cleanEnv["PATH"] = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
         }
 
+        // Prevent child subprocesses from hanging on interactive prompts or emitting ANSI escapes
+        cleanEnv["HOMEBREW_NO_AUTO_UPDATE"] = cleanEnv["HOMEBREW_NO_AUTO_UPDATE"] ?? "1"
+        cleanEnv["HOMEBREW_NO_INSTALL_CLEANUP"] = cleanEnv["HOMEBREW_NO_INSTALL_CLEANUP"] ?? "1"
+        cleanEnv["HOMEBREW_NO_COLOR"] = cleanEnv["HOMEBREW_NO_COLOR"] ?? "1"
+        cleanEnv["NONINTERACTIVE"] = "1"
+        cleanEnv["CI"] = cleanEnv["CI"] ?? "1"
+
         return cleanEnv
     }
 }

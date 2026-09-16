@@ -749,53 +749,52 @@ struct CommandPaletteView: View {
 
     // MARK: - Left Column: Results List
 
+    @ViewBuilder
     private var leftResultsColumn: some View {
-        Group {
-            if filteredItems.isEmpty {
-                VStack(spacing: 12) {
-                    Image(systemName: "questionmark.folder")
-                        .font(.system(size: 36))
-                        .foregroundStyle(.secondary.opacity(0.5))
-                    Text("No matching commands or packages found for '\(query)'")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    if !query.isEmpty {
-                        Button("Clear Query") {
-                            query = ""
+        if filteredItems.isEmpty {
+            VStack(spacing: 12) {
+                Image(systemName: "questionmark.folder")
+                    .font(.system(size: 36))
+                    .foregroundStyle(.secondary.opacity(0.5))
+                Text("No matching commands or packages found for '\(query)'")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                if !query.isEmpty {
+                    Button("Clear Query") {
+                        query = ""
+                    }
+                    .controlSize(.small)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding(24)
+        } else {
+            ScrollViewReader { proxy in
+                List(selection: Binding(
+                    get: { selectedIndex },
+                    set: { newIndex in
+                        if let newIndex {
+                            selectedIndex = newIndex
                         }
-                        .controlSize(.small)
+                    }
+                )) {
+                    ForEach(Array(filteredItems.enumerated()), id: \.offset) { index, item in
+                        resultRow(item: item, isSelected: selectedIndex == index)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                if selectedIndex == index {
+                                    item.execute()
+                                } else {
+                                    selectedIndex = index
+                                }
+                            }
+                            .tag(index)
+                            .id(index)
                     }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding(24)
-            } else {
-                ScrollViewReader { proxy in
-                    List(selection: Binding(
-                        get: { selectedIndex },
-                        set: { newIndex in
-                            if let newIndex {
-                                selectedIndex = newIndex
-                            }
-                        }
-                    )) {
-                        ForEach(Array(filteredItems.enumerated()), id: \.offset) { index, item in
-                            resultRow(item: item, isSelected: selectedIndex == index)
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    if selectedIndex == index {
-                                        item.execute()
-                                    } else {
-                                        selectedIndex = index
-                                    }
-                                }
-                                .tag(index)
-                                .id(index)
-                        }
-                    }
-                    .listStyle(.plain)
-                    .onChange(of: selectedIndex) { _, newIndex in
-                        proxy.scrollTo(newIndex, anchor: .center)
-                    }
+                .listStyle(.plain)
+                .onChange(of: selectedIndex) { _, newIndex in
+                    proxy.scrollTo(newIndex, anchor: .center)
                 }
             }
         }
@@ -1075,7 +1074,6 @@ struct CommandPaletteView: View {
         }
     }
 
-    @ViewBuilder
     private func serviceInspector(svc: BrewStoreService, item: PaletteItem) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header
@@ -1201,7 +1199,6 @@ struct CommandPaletteView: View {
         }
     }
 
-    @ViewBuilder
     private func actionInspector(item: PaletteItem) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header
@@ -1286,7 +1283,6 @@ struct CommandPaletteView: View {
         }
     }
 
-    @ViewBuilder
     private func navigationInspector(item: PaletteItem) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header

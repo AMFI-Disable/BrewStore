@@ -107,15 +107,19 @@ struct HealthHubView: View {
                 }
 
                 // Zone 1: Segmented Switcher
-                HStack {
+                HStack(spacing: 12) {
                     Picker("Health Navigation", selection: $subMode) {
-                        Text("Snapshots (\(snapshotManager.snapshots.count))").tag(HealthSubMode.snapshots)
+                        Text("Snapshots").tag(HealthSubMode.snapshots)
                         Text("Doctor Diagnostics").tag(HealthSubMode.doctor)
-                        Text("Disk Storage & Cleanup").tag(HealthSubMode.storage)
+                        Text("Storage Cleanup").tag(HealthSubMode.storage)
                     }
                     .labelsHidden()
                     .pickerStyle(.segmented)
                     .fixedSize(horizontal: true, vertical: false)
+
+                    Text("\(snapshotManager.snapshots.count) snapshot\(snapshotManager.snapshots.count == 1 ? "" : "s")")
+                        .font(.caption2.monospacedDigit())
+                        .foregroundStyle(.secondary)
 
                     Spacer()
                 }

@@ -128,13 +128,13 @@ final class BrewStoreUninstallCoordinator: ObservableObject {
 
         let hasCasks = installedPackages.contains { $0.kind == .cask }
         let cleanerEnabled = BrewStorePreferences.shared.enableAppCleaner
-        if hasCasks && cleanerEnabled {
+        if hasCasks, cleanerEnabled {
             request.isScanningResiduals = true
         }
 
         pendingRequest = request
 
-        if hasCasks && cleanerEnabled {
+        if hasCasks, cleanerEnabled {
             let requestId = request.id
             Task { [weak self] in
                 let plans = await Self.scanResidualPlans(for: installedPackages)
@@ -342,19 +342,19 @@ final class BrewStoreUninstallCoordinator: ObservableObject {
                     }
                 }
             }
-
+            let finalOrphanNames = orphanNames
             return await MainActor.run {
-                orphanNames.compactMap { name in
+                finalOrphanNames.compactMap { name in
                     manager.packages.first { $0.name.caseInsensitiveCompare(name) == .orderedSame } ??
-                    BrewStorePackage(
-                        id: name,
-                        name: name,
-                        description: "Unneeded dependency formula",
-                        homepage: "",
-                        version: "",
-                        kind: .formula,
-                        isInstalled: true
-                    )
+                        BrewStorePackage(
+                            id: name,
+                            name: name,
+                            description: "Unneeded dependency formula",
+                            homepage: "",
+                            version: "",
+                            kind: .formula,
+                            isInstalled: true
+                        )
                 }
             }
         }.value

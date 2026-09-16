@@ -79,7 +79,7 @@ struct BrewStoreStatusHUDView: View {
                             .frame(width: 7, height: 7)
 
                         Text("\(healthScore)%")
-                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .font(.system(size: 11, weight: .bold, design: .rounded).monospacedDigit())
                             .foregroundStyle(.primary)
 
                         Text("Health")
@@ -104,7 +104,7 @@ struct BrewStoreStatusHUDView: View {
                             .foregroundStyle(runningServicesCount > 0 ? Color.green : Color.secondary)
 
                         Text("\(runningServicesCount)")
-                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .font(.system(size: 11, weight: .bold, design: .rounded).monospacedDigit())
                             .foregroundStyle(.primary)
                     }
                     .padding(.horizontal, 7)
@@ -129,7 +129,7 @@ struct BrewStoreStatusHUDView: View {
 
                         if let date = manager.lastRefreshedAt {
                             Text(date, style: .relative)
-                                .font(.system(size: 10, weight: .medium))
+                                .font(.system(size: 10, weight: .medium).monospacedDigit())
                                 .foregroundStyle(.secondary)
                         } else {
                             Text("Sync")

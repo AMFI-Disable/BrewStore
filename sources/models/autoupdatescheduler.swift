@@ -302,7 +302,7 @@ final class BrewStoreAutoUpdateScheduler: ObservableObject {
 
         do {
             let (_, response) = try await URLSession.shared.data(for: request)
-            if let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) {
+            if let httpResponse = response as? HTTPURLResponse, (200 ... 299).contains(httpResponse.statusCode) {
                 return (true, "Webhook delivered successfully (HTTP \(httpResponse.statusCode))")
             } else if let httpResponse = response as? HTTPURLResponse {
                 return (false, "Server returned HTTP status \(httpResponse.statusCode)")

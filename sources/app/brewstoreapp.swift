@@ -89,7 +89,8 @@ struct BrewStoreApp: App {
                 if outdatedCount > 0, preferences.showMenuBarBadge {
                     if style == "count" {
                         Text("\(outdatedCount)")
-                            .font(.caption2.bold())
+                            .font(.system(size: 9.5, weight: .bold).monospacedDigit())
+                            .frame(minWidth: 10)
                     } else if style == "dot" {
                         Circle()
                             .fill(Color.orange)

@@ -102,12 +102,12 @@ struct MyMacHubView: View {
                 }
 
                 // Zone 1: Segmented Switcher
-                HStack {
+                HStack(spacing: 12) {
                     Picker("My Mac Navigation", selection: $subMode) {
-                        Text("Installed (\(installedCount))").tag(MyMacSubMode.installed)
-                        Text(outdatedCount > 0 ? "Updates (\(outdatedCount))" : "Updates").tag(MyMacSubMode.updates)
-                        Text("Wishlist (\(wishlistCount))").tag(MyMacSubMode.wishlist)
-                        Text("Adoption (\(adoptableCount))").tag(MyMacSubMode.adoption)
+                        Text("Installed").tag(MyMacSubMode.installed)
+                        Text("Updates").tag(MyMacSubMode.updates)
+                        Text("Wishlist").tag(MyMacSubMode.wishlist)
+                        Text("Adoption").tag(MyMacSubMode.adoption)
                         Text("Dependencies").tag(MyMacSubMode.topology)
                     }
                     .labelsHidden()
@@ -117,6 +117,20 @@ struct MyMacHubView: View {
                         if selection != newMode.section {
                             selection = newMode.section
                         }
+                    }
+
+                    if outdatedCount > 0 {
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(Color.orange)
+                                .frame(width: 5, height: 5)
+                            Text("\(outdatedCount) update\(outdatedCount == 1 ? "" : "s")")
+                                .font(.caption2.bold().monospacedDigit())
+                                .foregroundStyle(.orange)
+                        }
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(Color.orange.opacity(0.12), in: Capsule())
                     }
 
                     Spacer()

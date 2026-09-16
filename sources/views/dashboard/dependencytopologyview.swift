@@ -10,7 +10,6 @@ struct DependencyTopologyView: View {
 
     var showHeader: Bool = true
 
-    @ViewBuilder
     private var actionButtons: some View {
         HStack(spacing: Spacing.xs) {
             if topologyManager.isAnalyzing {

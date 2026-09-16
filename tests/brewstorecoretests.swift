@@ -241,4 +241,62 @@ final class BrewStoreCoreTests: XCTestCase {
         let notFound = catalog.findItem(id: "nonexistent-item-\(UUID().uuidString)")
         XCTAssertNil(notFound)
     }
+
+    func testCommandExecutorStripsANSIEscapeCodes() {
+        let executor = BrewStoreCommandExecutor.shared
+        // Echo string containing standard ANSI 16-color codes
+        let ansiString = "\u{001B}[31mRedText\u{001B}[0m \u{001B}[1;32mGreenBold\u{001B}[0m"
+        let result = executor.run(
+            executablePath: "/bin/echo",
+            arguments: [ansiString]
+        )
+        XCTAssertTrue(result.succeeded)
+        XCTAssertFalse(result.standardOutput.contains("\u{001B}"))
+        XCTAssertEqual(result.standardOutput, "RedText GreenBold\n")
+    }
+
+    func testSanitizeEnvironmentInjectsNoninteractiveAndNoColorFlags() {
+        let rawEnv: [String: String] = [
+            "PATH": "/usr/bin:/bin",
+            "DYLD_INSERT_LIBRARIES": "/malicious/lib.dylib"
+        ]
+        let sanitized = ExecutionSecurityBoundary.sanitizeEnvironment(rawEnv)
+        XCTAssertNil(sanitized["DYLD_INSERT_LIBRARIES"])
+        XCTAssertEqual(sanitized["NONINTERACTIVE"], "1")
+        XCTAssertEqual(sanitized["HOMEBREW_NO_COLOR"], "1")
+        XCTAssertEqual(sanitized["HOMEBREW_NO_AUTO_UPDATE"], "1")
+        XCTAssertEqual(sanitized["CI"], "1")
+    }
+
+    func testHomebrewJSONParserHandlesSingleStringAndArrayAppArtifacts() {
+        let sampleCaskJSON = """
+        {
+            "casks": [
+                {
+                    "token": "multi-artifact-app",
+                    "name": ["Multi Artifact App"],
+                    "version": " 1.2.3 ",
+                    "artifacts": [
+                        { "app": ["Primary.app"] },
+                        { "app": "Secondary Helper.app" }
+                    ]
+                }
+            ]
+        }
+        """.data(using: .utf8)!
+
+        let packages = HomebrewJSONParser.packages(
+            from: sampleCaskJSON,
+            kind: .cask,
+            installedIDs: [],
+            outdatedIDs: []
+        )
+
+        XCTAssertEqual(packages.count, 1)
+        let pkg = packages[0]
+        XCTAssertEqual(pkg.id, "multi-artifact-app")
+        XCTAssertEqual(pkg.version, "1.2.3") // verify whitespace trimming
+        XCTAssertTrue(pkg.applicationNames.contains("Primary.app"))
+        XCTAssertTrue(pkg.applicationNames.contains("Secondary Helper.app"))
+    }
 }

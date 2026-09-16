@@ -31,44 +31,32 @@ struct StorageReport: Hashable, Codable {
         totalCacheBytes + totalLogsBytes + inactiveVersionsBytes
     }
 
-    var formattedTotalCellar: String {
+    private static func formatBytes(_ bytes: Int64, units: ByteCountFormatter.Units = [.useMB, .useGB]) -> String {
         let formatter = ByteCountFormatter()
-        formatter.allowedUnits = [.useMB, .useGB]
+        formatter.allowedUnits = units
         formatter.countStyle = .file
         formatter.allowsNonnumericFormatting = false
-        return formatter.string(fromByteCount: totalCellarBytes)
+        return formatter.string(fromByteCount: bytes)
+    }
+
+    var formattedTotalCellar: String {
+        Self.formatBytes(totalCellarBytes)
     }
 
     var formattedTotalCache: String {
-        let formatter = ByteCountFormatter()
-        formatter.allowedUnits = [.useMB, .useGB]
-        formatter.countStyle = .file
-        formatter.allowsNonnumericFormatting = false
-        return formatter.string(fromByteCount: totalCacheBytes)
+        Self.formatBytes(totalCacheBytes)
     }
 
     var formattedTotalLogs: String {
-        let formatter = ByteCountFormatter()
-        formatter.allowedUnits = [.useMB, .useGB, .useKB]
-        formatter.countStyle = .file
-        formatter.allowsNonnumericFormatting = false
-        return formatter.string(fromByteCount: totalLogsBytes)
+        Self.formatBytes(totalLogsBytes, units: [.useMB, .useGB, .useKB])
     }
 
     var formattedInactiveVersions: String {
-        let formatter = ByteCountFormatter()
-        formatter.allowedUnits = [.useMB, .useGB, .useKB]
-        formatter.countStyle = .file
-        formatter.allowsNonnumericFormatting = false
-        return formatter.string(fromByteCount: inactiveVersionsBytes)
+        Self.formatBytes(inactiveVersionsBytes, units: [.useMB, .useGB, .useKB])
     }
 
     var formattedReclaimable: String {
-        let formatter = ByteCountFormatter()
-        formatter.allowedUnits = [.useMB, .useGB]
-        formatter.countStyle = .file
-        formatter.allowsNonnumericFormatting = false
-        return formatter.string(fromByteCount: reclaimableBytes)
+        Self.formatBytes(reclaimableBytes)
     }
 }
 

@@ -3,8 +3,8 @@ import SwiftUI
 
 /// Defines user preference for managing dual-available apps (Homebrew vs. Mac App Store).
 enum AppSourcePreference: String, CaseIterable, Identifiable, Codable, Sendable {
-    case homebrew = "homebrew"
-    case macAppStore = "macAppStore"
+    case homebrew
+    case macAppStore
 
     var id: String {
         rawValue

@@ -175,7 +175,7 @@ final class BrewStoreDoctorRemediationManager: ObservableObject {
         }
     }
 
-    nonisolated func scanDanglingSymlinks(prefixPath: String? = nil) -> [URL] {
+    nonisolated static func scanDanglingSymlinks(prefixPath: String? = nil) -> [URL] {
         let fm = FileManager.default
         let prefix = prefixPath ?? (fm.fileExists(atPath: "/opt/homebrew") ? "/opt/homebrew" : "/usr/local")
         let candidateDirs = [
@@ -205,7 +205,11 @@ final class BrewStoreDoctorRemediationManager: ObservableObject {
         return dangling
     }
 
-    nonisolated func pruneBrokenSymlinks(links: [URL]) -> (removed: Int, errors: [String]) {
+    nonisolated func scanDanglingSymlinks(prefixPath: String? = nil) -> [URL] {
+        Self.scanDanglingSymlinks(prefixPath: prefixPath)
+    }
+
+    nonisolated static func pruneBrokenSymlinks(links: [URL]) -> (removed: Int, errors: [String]) {
         let fm = FileManager.default
         var removedCount = 0
         var errors: [String] = []
@@ -219,5 +223,9 @@ final class BrewStoreDoctorRemediationManager: ObservableObject {
             }
         }
         return (removedCount, errors)
+    }
+
+    nonisolated func pruneBrokenSymlinks(links: [URL]) -> (removed: Int, errors: [String]) {
+        Self.pruneBrokenSymlinks(links: links)
     }
 }

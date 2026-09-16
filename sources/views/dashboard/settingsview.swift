@@ -1513,7 +1513,9 @@ struct SettingsView: View {
                 NSPasteboard.general.setString(url, forType: .string)
                 copiedSchemeURL = url
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    if copiedSchemeURL == url { copiedSchemeURL = nil }
+                    if copiedSchemeURL == url {
+                        copiedSchemeURL = nil
+                    }
                 }
             }
             .controlSize(.mini)

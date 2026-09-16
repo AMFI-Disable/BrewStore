@@ -146,7 +146,7 @@ struct CategoriesGridView: View {
                                     selectedCategoryID == cat.id
                                         ? AnyShapeStyle(LinearGradient(colors: cat.gradient, startPoint: .leading, endPoint: .trailing))
                                         : AnyShapeStyle(Color.secondary.opacity(0.08))
-                                // End background
+                                    // End background
                                 )
                                 .foregroundStyle(selectedCategoryID == cat.id ? Color.white : Color.primary)
                                 .clipShape(Capsule())

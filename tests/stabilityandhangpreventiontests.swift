@@ -23,20 +23,24 @@ final class StabilityAndHangPreventionTests: XCTestCase {
 
     func testCommandExecutorCancellationTerminatesSafely() {
         let executor = BrewStoreCommandExecutor()
-        let lock = NSLock()
-        var checkCount = 0
+        final class SafeCounter: @unchecked Sendable {
+            private let lock = NSLock()
+            private var count = 0
+            func incrementAndCheck() -> Bool {
+                lock.lock()
+                defer { lock.unlock() }
+                count += 1
+                return count >= 2
+            }
+        }
+        let counter = SafeCounter()
 
         let result = executor.run(
             executablePath: "/bin/sleep",
             arguments: ["5"],
             timeout: 5.0,
             category: .readOnly,
-            cancellationCheck: {
-                lock.lock()
-                defer { lock.unlock() }
-                checkCount += 1
-                return checkCount >= 2
-            }
+            cancellationCheck: { counter.incrementAndCheck() }
         )
 
         XCTAssertTrue(result.wasCancelled)
@@ -120,7 +124,6 @@ final class StabilityAndHangPreventionTests: XCTestCase {
     }
 
     func testLockManagerForceUnlockIgnoresCriticalPIDs() {
-        var killedPIDs: [Int32] = []
         let myPID = getpid()
         let mockChecker: BrewStoreLockManager.ActivePIDsChecker = {
             [-1, 0, 1, myPID, 99999]

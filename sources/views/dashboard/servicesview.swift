@@ -201,13 +201,13 @@ struct ServicesView: View {
                     }
                 case .batchStop:
                     Button("Stop All Running Daemons", role: .destructive) {
-                        let running = manager.services.filter { $0.isRunning }
+                        let running = manager.services.filter(\.isRunning)
                         manager.batchPerform(services: running, action: .stop)
                         pendingAction = nil
                     }
                 case .batchRestart:
                     Button("Restart All Active Daemons") {
-                        let running = manager.services.filter { $0.isRunning }
+                        let running = manager.services.filter(\.isRunning)
                         manager.batchPerform(services: running, action: .restart)
                         pendingAction = nil
                     }
@@ -257,7 +257,6 @@ struct ServicesView: View {
         }
     }
 
-    @ViewBuilder
     private var batchControlsMenu: some View {
         Menu {
             Button {

@@ -34,12 +34,14 @@ enum HomebrewJSONParser {
             }
 
             let versions = entry["versions"] as? [String: Any]
-            let version = (entry["version"] as? String) ?? (versions?["stable"] as? String) ?? ""
+            let version = ((entry["version"] as? String) ?? (versions?["stable"] as? String) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
             var applicationNames: [String] = []
             if let artifacts = entry["artifacts"] as? [[String: Any]] {
                 for artifact in artifacts {
                     if let apps = artifact["app"] as? [String] {
                         applicationNames.append(contentsOf: apps)
+                    } else if let app = artifact["app"] as? String {
+                        applicationNames.append(app)
                     }
                 }
             }

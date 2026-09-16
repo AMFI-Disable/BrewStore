@@ -3,7 +3,6 @@ import SwiftUI
 
 enum MenuBarTab: String, CaseIterable, Identifiable {
     case updates = "Updates"
-    case search = "Search"
     case services = "Services"
     case tools = "Tools"
 
@@ -19,8 +18,6 @@ struct MenuBarExtraView: View {
     @ObservedObject var preferences = BrewStorePreferences.shared
     @StateObject private var serviceTelemetry = BrewStoreServiceTelemetryMonitor()
     @State private var selectedTab: MenuBarTab = .updates
-    @State private var searchInput = ""
-
     private var outdatedPackages: [BrewStorePackage] {
         manager.packages.filter(\.isOutdated)
     }
@@ -31,15 +28,6 @@ struct MenuBarExtraView: View {
 
     private var rosettaCount: Int {
         BrewStoreAppleSiliconMigrationManager.shared.report?.rosettaIntelCount ?? 0
-    }
-
-    private var searchResults: [BrewStorePackage] {
-        guard !searchInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return [] }
-        return manager.packages.filter {
-            $0.name.localizedCaseInsensitiveContains(searchInput) ||
-                $0.id.localizedCaseInsensitiveContains(searchInput) ||
-                $0.description.localizedCaseInsensitiveContains(searchInput)
-        }.prefix(10).map { $0 }
     }
 
     private var scrollAreaHeight: CGFloat {
@@ -128,11 +116,10 @@ struct MenuBarExtraView: View {
 
             Divider()
 
-            // 4-Tab Segment (Rigid height & full width)
+            // 3-Tab Segment (Rigid height & full width, fixed titles prevent shift)
             Picker("", selection: $selectedTab) {
-                Text("Updates (\(outdatedPackages.count))").tag(MenuBarTab.updates)
-                Text("Search").tag(MenuBarTab.search)
-                Text("Services (\(runningServices.count))").tag(MenuBarTab.services)
+                Text("Updates").tag(MenuBarTab.updates)
+                Text("Services").tag(MenuBarTab.services)
                 Text("Tools").tag(MenuBarTab.tools)
             }
             .labelsHidden()
@@ -149,8 +136,6 @@ struct MenuBarExtraView: View {
                     switch selectedTab {
                     case .updates:
                         updatesTabContent
-                    case .search:
-                        searchTabContent
                     case .services:
                         servicesTabContent
                     case .tools:
@@ -244,7 +229,7 @@ struct MenuBarExtraView: View {
                     Spacer()
 
                     Text("\(outdatedPackages.count) pending")
-                        .font(.caption2.bold())
+                        .font(.caption2.bold().monospacedDigit())
                         .padding(.horizontal, 6)
                         .padding(.vertical, 1)
                         .background(Color.orange.opacity(0.12), in: Capsule())
@@ -297,72 +282,6 @@ struct MenuBarExtraView: View {
         }
     }
 
-    // MARK: - Search Tab
-
-    private var searchTabContent: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(.secondary)
-                TextField("Search all packages…", text: $searchInput)
-                    .textFieldStyle(.plain)
-                if !searchInput.isEmpty {
-                    Button {
-                        searchInput = ""
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 28)
-            .padding(.horizontal, 8)
-            .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 6))
-            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.secondary.opacity(0.2), lineWidth: 1))
-
-            if searchResults.isEmpty, !searchInput.isEmpty {
-                VStack(spacing: 8) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.title3)
-                        .foregroundStyle(.secondary)
-                    Text("No matching packages found.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 30)
-            } else if searchInput.isEmpty {
-                VStack(spacing: 8) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.title3)
-                        .foregroundStyle(.secondary.opacity(0.6))
-                    Text("Quick Search")
-                        .font(.caption.bold())
-                        .foregroundStyle(.secondary)
-                    Text("Search formulas, casks, and tools to install or update instantly.")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary.opacity(0.8))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 20)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 30)
-            } else {
-                ForEach(searchResults) { pkg in
-                    MenuBarSearchRow(
-                        manager: manager,
-                        package: pkg,
-                        preferences: preferences
-                    )
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .topLeading)
-    }
-
     // MARK: - Services Tab
 
     @ViewBuilder
@@ -382,6 +301,24 @@ struct MenuBarExtraView: View {
             .padding(.vertical, 30)
         } else {
             VStack(spacing: 6) {
+                HStack(spacing: 6) {
+                    Image(systemName: "gearshape.2.fill")
+                        .font(.caption2)
+                        .foregroundStyle(Color.accentColor)
+                    Text("Background Daemons")
+                        .font(.caption2.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text("\(runningServices.count) running")
+                        .font(.caption2.bold().monospacedDigit())
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 1)
+                        .background(Color.green.opacity(0.12), in: Capsule())
+                        .foregroundStyle(.green)
+                }
+                .frame(height: 20)
+                .padding(.horizontal, 4)
+
                 ForEach(manager.services) { svc in
                     MenuBarServiceRow(
                         manager: manager,
@@ -410,42 +347,11 @@ struct MenuBarExtraView: View {
             }
 
             menuBarToolRow(
-                title: "Clean Disk Cache (brew cleanup)",
-                icon: "trash"
+                title: "Deep Clean All Caches",
+                icon: "trash.fill"
             ) {
                 BrewStoreDiskStorageAnalyzerManager.shared.purgeCache(manager: manager)
-                if preferences.menuBarCloseOnAction {
-                    BrewStoreMenuBarCompanionManager.shared.closeMenuBarPanel()
-                }
-            }
-
-            menuBarToolRow(
-                title: "Clean Developer Caches (Xcode, npm, Cargo…)",
-                icon: "hammer.fill"
-            ) {
                 BrewStoreDeveloperCacheManager.shared.purgeSelected()
-                if preferences.menuBarCloseOnAction {
-                    BrewStoreMenuBarCompanionManager.shared.closeMenuBarPanel()
-                }
-            }
-
-            if rosettaCount > 0 {
-                menuBarToolRow(
-                    title: "Migrate \(rosettaCount) Intel Apps to Native ARM64",
-                    icon: "cpu"
-                ) {
-                    BrewStoreAppleSiliconMigrationManager.shared.migrateAllRosettaPackages(manager: manager)
-                    if preferences.menuBarCloseOnAction {
-                        BrewStoreMenuBarCompanionManager.shared.closeMenuBarPanel()
-                    }
-                }
-            }
-
-            menuBarToolRow(
-                title: "Export Mac Blueprint (~/Brewfile)",
-                icon: "doc.badge.arrow.up"
-            ) {
-                BrewStoreDotfilesAutoSyncManager.shared.syncNow(manager: manager)
                 if preferences.menuBarCloseOnAction {
                     BrewStoreMenuBarCompanionManager.shared.closeMenuBarPanel()
                 }
@@ -470,13 +376,23 @@ struct MenuBarExtraView: View {
                 BrewStoreMenuBarCompanionManager.shared.closeMenuBarPanel()
             }
 
+            if rosettaCount > 0 {
+                menuBarToolRow(
+                    title: "Migrate \(rosettaCount) Intel Apps to Native ARM64",
+                    icon: "cpu"
+                ) {
+                    BrewStoreAppleSiliconMigrationManager.shared.migrateAllRosettaPackages(manager: manager)
+                    if preferences.menuBarCloseOnAction {
+                        BrewStoreMenuBarCompanionManager.shared.closeMenuBarPanel()
+                    }
+                }
+            }
+
             menuBarToolRow(
-                title: "Scan & Adopt Unmanaged Apps",
-                icon: "app.badge.checkmark"
+                title: "Open Full Application",
+                icon: "arrow.up.forward.app"
             ) {
                 BrewStoreDockLifecycleManager.shared.showMainWindowAndDock()
-                BrewStoreURLSchemeRouter.shared.activeRoute = .adopt
-                BrewStoreAppAdoptionManager.shared.scanApplications(manager: manager)
                 BrewStoreMenuBarCompanionManager.shared.closeMenuBarPanel()
             }
         }
@@ -554,84 +470,6 @@ private struct MenuBarOutdatedRow: View {
         .frame(height: 32)
         .padding(.horizontal, 8)
         .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 6))
-    }
-}
-
-// MARK: - Search Row
-
-private struct MenuBarSearchRow: View {
-    @ObservedObject var manager: HomebrewManager
-    let package: BrewStorePackage
-    let preferences: BrewStorePreferences
-
-    private var buttonTitle: String {
-        if package.isOutdated {
-            return "Update"
-        }
-        if package.isInstalled {
-            return "Installed"
-        }
-        return "Get"
-    }
-
-    private var buttonBordered: Bool {
-        package.isInstalled && !package.isOutdated
-    }
-
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: package.kind == .cask ? "app.fill" : "terminal.fill")
-                .font(.caption)
-                .foregroundStyle(package.kind == .cask ? Color.blue : Color.green)
-                .frame(width: 14)
-
-            VStack(alignment: .leading, spacing: 1) {
-                Text(package.name)
-                    .font(.caption.bold())
-                    .lineLimit(1)
-                Text(package.description)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            }
-
-            Spacer()
-
-            if buttonBordered {
-                Button(buttonTitle) {
-                    performAction()
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.mini)
-                .frame(width: 64)
-                .disabled(manager.isOperating)
-            } else {
-                Button(buttonTitle) {
-                    performAction()
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.mini)
-                .frame(width: 64)
-                .disabled(manager.isOperating)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 34)
-        .padding(.horizontal, 8)
-        .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 6))
-    }
-
-    private func performAction() {
-        if package.isOutdated {
-            manager.perform(package: package, action: .upgrade)
-        } else if !package.isInstalled {
-            manager.perform(package: package, action: .install)
-        } else {
-            BrewStoreDockLifecycleManager.shared.showMainWindowAndDock()
-        }
-        if preferences.menuBarCloseOnAction {
-            BrewStoreMenuBarCompanionManager.shared.closeMenuBarPanel()
-        }
     }
 }
 
@@ -717,7 +555,14 @@ private struct MenuBarPanelWindowAccessor: NSViewRepresentable {
 
     func updateNSView(_ nsView: NSView, context _: Context) {
         if let window = nsView.window {
-            BrewStoreMenuBarCompanionManager.shared.configureMenuBarWindow(window, isCompact: isCompact)
+            let targetHeight = isCompact ?
+                BrewStoreMenuBarCompanionManager.compactPanelHeight :
+                BrewStoreMenuBarCompanionManager.panelHeight
+            let widthDiff = abs(window.frame.width - BrewStoreMenuBarCompanionManager.panelWidth)
+            let heightDiff = abs(window.frame.height - targetHeight)
+            if widthDiff > 1.0 || heightDiff > 1.0 {
+                BrewStoreMenuBarCompanionManager.shared.configureMenuBarWindow(window, isCompact: isCompact)
+            }
         }
     }
 }

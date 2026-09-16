@@ -408,10 +408,10 @@ final class BrewStoreAppAdoptionManager: ObservableObject {
         }
 
         #if arch(arm64)
-        let detectedArch = BrewStoreSecurityInspector.inspectAppBundleArchitecture(at: appPath)
-        if detectedArch == .intel {
-            return (false, "App is currently running under Rosetta 2 (Intel x86_64). Adopting Cask can upgrade to native Apple Silicon.")
-        }
+            let detectedArch = BrewStoreSecurityInspector.inspectAppBundleArchitecture(at: appPath)
+            if detectedArch == .intel {
+                return (false, "App is currently running under Rosetta 2 (Intel x86_64). Adopting Cask can upgrade to native Apple Silicon.")
+            }
         #endif
 
         return (true, nil)

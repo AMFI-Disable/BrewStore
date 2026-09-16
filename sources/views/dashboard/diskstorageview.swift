@@ -54,253 +54,253 @@ struct DiskStorageView: View {
                     }
                 }
 
-            if let rep = storageManager.report {
-                // Reclaimable Hero Banner
-                if rep.reclaimableBytes > 0 {
-                    HStack(spacing: 16) {
-                        Image(systemName: "sparkles")
-                            .font(.title)
-                            .foregroundStyle(.green)
+                if let rep = storageManager.report {
+                    // Reclaimable Hero Banner
+                    if rep.reclaimableBytes > 0 {
+                        HStack(spacing: 16) {
+                            Image(systemName: "sparkles")
+                                .font(.title)
+                                .foregroundStyle(.green)
 
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Up to \(rep.formattedReclaimable) can be safely reclaimed")
-                                .font(.subheadline.bold())
-                            Text("Cleaning download caches (\(rep.formattedTotalCache)), logs (\(rep.formattedTotalLogs)), and inactive versions (\(rep.formattedInactiveVersions)) will free up disk space without affecting your installed tools.")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Up to \(rep.formattedReclaimable) can be safely reclaimed")
+                                    .font(.subheadline.bold())
+                                Text("Cleaning download caches (\(rep.formattedTotalCache)), logs (\(rep.formattedTotalLogs)), and inactive versions (\(rep.formattedInactiveVersions)) will free up disk space without affecting your installed tools.")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
 
-                        Spacer()
-
-                        Menu {
-                            Button("Clean Download Cache (\(rep.formattedTotalCache))") {
-                                storageManager.purgeCache(manager: manager)
-                            }
-                            Button("Clean Old Build Logs (\(rep.formattedTotalLogs))") {
-                                storageManager.purgeLogs(manager: manager)
-                            }
-                            Button("Remove Inactive Versions (\(rep.formattedInactiveVersions))") {
-                                storageManager.purgeInactiveVersions(manager: manager)
-                            }
-                            Divider()
-                            Button("Clean All Safely", role: .destructive) {
-                                storageManager.purgeCache(manager: manager)
-                                storageManager.purgeLogs(manager: manager)
-                                storageManager.purgeInactiveVersions(manager: manager)
-                            }
-                            Button("Deep Clean & Prune All Caches", role: .destructive) {
-                                storageManager.purgeDeepCaches(manager: manager)
-                            }
-                        } label: {
-                            Label("Clean Options…", systemImage: "trash.fill")
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.green)
-                        .controlSize(.small)
-                        .disabled(manager.isOperating)
-                    }
-                    .padding(14)
-                    .background(Color.green.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
-                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.green.opacity(0.2), lineWidth: 1))
-                }
-
-                // Metric Stat Summary Cards
-                HStack(spacing: 12) {
-                    statCard(title: "Installed Packages", value: rep.formattedTotalCellar, icon: "internaldrive.fill", color: .blue)
-                    statCard(title: "Download Cache", value: rep.formattedTotalCache, icon: "archivebox.fill", color: .orange)
-                    statCard(title: "Build Logs", value: rep.formattedTotalLogs, icon: "doc.text.fill", color: .purple)
-                    statCard(title: "Inactive Versions", value: rep.formattedInactiveVersions, icon: "arrow.triangle.swap", color: .pink)
-                }
-
-                // Interactive Storage Distribution Proportional Treemap Bar
-                if rep.totalCellarBytes > 0, !rep.topHogs.isEmpty {
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack {
-                            Text("Interactive Storage Treemap (Top Packages)").font(.subheadline.bold())
                             Spacer()
-                            Text("Click any segment to drill down")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
 
-                        GeometryReader { geo in
-                            HStack(spacing: 2) {
-                                ForEach(Array(rep.topHogs.enumerated()), id: \.element.id) { index, hog in
-                                    let barColor = colorForIndex(index)
-                                    let isSelected = selectedHog?.id == hog.id
-                                    let width = max(geo.size.width * CGFloat(hog.percentageOfTotal) - 2, 6)
+                            Menu {
+                                Button("Clean Download Cache (\(rep.formattedTotalCache))") {
+                                    storageManager.purgeCache(manager: manager)
+                                }
+                                Button("Clean Old Build Logs (\(rep.formattedTotalLogs))") {
+                                    storageManager.purgeLogs(manager: manager)
+                                }
+                                Button("Remove Inactive Versions (\(rep.formattedInactiveVersions))") {
+                                    storageManager.purgeInactiveVersions(manager: manager)
+                                }
+                                Divider()
+                                Button("Clean All Safely", role: .destructive) {
+                                    storageManager.purgeCache(manager: manager)
+                                    storageManager.purgeLogs(manager: manager)
+                                    storageManager.purgeInactiveVersions(manager: manager)
+                                }
+                                Button("Deep Clean & Prune All Caches", role: .destructive) {
+                                    storageManager.purgeDeepCaches(manager: manager)
+                                }
+                            } label: {
+                                Label("Clean Options…", systemImage: "trash.fill")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.green)
+                            .controlSize(.small)
+                            .disabled(manager.isOperating)
+                        }
+                        .padding(14)
+                        .background(Color.green.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.green.opacity(0.2), lineWidth: 1))
+                    }
+
+                    // Metric Stat Summary Cards
+                    HStack(spacing: 12) {
+                        statCard(title: "Installed Packages", value: rep.formattedTotalCellar, icon: "internaldrive.fill", color: .blue)
+                        statCard(title: "Download Cache", value: rep.formattedTotalCache, icon: "archivebox.fill", color: .orange)
+                        statCard(title: "Build Logs", value: rep.formattedTotalLogs, icon: "doc.text.fill", color: .purple)
+                        statCard(title: "Inactive Versions", value: rep.formattedInactiveVersions, icon: "arrow.triangle.swap", color: .pink)
+                    }
+
+                    // Interactive Storage Distribution Proportional Treemap Bar
+                    if rep.totalCellarBytes > 0, !rep.topHogs.isEmpty {
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack {
+                                Text("Interactive Storage Treemap (Top Packages)").font(.subheadline.bold())
+                                Spacer()
+                                Text("Click any segment to drill down")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            GeometryReader { geo in
+                                HStack(spacing: 2) {
+                                    ForEach(Array(rep.topHogs.enumerated()), id: \.element.id) { index, hog in
+                                        let barColor = colorForIndex(index)
+                                        let isSelected = selectedHog?.id == hog.id
+                                        let width = max(geo.size.width * CGFloat(hog.percentageOfTotal) - 2, 6)
+
+                                        Button {
+                                            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                                                selectedHog = (selectedHog?.id == hog.id) ? nil : hog
+                                            }
+                                        } label: {
+                                            RoundedRectangle(cornerRadius: 3)
+                                                .fill(barColor)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 3)
+                                                        .stroke(isSelected ? Color.white : Color.clear, lineWidth: 2)
+                                                )
+                                                .frame(width: width)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .help("\(hog.name): \(hog.formattedSize) (\(Int(hog.percentageOfTotal * 100))%)")
+                                    }
+                                }
+                            }
+                            .frame(height: 20)
+                            .background(Color.secondary.opacity(0.12), in: RoundedRectangle(cornerRadius: 4))
+
+                            // Selected Hog Drill-Down Detail Card
+                            if let hog = selectedHog {
+                                HStack(spacing: 12) {
+                                    Image(systemName: hog.kind == .cask ? "app.fill" : "terminal.fill")
+                                        .font(.title3)
+                                        .foregroundStyle(.tint)
+                                        .frame(width: 32, height: 32)
+                                        .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 6))
+
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        HStack(spacing: 6) {
+                                            Text(hog.name).font(.subheadline.bold())
+                                            Text("(\(hog.formattedSize) · \(Int(hog.percentageOfTotal * 100))% of storage)")
+                                                .font(.caption2.monospaced())
+                                                .foregroundStyle(.secondary)
+                                        }
+                                        Text(hog.path)
+                                            .font(.caption2.monospaced())
+                                            .foregroundStyle(.secondary)
+                                            .lineLimit(1)
+                                    }
+
+                                    Spacer()
 
                                     Button {
-                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                                        NSWorkspace.shared.selectFile(hog.path, inFileViewerRootedAtPath: "")
+                                    } label: {
+                                        Label("Reveal in Finder", systemImage: "folder")
+                                    }
+                                    .controlSize(.small)
+
+                                    if let pkg = manager.packages.first(where: { $0.id == hog.id }) {
+                                        Button {
+                                            selectedPackageForDetail = pkg
+                                        } label: {
+                                            Label("Package Details", systemImage: "info.circle")
+                                        }
+                                        .buttonStyle(.borderedProminent)
+                                        .controlSize(.small)
+                                    }
+                                }
+                                .padding(10)
+                                .background(Color.secondary.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
+                                .transition(.opacity.combined(with: .move(edge: .top)))
+                            }
+
+                            // Legend
+                            HStack(spacing: 12) {
+                                ForEach(Array(rep.topHogs.prefix(5).enumerated()), id: \.element.id) { index, hog in
+                                    Button {
+                                        withAnimation {
                                             selectedHog = (selectedHog?.id == hog.id) ? nil : hog
                                         }
                                     } label: {
-                                        RoundedRectangle(cornerRadius: 3)
-                                            .fill(barColor)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 3)
-                                                    .stroke(isSelected ? Color.white : Color.clear, lineWidth: 2)
-                                            )
-                                            .frame(width: width)
+                                        HStack(spacing: 4) {
+                                            Circle().fill(colorForIndex(index)).frame(width: 8, height: 8)
+                                            Text("\(hog.name) (\(hog.formattedSize))")
+                                                .font(.caption2.monospaced())
+                                                .foregroundStyle(selectedHog?.id == hog.id ? Color.primary : Color.secondary)
+                                        }
                                     }
                                     .buttonStyle(.plain)
-                                    .help("\(hog.name): \(hog.formattedSize) (\(Int(hog.percentageOfTotal * 100))%)")
                                 }
                             }
                         }
-                        .frame(height: 20)
-                        .background(Color.secondary.opacity(0.12), in: RoundedRectangle(cornerRadius: 4))
+                        .padding(14)
+                        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10))
+                    }
 
-                        // Selected Hog Drill-Down Detail Card
-                        if let hog = selectedHog {
+                    // Developer Toolchain Deep-Caches
+                    developerCachesSection
+
+                    // Package Filter & List
+                    VStack(alignment: .leading, spacing: 10) {
+                        let filteredItems = rep.items.filter { item in
+                            switch selectedFilter {
+                            case .all: true
+                            case .formulae: item.kind == .formula
+                            case .casks: item.kind == .cask
+                            }
+                        }
+
+                        HStack {
+                            if filteredItems.count > 20 {
+                                Text("Top 20 Packages by Disk Usage (of \(filteredItems.count))")
+                                    .font(.subheadline.bold())
+                            } else {
+                                Text("Packages by Disk Usage (\(filteredItems.count))")
+                                    .font(.subheadline.bold())
+                            }
+                            Spacer()
+                            Picker("Filter", selection: $selectedFilter) {
+                                ForEach(StorageFilter.allCases) { filter in
+                                    Text(filter.rawValue).tag(filter)
+                                }
+                            }
+                            .labelsHidden()
+                            .pickerStyle(.segmented)
+                            .frame(width: 240)
+                        }
+
+                        ForEach(filteredItems.prefix(20)) { item in
                             HStack(spacing: 12) {
-                                Image(systemName: hog.kind == .cask ? "app.fill" : "terminal.fill")
-                                    .font(.title3)
-                                    .foregroundStyle(.tint)
-                                    .frame(width: 32, height: 32)
-                                    .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 6))
+                                Image(systemName: item.kind == .cask ? "app.fill" : "terminal.fill")
+                                    .foregroundStyle(item.kind == .cask ? Color.blue : Color.green)
 
                                 VStack(alignment: .leading, spacing: 2) {
-                                    HStack(spacing: 6) {
-                                        Text(hog.name).font(.subheadline.bold())
-                                        Text("(\(hog.formattedSize) · \(Int(hog.percentageOfTotal * 100))% of storage)")
-                                            .font(.caption2.monospaced())
-                                            .foregroundStyle(.secondary)
-                                    }
-                                    Text(hog.path)
-                                        .font(.caption2.monospaced())
-                                        .foregroundStyle(.secondary)
-                                        .lineLimit(1)
+                                    Text(item.name).font(.subheadline.bold())
+                                    Text(item.path).font(.caption2.monospaced()).foregroundStyle(.secondary).lineLimit(1)
                                 }
 
                                 Spacer()
 
-                                Button {
-                                    NSWorkspace.shared.selectFile(hog.path, inFileViewerRootedAtPath: "")
-                                } label: {
-                                    Label("Reveal in Finder", systemImage: "folder")
-                                }
-                                .controlSize(.small)
+                                Text(item.formattedSize)
+                                    .font(.subheadline.monospaced().bold())
+                                    .foregroundStyle(.primary)
 
-                                if let pkg = manager.packages.first(where: { $0.id == hog.id }) {
-                                    Button {
+                                if let pkg = manager.packages.first(where: { $0.id == item.id }) {
+                                    Button("Inspect") {
                                         selectedPackageForDetail = pkg
-                                    } label: {
-                                        Label("Package Details", systemImage: "info.circle")
                                     }
-                                    .buttonStyle(.borderedProminent)
                                     .controlSize(.small)
                                 }
                             }
                             .padding(10)
-                            .background(Color.secondary.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
-                            .transition(.opacity.combined(with: .move(edge: .top)))
-                        }
-
-                        // Legend
-                        HStack(spacing: 12) {
-                            ForEach(Array(rep.topHogs.prefix(5).enumerated()), id: \.element.id) { index, hog in
-                                Button {
-                                    withAnimation {
-                                        selectedHog = (selectedHog?.id == hog.id) ? nil : hog
-                                    }
-                                } label: {
-                                    HStack(spacing: 4) {
-                                        Circle().fill(colorForIndex(index)).frame(width: 8, height: 8)
-                                        Text("\(hog.name) (\(hog.formattedSize))")
-                                            .font(.caption2.monospaced())
-                                            .foregroundStyle(selectedHog?.id == hog.id ? Color.primary : Color.secondary)
-                                    }
-                                }
-                                .buttonStyle(.plain)
-                            }
+                            .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
                         }
                     }
-                    .padding(14)
-                    .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10))
-                }
-
-                // Developer Toolchain Deep-Caches
-                developerCachesSection
-
-                // Package Filter & List
-                VStack(alignment: .leading, spacing: 10) {
-                    let filteredItems = rep.items.filter { item in
-                        switch selectedFilter {
-                        case .all: true
-                        case .formulae: item.kind == .formula
-                        case .casks: item.kind == .cask
-                        }
-                    }
-
+                } else {
                     HStack {
-                        if filteredItems.count > 20 {
-                            Text("Top 20 Packages by Disk Usage (of \(filteredItems.count))")
-                                .font(.subheadline.bold())
-                        } else {
-                            Text("Packages by Disk Usage (\(filteredItems.count))")
-                                .font(.subheadline.bold())
-                        }
-                        Spacer()
-                        Picker("Filter", selection: $selectedFilter) {
-                            ForEach(StorageFilter.allCases) { filter in
-                                Text(filter.rawValue).tag(filter)
-                            }
-                        }
-                        .labelsHidden()
-                        .pickerStyle(.segmented)
-                        .frame(width: 240)
+                        ProgressView().controlSize(.small)
+                        Text("Calculating disk usage across Cellar, Caskroom, and Caches…")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
-
-                    ForEach(filteredItems.prefix(20)) { item in
-                        HStack(spacing: 12) {
-                            Image(systemName: item.kind == .cask ? "app.fill" : "terminal.fill")
-                                .foregroundStyle(item.kind == .cask ? Color.blue : Color.green)
-
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(item.name).font(.subheadline.bold())
-                                Text(item.path).font(.caption2.monospaced()).foregroundStyle(.secondary).lineLimit(1)
-                            }
-
-                            Spacer()
-
-                            Text(item.formattedSize)
-                                .font(.subheadline.monospaced().bold())
-                                .foregroundStyle(.primary)
-
-                            if let pkg = manager.packages.first(where: { $0.id == item.id }) {
-                                Button("Inspect") {
-                                    selectedPackageForDetail = pkg
-                                }
-                                .controlSize(.small)
-                            }
-                        }
-                        .padding(10)
-                        .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
-                    }
+                    .padding()
                 }
-            } else {
-                HStack {
-                    ProgressView().controlSize(.small)
-                    Text("Calculating disk usage across Cellar, Caskroom, and Caches…")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                .padding()
             }
+            .padding(Spacing.lg)
         }
-        .padding(Spacing.lg)
+        .detailModalOverlay(item: $selectedPackageForDetail) { pkg in
+            PackageDetailView(manager: manager, package: pkg, onDismiss: {
+                selectedPackageForDetail = nil
+            })
+        }
+        .task {
+            storageManager.scanStorage(manager: manager)
+            devCacheManager.scanCaches()
+        }
     }
-    .detailModalOverlay(item: $selectedPackageForDetail) { pkg in
-        PackageDetailView(manager: manager, package: pkg, onDismiss: {
-            selectedPackageForDetail = nil
-        })
-    }
-    .task {
-        storageManager.scanStorage(manager: manager)
-        devCacheManager.scanCaches()
-    }
-}
 
     @ViewBuilder
     private var developerCachesSection: some View {

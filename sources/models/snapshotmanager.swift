@@ -68,6 +68,7 @@ final class BrewStoreSnapshotManager: ObservableObject {
             UserDefaults.standard.set(backupFrequency.rawValue, forKey: "brewstore.snapshot.backup_frequency")
         }
     }
+
     @Published var lastScheduledBackupDate: Date? {
         didSet {
             if let lastScheduledBackupDate {

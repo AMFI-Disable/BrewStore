@@ -400,7 +400,6 @@ struct PackageDetailView: View {
 
     // MARK: - Inspector Column
 
-    @ViewBuilder
     private var inspectorColumn: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             specificationsCard

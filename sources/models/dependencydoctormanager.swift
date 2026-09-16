@@ -88,7 +88,7 @@ final class BrewStoreDependencyDoctorManager: ObservableObject {
             }
 
             // 2. Scan dangling symlinks
-            let dangling = BrewStoreDoctorRemediationManager.shared.scanDanglingSymlinks(prefixPath: prefix)
+            let dangling = BrewStoreDoctorRemediationManager.scanDanglingSymlinks(prefixPath: prefix)
             if !dangling.isEmpty {
                 let count = dangling.count
                 let names = dangling.prefix(3).map(\.lastPathComponent).joined(separator: ", ")
@@ -198,8 +198,8 @@ final class BrewStoreDependencyDoctorManager: ObservableObject {
 
             // Step 2: Prune dangling symlinks
             await MainActor.run { self.healStatusMessage = "Step 2/4: Pruning orphaned symlinks…" }
-            let broken = BrewStoreDoctorRemediationManager.shared.scanDanglingSymlinks(prefixPath: prefix)
-            _ = BrewStoreDoctorRemediationManager.shared.pruneBrokenSymlinks(links: broken)
+            let broken = BrewStoreDoctorRemediationManager.scanDanglingSymlinks(prefixPath: prefix)
+            _ = BrewStoreDoctorRemediationManager.pruneBrokenSymlinks(links: broken)
 
             // Step 3: Prune orphans
             await MainActor.run { self.healStatusMessage = "Step 3/4: Removing unused dependencies…" }
@@ -230,8 +230,8 @@ final class BrewStoreDependencyDoctorManager: ObservableObject {
 
     func pruneDanglingSymlinks(manager: HomebrewManager, prefixPath: String? = nil) {
         let prefix = prefixPath ?? manager.brewPrefix ?? (FileManager.default.fileExists(atPath: "/opt/homebrew") ? "/opt/homebrew" : "/usr/local")
-        let broken = BrewStoreDoctorRemediationManager.shared.scanDanglingSymlinks(prefixPath: prefix)
-        _ = BrewStoreDoctorRemediationManager.shared.pruneBrokenSymlinks(links: broken)
+        let broken = BrewStoreDoctorRemediationManager.scanDanglingSymlinks(prefixPath: prefix)
+        _ = BrewStoreDoctorRemediationManager.pruneBrokenSymlinks(links: broken)
         diagnose(manager: manager)
         manager.refresh()
     }

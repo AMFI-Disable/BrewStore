@@ -214,7 +214,7 @@ struct SnapshotsView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if filteredSnapshots.isEmpty {
-                    if preferences.hideIdenticalSnapshots && inSyncSnapshotsCount > 0 {
+                    if preferences.hideIdenticalSnapshots, inSyncSnapshotsCount > 0 {
                         VStack(spacing: 12) {
                             Spacer()
                             Image(systemName: "checkmark.seal.fill")
@@ -330,7 +330,7 @@ struct SnapshotsView: View {
             }
             snapshotManager.checkScheduledBackup(manager: manager)
         }
-        .onChange(of: preferences.hideIdenticalSnapshots) { _ in
+        .onChange(of: preferences.hideIdenticalSnapshots) { _, _ in
             if let selected = selectedSnapshot, !filteredSnapshots.contains(where: { $0.id == selected.id }) {
                 selectedSnapshot = filteredSnapshots.first
             }

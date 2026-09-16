@@ -156,7 +156,7 @@ struct WishlistView: View {
 
             Spacer()
 
-            if selectedTab == 0 && installedWishlistCount > 0 {
+            if selectedTab == 0, installedWishlistCount > 0 {
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         preferences.hideInstalledWishlist.toggle()
@@ -198,7 +198,7 @@ struct WishlistView: View {
                 description: Text("Click the star icon on any package to save it to your wishlist.")
             )
             .padding(.top, Spacing.xl)
-        } else if preferences.hideInstalledWishlist && wishlistedPackages.isEmpty && installedWishlistCount > 0 {
+        } else if preferences.hideInstalledWishlist, wishlistedPackages.isEmpty, installedWishlistCount > 0 {
             VStack(spacing: Spacing.sm) {
                 Image(systemName: "checkmark.seal.fill")
                     .font(.system(size: 40))
