@@ -299,4 +299,41 @@ final class BrewStoreCoreTests: XCTestCase {
         XCTAssertTrue(pkg.applicationNames.contains("Primary.app"))
         XCTAssertTrue(pkg.applicationNames.contains("Secondary Helper.app"))
     }
+
+    func testUpdateEstimatorHandlesZeroAndNaNGracefully() {
+        let zeroPkg = BrewStorePackage(
+            id: "zero-pkg",
+            name: "zero-pkg",
+            description: "",
+            homepage: "",
+            version: "1.0",
+            kind: .formula
+        )
+
+        let estimate = BrewStoreUpdateEstimator.estimate(for: zeroPkg)
+        XCTAssertTrue(estimate.totalSeconds.isFinite)
+        XCTAssertFalse(estimate.totalSeconds.isNaN)
+        XCTAssertGreaterThanOrEqual(estimate.totalSeconds, 8.0)
+        XCTAssertEqual(BrewStoreUpdateEstimator.formatDuration(-5.0), "< 10s")
+        XCTAssertEqual(BrewStoreUpdateEstimator.formatDuration(Double.nan), "< 10s")
+        XCTAssertEqual(BrewStoreUpdateEstimator.formatDuration(Double.infinity), "< 10s")
+    }
+
+    func testPathSafetyValidatorHandlesUnicodeNormalizedPaths() throws {
+        let tempRoot = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: tempRoot, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempRoot) }
+
+        // Construct a path with decomposed (NFD) accented characters
+        let decomposedName = "Cafe\u{0301}.txt" // e + combining acute accent
+        let targetFile = tempRoot.appendingPathComponent(decomposedName)
+        try Data("test".utf8).write(to: targetFile)
+
+        // Precomposed (NFC) URL
+        let precomposedName = "Caf\u{00E9}.txt" // single precomposed é character
+        let queryURL = tempRoot.appendingPathComponent(precomposedName)
+
+        let validator = BrewStorePathSafetyValidator(allowedRoots: [tempRoot])
+        XCTAssertNoThrow(try validator.validate(queryURL))
+    }
 }

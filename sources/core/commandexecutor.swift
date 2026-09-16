@@ -163,6 +163,10 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
                 if process.isRunning {
                     let pid = process.processIdentifier
                     if pid > 1, pid != getpid() {
+                        let pgid = getpgid(pid)
+                        if pgid > 1, pgid != getpgrp() {
+                            kill(-pgid, SIGKILL)
+                        }
                         kill(pid, SIGKILL)
                     }
                     let killDeadline = Date().addingTimeInterval(0.2)

@@ -66,14 +66,20 @@ final class BrewStorePrivilegeElevationManager: @unchecked Sendable {
         brewPath: String,
         arguments: [String]
     ) -> (succeeded: Bool, output: String, error: String?) {
+        guard brewPath.hasPrefix("/"), ExecutionSecurityBoundary.isExecutableAllowed(executablePath: brewPath) else {
+            return (false, "", "Executable path '\(brewPath)' is not permitted by BrewStore security boundaries.")
+        }
+
         let escapedBrew = Self.escapeShellArgument(brewPath)
         let escapedArgs = arguments.map { Self.escapeShellArgument($0) }.joined(separator: " ")
         let fullCommand = "\(escapedBrew) \(escapedArgs)"
 
-        // AppleScript string escaping
+        // AppleScript string escaping (handling backslashes, quotes, and newlines)
         let escapedScriptCommand = fullCommand
             .replacingOccurrences(of: "\\", with: "\\\\")
             .replacingOccurrences(of: "\"", with: "\\\"")
+            .replacingOccurrences(of: "\r", with: "\\r")
+            .replacingOccurrences(of: "\n", with: "\\n")
 
         let script = "do shell script \"\(escapedScriptCommand)\" with administrator privileges"
         return runner(script)

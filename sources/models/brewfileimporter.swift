@@ -199,15 +199,21 @@ final class BrewStoreBrewfileImporter: ObservableObject {
     }
 
     private func extractMASInfo(from line: String) -> (name: String, id: String?) {
-        let rest = line.dropFirst(4).trimmingCharacters(in: .whitespaces)
-        guard let firstQuote = rest.firstIndex(of: "\"") else { return ("", nil) }
+        var cleanLine = line
+        if let hashIdx = cleanLine.firstIndex(of: "#") {
+            cleanLine = String(cleanLine[..<hashIdx])
+        }
+        let rest = cleanLine.dropFirst(4).trimmingCharacters(in: .whitespaces)
+        guard let firstQuote = rest.firstIndex(of: "\"") ?? rest.firstIndex(of: "'") else { return ("", nil) }
+        let quoteChar = rest[firstQuote]
         let afterFirst = rest[rest.index(after: firstQuote)...]
-        guard let secondQuote = afterFirst.firstIndex(of: "\"") else { return ("", nil) }
+        guard let secondQuote = afterFirst.firstIndex(of: quoteChar) else { return ("", nil) }
         let name = String(afterFirst[..<secondQuote])
         let afterSecond = afterFirst[afterFirst.index(after: secondQuote)...]
         if let idRange = afterSecond.range(of: "id:") {
-            let idStr = afterSecond[idRange.upperBound...].trimmingCharacters(in: .whitespacesAndNewlines)
-            return (name, idStr.isEmpty ? nil : idStr)
+            let rawID = String(afterSecond[idRange.upperBound...])
+            let cleanDigits = rawID.components(separatedBy: CharacterSet.decimalDigits.inverted).filter { !$0.isEmpty }.first
+            return (name, cleanDigits)
         }
         return (name, nil)
     }

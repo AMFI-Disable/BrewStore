@@ -34,7 +34,7 @@ enum BrewStoreUpdateEstimator {
 
     /// Effective download speed in MB/s (measured dynamically via speedtest-go or fallback to CDN baselines)
     static func effectiveDownloadSpeedMBps(for kind: BrewPackageKind) -> Double {
-        if let measuredMBps = BrewStoreSpeedTestManager.cachedDownloadSpeedMBps, measuredMBps >= 0.2 {
+        if let measuredMBps = BrewStoreSpeedTestManager.cachedDownloadSpeedMBps, measuredMBps.isFinite, measuredMBps >= 0.2 {
             return max(0.5, measuredMBps * 0.85)
         }
         return kind == .cask ? 14.0 : 16.0
@@ -43,12 +43,14 @@ enum BrewStoreUpdateEstimator {
     /// Estimate duration for a single package based on footprint heuristics, speedtest bandwidth, and package kind
     static func estimate(for package: BrewStorePackage) -> UpdateTimeEstimate {
         let footprint = BrewStoreBottleFootprintEstimator.estimateFootprint(for: package)
-        let downloadSpeed = effectiveDownloadSpeedMBps(for: package.kind)
+        let rawSpeed = effectiveDownloadSpeedMBps(for: package.kind)
+        let downloadSpeed = (rawSpeed.isFinite && rawSpeed > 0) ? rawSpeed : (package.kind == .cask ? 14.0 : 16.0)
+        let downloadMB = footprint.estimatedDownloadMB.isFinite ? max(0, footprint.estimatedDownloadMB) : 50.0
 
         let seconds: Double
         if package.kind == .cask {
             // Casks download dmg/zip (measured speed or ~14 MB/s) + mount & copy to /Applications (~12s)
-            let downloadTime = footprint.estimatedDownloadMB / downloadSpeed
+            let downloadTime = downloadMB / downloadSpeed
             seconds = max(12.0, downloadTime + 12.0)
             return UpdateTimeEstimate(
                 totalSeconds: (seconds * 10).rounded() / 10,
@@ -132,23 +134,27 @@ enum BrewStoreUpdateEstimator {
             return "~\(est.formattedEstimate) left"
         }
 
-        let elapsed = Date().timeIntervalSince(startTime)
+        let elapsed = max(0, Date().timeIntervalSince(startTime))
         let baselineEstimate = estimate(for: outdated).totalSeconds
 
         let completed = max(0, initialCount - outdated.count)
         if completed > 0, initialCount > 0 {
-            let averagePerItem = elapsed / Double(completed)
+            let averagePerItem = max(1.0, elapsed / Double(completed))
             let remainingItems = max(1, outdated.count)
-            let remainingSeconds = max(5.0, averagePerItem * Double(remainingItems))
+            let rawRemaining = averagePerItem * Double(remainingItems)
+            let remainingSeconds = rawRemaining.isFinite ? max(5.0, rawRemaining) : 15.0
             return formatRemaining(seconds: remainingSeconds)
         } else {
             let remainingSeconds = max(5.0, baselineEstimate - elapsed)
-            return formatRemaining(seconds: remainingSeconds)
+            return formatRemaining(seconds: remainingSeconds.isFinite ? remainingSeconds : 15.0)
         }
     }
 
     /// Format seconds into readable duration (e.g. "~45s", "~2m 15s", "~5 mins")
     static func formatDuration(_ seconds: Double) -> String {
+        guard seconds.isFinite, !seconds.isNaN, seconds >= 0 else {
+            return "< 10s"
+        }
         let sec = Int(seconds.rounded())
         if sec < 10 {
             return "< 10s"

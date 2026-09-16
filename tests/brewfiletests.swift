@@ -87,4 +87,27 @@ final class BrewfileTests: XCTestCase {
         XCTAssertTrue(result.contains("cask \"google-chrome\""))
         XCTAssertTrue(result.contains("brew \"ripgrep\""))
     }
+
+    @MainActor
+    func testBrewfileImporterParsesComplexRubyOptionsAndComments() {
+        let content = """
+        # Global taps
+        tap 'homebrew/cask-fonts'
+        brew "postgresql@16", restart_service: :changed
+        cask 'font-fira-code', args: { no_quarantine: true }
+        mas "Xcode", id: 497799835 # Developer suite
+        mas 'Amphetamine', id: 937984704, option: true
+        """
+        let manager = HomebrewManager()
+        let summary = BrewStoreBrewfileImporter.shared.parseBrewfile(content: content, manager: manager)
+
+        XCTAssertEqual(summary.taps, ["homebrew/cask-fonts"])
+        XCTAssertEqual(summary.formulae.map(\.rawName), ["postgresql@16"])
+        XCTAssertEqual(summary.casks.map(\.rawName), ["font-fira-code"])
+        XCTAssertEqual(summary.masApps.count, 2)
+        XCTAssertEqual(summary.masApps[0].rawName, "Xcode")
+        XCTAssertEqual(summary.masApps[0].id, "mas:497799835")
+        XCTAssertEqual(summary.masApps[1].rawName, "Amphetamine")
+        XCTAssertEqual(summary.masApps[1].id, "mas:937984704")
+    }
 }

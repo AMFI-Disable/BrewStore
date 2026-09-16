@@ -83,4 +83,32 @@ final class PrivilegeElevationManagerTests: XCTestCase {
         XCTAssertTrue(script?.contains("install") == true)
         XCTAssertTrue(script?.contains("my-app") == true)
     }
+
+    func testRunElevatedRejectsUnapprovedBinary() {
+        let manager = BrewStorePrivilegeElevationManager()
+        let res = manager.runElevated(brewPath: "/bin/unapproved_binary", arguments: ["--help"])
+        XCTAssertFalse(res.succeeded)
+        XCTAssertTrue(res.error?.contains("not permitted") == true)
+    }
+
+    func testRunElevatedEscapesNewlinesAndQuotes() {
+        let box = ScriptBox()
+        let mockRunner: BrewStorePrivilegeElevationManager.ElevationRunner = { script in
+            box.script = script
+            return (true, "OK", nil)
+        }
+
+        let manager = BrewStorePrivilegeElevationManager(runner: mockRunner)
+        let res = manager.runElevated(brewPath: "/opt/homebrew/bin/brew", arguments: ["install", "arg\nwith\nnewline", "arg\"quote\""])
+        XCTAssertTrue(res.succeeded)
+
+        guard let script = box.script else {
+            XCTFail("Script was not captured")
+            return
+        }
+
+        // Must escape raw newlines to \n to prevent AppleScript syntax syntax errors
+        XCTAssertFalse(script.contains("\nwith\n"))
+        XCTAssertTrue(script.contains("\\nwith\\n"))
+    }
 }

@@ -13,8 +13,8 @@ struct BrewStorePathSafetyValidator: Sendable {
         guard fileManager.fileExists(atPath: rawPath) else { throw BrewStorePathSafetyError.targetDoesNotExist(url) }
 
         let resolvedURL = url.resolvingSymlinksInPath().standardizedFileURL
-        let resolvedPath = resolvedURL.path
-        let parentResolvedPath = url.deletingLastPathComponent().resolvingSymlinksInPath().standardizedFileURL.path
+        let resolvedPath = resolvedURL.path.precomposedStringWithCanonicalMapping
+        let parentResolvedPath = url.deletingLastPathComponent().resolvingSymlinksInPath().standardizedFileURL.path.precomposedStringWithCanonicalMapping
 
         let protectedPaths = [
             "/",
@@ -28,15 +28,16 @@ struct BrewStorePathSafetyValidator: Sendable {
             "/bin",
             "/sbin",
             "/private"
-        ].map { URL(fileURLWithPath: $0).resolvingSymlinksInPath().standardizedFileURL.path }
+        ].map { URL(fileURLWithPath: $0).resolvingSymlinksInPath().standardizedFileURL.path.precomposedStringWithCanonicalMapping }
 
         if protectedPaths.contains(resolvedPath) {
             throw BrewStorePathSafetyError.protectedPath(url)
         }
 
         let matchingRoot = allowedRoots.first(where: {
-            resolvedPath == $0.path || resolvedPath.hasPrefix($0.path + "/") ||
-                parentResolvedPath == $0.path || parentResolvedPath.hasPrefix($0.path + "/")
+            let rootPath = $0.path.precomposedStringWithCanonicalMapping
+            return resolvedPath == rootPath || resolvedPath.hasPrefix(rootPath + "/") ||
+                parentResolvedPath == rootPath || parentResolvedPath.hasPrefix(rootPath + "/")
         })
 
         guard let root = matchingRoot else {
@@ -57,8 +58,8 @@ struct BrewStorePathSafetyValidator: Sendable {
     }
 
     private func containsIntermediateSymbolicLink(target: URL, relativeTo root: URL, fileManager _: FileManager) -> Bool {
-        let rootPath = root.path
-        let targetPath = target.path
+        let rootPath = root.path.precomposedStringWithCanonicalMapping
+        let targetPath = target.path.precomposedStringWithCanonicalMapping
         if targetPath.hasPrefix(rootPath) {
             let relative = targetPath.dropFirst(rootPath.count).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
             var current = root
