@@ -218,6 +218,7 @@ struct ActionConsoleDrawer: View {
             .background(Color(nsColor: .windowBackgroundColor))
         }
         .frame(height: isExpanded ? 380 : 210)
+        .animation(.spring(response: 0.3, dampingFraction: 0.85), value: isExpanded)
         .overlay(
             Rectangle()
                 .frame(height: 1)

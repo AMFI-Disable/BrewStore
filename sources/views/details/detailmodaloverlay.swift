@@ -26,7 +26,7 @@ struct DetailModalOverlayModifier<Item: Identifiable, ModalContent: View>: ViewM
 
                         // Centered detail card container
                         modalContent(currentItem)
-                            .frame(minWidth: 640, idealWidth: 800, maxWidth: 960, minHeight: 480, idealHeight: 660, maxHeight: 820)
+                            .frame(minWidth: 540, idealWidth: 780, maxWidth: 960, minHeight: 460, idealHeight: 640, maxHeight: 820)
                             .background(Color(nsColor: .windowBackgroundColor))
                             .clipShape(RoundedRectangle(cornerRadius: Radius.modal, style: .continuous))
                             .overlay(
