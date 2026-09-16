@@ -111,12 +111,18 @@ struct ServicesView: View {
             // Sub-category Navigation & Compact Actions Bar
             HStack(spacing: Spacing.md) {
                 Picker("", selection: $serviceCategoryTab) {
-                    Text("Homebrew Daemons (\(manager.services.count))").tag(0)
-                    Text("macOS LaunchAgents & Login Items (\(backgroundManager.items.count))").tag(1)
+                    Text("Homebrew Daemons").tag(0)
+                    Text("macOS LaunchAgents & Login Items").tag(1)
                 }
                 .labelsHidden()
                 .pickerStyle(.segmented)
                 .fixedSize(horizontal: true, vertical: false)
+
+                Text(serviceCategoryTab == 0 ?
+                    "\(manager.services.count) services" :
+                    "\(backgroundManager.items.count) agents")
+                    .font(.caption2.monospacedDigit())
+                    .foregroundStyle(.secondary)
 
                 Spacer()
 
@@ -408,29 +414,38 @@ struct ServicesView: View {
 
                         Spacer()
 
-                        if service.isRunning {
-                            HStack(spacing: 16) {
+                        HStack(spacing: 16) {
+                            if service.isRunning {
                                 if let mem = metric?.formattedMemory {
                                     VStack(alignment: .trailing, spacing: 1) {
                                         Text("RAM").font(.caption2).foregroundStyle(.secondary)
                                         Text(mem).font(.caption.monospaced().bold())
                                     }
+                                    .frame(width: 68, alignment: .trailing)
                                 }
                                 if let cpu = metric?.formattedCPU {
                                     VStack(alignment: .trailing, spacing: 1) {
                                         Text("CPU").font(.caption2).foregroundStyle(.secondary)
                                         Text(cpu).font(.caption.monospaced().bold())
                                     }
+                                    .frame(width: 52, alignment: .trailing)
                                 }
                                 if let uptime = metric?.formattedUptime {
                                     VStack(alignment: .trailing, spacing: 1) {
                                         Text("Uptime").font(.caption2).foregroundStyle(.secondary)
                                         Text(uptime).font(.caption.monospaced())
                                     }
+                                    .frame(width: 62, alignment: .trailing)
                                 }
+                            } else {
+                                Text("Stopped")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .frame(maxWidth: .infinity, alignment: .trailing)
                             }
-                            .padding(.trailing, 8)
                         }
+                        .frame(width: 206, alignment: .trailing)
+                        .padding(.trailing, 8)
 
                         HStack(spacing: 8) {
                             Button {
@@ -459,7 +474,7 @@ struct ServicesView: View {
                                     .disabled(manager.isOperating)
                             }
                         }
-                        .fixedSize(horizontal: true, vertical: false)
+                        .frame(width: 148, alignment: .trailing)
                     }
                 }
                 .padding(.vertical, 4)
@@ -635,7 +650,7 @@ struct ServicesView: View {
                             .help("Move Agent Plist to Trash")
                         }
                     }
-                    .fixedSize(horizontal: true, vertical: false)
+                    .frame(width: 170, alignment: .trailing)
                 }
                 .padding(.vertical, 4)
             }

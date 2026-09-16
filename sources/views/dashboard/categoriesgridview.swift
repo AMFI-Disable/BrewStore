@@ -336,7 +336,8 @@ private struct CategoryPackageCard: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    .frame(height: 32)
             }
             .padding(14)
             .background(Color(nsColor: .controlBackgroundColor))
