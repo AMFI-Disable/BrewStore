@@ -239,37 +239,45 @@ final class BrewStoreLaunchAgentManager: ObservableObject {
 
         OUTDATED_JSON=$("$BREW_BIN" outdated --json=v2 2>> "$LOG_FILE" || echo "{}")
 
-        STATUS_OUTPUT=$(python3 -c '
-        import json, sys
-        try:
-            data = json.loads(sys.argv[1])
-            formulae = [f.get("name", "") for f in data.get("formulae", [])]
-            casks = [c.get("name", "") for c in data.get("casks", [])]
-            total = len(formulae) + len(casks)
-            result = {
-                "timestamp": sys.argv[2],
-                "status": "success",
-                "totalOutdated": total,
-                "outdatedFormulae": formulae,
-                "outdatedCasks": casks,
-                "summary": f"{total} update(s) available" if total > 0 else "All packages up to date"
-            }
-            print(json.dumps(result, indent=2))
-        except Exception as e:
-            result = {
-                "timestamp": sys.argv[2],
-                "status": "error",
-                "errorMessage": str(e),
-                "totalOutdated": 0,
-                "outdatedFormulae": [],
-                "outdatedCasks": []
-            }
-            print(json.dumps(result, indent=2))
+        STATUS_OUTPUT=$(/usr/bin/osascript -l JavaScript -e '
+        function run(argv) {
+          try {
+            const data = JSON.parse(argv[0] || "{}");
+            const formulae = (data.formulae || []).map(f => f.name || "").filter(Boolean);
+            const casks = (data.casks || []).map(c => c.name || "").filter(Boolean);
+            const total = formulae.length + casks.length;
+            return JSON.stringify({
+              timestamp: argv[1],
+              status: "success",
+              totalOutdated: total,
+              outdatedFormulae: formulae,
+              outdatedCasks: casks,
+              summary: total > 0 ? (total + " update(s) available") : "All packages up to date"
+            }, null, 2);
+          } catch (e) {
+            return JSON.stringify({
+              timestamp: argv[1],
+              status: "error",
+              errorMessage: String(e),
+              totalOutdated: 0,
+              outdatedFormulae: [],
+              outdatedCasks: []
+            }, null, 2);
+          }
+        }
         ' "$OUTDATED_JSON" "$TIMESTAMP" 2>> "$LOG_FILE")
 
         echo "$STATUS_OUTPUT" > "$STATUS_FILE"
 
-        TOTAL_COUNT=$(python3 -c 'import json, sys; d=json.loads(sys.argv[1]); print(d.get("totalOutdated", 0))' "$STATUS_OUTPUT" 2>/dev/null || echo "0")
+        TOTAL_COUNT=$(/usr/bin/osascript -l JavaScript -e '
+        function run(argv) {
+          try {
+            return String(JSON.parse(argv[0] || "{}").totalOutdated || 0);
+          } catch (e) {
+            return "0";
+          }
+        }
+        ' "$STATUS_OUTPUT" 2>/dev/null || echo "0")
 
         if [ "$TOTAL_COUNT" -gt 0 ]; then
           osascript -e "display notification \\"$TOTAL_COUNT package(s) have available updates. Click to review in BrewStore.\\" with title \\"BrewStore Updates Available\\"" 2>> "$LOG_FILE" || true
