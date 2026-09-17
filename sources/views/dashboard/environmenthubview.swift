@@ -338,15 +338,23 @@ final class ToolchainCompanionsModel: ObservableObject {
         return false
     }
 
-    func install(item: ToolchainCompanionItem, manager: HomebrewManager) {
+    func install(item: ToolchainCompanionItem, manager: HomebrewManager, completion: ((Bool) -> Void)? = nil) {
         installingItemID = item.id
+        let handleCompletion: (Bool) -> Void = { [weak self] success in
+            Task { @MainActor in
+                self?.installingItemID = nil
+                self?.refresh()
+                completion?(success)
+            }
+        }
+
         switch item.id {
         case "speedtest-go":
-            BrewStoreSpeedTestManager.shared.installSpeedTest(manager: manager)
+            BrewStoreSpeedTestManager.shared.installSpeedTest(manager: manager, completion: handleCompletion)
         case "mas":
-            BrewStoreMASManager.shared.installMAS(manager: manager)
+            BrewStoreMASManager.shared.installMAS(manager: manager, completion: handleCompletion)
         case "mole":
-            BrewStoreMoleManager.shared.installMole(manager: manager)
+            BrewStoreMoleManager.shared.installMole(manager: manager, completion: handleCompletion)
         case "trash":
             let pkg = BrewStorePackage(
                 id: "trash",
@@ -356,21 +364,28 @@ final class ToolchainCompanionsModel: ObservableObject {
                 version: "latest",
                 kind: .formula
             )
-            manager.perform(package: pkg, action: .install) { [weak self] _ in
-                Task { @MainActor in
-                    self?.installingItemID = nil
-                    self?.refresh()
-                }
-            }
+            manager.perform(package: pkg, action: .install, completion: handleCompletion)
         default:
-            break
+            installingItemID = nil
+            completion?(false)
         }
     }
 
     func installAllMissing(manager: HomebrewManager) {
         let missing = items.filter { !$0.isInstalled && $0.canInstall }
-        guard let first = missing.first else { return }
-        install(item: first, manager: manager)
+        guard !missing.isEmpty else { return }
+
+        func installNext(_ queue: [ToolchainCompanionItem]) {
+            guard let next = queue.first else {
+                self.installingItemID = nil
+                self.refresh()
+                return
+            }
+            install(item: next, manager: manager) { _ in
+                installNext(Array(queue.dropFirst()))
+            }
+        }
+        installNext(missing)
     }
 }
 

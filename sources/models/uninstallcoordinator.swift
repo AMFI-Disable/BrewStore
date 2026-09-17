@@ -334,13 +334,7 @@ final class BrewStoreUninstallCoordinator: ObservableObject {
 
             var orphanNames: [String] = []
             if autoResult.succeeded {
-                for line in autoResult.standardOutput.components(separatedBy: .newlines)
-                    where line.contains("Uninstalling") || line.contains("uninstall") {
-                    let tokens = line.split(separator: " ")
-                    if let target = tokens.last.map(String.init), !target.isEmpty {
-                        orphanNames.append(target)
-                    }
-                }
+                orphanNames = Self.parseAutoremoveOutput(autoResult.standardOutput)
             }
             let finalOrphanNames = orphanNames
             return await MainActor.run {
@@ -358,6 +352,55 @@ final class BrewStoreUninstallCoordinator: ObservableObject {
                 }
             }
         }.value
+    }
+
+    nonisolated static func parseAutoremoveOutput(_ output: String) -> [String] {
+        var orphanNames: [String] = []
+        var isInPackageList = false
+
+        for rawLine in output.components(separatedBy: .newlines) {
+            let line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !line.isEmpty else { continue }
+
+            let isHeader = (line.localizedCaseInsensitiveContains("uninstall") || line.localizedCaseInsensitiveContains("autoremov")) &&
+                (line.hasSuffix(":") || line.localizedCaseInsensitiveContains("unneeded") || line.localizedCaseInsensitiveContains("formulae") || line.localizedCaseInsensitiveContains("dependencies"))
+            if isHeader {
+                isInPackageList = true
+                continue
+            }
+
+            if line.hasPrefix("Uninstalling ") {
+                let rest = line.dropFirst("Uninstalling ".count).trimmingCharacters(in: .whitespaces)
+                let candidate = rest.replacingOccurrences(of: "...", with: "").split(separator: " ").first.map(String.init) ?? ""
+                let cleaned = candidate.trimmingCharacters(in: CharacterSet(charactersIn: "():,."))
+                if !cleaned.isEmpty && !cleaned.localizedCaseInsensitiveContains("formula") && !cleaned.localizedCaseInsensitiveContains("unneeded") {
+                    orphanNames.append(cleaned)
+                }
+                continue
+            }
+
+            if isInPackageList {
+                if line.hasPrefix("==>") && !line.localizedCaseInsensitiveContains("uninstall") && !line.localizedCaseInsensitiveContains("autoremov") {
+                    isInPackageList = false
+                    continue
+                }
+                if line.contains(",") {
+                    for part in line.split(separator: ",") {
+                        let candidate = part.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: "():,.")))
+                        if !candidate.isEmpty && !candidate.hasPrefix("==") && !candidate.localizedCaseInsensitiveContains("formula") {
+                            orphanNames.append(candidate)
+                        }
+                    }
+                } else {
+                    let candidate = line.split(separator: " ").first.map(String.init) ?? ""
+                    let cleaned = candidate.trimmingCharacters(in: CharacterSet(charactersIn: "():,."))
+                    if !cleaned.isEmpty && !cleaned.hasPrefix("==") && !cleaned.localizedCaseInsensitiveContains("formula") {
+                        orphanNames.append(cleaned)
+                    }
+                }
+            }
+        }
+        return Array(Set(orphanNames)).sorted()
     }
 
     private func resolvedInstalledPackages(_ packages: [BrewStorePackage], manager: HomebrewManager) -> [BrewStorePackage] {

@@ -330,7 +330,7 @@ struct DependencyGraphView: View {
 
             var tier2Deps: [String] = []
             for directDep in directDeps {
-                if let depPkg = manager.packages.first(where: { $0.id == directDep }) {
+                if let depPkg = manager.packages.first(where: { $0.id.caseInsensitiveCompare(directDep) == .orderedSame }) {
                     for subDep in depPkg.dependencies {
                         computedEdges.append(DependencyGraphEdge(id: "\(directDep)->\(subDep)", fromID: directDep, toID: subDep))
                         if !visited.contains(subDep) {
@@ -347,8 +347,8 @@ struct DependencyGraphView: View {
 
         // 2. Downstream Layout (Used By Reverse Dependents)
         if graphMode == .downstream || graphMode == .dual {
-            let directDependents = manager.packages.filter {
-                $0.dependencies.map { $0.lowercased() }.contains(rootID.lowercased()) && !visited.contains($0.id)
+            let directDependents = manager.packages.filter { pkg in
+                pkg.dependencies.contains { $0.caseInsensitiveCompare(rootID) == .orderedSame } && !visited.contains(pkg.id)
             }.map(\.id)
 
             for dep in directDependents {
@@ -377,13 +377,15 @@ struct DependencyGraphView: View {
 
             for (index, id) in idsInTier.enumerated() {
                 let y = startY + CGFloat(index) * rowSpacing
-                let isRoot = (id == rootID)
-                let isInstalled = manager.packages.contains { $0.id == id && $0.isInstalled }
-                let kind = manager.packages.first { $0.id == id }?.kind ?? .formula
+                let isRoot = (id.caseInsensitiveCompare(rootID) == .orderedSame)
+                let matchedPkg = manager.packages.first { $0.id.caseInsensitiveCompare(id) == .orderedSame }
+                let isInstalled = isRoot ? rootPackage.isInstalled : (matchedPkg?.isInstalled ?? false)
+                let kind = isRoot ? rootPackage.kind : (matchedPkg?.kind ?? .formula)
+                let displayName = isRoot ? rootPackage.name : (matchedPkg?.name ?? id)
 
                 let node = DependencyGraphNode(
                     id: id,
-                    name: id,
+                    name: displayName,
                     kind: kind,
                     isInstalled: isInstalled,
                     isRoot: isRoot,

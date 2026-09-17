@@ -92,4 +92,48 @@ final class DependencyTopologyTests: XCTestCase {
         XCTAssertFalse(topologyManager.isAnalyzing)
         XCTAssertNotNil(topologyManager.topology)
     }
+
+    func testParseAutoremoveOutputFormats() {
+        // Format 1: Modern Homebrew dry-run multi-line
+        let output1 = """
+        ==> Would uninstall 2 unneeded formulae:
+        libevent
+        libidn2
+        """
+        let parsed1 = BrewStoreUninstallCoordinator.parseAutoremoveOutput(output1)
+        XCTAssertEqual(parsed1, ["libevent", "libidn2"])
+        XCTAssertFalse(parsed1.contains("formulae:"))
+
+        // Format 2: Comma-separated autoremoved output
+        let output2 = "==> Autoremoved 3 unneeded dependencies:\n  libevent, libidn2, utf8proc\n"
+        let parsed2 = BrewStoreUninstallCoordinator.parseAutoremoveOutput(output2)
+        XCTAssertEqual(parsed2, ["libevent", "libidn2", "utf8proc"])
+
+        // Format 3: Legacy or live uninstalling lines
+        let output3 = """
+        Uninstalling libevent...
+        Uninstalling libidn2...
+        """
+        let parsed3 = BrewStoreUninstallCoordinator.parseAutoremoveOutput(output3)
+        XCTAssertEqual(parsed3, ["libevent", "libidn2"])
+
+        // Format 4: Empty / Nothing to autoremove
+        let output4 = ""
+        let parsed4 = BrewStoreUninstallCoordinator.parseAutoremoveOutput(output4)
+        XCTAssertTrue(parsed4.isEmpty)
+    }
+
+    func testDependencyTreeCalculatorPreIndexedGraph() {
+        let openssl = BrewStorePackage(id: "openssl@3", name: "OpenSSL 3", description: "", homepage: "", version: "3.0", kind: .formula, isInstalled: true, dependencies: [])
+        let curl = BrewStorePackage(id: "curl", name: "cURL", description: "", homepage: "", version: "8.5", kind: .formula, isInstalled: true, dependencies: ["openssl@3"])
+        let git = BrewStorePackage(id: "git", name: "Git", description: "", homepage: "", version: "2.44", kind: .formula, isInstalled: true, dependencies: ["curl"])
+
+        let graph = DependencyTreeCalculator.buildGraph(for: curl, in: [openssl, curl, git])
+        XCTAssertEqual(graph.rootID, "curl")
+        XCTAssertEqual(graph.upstreamNodes.count, 1)
+        XCTAssertEqual(graph.upstreamNodes.first?.id, "openssl@3")
+        XCTAssertEqual(graph.downstreamNodes.count, 1)
+        XCTAssertEqual(graph.downstreamNodes.first?.id, "git")
+        XCTAssertTrue(graph.hasDependents)
+    }
 }

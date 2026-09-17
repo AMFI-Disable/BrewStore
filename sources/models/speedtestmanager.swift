@@ -272,7 +272,7 @@ final class BrewStoreSpeedTestManager: ObservableObject {
         }
     }
 
-    func installSpeedTest(manager: HomebrewManager) {
+    func installSpeedTest(manager: HomebrewManager, completion: ((Bool) -> Void)? = nil) {
         manager.perform(
             package: BrewStorePackage(
                 id: "speedtest-go",
@@ -293,6 +293,11 @@ final class BrewStoreSpeedTestManager: ObservableObject {
                 Task { @MainActor in
                     self?.detectBinary()
                     self?.runSpeedTest()
+                    completion?(true)
+                }
+            } else {
+                Task { @MainActor in
+                    completion?(false)
                 }
             }
         }

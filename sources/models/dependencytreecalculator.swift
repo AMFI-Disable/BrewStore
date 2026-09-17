@@ -57,9 +57,22 @@ enum DependencyTreeCalculator {
         }
 
         // 2. Traverse Downstream (Packages that require root)
+        // Pre-index reverse dependencies for O(1) lookup across large catalogs
+        var reverseIndex: [String: [BrewStorePackage]] = [:]
+        for pkg in allPackages {
+            for dep in pkg.dependencies {
+                let depLower = dep.lowercased()
+                reverseIndex[depLower, default: []].append(pkg)
+                let normalized = (dep.components(separatedBy: "/").last ?? dep).lowercased()
+                if normalized != depLower {
+                    reverseIndex[normalized, default: []].append(pkg)
+                }
+            }
+        }
+
         var downstream: [DependencyNode] = []
         var visitedDownstream = Set<String>()
-        let directDependents = allPackages.filter { $0.dependencies.map { $0.lowercased() }.contains(root.id.lowercased()) }
+        let directDependents = reverseIndex[root.id.lowercased()] ?? []
         var downQueue: [(pkg: BrewStorePackage, depth: Int)] = directDependents.map { ($0, 1) }
 
         while !downQueue.isEmpty {
@@ -80,7 +93,7 @@ enum DependencyTreeCalculator {
             downstream.append(node)
 
             if depth < 3 {
-                let nextLevel = allPackages.filter { $0.dependencies.map { $0.lowercased() }.contains(lowerID) }
+                let nextLevel = reverseIndex[lowerID] ?? []
                 for nextPkg in nextLevel {
                     downQueue.append((nextPkg, depth + 1))
                 }

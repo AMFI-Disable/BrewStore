@@ -137,19 +137,17 @@ final class BrewStoreDependencyDoctorManager: ObservableObject {
                 )
 
                 if autoResult.succeeded {
-                    for line in autoResult.standardOutput.components(separatedBy: .newlines) where line.contains("Uninstalling") || line.contains("uninstall") {
-                        let tokens = line.split(separator: " ")
-                        if let target = tokens.last.map(String.init), !target.isEmpty {
-                            foundIssues.append(ToolchainIssue(
-                                id: "orphan-\(target)",
-                                title: "Orphaned Package: \(target)",
-                                description: "Installed as a dependency, but no longer required by any installed package.",
-                                kind: .orphan,
-                                severity: "info",
-                                recommendedAction: "Prune Orphan",
-                                packageID: target
-                            ))
-                        }
+                    let orphans = BrewStoreUninstallCoordinator.parseAutoremoveOutput(autoResult.standardOutput)
+                    for target in orphans {
+                        foundIssues.append(ToolchainIssue(
+                            id: "orphan-\(target)",
+                            title: "Orphaned Package: \(target)",
+                            description: "Installed as a dependency, but no longer required by any installed package.",
+                            kind: .orphan,
+                            severity: "info",
+                            recommendedAction: "Prune Orphan",
+                            packageID: target
+                        ))
                     }
                 }
             }

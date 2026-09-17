@@ -29,7 +29,7 @@ enum CellarScanner {
             if let receiptData = try? Data(contentsOf: URL(fileURLWithPath: receiptPath)),
                let json = try? JSONSerialization.jsonObject(with: receiptData) as? [String: Any] {
                 if let runtimeDeps = json["runtime_dependencies"] as? [[String: Any]] {
-                    deps = runtimeDeps.compactMap { $0["full_name"] as? String }
+                    deps = runtimeDeps.compactMap { ($0["full_name"] as? String) ?? ($0["name"] as? String) }
                 }
                 if let source = json["source"] as? [String: Any] {
                     tap = source["tap"] as? String

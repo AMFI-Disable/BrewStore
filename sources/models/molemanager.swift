@@ -111,7 +111,7 @@ final class BrewStoreMoleManager: ObservableObject {
     }
 
     /// Triggers installation of the `mole` formula via Homebrew.
-    func installMole(manager: HomebrewManager) {
+    func installMole(manager: HomebrewManager, completion: ((Bool) -> Void)? = nil) {
         let pkg = manager.packages.first(where: { $0.id == "mole" }) ?? BrewStorePackage(
             id: "mole",
             name: "Mole",
@@ -120,9 +120,10 @@ final class BrewStoreMoleManager: ObservableObject {
             version: "1.53.0",
             kind: .formula
         )
-        manager.perform(package: pkg, action: .install) { [weak self] _ in
+        manager.perform(package: pkg, action: .install) { [weak self] success in
             Task { @MainActor in
                 self?.detectBinary()
+                completion?(success)
             }
         }
     }

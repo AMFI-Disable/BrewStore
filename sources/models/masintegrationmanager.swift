@@ -45,7 +45,7 @@ final class BrewStoreMASManager: ObservableObject {
         }
     }
 
-    func installMAS(manager: HomebrewManager) {
+    func installMAS(manager: HomebrewManager, completion: ((Bool) -> Void)? = nil) {
         let masPkg = BrewStorePackage(
             id: "mas",
             name: "mas",
@@ -59,6 +59,7 @@ final class BrewStoreMASManager: ObservableObject {
                 self?.checkMASAvailability()
                 self?.refresh()
             }
+            completion?(success)
         }
     }
 
