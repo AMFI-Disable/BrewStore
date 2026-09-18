@@ -150,4 +150,19 @@ final class AppAdoptionPrecisionTests: XCTestCase {
         XCTAssertTrue(result.isCompatible)
         XCTAssertNil(result.reason)
     }
+
+    func testEvaluateVersionCompatibilityUppercaseAndPrefixVariants() {
+        // Uppercase V prefix
+        let res1 = BrewStoreAppAdoptionManager.evaluateVersionCompatibility(installed: "V2.1.0", caskVersion: "2.4.0")
+        XCTAssertTrue(res1.isCompatible, "V2.1.0 and 2.4.0 share major version 2 and must be compatible")
+
+        // Major version discrepancy >= 3
+        let res2 = BrewStoreAppAdoptionManager.evaluateVersionCompatibility(installed: "Version 1.0", caskVersion: "4.5.0")
+        XCTAssertFalse(res2.isCompatible, "Version 1.0 vs 4.5.0 has diff of 3 versions and must require review")
+        XCTAssertNotNil(res2.reason)
+
+        // Close versions with words
+        let res3 = BrewStoreAppAdoptionManager.evaluateVersionCompatibility(installed: "Release 12.1", caskVersion: "13.0")
+        XCTAssertTrue(res3.isCompatible)
+    }
 }

@@ -960,6 +960,20 @@ final class HomebrewManagerTests: XCTestCase {
         }
     }
 
+    func testURLSchemeRouterPercentEncodingAndSpaceDecoding() {
+        let searchPlusURL = URL(string: "brewstore://search?q=visual+studio+code")!
+        XCTAssertEqual(BrewStoreURLSchemeRouter.parse(url: searchPlusURL), .search(query: "visual studio code"))
+
+        let pkgEncodedURL = URL(string: "brewstore://package/node%4020")!
+        XCTAssertEqual(BrewStoreURLSchemeRouter.parse(url: pkgEncodedURL), .package(id: "node@20", kind: nil))
+
+        let installEncodedURL = URL(string: "brewstore://install/openssl%403")!
+        XCTAssertEqual(BrewStoreURLSchemeRouter.parse(url: installEncodedURL), .install(id: "openssl@3", kind: nil))
+
+        let quickInstallEncodedURL = URL(string: "brewstore://quick-install?packages=python%403.11,node%4020")!
+        XCTAssertEqual(BrewStoreURLSchemeRouter.parse(url: quickInstallEncodedURL), .quickInstall(ids: ["python@3.11", "node@20"]))
+    }
+
     @MainActor
     func testStackBlueprintExportAndImportRoundtrip() throws {
         let stack = BrewStoreStack(

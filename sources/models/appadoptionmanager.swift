@@ -389,8 +389,8 @@ final class BrewStoreAppAdoptionManager: ObservableObject {
     }
 
     nonisolated static func evaluateVersionCompatibility(installed: String, caskVersion: String) -> (isCompatible: Bool, reason: String?) {
-        let cleanInst = installed.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: "v", with: "")
-        let cleanCask = caskVersion.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: "v", with: "")
+        let cleanInst = String(installed.trimmingCharacters(in: .whitespacesAndNewlines).drop(while: { !$0.isNumber }))
+        let cleanCask = String(caskVersion.trimmingCharacters(in: .whitespacesAndNewlines).drop(while: { !$0.isNumber }))
 
         let instComponents = cleanInst.split(separator: ".").compactMap { Int($0.prefix(while: \.isNumber)) }
         let caskComponents = cleanCask.split(separator: ".").compactMap { Int($0.prefix(while: \.isNumber)) }

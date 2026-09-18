@@ -70,4 +70,38 @@ final class BackgroundItemsManagerTests: XCTestCase {
         )
         XCTAssertEqual(item2.displayName, "RandomApp Helper")
     }
+
+    func testBackgroundItemRunningStateEvaluation() {
+        let itemRunning = BrewStoreBackgroundItem(
+            id: "run-1",
+            name: "Agent",
+            label: "com.test.agent",
+            programPath: nil,
+            plistURL: nil,
+            kind: .userLaunchAgent,
+            associatedAppName: "TestApp",
+            isLoaded: true,
+            isRunning: true,
+            runAtLoad: true,
+            pid: 5432
+        )
+        XCTAssertTrue(itemRunning.isRunning)
+        XCTAssertEqual(itemRunning.pid, 5432)
+
+        let itemStopped = BrewStoreBackgroundItem(
+            id: "stop-1",
+            name: "Agent",
+            label: "com.test.agent",
+            programPath: nil,
+            plistURL: nil,
+            kind: .userLaunchAgent,
+            associatedAppName: "TestApp",
+            isLoaded: true,
+            isRunning: false,
+            runAtLoad: false,
+            pid: nil
+        )
+        XCTAssertFalse(itemStopped.isRunning)
+        XCTAssertNil(itemStopped.pid)
+    }
 }

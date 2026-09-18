@@ -172,7 +172,7 @@ final class BrewStoreSecurityInspector: ObservableObject {
             return .universal2
         } else if fileOutput.contains("arm64") {
             return .appleSilicon
-        } else if fileOutput.contains("x86_64") {
+        } else if fileOutput.contains("x86_64") || fileOutput.contains("i386") || fileOutput.contains("Intel 80386") {
             return .intel
         }
         return .unknown
@@ -180,10 +180,24 @@ final class BrewStoreSecurityInspector: ObservableObject {
 
     nonisolated static func inspectAppBundleArchitecture(at appPath: String) -> BinaryArchitectureType {
         let macosDir = (appPath as NSString).appendingPathComponent("Contents/MacOS")
-        guard let files = try? FileManager.default.contentsOfDirectory(atPath: macosDir), let first = files.first else {
+        let infoPlistPath = (appPath as NSString).appendingPathComponent("Contents/Info.plist")
+        if let infoDict = NSDictionary(contentsOfFile: infoPlistPath),
+           let exeName = infoDict["CFBundleExecutable"] as? String {
+            let execPath = (macosDir as NSString).appendingPathComponent(exeName)
+            if FileManager.default.fileExists(atPath: execPath) {
+                return inspectBinaryArchitecture(at: execPath)
+            }
+        }
+
+        guard let files = try? FileManager.default.contentsOfDirectory(atPath: macosDir) else {
             return .unknown
         }
-        let execPath = (macosDir as NSString).appendingPathComponent(first)
+        let candidate = files.first(where: {
+            !$0.hasPrefix(".") && FileManager.default.isExecutableFile(atPath: (macosDir as NSString).appendingPathComponent($0))
+        }) ?? files.first(where: { !$0.hasPrefix(".") })
+
+        guard let chosen = candidate else { return .unknown }
+        let execPath = (macosDir as NSString).appendingPathComponent(chosen)
         return inspectBinaryArchitecture(at: execPath)
     }
 

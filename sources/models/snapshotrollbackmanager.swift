@@ -6,9 +6,11 @@ struct SnapshotRollbackPlan: Identifiable, Hashable, Codable {
     let snapshotDate: Date
     let packagesToUninstall: [String] // Installed now, but wasn't in snapshot
     let packagesToReinstall: [String] // In snapshot, but missing now
+    var missingTaps: [String] = []
+    var caskIDs: [String] = []
 
     var totalOperations: Int {
-        packagesToUninstall.count + packagesToReinstall.count
+        packagesToUninstall.count + packagesToReinstall.count + missingTaps.count
     }
 
     var isEmpty: Bool {
@@ -23,7 +25,7 @@ final class BrewStoreSnapshotRollbackManager: ObservableObject {
     @Published var isRollingBack = false
     @Published var statusMessage = ""
 
-    func computePlan(currentPackages: [BrewStorePackage], snapshot: BrewStoreSnapshot) -> SnapshotRollbackPlan {
+    func computePlan(currentPackages: [BrewStorePackage], currentTaps: [BrewStoreTap] = [], snapshot: BrewStoreSnapshot) -> SnapshotRollbackPlan {
         let currentlyInstalledIDs = Set(currentPackages.filter(\.isInstalled).map { $0.id.lowercased() })
         let snapshotIDs = snapshot.formulae + snapshot.casks
         let snapshotPackageIDs = Set(snapshotIDs.map { $0.lowercased() })
@@ -31,12 +33,17 @@ final class BrewStoreSnapshotRollbackManager: ObservableObject {
         let toUninstall = currentlyInstalledIDs.subtracting(snapshotPackageIDs).sorted()
         let toReinstall = snapshotPackageIDs.subtracting(currentlyInstalledIDs).sorted()
 
+        let currentTapNames = Set(currentTaps.map { $0.name.lowercased() })
+        let missingTaps = snapshot.taps.filter { !currentTapNames.contains($0.lowercased()) }.sorted()
+
         return SnapshotRollbackPlan(
             id: UUID().uuidString,
             snapshotID: snapshot.id,
             snapshotDate: snapshot.timestamp,
             packagesToUninstall: toUninstall,
-            packagesToReinstall: toReinstall
+            packagesToReinstall: toReinstall,
+            missingTaps: missingTaps,
+            caskIDs: snapshot.casks.map { $0.lowercased() }
         )
     }
 
@@ -50,6 +57,16 @@ final class BrewStoreSnapshotRollbackManager: ObservableObject {
         statusMessage = "Starting Time Machine rollback to snapshot from \(plan.snapshotDate.formatted())…"
 
         Task { @MainActor [weak self] in
+            // 0. Reconfigure missing taps if any
+            for tap in plan.missingTaps {
+                self?.statusMessage = "Restoring tap: \(tap)…"
+                await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                    manager.tap(name: tap) { _ in
+                        continuation.resume()
+                    }
+                }
+            }
+
             // 1. Uninstall newly added packages
             let packagesToUninstall = plan.packagesToUninstall.compactMap { pkgID in
                 manager.packages.first(where: { $0.id.lowercased() == pkgID && $0.isInstalled })
@@ -72,8 +89,9 @@ final class BrewStoreSnapshotRollbackManager: ObservableObject {
             // 2. Reinstall missing packages
             for pkgID in plan.packagesToReinstall {
                 self?.statusMessage = "Restoring: reinstalling \(pkgID)…"
+                let isCask = plan.caskIDs.contains(pkgID.lowercased())
                 let targetPkg = manager.packages.first(where: { $0.id.lowercased() == pkgID }) ??
-                    BrewStorePackage(id: pkgID, name: pkgID, description: "", homepage: "", version: "", kind: .formula)
+                    BrewStorePackage(id: pkgID, name: pkgID, description: "", homepage: "", version: "", kind: isCask ? .cask : .formula)
 
                 await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
                     manager.perform(package: targetPkg, action: .install) { _ in

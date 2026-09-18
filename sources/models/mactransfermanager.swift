@@ -191,17 +191,14 @@ final class BrewStoreMacTransferManager: ObservableObject {
         return script
     }
 
-    func bootstrapMac(bundle: MacRigExportBundle, manager: HomebrewManager) {
+    func bootstrapMac(bundle: MacRigExportBundle, manager: HomebrewManager, completion: (@Sendable @MainActor (Bool) -> Void)? = nil) {
         isBootstrapping = true
         bootstrapStatus = "Starting Mac Blueprint restore…"
 
         Task { @MainActor in
             // 1. Taps
             let installedTapNames = Set(manager.taps.map { $0.name.lowercased() })
-            for tap in bundle.taps where !installedTapNames.contains(tap.lowercased()) {
-                self.bootstrapStatus = "Adding tap \(tap)…"
-                manager.tap(name: tap)
-            }
+            let missingTaps = bundle.taps.filter { !installedTapNames.contains($0.lowercased()) }
 
             // 2. Missing Formulae and Casks
             let installedSet = Set(manager.packages.filter(\.isInstalled).map { $0.id.lowercased() })
@@ -235,22 +232,42 @@ final class BrewStoreMacTransferManager: ObservableObject {
                 toInstall.append(pkg)
             }
 
-            if !toInstall.isEmpty {
-                self.bootstrapStatus = "Installing \(toInstall.count) Homebrew packages…"
-                manager.batchPerform(packages: toInstall, action: .install)
+            @MainActor func installMASApps() {
+                let installedMASIDs = Set(BrewStoreMASManager.shared.installedApps.map(\.id))
+                for app in bundle.masApps {
+                    if let masID = app.tap, !masID.isEmpty, !installedMASIDs.contains(masID) {
+                        self.bootstrapStatus = "Installing Mac App Store app: \(app.name)…"
+                        BrewStoreMASManager.shared.installApp(id: masID, name: app.name)
+                    }
+                }
+                self.isBootstrapping = false
+                self.bootstrapStatus = "Mac Blueprint setup complete!"
+                completion?(true)
             }
 
-            // 3. MAS Apps
-            let installedMASIDs = Set(BrewStoreMASManager.shared.installedApps.map(\.id))
-            for app in bundle.masApps {
-                if let masID = app.tap, !masID.isEmpty, !installedMASIDs.contains(masID) {
-                    self.bootstrapStatus = "Installing Mac App Store app: \(app.name)…"
-                    BrewStoreMASManager.shared.installApp(id: masID, name: app.name)
+            @MainActor func proceedWithInstallations() {
+                if !toInstall.isEmpty {
+                    self.bootstrapStatus = "Installing \(toInstall.count) Homebrew packages…"
+                    manager.batchPerform(packages: toInstall, action: .install) { _ in
+                        installMASApps()
+                    }
+                } else {
+                    installMASApps()
                 }
             }
 
-            self.isBootstrapping = false
-            self.bootstrapStatus = "Mac Blueprint setup complete!"
+            @MainActor func installNextTap(remaining: [String]) {
+                guard let next = remaining.first else {
+                    proceedWithInstallations()
+                    return
+                }
+                self.bootstrapStatus = "Adding tap \(next)…"
+                manager.tap(name: next) { _ in
+                    installNextTap(remaining: Array(remaining.dropFirst()))
+                }
+            }
+
+            installNextTap(remaining: missingTaps)
         }
     }
 

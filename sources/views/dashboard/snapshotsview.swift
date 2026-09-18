@@ -383,6 +383,14 @@ private struct SnapshotDetailInspector: View {
         filterList(snapshot.formulae)
     }
 
+    private var filteredMissingTaps: [String] {
+        filterList(diff.missingTaps)
+    }
+
+    private var filteredTaps: [String] {
+        filterList(snapshot.taps)
+    }
+
     private func filterList(_ list: [String]) -> [String] {
         let q = packageQuery.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard !q.isEmpty else { return list }
@@ -534,6 +542,10 @@ private struct SnapshotDetailInspector: View {
                         .padding(.vertical, 4)
                     } else {
                         VStack(spacing: 8) {
+                            if !filteredMissingTaps.isEmpty {
+                                DiffGroupView(title: "Missing Taps (in snapshot, not currently tapped)", items: filteredMissingTaps, isAddition: false)
+                            }
+
                             if !filteredMissingFormulae.isEmpty {
                                 DiffGroupView(title: "Missing Formulae (in snapshot, not currently installed)", items: filteredMissingFormulae, isAddition: false)
                             }
@@ -563,6 +575,25 @@ private struct SnapshotDetailInspector: View {
                         Text("Recorded Packages in Snapshot (\(snapshot.totalCount))")
                             .font(.headline)
                         Spacer()
+                    }
+
+                    if !filteredTaps.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Third-Party Taps (\(filteredTaps.count))")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 160), spacing: 8)], spacing: 8) {
+                                ForEach(filteredTaps, id: \.self) { tap in
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "square.3.layers.3d.down.forward").foregroundStyle(.purple).font(.caption)
+                                        Text(tap).font(.caption.monospaced()).lineLimit(1)
+                                    }
+                                    .padding(8)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 6))
+                                }
+                            }
+                        }
                     }
 
                     if !filteredCasks.isEmpty {

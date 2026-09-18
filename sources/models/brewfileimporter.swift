@@ -142,12 +142,10 @@ final class BrewStoreBrewfileImporter: ObservableObject {
         return parseBrewfile(content: content, manager: manager)
     }
 
-    func installSelectedMissing(manager: HomebrewManager, entries: [ImportedBrewfileEntry], taps: [String] = []) {
-        // Configure missing taps first
+    func installSelectedMissing(manager: HomebrewManager, entries: [ImportedBrewfileEntry], taps: [String] = [], completion: (@Sendable @MainActor (Bool) -> Void)? = nil) {
+        // Configure missing taps first sequentially before installing packages
         let installedTapNames = Set(manager.taps.map { $0.name.lowercased() })
-        for tap in taps where !installedTapNames.contains(tap.lowercased()) {
-            manager.tap(name: tap)
-        }
+        let missingTaps = taps.filter { !installedTapNames.contains($0.lowercased()) }
 
         let toInstall = entries.filter {
             $0.isSelected && !$0.isInstalled && ($0.kind == .cask || $0.kind == .formula)
@@ -163,16 +161,36 @@ final class BrewStoreBrewfileImporter: ObservableObject {
                 isOutdated: false
             )
         }
-        if !toInstall.isEmpty {
-            manager.batchPerform(packages: toInstall, action: .install)
+
+        @MainActor func proceedWithPackageInstalls() {
+            if !toInstall.isEmpty {
+                manager.batchPerform(packages: toInstall, action: .install) { results in
+                    let allSucceeded = results.values.allSatisfy { $0 }
+                    completion?(allSucceeded)
+                }
+            } else {
+                completion?(true)
+            }
+
+            // Install missing MAS apps
+            let missingMAS = entries.filter { $0.isSelected && !$0.isInstalled && $0.kind == .mas }
+            for entry in missingMAS {
+                let idStr = entry.id.components(separatedBy: ":").last ?? entry.id
+                BrewStoreMASManager.shared.installApp(id: idStr, name: entry.rawName)
+            }
         }
 
-        // Install missing MAS apps
-        let missingMAS = entries.filter { $0.isSelected && !$0.isInstalled && $0.kind == .mas }
-        for entry in missingMAS {
-            let idStr = entry.id.components(separatedBy: ":").last ?? entry.id
-            BrewStoreMASManager.shared.installApp(id: idStr, name: entry.rawName)
+        @MainActor func installNextTap(remaining: [String]) {
+            guard let next = remaining.first else {
+                proceedWithPackageInstalls()
+                return
+            }
+            manager.tap(name: next) { _ in
+                installNextTap(remaining: Array(remaining.dropFirst()))
+            }
         }
+
+        installNextTap(remaining: missingTaps)
     }
 
     private func extractPackageName(from line: String, prefix: String) -> String {

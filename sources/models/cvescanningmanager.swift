@@ -112,9 +112,23 @@ final class BrewStoreCVEScanningManager: ObservableObject {
         self.isScanning = false
     }
 
+    nonisolated static func isPackageVulnerable(package: BrewStorePackage, advisory: CVEAdvisory) -> Bool {
+        guard advisory.packageID.lowercased() == package.id.lowercased() else { return false }
+
+        // EOL packages like openssl@1.1 have reached end of life with no upstream fix on the 1.1 line
+        if advisory.id == "GHSA-openssl-1-1-eol" || advisory.fixedVersion.lowercased().contains("upgrade to") {
+            return true
+        }
+
+        let currentVer = package.installedVersion ?? package.version
+        guard !currentVer.isEmpty else { return true }
+
+        return BrewStoreAppUpdateChecker.isNewerVersion(remote: advisory.fixedVersion, local: currentVer)
+    }
+
     nonisolated static func advisories(for package: BrewStorePackage) -> [CVEAdvisory] {
         knownAdvisories.filter { adv in
-            adv.packageID.lowercased() == package.id.lowercased()
+            isPackageVulnerable(package: package, advisory: adv)
         }
     }
 }

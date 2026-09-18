@@ -42,11 +42,17 @@ final class BrewStoreURLSchemeRouter: ObservableObject {
 
         func queryValue(for names: [String]) -> String? {
             for name in names {
-                if let val = queryItems.first(where: { $0.name.lowercased() == name.lowercased() })?.value, !val.isEmpty {
-                    return val
+                if let raw = queryItems.first(where: { $0.name.lowercased() == name.lowercased() })?.value, !raw.isEmpty {
+                    let unescaped = raw.replacingOccurrences(of: "+", with: " ")
+                    return unescaped.removingPercentEncoding ?? unescaped
                 }
             }
             return nil
+        }
+
+        func pathFirst() -> String? {
+            guard let first = pathComponents.first else { return nil }
+            return first.removingPercentEncoding ?? first
         }
 
         let kindParam: BrewPackageKind? = {
@@ -63,28 +69,28 @@ final class BrewStoreURLSchemeRouter: ObservableObject {
 
         switch host {
         case "package", "view":
-            let pkgID = queryValue(for: ["id", "name", "pkg"]) ?? pathComponents.first
+            let pkgID = queryValue(for: ["id", "name", "pkg"]) ?? pathFirst()
             if let pkgID, !pkgID.isEmpty {
                 return .package(id: pkgID, kind: kindParam)
             }
             return nil
 
         case "open":
-            let pkgID = queryValue(for: ["id", "name", "pkg"]) ?? pathComponents.first
+            let pkgID = queryValue(for: ["id", "name", "pkg"]) ?? pathFirst()
             if let pkgID, !pkgID.isEmpty {
                 return .package(id: pkgID, kind: kindParam)
             }
             return .open
 
         case "install", "add":
-            let pkgID = queryValue(for: ["id", "name", "pkg"]) ?? pathComponents.first
+            let pkgID = queryValue(for: ["id", "name", "pkg"]) ?? pathFirst()
             if let pkgID, !pkgID.isEmpty {
                 return .install(id: pkgID, kind: kindParam)
             }
             return nil
 
         case "search", "find":
-            let query = queryValue(for: ["q", "query", "term"]) ?? pathComponents.first ?? ""
+            let query = queryValue(for: ["q", "query", "term"]) ?? pathFirst() ?? ""
             return .search(query: query)
 
         case "doctor", "diagnose", "diagnostics":
@@ -118,12 +124,16 @@ final class BrewStoreURLSchemeRouter: ObservableObject {
             return .clean
 
         case "blueprint", "blueprints", "stack":
-            let blueprintID = queryValue(for: ["id", "name", "stack"]) ?? pathComponents.first
+            let blueprintID = queryValue(for: ["id", "name", "stack"]) ?? pathFirst()
             return .blueprint(id: blueprintID)
 
         case "quick-install", "batch-install":
             let packagesString = queryValue(for: ["packages", "pkgs", "items"]) ?? pathComponents.joined(separator: ",")
-            let ids = packagesString.split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+            let ids = packagesString
+                .split(separator: ",")
+                .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
+                .map { $0.removingPercentEncoding ?? $0 }
+                .filter { !$0.isEmpty }
             if !ids.isEmpty {
                 return .quickInstall(ids: ids)
             }
@@ -132,7 +142,8 @@ final class BrewStoreURLSchemeRouter: ObservableObject {
         default:
             // Fallback for direct host names e.g. brewstore://docker -> package(docker)
             if !host.isEmpty, host != "localhost" {
-                return .package(id: host, kind: kindParam)
+                let decodedHost = host.removingPercentEncoding ?? host
+                return .package(id: decodedHost, kind: kindParam)
             }
             return nil
         }

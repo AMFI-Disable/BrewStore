@@ -110,4 +110,58 @@ final class BrewfileTests: XCTestCase {
         XCTAssertEqual(summary.masApps[1].rawName, "Amphetamine")
         XCTAssertEqual(summary.masApps[1].id, "mas:937984704")
     }
+
+    @MainActor
+    func testSnapshotDiffComputesMissingTaps() {
+        let snapshot = BrewStoreSnapshot(
+            id: "snap-1",
+            timestamp: Date(),
+            name: "Test Snapshot",
+            fileURL: URL(fileURLWithPath: "/tmp/Brewfile-1"),
+            formulae: ["git"],
+            casks: ["firefox"],
+            taps: ["homebrew/cask-fonts", "custom/tap"]
+        )
+        let installedPackages = [
+            BrewStorePackage(id: "git", name: "git", description: "", homepage: "", version: "2.45.0", kind: .formula, isInstalled: true, isOutdated: false),
+            BrewStorePackage(id: "firefox", name: "firefox", description: "", homepage: "", version: "128.0", kind: .cask, isInstalled: true, isOutdated: false)
+        ]
+        let installedTaps = [
+            BrewStoreTap(id: "homebrew/cask-fonts", name: "homebrew/cask-fonts")
+        ]
+
+        let diff = BrewStoreSnapshotManager().computeDiff(for: snapshot, currentPackages: installedPackages, currentTaps: installedTaps)
+        XCTAssertTrue(diff.hasDifferences, "Missing tap must trigger hasDifferences")
+        XCTAssertEqual(diff.missingTaps, ["custom/tap"])
+        XCTAssertEqual(diff.missingFormulae, [])
+        XCTAssertEqual(diff.missingCasks, [])
+        XCTAssertEqual(diff.totalChanges, 1)
+    }
+
+    @MainActor
+    func testSnapshotRollbackPlanPreservesCasksAndTaps() {
+        let snapshot = BrewStoreSnapshot(
+            id: "snap-2",
+            timestamp: Date(),
+            name: "Test Snapshot 2",
+            fileURL: URL(fileURLWithPath: "/tmp/Brewfile-2"),
+            formulae: ["wget"],
+            casks: ["visual-studio-code"],
+            taps: ["hashicorp/tap"]
+        )
+        let currentPackages: [BrewStorePackage] = []
+        let currentTaps: [BrewStoreTap] = []
+
+        let plan = BrewStoreSnapshotRollbackManager.shared.computePlan(
+            currentPackages: currentPackages,
+            currentTaps: currentTaps,
+            snapshot: snapshot
+        )
+
+        XCTAssertEqual(plan.packagesToReinstall, ["visual-studio-code", "wget"])
+        XCTAssertEqual(plan.missingTaps, ["hashicorp/tap"])
+        XCTAssertTrue(plan.caskIDs.contains("visual-studio-code"))
+        XCTAssertFalse(plan.caskIDs.contains("wget"))
+        XCTAssertEqual(plan.totalOperations, 3)
+    }
 }

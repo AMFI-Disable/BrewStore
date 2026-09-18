@@ -182,7 +182,6 @@ struct TapsView: View {
                     }
                 }
             }
-            .searchable(text: $search, prompt: "Search taps")
             .overlay {
                 if let error = manager.errorMessage, manager.taps.isEmpty, !manager.isLoading {
                     ContentUnavailableView {
@@ -249,8 +248,12 @@ struct TapsView: View {
     private func submitNewTap() {
         let value = newTap.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !value.isEmpty else { return }
-        guard value.range(of: #"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"#, options: .regularExpression) != nil else {
-            tapInputError = "Tap must be in 'user/repo' format (e.g. homebrew/cask-fonts)"
+        let isUserRepo = value.range(of: #"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"#, options: .regularExpression) != nil
+        let isURL = value.hasPrefix("https://") || value.hasPrefix("http://") || value.hasPrefix("git@")
+        let isUserRepoWithURL = value.range(of: #"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\s+\S+$"#, options: .regularExpression) != nil
+
+        guard isUserRepo || isURL || isUserRepoWithURL else {
+            tapInputError = "Tap must be in 'user/repo' format or a repository URL (e.g. homebrew/cask-fonts or https://github.com/...)"
             return
         }
         tapInputError = nil

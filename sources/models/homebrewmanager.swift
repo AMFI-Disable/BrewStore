@@ -1045,20 +1045,20 @@ final class HomebrewManager: ObservableObject {
         }
     }
 
-    func addTap(_ name: String) {
-        runTapCommand(["tap", name])
+    func addTap(_ name: String, completion: (@Sendable @MainActor (Bool) -> Void)? = nil) {
+        runTapCommand(["tap", name], completion: completion)
     }
 
-    func tap(name: String) {
-        addTap(name)
+    func tap(name: String, completion: (@Sendable @MainActor (Bool) -> Void)? = nil) {
+        addTap(name, completion: completion)
     }
 
-    func removeTap(_ tap: BrewStoreTap) {
-        runTapCommand(["untap", tap.name])
+    func removeTap(_ tap: BrewStoreTap, completion: (@Sendable @MainActor (Bool) -> Void)? = nil) {
+        runTapCommand(["untap", tap.name], completion: completion)
     }
 
-    func untap(name: String) {
-        runTapCommand(["untap", name])
+    func untap(name: String, completion: (@Sendable @MainActor (Bool) -> Void)? = nil) {
+        runTapCommand(["untap", name], completion: completion)
     }
 
     func bootstrapHomebrew() {
@@ -1410,8 +1410,11 @@ final class HomebrewManager: ObservableObject {
         return total
     }
 
-    private func runTapCommand(_ arguments: [String]) {
-        guard let brewPath, !isOperating else { return }
+    private func runTapCommand(_ arguments: [String], completion: (@Sendable @MainActor (Bool) -> Void)? = nil) {
+        guard let brewPath, !isOperating else {
+            completion?(false)
+            return
+        }
         isOperating = true
         isCancelled = false
         let title = arguments.first == "tap" ? "Add tap \(arguments.dropFirst().joined(separator: " "))" : "Remove tap \(arguments.dropFirst().joined(separator: " "))"
@@ -1419,7 +1422,10 @@ final class HomebrewManager: ObservableObject {
         Task.detached(priority: .userInitiated) { [executor, brewPath, arguments, title] in
             let result = executor.run(executablePath: brewPath, arguments: arguments, timeout: 300, category: .reversibleMutation)
             await MainActor.run { [weak self] in
-                guard let self else { return }
+                guard let self else {
+                    completion?(result.succeeded)
+                    return
+                }
                 self.isOperating = false
                 self.activeOperationTitle = nil
                 self.errorMessage = result.succeeded ? nil : self.failureMessage(for: result)
@@ -1428,6 +1434,7 @@ final class HomebrewManager: ObservableObject {
                 if result.succeeded {
                     self.refresh()
                 }
+                completion?(result.succeeded)
             }
         }
     }

@@ -295,4 +295,47 @@ final class CVESecurityScannerTests: XCTestCase {
             XCTAssertFalse(report.issues.contains { $0.cveIdentifier == sampleAdv.id }, "Patched package must not be flagged as vulnerable")
         }
     }
+
+    func testCVEScanningManagerVulnerabilityAssessment() {
+        let eolOpenssl = BrewStorePackage(
+            id: "openssl@1.1",
+            name: "OpenSSL 1.1",
+            description: "",
+            homepage: "",
+            version: "1.1.1w",
+            kind: .formula,
+            isInstalled: true,
+            installedVersion: "1.1.1w"
+        )
+        let opensslAdvisories = BrewStoreCVEScanningManager.advisories(for: eolOpenssl)
+        XCTAssertFalse(opensslAdvisories.isEmpty, "EOL openssl@1.1 must be identified as vulnerable")
+        XCTAssertTrue(opensslAdvisories.contains { $0.id == "GHSA-openssl-1-1-eol" })
+
+        let patchedGit = BrewStorePackage(
+            id: "git",
+            name: "Git",
+            description: "",
+            homepage: "",
+            version: "2.47.0",
+            kind: .formula,
+            isInstalled: true,
+            installedVersion: "2.47.0"
+        )
+        let gitAdvisories = BrewStoreCVEScanningManager.advisories(for: patchedGit)
+        XCTAssertTrue(gitAdvisories.isEmpty, "Patched git must not have false-positive advisories")
+
+        let vulnerableGit = BrewStorePackage(
+            id: "git",
+            name: "Git",
+            description: "",
+            homepage: "",
+            version: "2.44.0",
+            kind: .formula,
+            isInstalled: true,
+            installedVersion: "2.44.0"
+        )
+        let vulnerableGitAdvisories = BrewStoreCVEScanningManager.advisories(for: vulnerableGit)
+        XCTAssertFalse(vulnerableGitAdvisories.isEmpty, "Vulnerable git version must be detected")
+        XCTAssertTrue(vulnerableGitAdvisories.contains { $0.id == "CVE-2024-32002" })
+    }
 }

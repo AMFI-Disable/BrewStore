@@ -140,10 +140,21 @@ final class BrewStoreBackgroundItemsManager: ObservableObject {
                     )
                 ]
             )
-            _ = executor.execute(plan: plan)
+            let removalResult = executor.execute(plan: plan)
+            let didSucceed: Bool
+            switch removalResult {
+            case .completed, .partiallyCompleted:
+                didSucceed = true
+            default:
+                didSucceed = false
+            }
 
             await MainActor.run { [weak self] in
-                self?.statusMessage = "Moved \(item.displayName) to Trash."
+                if didSucceed {
+                    self?.statusMessage = "Moved \(item.displayName) to Trash."
+                } else {
+                    self?.statusMessage = "Failed to move \(item.displayName) to Trash."
+                }
                 self?.scanBackgroundItems()
             }
         }
@@ -199,7 +210,7 @@ final class BrewStoreBackgroundItemsManager: ObservableObject {
             let loadedInfo = loadedMap[label]
             let isLoaded = loadedInfo?.isLoaded ?? false
             let pid = loadedInfo?.pid
-            let isRunning = pid != nil && pid! > 0
+            let isRunning = (pid ?? 0) > 0
 
             let appName = deduceAppName(from: label, programPath: programPath)
             let friendlyName = deduceFriendlyName(from: label, appName: appName, filename: file.lastPathComponent)
