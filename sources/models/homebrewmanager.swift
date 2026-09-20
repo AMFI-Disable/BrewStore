@@ -200,6 +200,7 @@ final class HomebrewManager: ObservableObject {
     func setupDirectoryWatcher() {
         directoryWatcher?.stop()
         directoryWatcher = nil
+        CellarFileSystemSentry.shared.stopMonitoring()
 
         guard BrewStorePreferences.shared.autoRefreshOnExternalBrewCommands, let prefix = brewPrefix else { return }
 
@@ -212,6 +213,14 @@ final class HomebrewManager: ObservableObject {
                 self.refresh()
             }
         }
+
+        CellarFileSystemSentry.shared.onDriftDetected = { [weak self] _ in
+            guard let self else { return }
+            if !self.isLoading, !self.isOperating {
+                self.refresh()
+            }
+        }
+        CellarFileSystemSentry.shared.startMonitoring()
     }
 
     var isAvailable: Bool {
@@ -1365,6 +1374,14 @@ final class HomebrewManager: ObservableObject {
         return packages.filter {
             $0.kind == .formula && $0.isInstalled && (($0.id.components(separatedBy: "@").first ?? $0.id) == baseFamily)
         }
+    }
+
+    func fetchFamilyVariants(for package: BrewStorePackage) -> [BrewStorePackage] {
+        guard package.kind == .formula else { return [] }
+        let baseFamily = package.id.components(separatedBy: "@").first ?? package.id
+        return packages.filter {
+            $0.kind == .formula && (($0.id.components(separatedBy: "@").first ?? $0.id) == baseFamily)
+        }.sorted { $0.id < $1.id }
     }
 
     func switchLinkedVersion(from current: BrewStorePackage, to target: BrewStorePackage) {

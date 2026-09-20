@@ -20,6 +20,17 @@ struct ActionConsoleDrawer: View {
         return lines.filter { $0.localizedCaseInsensitiveContains(filterText) }
     }
 
+    private var currentDownloadProgress: Double? {
+        guard manager.isOperating else { return nil }
+        let recentLines = manager.outputLog.components(separatedBy: .newlines).suffix(5)
+        for line in recentLines.reversed() {
+            if let p = ANSIColorSerializer.extractDownloadProgress(from: line) {
+                return p
+            }
+        }
+        return nil
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             // Top Toolbar of Console Drawer
@@ -33,6 +44,14 @@ struct ActionConsoleDrawer: View {
 
                     if manager.isOperating {
                         ProgressView().controlSize(.mini).padding(.leading, 2)
+                        if let progress = currentDownloadProgress {
+                            ProgressView(value: progress, total: 100.0)
+                                .progressViewStyle(.linear)
+                                .frame(width: 50)
+                            Text("\(Int(progress))%")
+                                .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                                .foregroundStyle(.secondary)
+                        }
                         Text(manager.activeOperationTitle ?? "Executing…")
                             .font(.caption2.monospaced())
                             .foregroundStyle(.secondary)
@@ -163,9 +182,7 @@ struct ActionConsoleDrawer: View {
                                 .padding(12)
                         } else {
                             ForEach(Array(filteredLogLines.enumerated()), id: \.offset) { index, line in
-                                Text(line)
-                                    .font(.system(size: 11, design: .monospaced))
-                                    .foregroundStyle(colorForLogLine(line))
+                                Text(ANSIColorSerializer.attributedString(from: line, defaultColor: colorForLogLine(line)))
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .textSelection(.enabled)
                                     .id(index)

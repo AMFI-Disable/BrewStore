@@ -18,8 +18,10 @@ struct PackageDetailView: View {
 
     @State private var showingAdvancedInstallSheet = false
     @State private var showingSecurityApprovalSheet = false
+    @State private var showingVersionSwitcherSheet = false
 
     @StateObject private var securityInspector = BrewStoreSecurityInspector()
+    @StateObject private var entitlementsAuditor = CaskEntitlementsAuditor.shared
     @StateObject private var storageInspector = BrewStoreAppStorageInspector()
     @StateObject private var analyticsManager = BrewStoreAnalyticsManager.shared
     @StateObject private var shellAssistant = BrewStoreShellConfigAssistant()
@@ -74,6 +76,10 @@ struct PackageDetailView: View {
 
     private var siblings: [BrewStorePackage] {
         manager.fetchSiblingVersions(for: currentPackage)
+    }
+
+    private var familyVariants: [BrewStorePackage] {
+        manager.fetchFamilyVariants(for: currentPackage)
     }
 
     var body: some View {
@@ -131,6 +137,9 @@ struct PackageDetailView: View {
             if currentPackage.isInstalled {
                 securityInspector.inspect(package: currentPackage, manager: manager)
                 storageInspector.inspect(package: currentPackage)
+                if currentPackage.kind == .cask {
+                    await entitlementsAuditor.audit(package: currentPackage)
+                }
             }
             if currentPackage.kind == .formula, currentPackage.isInstalled {
                 isLoadingDependents = true
@@ -152,6 +161,9 @@ struct PackageDetailView: View {
         .sheet(isPresented: $showingSecurityApprovalSheet) {
             let requiredPerms = TCCPermissionManager.shared.detectPermissions(for: currentPackage)
             SecurityApprovalSheet(package: currentPackage, permissions: requiredPerms)
+        }
+        .sheet(isPresented: $showingVersionSwitcherSheet) {
+            VersionLinkView(manager: manager)
         }
         .detailModalOverlay(item: $selectedDependencyPackage) { depPkg in
             PackageDetailView(manager: manager, package: depPkg, onDismiss: {
@@ -371,8 +383,8 @@ struct PackageDetailView: View {
             dependenciesSection
         }
 
-        if siblings.count > 1 {
-            versionSwitcherSection(siblings: siblings)
+        if familyVariants.count > 1 {
+            versionSwitcherSection(variants: familyVariants)
         }
 
         if preferences.enableAppCleaner, currentPackage.isInstalled {
@@ -651,11 +663,20 @@ struct PackageDetailView: View {
         .brewCardStyle(elevation: .subtle, padding: Spacing.md)
     }
 
-    private func versionSwitcherSection(siblings: [BrewStorePackage]) -> some View {
+    private func versionSwitcherSection(variants: [BrewStorePackage]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label("Installed Family Versions (\(siblings.count))", systemImage: "arrow.triangle.swap")
-                .font(.headline)
-            versionSwitcherContent(siblings: siblings)
+            HStack {
+                Label("Version Family (\(variants.count) Versions)", systemImage: "arrow.triangle.swap")
+                    .font(.headline)
+                Spacer()
+                Button("Full Switcher Hub…") {
+                    showingVersionSwitcherSheet = true
+                }
+                .buttonStyle(.borderless)
+                .font(.caption)
+                .foregroundStyle(Color.accentColor)
+            }
+            versionSwitcherContent(variants: variants)
         }
         .brewCardStyle(elevation: .subtle, padding: Spacing.md)
     }
@@ -831,11 +852,39 @@ struct PackageDetailView: View {
                                 .foregroundStyle(.secondary)
                         }
                         .padding(6)
-                        .background(Color.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 6))
                     } else {
                         HStack(spacing: 4) {
                             Image(systemName: "checkmark.shield.fill").foregroundStyle(.green).font(.caption2)
                             Text("Clean Gatekeeper").font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+
+                    if currentPackage.kind == .cask, let entReport = entitlementsAuditor.reportsByPackageID[currentPackage.id] {
+                        Divider()
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text("App Sandbox").font(.caption).foregroundStyle(.secondary)
+                                Spacer()
+                                Text(entReport.isSandboxed ? "Enforced" : "Unrestricted")
+                                    .font(.caption2.bold())
+                                    .foregroundStyle(entReport.isSandboxed ? Color.green : Color.secondary)
+                            }
+
+                            if !entReport.badges.isEmpty {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 4) {
+                                        ForEach(entReport.badges) { badge in
+                                            Label(badge.title, systemImage: badge.systemImage)
+                                                .font(.system(size: 9, weight: .semibold))
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 2)
+                                                .background(Color.secondary.opacity(0.12), in: Capsule())
+                                                .help(badge.description)
+                                        }
+                                    }
+                                }
+                                .padding(.top, 2)
+                            }
                         }
                     }
                 }
@@ -1027,33 +1076,41 @@ struct PackageDetailView: View {
 
     // MARK: - Collapsible Content Blocks
 
-    private func versionSwitcherContent(siblings: [BrewStorePackage]) -> some View {
+    private func versionSwitcherContent(variants: [BrewStorePackage]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Switch active symlinked version for this formula family:")
+            Text("Switch active symlink or install alternative releases for this runtime family:")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            HStack(spacing: 8) {
-                ForEach(siblings) { sibling in
-                    if sibling.id == currentPackage.id {
-                        Button {} label: {
-                            HStack(spacing: 6) {
-                                Text(sibling.id).font(.caption.monospaced())
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(variants) { variant in
+                        HStack(spacing: 6) {
+                            Text(variant.id).font(.caption.monospaced())
+                            if variant.id == currentPackage.id {
                                 Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                            } else if variant.isInstalled {
+                                Button("Switch") {
+                                    manager.switchLinkedVersion(from: currentPackage, to: variant)
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .controlSize(.mini)
+                                .disabled(manager.isOperating)
+                            } else {
+                                Button("Install") {
+                                    manager.perform(package: variant, action: .install)
+                                }
+                                .buttonStyle(.bordered)
+                                .controlSize(.mini)
+                                .disabled(manager.isOperating)
                             }
                         }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(true)
-                    } else {
-                        Button {
-                            manager.switchLinkedVersion(from: currentPackage, to: sibling)
-                        } label: {
-                            Text(sibling.id).font(.caption.monospaced())
-                        }
-                        .buttonStyle(.bordered)
-                        .disabled(manager.isOperating)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 6))
                     }
                 }
+                .padding(.vertical, 2)
             }
         }
     }
