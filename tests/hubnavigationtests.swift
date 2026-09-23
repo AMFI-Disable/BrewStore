@@ -15,9 +15,9 @@ final class HubNavigationTests: XCTestCase {
         }
     }
 
-    func testAll17SectionsMapToCorrectHubs() {
+    func testAllSectionsMapToCorrectHubs() {
         let sections = BrewStoreSection.allCases
-        XCTAssertEqual(sections.count, 17)
+        XCTAssertEqual(sections.count, 18)
 
         for section in sections {
             let hub = section.hub
@@ -26,7 +26,7 @@ final class HubNavigationTests: XCTestCase {
                 XCTAssertEqual(hub, .storefront, "\(section.rawValue) should belong to Storefront Hub")
             case .installed, .updates, .wishlist, .adoption, .topology:
                 XCTAssertEqual(hub, .myMac, "\(section.rawValue) should belong to My Mac Hub")
-            case .services, .taps, .creator:
+            case .workspaces, .services, .taps, .creator:
                 XCTAssertEqual(hub, .environment, "\(section.rawValue) should belong to Environment Hub")
             case .backups:
                 XCTAssertEqual(hub, .health, "\(section.rawValue) should belong to Health Hub")

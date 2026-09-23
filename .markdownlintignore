@@ -1,0 +1,4 @@
+build/**
+.build/**
+DerivedData/**
+**/node_modules/**

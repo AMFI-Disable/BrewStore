@@ -111,6 +111,8 @@ final class HierarchicalPipelineIntegrationTests: XCTestCase {
                 AnyView(CategoriesGridView(manager: manager, catalog: discovery) { _ in })
             case .installed, .updates, .wishlist, .adoption, .topology:
                 AnyView(MyMacHubView(manager: manager, selection: .constant(section)))
+            case .workspaces:
+                AnyView(WorkspacesView(manager: manager))
             case .services, .taps, .creator:
                 AnyView(EnvironmentHubView(manager: manager, selection: .constant(section), accountManager: githubAccount))
             case .backups:

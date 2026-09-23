@@ -205,6 +205,8 @@ struct BrewStoreRootView: View {
                                 }
                             case .installed, .adoption, .topology, .wishlist, .updates:
                                 MyMacHubView(manager: manager, selection: $selection)
+                            case .workspaces:
+                                WorkspacesView(manager: manager)
                             case .services, .taps, .creator:
                                 EnvironmentHubView(manager: manager, selection: $selection, accountManager: githubAccount)
                             case .backups:

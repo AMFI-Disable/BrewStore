@@ -6,7 +6,7 @@ import XCTest
 final class SidebarDestinationSelectionTests: XCTestCase {
     func testOnlyAuthenticDestinationsAreRegisteredAsSelectable() {
         let expectedDestinations = BrewStoreSection.allCases
-        XCTAssertEqual(expectedDestinations.count, 17)
+        XCTAssertEqual(expectedDestinations.count, 18)
 
         for destination in expectedDestinations {
             XCTAssertTrue(

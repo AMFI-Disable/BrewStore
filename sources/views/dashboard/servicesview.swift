@@ -13,6 +13,7 @@ struct ServicesView: View {
     @State private var selectedLogService: BrewStoreService?
     @State private var pendingAction: PendingServiceAction?
     @State private var itemPendingTrash: BrewStoreBackgroundItem?
+    @State private var showingPortMatrixSheet = false
 
     enum PendingServiceAction: Identifiable {
         case single(service: BrewStoreService, action: ServiceActionType)
@@ -90,6 +91,14 @@ struct ServicesView: View {
                         batchControlsMenu
 
                         Button {
+                            showingPortMatrixSheet = true
+                        } label: {
+                            Label("Port Matrix", systemImage: "network")
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+
+                        Button {
                             manager.refresh()
                             telemetry.refreshTelemetry(for: manager.services)
                         } label: {
@@ -140,6 +149,13 @@ struct ServicesView: View {
                         batchControlsMenu
 
                         Button {
+                            showingPortMatrixSheet = true
+                        } label: {
+                            Label("Port Matrix", systemImage: "network")
+                        }
+                        .controlSize(.small)
+
+                        Button {
                             manager.refresh()
                             telemetry.refreshTelemetry(for: manager.services)
                         } label: {
@@ -176,6 +192,9 @@ struct ServicesView: View {
         }
         .sheet(item: $selectedLogService) { svc in
             ServiceLogView(service: svc, brewPrefix: manager.brewPrefix)
+        }
+        .sheet(isPresented: $showingPortMatrixSheet) {
+            ServicePortMatrixView(manager: manager)
         }
         .confirmationDialog(
             confirmationTitle,

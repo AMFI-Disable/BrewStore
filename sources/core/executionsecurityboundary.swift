@@ -16,7 +16,8 @@ enum ExecutionSecurityBoundary {
         "/bin/bash",
         "/bin/sleep",
         "/bin/echo",
-        "/bin/cat"
+        "/bin/cat",
+        "/usr/bin/tar"
     ]
 
     /// Dangerous environment variables that must be scrubbed before executing child processes.

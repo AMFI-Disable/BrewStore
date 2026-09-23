@@ -387,6 +387,10 @@ struct PackageDetailView: View {
             versionSwitcherSection(variants: familyVariants)
         }
 
+        if currentPackage.kind == .formula, currentPackage.isInstalled {
+            KegSnapshotCardView(manager: manager, packageID: currentPackage.id)
+        }
+
         if preferences.enableAppCleaner, currentPackage.isInstalled {
             storageSection
         }

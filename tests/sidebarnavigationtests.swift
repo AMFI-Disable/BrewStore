@@ -4,7 +4,7 @@ import XCTest
 final class SidebarNavigationTests: XCTestCase {
     func testAllSidebarSectionsAreValidAndUnique() {
         let allSections = BrewStoreSection.allCases
-        XCTAssertEqual(allSections.count, 17)
+        XCTAssertEqual(allSections.count, 18)
 
         var seenIDs = Set<String>()
         for section in allSections {
@@ -30,6 +30,7 @@ final class SidebarNavigationTests: XCTestCase {
         XCTAssertEqual(BrewStoreSection.adoption.rawValue, "Adoption & Replacements")
         XCTAssertEqual(BrewStoreSection.topology.rawValue, "Dependencies")
         XCTAssertEqual(BrewStoreSection.wishlist.rawValue, "Wishlist")
+        XCTAssertEqual(BrewStoreSection.workspaces.rawValue, "Workspaces")
         XCTAssertEqual(BrewStoreSection.services.rawValue, "Services")
         XCTAssertEqual(BrewStoreSection.taps.rawValue, "Taps")
 

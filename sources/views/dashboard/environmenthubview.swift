@@ -35,6 +35,7 @@ struct EnvironmentHubView: View {
 
     @State private var subMode: EnvironmentSubMode = .services
     @State private var showingVersionSwitcher = false
+    @State private var showingShellProfiler = false
 
     private var runningServicesCount: Int {
         manager.services.filter(\.isRunning).count
@@ -121,6 +122,14 @@ struct EnvironmentHubView: View {
                     }
 
                     Spacer()
+
+                    Button {
+                        showingShellProfiler = true
+                    } label: {
+                        Label("Profile Shell", systemImage: "gauge.with.needle")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
                 }
 
                 ToolchainCompanionsCard(manager: manager)
@@ -149,6 +158,9 @@ struct EnvironmentHubView: View {
         }
         .sheet(isPresented: $showingVersionSwitcher) {
             VersionLinkView(manager: manager)
+        }
+        .sheet(isPresented: $showingShellProfiler) {
+            ShellProfilerView()
         }
         .onAppear {
             syncFromSelection()

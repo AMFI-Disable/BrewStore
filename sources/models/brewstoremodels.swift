@@ -160,6 +160,7 @@ enum BrewStoreSection: String, CaseIterable, Identifiable {
     case adoption = "Adoption & Replacements"
     case topology = "Dependencies"
     case wishlist = "Wishlist"
+    case workspaces = "Workspaces"
     case services = "Services"
     case taps = "Taps"
     case creator = "Creator Studio"
@@ -186,6 +187,7 @@ enum BrewStoreSection: String, CaseIterable, Identifiable {
         case .adoption: "arrow.down.app.fill"
         case .topology: "point.3.connected.trianglepath.dotted"
         case .wishlist: "star.fill"
+        case .workspaces: "briefcase.fill"
         case .services: "gearshape.2.fill"
         case .taps: "square.3.layers.3d.down.forward"
         case .creator: "hammer.circle.fill"
@@ -221,7 +223,7 @@ enum BrewStoreHub: String, CaseIterable, Identifiable {
         switch self {
         case .storefront: .discover
         case .myMac: .installed
-        case .environment: .services
+        case .environment: .workspaces
         case .health: .backups
         case .settings: .settings
         }
@@ -234,7 +236,7 @@ enum BrewStoreHub: String, CaseIterable, Identifiable {
         case .myMac:
             [.installed, .updates, .wishlist, .adoption, .topology]
         case .environment:
-            [.services, .taps, .creator]
+            [.workspaces, .services, .taps, .creator]
         case .health:
             [.backups]
         case .settings:
@@ -250,7 +252,7 @@ extension BrewStoreSection {
             .storefront
         case .installed, .updates, .wishlist, .adoption, .topology:
             .myMac
-        case .services, .taps, .creator:
+        case .workspaces, .services, .taps, .creator:
             .environment
         case .backups:
             .health
