@@ -21,6 +21,8 @@ struct PackageDetailView: View {
     @State private var showingVersionSwitcherSheet = false
     @State private var showingUpgradeDiffSheet = false
     @State private var showingBottleIntegritySheet = false
+    @State private var showingCaskQuarantineSheet = false
+    @State private var caskQuarantineItem: CaskQuarantineItem? = nil
 
     @StateObject private var securityInspector = BrewStoreSecurityInspector()
     @StateObject private var entitlementsAuditor = CaskEntitlementsAuditor.shared
@@ -163,6 +165,7 @@ struct PackageDetailView: View {
                 storageInspector.inspect(package: currentPackage)
                 if currentPackage.kind == .cask {
                     await entitlementsAuditor.audit(package: currentPackage)
+                    caskQuarantineItem = await BrewStoreCaskQuarantineAuditor.shared.auditPackage(package: currentPackage, prefix: effectivePrefix)
                 }
             }
             if currentPackage.kind == .formula, currentPackage.isInstalled {
@@ -194,6 +197,9 @@ struct PackageDetailView: View {
         }
         .sheet(isPresented: $showingBottleIntegritySheet) {
             BottleIntegrityAuditorView(manager: manager)
+        }
+        .sheet(isPresented: $showingCaskQuarantineSheet) {
+            CaskQuarantineAuditorView(manager: manager)
         }
         .detailModalOverlay(item: $selectedDependencyPackage) { depPkg in
             PackageDetailView(manager: manager, package: depPkg, onDismiss: {
@@ -466,6 +472,10 @@ struct PackageDetailView: View {
             let integrity = BrewStoreBottleIntegrityAuditor.auditPackage(package: currentPackage, prefix: effectivePrefix)
             if integrity.hasIntegrityIssue {
                 integrityWarningCard(integrity: integrity)
+            }
+
+            if let quarantine = caskQuarantineItem, quarantine.isQuarantined {
+                caskQuarantineWarningCard(item: quarantine)
             }
         }
 
@@ -1005,6 +1015,36 @@ struct PackageDetailView: View {
                 }
                 .buttonStyle(.plain)
                 .help("Inspect cryptographic bottle checksums and Cellar Mach-O binaries")
+            }
+
+            if currentPackage.kind == .cask, currentPackage.isInstalled {
+                Divider()
+                Button {
+                    showingCaskQuarantineSheet = true
+                } label: {
+                    HStack {
+                        let status = caskQuarantineItem?.status ?? .uninspected
+                        Image(systemName: status.iconName)
+                            .font(.caption2)
+                            .foregroundStyle(status.badgeColor)
+                        Text("Gatekeeper & Quarantine").font(.caption).foregroundStyle(.secondary)
+                        Spacer()
+                        Text(status.rawValue)
+                            .font(.caption2.bold())
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(
+                                status.badgeColor.opacity(0.12),
+                                in: Capsule()
+                            )
+                            .foregroundStyle(status.badgeColor)
+                        Image(systemName: "chevron.right")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .buttonStyle(.plain)
+                .help("Audit Gatekeeper extended quarantine attributes and code signatures")
             }
 
             let advisories = BrewStoreCVEScanningManager.advisories(for: currentPackage)
@@ -1834,6 +1874,63 @@ struct PackageDetailView: View {
         .overlay(
             RoundedRectangle(cornerRadius: Radius.panel)
                 .strokeBorder(Color.red.opacity(0.3), lineWidth: 1)
+        )
+    }
+
+    @ViewBuilder
+    private func caskQuarantineWarningCard(item: CaskQuarantineItem) -> some View {
+        HStack(alignment: .center, spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(Color.orange.opacity(0.15))
+                    .frame(width: 40, height: 40)
+                Image(systemName: "exclamationmark.shield.fill")
+                    .font(.system(size: 18))
+                    .foregroundStyle(.orange)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 6) {
+                    Text("Gatekeeper Quarantine Active")
+                        .font(.headline)
+                    Text("(Quarantined)")
+                        .font(.caption.bold())
+                        .foregroundStyle(.orange)
+                }
+
+                Text("This application bundle has extended quarantine attributes that may trigger Gatekeeper launch blocks or verification dialogs.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Button {
+                Task {
+                    let res = await BrewStoreCaskQuarantineAuditor.shared.removeQuarantine(for: item)
+                    if case .success = res {
+                        caskQuarantineItem = await BrewStoreCaskQuarantineAuditor.shared.auditPackage(package: currentPackage, prefix: effectivePrefix)
+                    }
+                }
+            } label: {
+                Label("Clear Quarantine", systemImage: "checkmark.shield")
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.regular)
+
+            Button {
+                showingCaskQuarantineSheet = true
+            } label: {
+                Image(systemName: "info.circle")
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.regular)
+            .help("Audit Details")
+        }
+        .brewCardStyle(elevation: .subtle, padding: Spacing.md)
+        .overlay(
+            RoundedRectangle(cornerRadius: Radius.panel)
+                .strokeBorder(Color.orange.opacity(0.3), lineWidth: 1)
         )
     }
 }

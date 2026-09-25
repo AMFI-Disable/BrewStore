@@ -1659,25 +1659,41 @@ enum PackageAction: Equatable {
     }
 
     func arguments(for package: BrewStorePackage) -> [String] {
+        let noQuarantine = package.kind == .cask && UserDefaults.standard.bool(forKey: BrewStorePreferences.Keys.noQuarantineCaskOpts)
         switch self {
         case .install:
-            ["install", package.kind.brewFlag, package.id]
+            var args = ["install", package.kind.brewFlag]
+            if noQuarantine {
+                args.append("--no-quarantine")
+            }
+            args.append(package.id)
+            return args
         case .upgrade:
-            ["upgrade", package.kind.brewFlag, package.id]
+            var args = ["upgrade", package.kind.brewFlag]
+            if noQuarantine {
+                args.append("--no-quarantine")
+            }
+            args.append(package.id)
+            return args
         case .uninstall:
-            ["uninstall", package.kind.brewFlag, package.id]
+            return ["uninstall", package.kind.brewFlag, package.id]
         case .reinstall:
-            ["reinstall", package.kind.brewFlag, package.id]
+            var args = ["reinstall", package.kind.brewFlag]
+            if noQuarantine {
+                args.append("--no-quarantine")
+            }
+            args.append(package.id)
+            return args
         case .link:
-            ["link", package.id]
+            return ["link", package.id]
         case .linkOverwrite:
-            ["link", "--overwrite", package.id]
+            return ["link", "--overwrite", package.id]
         case .unlink:
-            ["unlink", package.id]
+            return ["unlink", package.id]
         case .adopt:
-            ["install", "--cask", "--adopt", package.id]
+            return ["install", "--cask", "--adopt", package.id]
         case let .custom(_, args):
-            args
+            return args
         }
     }
 }

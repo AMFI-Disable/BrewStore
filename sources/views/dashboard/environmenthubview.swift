@@ -41,6 +41,7 @@ struct EnvironmentHubView: View {
     @State private var showingBottleIntegrityAuditor = false
     @State private var showingTapHealthBenchmark = false
     @State private var showingBrewfileManager = false
+    @State private var showingCaskQuarantineAuditor = false
 
     private var runningServicesCount: Int {
         manager.services.filter(\.isRunning).count
@@ -175,6 +176,14 @@ struct EnvironmentHubView: View {
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
+
+                    Button {
+                        showingCaskQuarantineAuditor = true
+                    } label: {
+                        Label("Cask Security", systemImage: "shield.lefthalf.filled")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
                 }
 
                 ToolchainCompanionsCard(manager: manager)
@@ -221,6 +230,9 @@ struct EnvironmentHubView: View {
         }
         .sheet(isPresented: $showingBrewfileManager) {
             BrewfileManagerView(manager: manager)
+        }
+        .sheet(isPresented: $showingCaskQuarantineAuditor) {
+            CaskQuarantineAuditorView(manager: manager)
         }
         .onAppear {
             syncFromSelection()

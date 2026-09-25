@@ -68,6 +68,7 @@ final class BrewStorePreferences: ObservableObject {
         static let confirmOperationsBeforeExecution = "pref_confirm_operations_before_execution"
         static let defaultUninstallMode = "pref_default_uninstall_mode"
         static let defaultAppSourcePreference = "pref_default_app_source_preference"
+        static let noQuarantineCaskOpts = "pref_no_quarantine_cask_opts"
 
         // Decluttering & Hiding
         static let hideCompletedBundles = "pref_hide_completed_bundles"
@@ -108,6 +109,10 @@ final class BrewStorePreferences: ObservableObject {
 
     @Published var defaultAppSourcePreference: AppSourcePreference {
         didSet { defaults.set(defaultAppSourcePreference.rawValue, forKey: Keys.defaultAppSourcePreference) }
+    }
+
+    @Published var noQuarantineCaskOpts: Bool {
+        didSet { defaults.set(noQuarantineCaskOpts, forKey: Keys.noQuarantineCaskOpts) }
     }
 
     @Published var confirmOperationsBeforeExecution: Bool {
@@ -248,6 +253,7 @@ final class BrewStorePreferences: ObservableObject {
             Keys.confirmOperationsBeforeExecution: true,
             Keys.defaultUninstallMode: BrewStoreAppUninstallMode.preserveData.rawValue,
             Keys.defaultAppSourcePreference: AppSourcePreference.homebrew.rawValue,
+            Keys.noQuarantineCaskOpts: false,
             Keys.hideCompletedBundles: false,
             Keys.hideInstalledWishlist: false,
             Keys.hideIdenticalSnapshots: false,
@@ -298,6 +304,7 @@ final class BrewStorePreferences: ObservableObject {
         self.enableAppCleaner = defaults.bool(forKey: Keys.enableAppCleaner)
         self.enableAutoSnapshotBeforeMutations = defaults.bool(forKey: Keys.enableAutoSnapshotBeforeMutations)
         self.enableAutoGistCloudSync = defaults.bool(forKey: Keys.enableAutoGistCloudSync)
+        self.noQuarantineCaskOpts = defaults.bool(forKey: Keys.noQuarantineCaskOpts)
 
         self.webhookURL = defaults.string(forKey: Keys.webhookURL) ?? ""
         self.webhookEnabled = defaults.bool(forKey: Keys.webhookEnabled)
@@ -331,6 +338,7 @@ final class BrewStorePreferences: ObservableObject {
         confirmOperationsBeforeExecution = true
         defaultUninstallMode = .preserveData
         defaultAppSourcePreference = .homebrew
+        noQuarantineCaskOpts = false
         hideCompletedBundles = false
         hideInstalledWishlist = false
         hideIdenticalSnapshots = false
