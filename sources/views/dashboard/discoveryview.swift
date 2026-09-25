@@ -869,7 +869,7 @@ struct DiscoveryView: View {
             }
         }
         .padding(10)
-        .frame(width: 190)
+        .frame(width: 215)
         .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10))
         .overlay(
             RoundedRectangle(cornerRadius: 10)

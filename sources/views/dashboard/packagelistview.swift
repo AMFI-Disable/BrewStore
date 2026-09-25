@@ -790,6 +790,7 @@ struct PackageInstallCountBadge: View {
             .padding(.horizontal, 5)
             .padding(.vertical, 2)
             .background(Color.secondary.opacity(0.08), in: Capsule())
+            .fixedSize(horizontal: true, vertical: false)
             .help("Install Statistics for \(packageID):\n• Last 7 days: \(analytics.formatted7d) (\(analytics.install7d.formatted()) installs)\n• Last 30 days (1 mo): \(analytics.formatted30d) (\(analytics.install30d.formatted()) installs)\n• Last 365 days (1 yr): \(analytics.formatted365d) (\(analytics.install365d.formatted()) installs)")
         }
     }

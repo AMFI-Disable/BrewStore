@@ -119,7 +119,7 @@ struct CategoriesGridView: View {
     }
 
     private let columns = [
-        GridItem(.adaptive(minimum: 220, maximum: 380), spacing: Spacing.md)
+        GridItem(.adaptive(minimum: 300, maximum: 480), spacing: Spacing.md)
     ]
 
     var body: some View {
@@ -296,7 +296,7 @@ private struct CategoryPackageCard: View {
                             )
                     }
 
-                    VStack(alignment: .leading, spacing: 3) {
+                    VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 6) {
                             Text(resolvedPackage.name)
                                 .font(.headline)
@@ -304,6 +304,7 @@ private struct CategoryPackageCard: View {
                                 .lineLimit(1)
 
                             PackageInstallCountBadge(package: resolvedPackage)
+                                .fixedSize(horizontal: true, vertical: false)
                         }
 
                         HStack(spacing: 6) {
@@ -316,6 +317,7 @@ private struct CategoryPackageCard: View {
                                     in: RoundedRectangle(cornerRadius: 4)
                                 )
                                 .foregroundStyle(resolvedPackage.kind == .cask ? Color.blue : Color.green)
+                                .fixedSize(horizontal: true, vertical: false)
 
                             if !resolvedPackage.displayVersion.isEmpty {
                                 Text(resolvedPackage.displayVersion)
@@ -329,7 +331,7 @@ private struct CategoryPackageCard: View {
                     Spacer()
 
                     // App Store Action Pill
-                    AppStoreActionButton(manager: manager, package: resolvedPackage)
+                    AppStoreActionButton(manager: manager, package: resolvedPackage, size: .small)
                 }
 
                 Text(resolvedPackage.description.isEmpty ? "High-performance Homebrew package." : resolvedPackage.description)

@@ -193,11 +193,15 @@ final class BottleIntegrityAuditorTests: XCTestCase {
         XCTAssertTrue(report.failureReason?.contains("0-byte") ?? false)
     }
 
+    private final class ArgumentBox: @unchecked Sendable {
+        var args: [String] = []
+    }
+
     func testReinstallBottleCommandExecution() async {
-        var recordedArgs: [String] = []
+        let box = ArgumentBox()
 
         let customHandler: BrewStoreCommandExecutor.CustomHandler = { _, arguments, _, category, _, _, _ in
-            recordedArgs = arguments
+            box.args = arguments
             return BrewStoreCommandResult(
                 standardOutput: "Reinstalled",
                 standardError: "",
@@ -217,6 +221,6 @@ final class BottleIntegrityAuditorTests: XCTestCase {
 
         let res = await auditor.reinstallBottle(packageID: "wget", prefix: tempDir.path)
         XCTAssertTrue(res.success)
-        XCTAssertEqual(recordedArgs, ["reinstall", "--force-bottle", "wget"])
+        XCTAssertEqual(box.args, ["reinstall", "--force-bottle", "wget"])
     }
 }

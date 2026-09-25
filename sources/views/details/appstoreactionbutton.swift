@@ -142,9 +142,10 @@ struct AppStoreActionButton: View {
                                 .font(.system(size: 9, weight: .bold))
                             Text("INSTALLED")
                                 .font(.system(size: size == .small ? 10 : 11, weight: .bold, design: .rounded))
+                                .fixedSize(horizontal: true, vertical: false)
                         }
                     }
-                    .padding(.horizontal, size == .small ? 11 : 14)
+                    .padding(.horizontal, size == .small ? 8 : 14)
                     .padding(.vertical, size == .small ? 5 : 6)
                     .background(Color.secondary.opacity(0.12), in: Capsule())
                     .overlay(Capsule().stroke(Color.secondary.opacity(0.15), lineWidth: 1))

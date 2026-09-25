@@ -140,6 +140,8 @@ private struct BrewStoreCommands: Commands {
         CommandMenu("Navigate") {
             Button("Discover") { selection = .discover }
                 .keyboardShortcut("1", modifiers: .command)
+            Button("All Applications") { selection = .allApps }
+            Button("All CLI Tools") { selection = .allFormulae }
             Button("Community Picks") { selection = .showdown }
                 .keyboardShortcut("p", modifiers: [.command, .shift])
             Button("Stories") { selection = .stories }

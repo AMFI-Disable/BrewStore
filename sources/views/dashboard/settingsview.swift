@@ -1252,11 +1252,12 @@ struct SettingsView: View {
             }
 
             cardSection(title: "Maintenance Tools", icon: "wrench.and.screwdriver") {
-                HStack(spacing: 12) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 220, maximum: 360), spacing: 10)], spacing: 10) {
                     Button("Clean Disk Cache (brew cleanup)") {
                         showingClearCacheConfirm = true
                     }
                     .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .disabled(!manager.isAvailable || manager.isOperating)
                     .confirmationDialog("Clean Disk Cache?", isPresented: $showingClearCacheConfirm, titleVisibility: .visible) {
                         Button("Run Cleanup (brew cleanup)", role: .destructive) {
@@ -1271,42 +1272,49 @@ struct SettingsView: View {
                         BrewStoreUninstallCoordinator.shared.requestAutoremove(manager: manager)
                     }
                     .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .disabled(!manager.isAvailable || manager.isOperating)
 
                     Button("Audit Leaves & Keg-Only") {
                         showingOrphanAndKegAuditor = true
                     }
                     .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .disabled(!manager.isAvailable || manager.isOperating)
 
                     Button("Audit Bottle Integrity") {
                         showingBottleIntegrityAuditor = true
                     }
                     .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .disabled(!manager.isAvailable || manager.isOperating)
 
                     Button("Tap Health & Benchmark") {
                         showingTapHealthBenchmark = true
                     }
                     .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .disabled(!manager.isAvailable || manager.isOperating)
 
                     Button("Declarative Brewfile Studio") {
                         showingBrewfileManager = true
                     }
                     .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .disabled(!manager.isAvailable || manager.isOperating)
 
                     Button("Cask Quarantine Auditor") {
                         showingCaskQuarantineAuditor = true
                     }
                     .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .disabled(!manager.isAvailable || manager.isOperating)
 
                     Button("Source Compiler & Build Logs") {
                         showingSourceBuildStudio = true
                     }
                     .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .disabled(!manager.isAvailable || manager.isOperating)
                 }
             }

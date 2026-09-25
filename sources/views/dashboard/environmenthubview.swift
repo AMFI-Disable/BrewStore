@@ -130,68 +130,64 @@ struct EnvironmentHubView: View {
 
                     Spacer()
 
-                    Button {
-                        showingShellProfiler = true
-                    } label: {
-                        Label("Profile Shell", systemImage: "gauge.with.needle")
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
+                    Menu {
+                        Section("Security & Integrity") {
+                            Button {
+                                showingCaskQuarantineAuditor = true
+                            } label: {
+                                Label("Cask Quarantine & Gatekeeper Security…", systemImage: "shield.lefthalf.filled")
+                            }
 
-                    Button {
-                        showingDualArchBridge = true
-                    } label: {
-                        Label("Dual-Arch Bridge", systemImage: "cpu")
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
+                            Button {
+                                showingBottleIntegrityAuditor = true
+                            } label: {
+                                Label("Bottle Checksum & Integrity Auditor…", systemImage: "checkmark.shield")
+                            }
 
-                    Button {
-                        showingOrphanAndKegAuditor = true
-                    } label: {
-                        Label("Orphans & Keg-Only", systemImage: "leaf.arrow.triangle.circlepath")
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
+                            Button {
+                                showingOrphanAndKegAuditor = true
+                            } label: {
+                                Label("Orphans & Keg-Only Cleanliness…", systemImage: "leaf.arrow.triangle.circlepath")
+                            }
+                        }
 
-                    Button {
-                        showingBottleIntegrityAuditor = true
-                    } label: {
-                        Label("Bottle Integrity", systemImage: "checkmark.shield")
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
+                        Section("Performance & Benchmarks") {
+                            Button {
+                                showingShellProfiler = true
+                            } label: {
+                                Label("Profile Shell Startup…", systemImage: "gauge.with.needle")
+                            }
 
-                    Button {
-                        showingTapHealthBenchmark = true
-                    } label: {
-                        Label("Tap Health", systemImage: "point.3.connected.trianglepath.dotted")
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
+                            Button {
+                                showingTapHealthBenchmark = true
+                            } label: {
+                                Label("Tap Health & Sync Benchmark…", systemImage: "point.3.connected.trianglepath.dotted")
+                            }
+                        }
 
-                    Button {
-                        showingBrewfileManager = true
-                    } label: {
-                        Label("Brewfile Studio", systemImage: "shippingbox.and.arrow.backward")
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
+                        Section("Architecture & Toolchains") {
+                            Button {
+                                showingSourceBuildStudio = true
+                            } label: {
+                                Label("Source Compiler Matrix…", systemImage: "hammer.fill")
+                            }
 
-                    Button {
-                        showingCaskQuarantineAuditor = true
-                    } label: {
-                        Label("Cask Security", systemImage: "shield.lefthalf.filled")
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
+                            Button {
+                                showingDualArchBridge = true
+                            } label: {
+                                Label("Dual-Architecture Bridge…", systemImage: "cpu")
+                            }
 
-                    Button {
-                        showingSourceBuildStudio = true
+                            Button {
+                                showingBrewfileManager = true
+                            } label: {
+                                Label("Declarative Brewfile Studio…", systemImage: "shippingbox.and.arrow.backward")
+                            }
+                        }
                     } label: {
-                        Label("Compiler Matrix", systemImage: "hammer.fill")
+                        Label("Diagnostics & Studios", systemImage: "wrench.and.screwdriver")
                     }
-                    .buttonStyle(.bordered)
+                    .menuStyle(.borderedButton)
                     .controlSize(.small)
                 }
 

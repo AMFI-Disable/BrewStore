@@ -219,11 +219,15 @@ final class OrphanAndKegAuditorTests: XCTestCase {
         XCTAssertTrue(curlKeg?.binExists ?? false)
     }
 
+    private final class ArgumentBox: @unchecked Sendable {
+        var args: [String] = []
+    }
+
     func testToggleKegLinkActions() async {
-        var recordedArgs: [String] = []
+        let box = ArgumentBox()
 
         let customHandler: BrewStoreCommandExecutor.CustomHandler = { _, arguments, _, category, _, _, _ in
-            recordedArgs = arguments
+            box.args = arguments
             return BrewStoreCommandResult(
                 standardOutput: "Success",
                 standardError: "",
@@ -244,19 +248,19 @@ final class OrphanAndKegAuditorTests: XCTestCase {
         // Force link
         let forceRes = await auditor.toggleKegLink(packageID: "curl", forceLink: true, prefix: tempDir.path)
         XCTAssertTrue(forceRes.success)
-        XCTAssertEqual(recordedArgs, ["link", "--overwrite", "--force", "curl"])
+        XCTAssertEqual(box.args, ["link", "--overwrite", "--force", "curl"])
 
         // Unlink
         let unlinkRes = await auditor.toggleKegLink(packageID: "curl", forceLink: false, prefix: tempDir.path)
         XCTAssertTrue(unlinkRes.success)
-        XCTAssertEqual(recordedArgs, ["unlink", "curl"])
+        XCTAssertEqual(box.args, ["unlink", "curl"])
     }
 
     func testPruneSingleOrphanAndPruneAll() async {
-        var recordedArgs: [String] = []
+        let box = ArgumentBox()
 
         let customHandler: BrewStoreCommandExecutor.CustomHandler = { _, arguments, _, category, _, _, _ in
-            recordedArgs = arguments
+            box.args = arguments
             return BrewStoreCommandResult(
                 standardOutput: "Pruned",
                 standardError: "",
@@ -277,12 +281,12 @@ final class OrphanAndKegAuditorTests: XCTestCase {
         // Single prune
         let pruneSingleSuccess = await auditor.pruneSingleOrphan(packageID: "libpng", prefix: tempDir.path)
         XCTAssertTrue(pruneSingleSuccess)
-        XCTAssertEqual(recordedArgs, ["uninstall", "libpng"])
+        XCTAssertEqual(box.args, ["uninstall", "libpng"])
 
         // Prune all (autoremove)
         let pruneAllRes = await auditor.pruneAllOrphans(prefix: tempDir.path)
         XCTAssertTrue(pruneAllRes.success)
-        XCTAssertEqual(recordedArgs, ["autoremove"])
+        XCTAssertEqual(box.args, ["autoremove"])
     }
 
     func testClipboardCopy() {
