@@ -471,7 +471,7 @@ struct BrewStoreRootView: View {
             hubSummaryBadge(for: hub)
         }
         .padding(.vertical, 2)
-        .padding(.trailing, 20)
+        .padding(.trailing, 6)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("Sidebar.HubHeader.\(hub.rawValue.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "&", with: ""))")
     }
