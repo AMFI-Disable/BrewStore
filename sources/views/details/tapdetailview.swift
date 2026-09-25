@@ -8,6 +8,8 @@ struct TapDetailView: View {
     @State private var showingTapGraph = false
     @State private var selectedPackageForDetail: BrewStorePackage?
     @StateObject private var healthManager = BrewStoreTapHealthManager.shared
+    @State private var statusToast: String?
+    @State private var showingProtocolSwitchAlert = false
 
     private var tapLocalURL: URL? {
         guard let prefix = manager.brewPrefix else { return nil }
@@ -105,6 +107,8 @@ struct TapDetailView: View {
 
             Divider()
 
+            tapHealthDiagnosticsCard
+
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("Installed Packages from this Tap (\(packagesInTap.count))")
@@ -165,6 +169,232 @@ struct TapDetailView: View {
             PackageDetailView(manager: manager, package: package, onDismiss: {
                 selectedPackageForDetail = nil
             })
+        }
+        .confirmationDialog(
+            "Switch \(tap.name) Protocol?",
+            isPresented: $showingProtocolSwitchAlert,
+            titleVisibility: .visible
+        ) {
+            if let report = healthManager.report(for: tap.name) {
+                let targetProto: TapTransportProtocol = (report.transportProtocol == .https ? .ssh : .https)
+                Button("Switch to \(targetProto.rawValue)") {
+                    Task {
+                        let res = await healthManager.switchProtocol(tapName: tap.name, to: targetProto, prefix: manager.brewPrefix)
+                        showToast(res.message)
+                    }
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            if let report = healthManager.report(for: tap.name),
+               let targetURL = report.alternateProtocolURL {
+                Text("This will update the git remote origin to:\n\(targetURL)")
+            }
+        }
+        .overlay(alignment: .bottom) {
+            if let toast = statusToast {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                    Text(toast)
+                        .font(.caption.bold())
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Color(NSColor.windowBackgroundColor).opacity(0.95), in: Capsule())
+                .shadow(radius: 4)
+                .padding(.bottom, 16)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+    }
+
+    // MARK: - Tap Health Diagnostics Card
+
+    @ViewBuilder
+    private var tapHealthDiagnosticsCard: some View {
+        if let report = healthManager.report(for: tap.name) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 8) {
+                    Image(systemName: "point.3.connected.trianglepath.dotted")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(.blue)
+
+                    Text("Repository Health & Diagnostics")
+                        .font(.subheadline.bold())
+
+                    // Transport Protocol Pill
+                    HStack(spacing: 3) {
+                        Image(systemName: report.transportProtocol.systemImage)
+                        Text(report.transportProtocol.rawValue)
+                    }
+                    .font(.caption2.bold())
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.secondary.opacity(0.12), in: Capsule())
+                    .foregroundStyle(.secondary)
+
+                    // Latency Pill
+                    HStack(spacing: 3) {
+                        Circle()
+                            .fill(report.latencyColor)
+                            .frame(width: 6, height: 6)
+                        Text(report.formattedLatency)
+                    }
+                    .font(.caption2.monospaced())
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(report.latencyColor.opacity(0.12), in: Capsule())
+                    .foregroundStyle(report.latencyColor)
+
+                    Spacer()
+
+                    // Health Status
+                    HStack(spacing: 3) {
+                        Image(systemName: report.status.iconName)
+                        Text(report.status.rawValue)
+                    }
+                    .font(.caption2.bold())
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(report.status.color.opacity(0.12), in: Capsule())
+                    .foregroundStyle(report.status.color)
+                }
+
+                // Metadata details
+                HStack(spacing: 16) {
+                    if let branch = report.branch {
+                        HStack(spacing: 4) {
+                            Image(systemName: "arrow.triangle.branch")
+                                .foregroundStyle(.secondary)
+                            Text(branch)
+                                .font(.caption.monospaced())
+                        }
+                    }
+
+                    if let head = report.headCommit {
+                        HStack(spacing: 4) {
+                            Image(systemName: "number")
+                                .foregroundStyle(.secondary)
+                            Text(head)
+                                .font(.caption.monospaced())
+                        }
+                    }
+
+                    if let dateStr = report.lastCommitDateString {
+                        HStack(spacing: 4) {
+                            Image(systemName: "clock")
+                                .foregroundStyle(.secondary)
+                            Text(dateStr)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    Spacer()
+
+                    Text("\(report.formulaCount) formulae • \(report.caskCount) casks")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                if report.hasCommitLag {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.triangle.pull")
+                            .foregroundStyle(.orange)
+                        Text("Behind upstream origin by \(report.commitLagBehind) commit\(report.commitLagBehind == 1 ? "" : "s"). Sync recommended.")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    }
+                }
+
+                if report.isShallow {
+                    HStack(spacing: 6) {
+                        Image(systemName: "square.stack.3d.down.right")
+                            .foregroundStyle(.yellow)
+                        Text("Shallow clone detected. Run 'Repair' to fetch full git history.")
+                            .font(.caption)
+                            .foregroundStyle(.primary)
+                    }
+                }
+
+                Divider()
+
+                // Action buttons
+                HStack(spacing: 8) {
+                    Button {
+                        Task {
+                            let res = await healthManager.syncTap(tapName: report.tapName, prefix: manager.brewPrefix)
+                            showToast(res.message)
+                        }
+                    } label: {
+                        Label("Sync Tap", systemImage: "arrow.triangle.pull")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    .disabled(healthManager.isOperating)
+
+                    Button {
+                        Task {
+                            let res = await healthManager.repairTap(tapName: report.tapName, prefix: manager.brewPrefix, manager: manager)
+                            showToast(res.message)
+                        }
+                    } label: {
+                        Label("Repair", systemImage: "wrench.and.screwdriver")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    .disabled(healthManager.isOperating)
+
+                    if report.canSwitchProtocol {
+                        Button {
+                            showingProtocolSwitchAlert = true
+                        } label: {
+                            Label(
+                                report.transportProtocol == .https ? "Switch to SSH" : "Switch to HTTPS",
+                                systemImage: report.transportProtocol == .https ? "key.fill" : "lock.shield.fill"
+                            )
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        .disabled(healthManager.isOperating)
+                    }
+
+                    Button {
+                        Task {
+                            let ms = await healthManager.benchmarkLatency(for: report.tapName)
+                            if let ms {
+                                showToast("Latency: \(String(format: "%.0f ms", ms))")
+                            } else {
+                                showToast("Latency probe timed out.")
+                            }
+                        }
+                    } label: {
+                        Label("Test Latency", systemImage: "gauge.with.needle")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+
+                    Spacer()
+                }
+            }
+            .padding(12)
+            .background(Color(NSColor.controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10))
+            .padding(.horizontal)
+            .padding(.top, 8)
+        }
+    }
+
+    private func showToast(_ message: String) {
+        withAnimation {
+            statusToast = message
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            withAnimation {
+                if statusToast == message {
+                    statusToast = nil
+                }
+            }
         }
     }
 }

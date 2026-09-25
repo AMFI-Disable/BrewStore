@@ -39,6 +39,7 @@ struct EnvironmentHubView: View {
     @State private var showingDualArchBridge = false
     @State private var showingOrphanAndKegAuditor = false
     @State private var showingBottleIntegrityAuditor = false
+    @State private var showingTapHealthBenchmark = false
 
     private var runningServicesCount: Int {
         manager.services.filter(\.isRunning).count
@@ -157,6 +158,14 @@ struct EnvironmentHubView: View {
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
+
+                    Button {
+                        showingTapHealthBenchmark = true
+                    } label: {
+                        Label("Tap Health", systemImage: "point.3.connected.trianglepath.dotted")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
                 }
 
                 ToolchainCompanionsCard(manager: manager)
@@ -197,6 +206,9 @@ struct EnvironmentHubView: View {
         }
         .sheet(isPresented: $showingBottleIntegrityAuditor) {
             BottleIntegrityAuditorView(manager: manager)
+        }
+        .sheet(isPresented: $showingTapHealthBenchmark) {
+            TapHealthBenchmarkView(manager: manager)
         }
         .onAppear {
             syncFromSelection()

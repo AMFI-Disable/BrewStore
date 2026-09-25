@@ -9,7 +9,9 @@ struct TapsView: View {
     @State private var tapToAdd: String?
     @State private var showingRemoveConfirmation = false
     @State private var showingTapDiscoverySheet = false
+    @State private var showingTapHealthBenchmark = false
     @State private var tapInputError: String?
+    @ObservedObject private var healthManager = BrewStoreTapHealthManager.shared
 
     private var filteredTaps: [BrewStoreTap] {
         if search.isEmpty {
@@ -33,6 +35,14 @@ struct TapsView: View {
                         Text("Manage additional Homebrew repositories.").foregroundStyle(.secondary)
                     }
                     Spacer()
+
+                    Button {
+                        showingTapHealthBenchmark = true
+                    } label: {
+                        Label("Health & Latency", systemImage: "point.3.connected.trianglepath.dotted")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
 
                     Button {
                         showingTapDiscoverySheet = true
@@ -63,6 +73,14 @@ struct TapsView: View {
                 .disabled(manager.isOperating || newTap.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
 
                 if !showHeader {
+                    Button {
+                        showingTapHealthBenchmark = true
+                    } label: {
+                        Label("Health & Latency", systemImage: "point.3.connected.trianglepath.dotted")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+
                     Button {
                         showingTapDiscoverySheet = true
                     } label: {
@@ -145,6 +163,30 @@ struct TapsView: View {
                         }
 
                         Spacer()
+
+                        if let rep = healthManager.report(for: tap.name) {
+                            HStack(spacing: 4) {
+                                Circle()
+                                    .fill(rep.latencyColor)
+                                    .frame(width: 6, height: 6)
+                                Text(rep.formattedLatency)
+                            }
+                            .font(.caption2.monospaced())
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(rep.latencyColor.opacity(0.12), in: Capsule())
+                            .foregroundStyle(rep.latencyColor)
+
+                            HStack(spacing: 3) {
+                                Image(systemName: rep.status.iconName)
+                                Text(rep.status.rawValue)
+                            }
+                            .font(.caption2.bold())
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(rep.status.color.opacity(0.12), in: Capsule())
+                            .foregroundStyle(rep.status.color)
+                        }
 
                         Button("Untap", role: .destructive) {
                             tapToRemove = tap
@@ -237,6 +279,14 @@ struct TapsView: View {
         }
         .sheet(isPresented: $showingTapDiscoverySheet) {
             TapDiscoveryView(manager: manager)
+        }
+        .sheet(isPresented: $showingTapHealthBenchmark) {
+            TapHealthBenchmarkView(manager: manager)
+        }
+        .onAppear {
+            if healthManager.reports.isEmpty {
+                healthManager.auditAllTaps(taps: manager.taps, prefix: manager.brewPrefix)
+            }
         }
         .onChange(of: newTap) { _, _ in
             if tapInputError != nil {
