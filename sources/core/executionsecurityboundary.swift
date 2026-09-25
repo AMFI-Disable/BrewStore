@@ -18,7 +18,13 @@ enum ExecutionSecurityBoundary {
         "/bin/echo",
         "/bin/cat",
         "/usr/bin/tar",
-        "/bin/chmod"
+        "/bin/chmod",
+        "/usr/sbin/lsof",
+        "/usr/bin/arch",
+        "/usr/bin/lipo",
+        "/usr/bin/uname",
+        "/usr/sbin/sysctl",
+        "/usr/sbin/softwareupdate"
     ]
 
     /// Dangerous environment variables that must be scrubbed before executing child processes.

@@ -36,6 +36,7 @@ struct EnvironmentHubView: View {
     @State private var subMode: EnvironmentSubMode = .services
     @State private var showingVersionSwitcher = false
     @State private var showingShellProfiler = false
+    @State private var showingDualArchBridge = false
 
     private var runningServicesCount: Int {
         manager.services.filter(\.isRunning).count
@@ -130,6 +131,14 @@ struct EnvironmentHubView: View {
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
+
+                    Button {
+                        showingDualArchBridge = true
+                    } label: {
+                        Label("Dual-Arch Bridge", systemImage: "cpu")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
                 }
 
                 ToolchainCompanionsCard(manager: manager)
@@ -161,6 +170,9 @@ struct EnvironmentHubView: View {
         }
         .sheet(isPresented: $showingShellProfiler) {
             ShellProfilerView()
+        }
+        .sheet(isPresented: $showingDualArchBridge) {
+            DualArchitectureBridgeView(manager: manager)
         }
         .onAppear {
             syncFromSelection()

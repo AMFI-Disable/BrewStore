@@ -72,6 +72,7 @@ struct SettingsView: View {
     @State private var isTestingWebhook = false
     @State private var webhookTestResult: (success: Bool, message: String)?
     @State private var copiedSchemeURL: String?
+    @State private var showingDualArchBridge = false
 
     private var doctorDiagnostics: [BrewStoreDoctorDiagnostic] {
         BrewStoreDoctorParser.parse(manager.outputLog)
@@ -193,6 +194,9 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $resetManager.showingResetSheet) {
             ResetViewSheet(manager: manager, discovery: discovery)
+        }
+        .sheet(isPresented: $showingDualArchBridge) {
+            DualArchitectureBridgeView(manager: manager)
         }
         .confirmationDialog("Install this Brewfile?", isPresented: $showingBrewfileConfirmation, titleVisibility: .visible) {
             Button("Install Brewfile", role: .destructive) {
@@ -1037,6 +1041,16 @@ struct SettingsView: View {
                     .padding(8)
                     .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
                 }
+
+                Button {
+                    showingDualArchBridge = true
+                } label: {
+                    Label("Inspect Dual-Architecture Bridge", systemImage: "cpu.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .controlSize(.small)
+                .buttonStyle(.bordered)
+                .padding(.top, 4)
             }
         }
     }
