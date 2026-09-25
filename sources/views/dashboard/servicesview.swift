@@ -14,6 +14,8 @@ struct ServicesView: View {
     @State private var pendingAction: PendingServiceAction?
     @State private var itemPendingTrash: BrewStoreBackgroundItem?
     @State private var showingPortMatrixSheet = false
+    @StateObject private var diagnostician = ServiceCrashDiagnostician.shared
+    @State private var diagnosingService: BrewStoreService?
 
     enum PendingServiceAction: Identifiable {
         case single(service: BrewStoreService, action: ServiceActionType)
@@ -196,6 +198,9 @@ struct ServicesView: View {
         .sheet(isPresented: $showingPortMatrixSheet) {
             ServicePortMatrixView(manager: manager)
         }
+        .sheet(item: $diagnosingService) { svc in
+            ServiceCrashDiagnosticView(manager: manager, service: svc)
+        }
         .confirmationDialog(
             confirmationTitle,
             isPresented: Binding(get: { pendingAction != nil }, set: {
@@ -276,9 +281,20 @@ struct ServicesView: View {
         .onAppear {
             telemetry.refreshTelemetry(for: manager.services)
             backgroundManager.scanBackgroundItems()
+            if !erroredServices.isEmpty {
+                Task {
+                    await diagnostician.diagnoseAllErroredServices(services: erroredServices, brewPrefix: manager.brewPrefix)
+                }
+            }
         }
         .onChange(of: manager.services) { _, newServices in
             telemetry.refreshTelemetry(for: newServices)
+            let errored = newServices.filter(\.isError)
+            if !errored.isEmpty {
+                Task {
+                    await diagnostician.diagnoseAllErroredServices(services: errored, brewPrefix: manager.brewPrefix)
+                }
+            }
         }
     }
 
@@ -330,29 +346,64 @@ struct ServicesView: View {
                         .font(.title2)
                         .foregroundStyle(.orange)
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("\(erroredServices.count) Service\(erroredServices.count == 1 ? "" : "s") in Error State")
-                            .font(.subheadline.bold())
-                        Text("Detected error state: \(erroredServices.map(\.name).joined(separator: ", ")).")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
+                    if erroredServices.count == 1, let single = erroredServices.first {
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 6) {
+                                Text("\(single.name) in Error State")
+                                    .font(.subheadline.bold())
+                                if let diag = diagnostician.diagnosis(for: single.name) {
+                                    Text(diag.issueType.rawValue)
+                                        .font(.caption2.bold())
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(diag.issueType.tintColor.opacity(0.15))
+                                        .foregroundStyle(diag.issueType.tintColor)
+                                        .clipShape(Capsule())
+                                }
+                            }
+                            if let diag = diagnostician.diagnosis(for: single.name) {
+                                Text(diag.headline)
+                                    .font(.caption)
+                                    .foregroundStyle(.primary)
+                            } else {
+                                Text("Detected error state for \(single.name).")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
 
-                    Spacer()
+                        Spacer()
 
-                    Button {
-                        pendingAction = .autoFixErrored(erroredServices)
-                    } label: {
-                        if erroredServices.count == 1, let single = erroredServices.first {
-                            Label("Review Repair for \(single.name)", systemImage: "bolt.fill")
-                        } else {
+                        Button {
+                            diagnosingService = single
+                        } label: {
+                            Label("Diagnose & Heal", systemImage: "stethoscope")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.orange)
+                        .controlSize(.small)
+                        .disabled(manager.isOperating)
+                    } else {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("\(erroredServices.count) Services in Error State")
+                                .font(.subheadline.bold())
+                            Text("Detected error state: \(erroredServices.map(\.name).joined(separator: ", ")).")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+
+                        Button {
+                            pendingAction = .autoFixErrored(erroredServices)
+                        } label: {
                             Label("Review Repair (\(erroredServices.count) Services)", systemImage: "bolt.fill")
                         }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.orange)
+                        .controlSize(.small)
+                        .disabled(manager.isOperating)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.orange)
-                    .controlSize(.small)
-                    .disabled(manager.isOperating)
                 }
                 .padding(10)
                 .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
@@ -467,6 +518,18 @@ struct ServicesView: View {
                         .padding(.trailing, 8)
 
                         HStack(spacing: 8) {
+                            if service.isError {
+                                Button {
+                                    diagnosingService = service
+                                } label: {
+                                    Image(systemName: "stethoscope")
+                                }
+                                .buttonStyle(.bordered)
+                                .tint(.orange)
+                                .controlSize(.small)
+                                .help("Diagnose Crash & Auto-Heal")
+                            }
+
                             Button {
                                 selectedLogService = service
                             } label: {
@@ -493,11 +556,19 @@ struct ServicesView: View {
                                     .disabled(manager.isOperating)
                             }
                         }
-                        .frame(width: 148, alignment: .trailing)
+                        .frame(width: service.isError ? 180 : 148, alignment: .trailing)
                     }
                 }
                 .padding(.vertical, 4)
                 .contextMenu {
+                    if service.isError {
+                        Button {
+                            diagnosingService = service
+                        } label: {
+                            Label("Diagnose Crash & Auto-Heal", systemImage: "stethoscope")
+                        }
+                    }
+
                     Button {
                         selectedLogService = service
                     } label: {

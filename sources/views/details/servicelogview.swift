@@ -10,6 +10,8 @@ struct ServiceLogView: View {
     @State private var isAutoRefresh = true
     @State private var timerTask: Task<Void, Never>?
     @State private var copied = false
+    @StateObject private var diagnostician = ServiceCrashDiagnostician.shared
+    @State private var showingDiagnosticSheet = false
 
     private var logURL: URL? {
         if let direct = service.logURL(prefix: brewPrefix), FileManager.default.fileExists(atPath: direct.path) {
@@ -82,6 +84,58 @@ struct ServiceLogView: View {
             .padding()
 
             Divider()
+
+            if service.isError, let diag = diagnostician.diagnosis(for: service.name) {
+                HStack(spacing: Spacing.sm) {
+                    Image(systemName: diag.issueType.systemImage)
+                        .font(.title3)
+                        .foregroundStyle(diag.issueType.tintColor)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 6) {
+                            Text(diag.headline)
+                                .font(.caption.bold())
+
+                            Text(diag.issueType.rawValue)
+                                .font(.caption2.bold())
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 1)
+                                .background(diag.issueType.tintColor.opacity(0.15))
+                                .foregroundStyle(diag.issueType.tintColor)
+                                .clipShape(Capsule())
+                        }
+
+                        Text(diag.explanation)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                    }
+
+                    Spacer()
+
+                    if let rec = diag.remediations.first(where: { $0.isRecommended }) {
+                        Button(rec.title) {
+                            Task {
+                                let mgr = HomebrewManager()
+                                try? await diagnostician.executeRemediation(rec, for: service, manager: mgr)
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                    }
+
+                    Button("Details") {
+                        showingDiagnosticSheet = true
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                }
+                .padding(.horizontal, Spacing.md)
+                .padding(.vertical, 8)
+                .background(Color.orange.opacity(0.12))
+
+                Divider()
+            }
 
             // Toolbar
             HStack(spacing: 12) {
@@ -167,9 +221,17 @@ struct ServiceLogView: View {
             }
         }
         .frame(minWidth: 700, minHeight: 480)
+        .sheet(isPresented: $showingDiagnosticSheet) {
+            ServiceCrashDiagnosticView(manager: HomebrewManager(), service: service)
+        }
         .onAppear {
             readLogs()
             startAutoRefreshTimer()
+            if service.isError {
+                Task {
+                    await diagnostician.diagnoseCrash(for: service, brewPrefix: brewPrefix)
+                }
+            }
         }
         .onDisappear {
             timerTask?.cancel()
