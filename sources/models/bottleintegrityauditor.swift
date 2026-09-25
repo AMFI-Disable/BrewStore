@@ -463,7 +463,7 @@ final class BrewStoreBottleIntegrityAuditor: ObservableObject {
             manager?.refresh()
             return (true, "Reinstalled fresh verified bottle for \(packageID).")
         } else {
-            let msg = result.standardError.isEmpty ? "Reinstallation failed for \(packageID)." : result.standardError
+            let msg = BrewStoreHumanizedErrorResolver.humanizedMessage(from: result.standardError, fallback: "Reinstallation failed for \(packageID).")
             auditError = msg
             return (false, msg)
         }

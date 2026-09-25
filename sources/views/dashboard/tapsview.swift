@@ -226,13 +226,28 @@ struct TapsView: View {
             }
             .overlay {
                 if let error = manager.errorMessage, manager.taps.isEmpty, !manager.isLoading {
+                    let info = BrewStoreHumanizedErrorResolver.resolve(rawError: error)
                     ContentUnavailableView {
-                        Label("Taps Unavailable", systemImage: "exclamationmark.triangle")
+                        Label(info.title, systemImage: info.iconName)
                     } description: {
-                        Text(error)
+                        VStack(spacing: 6) {
+                            Text(info.summary)
+                            Text(info.suggestion)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     } actions: {
-                        Button("Retry", action: manager.refresh)
-                            .buttonStyle(.borderedProminent)
+                        HStack(spacing: 8) {
+                            Button("Retry Refresh", action: manager.refresh)
+                                .buttonStyle(.borderedProminent)
+
+                            if info.category == .lock {
+                                Button("Clear Locks") {
+                                    manager.clearLocks()
+                                }
+                                .buttonStyle(.bordered)
+                            }
+                        }
                     }
                 } else if manager.taps.isEmpty, !manager.isLoading {
                     ContentUnavailableView("No custom taps", systemImage: "square.3.layers.3d.down.forward", description: Text("Add a third-party tap above."))

@@ -30,7 +30,8 @@ public enum MarkdownBlock: Equatable, Identifiable {
 public enum MarkdownParser {
     public static func parse(_ raw: String) -> [MarkdownBlock] {
         var blocks: [MarkdownBlock] = []
-        let lines = raw.components(separatedBy: .newlines)
+        let (preprocessed, _) = CSSAndMarkdownParser.preprocessMarkdown(raw)
+        let lines = preprocessed.components(separatedBy: .newlines)
         var i = 0
 
         while i < lines.count {
@@ -176,37 +177,35 @@ public struct MarkdownTextView: View {
     }
 
     public var body: some View {
-        let blocks = MarkdownParser.parse(markdown)
+        let (preprocessed, classMap) = CSSAndMarkdownParser.preprocessMarkdown(markdown)
+        let blocks = MarkdownParser.parse(preprocessed)
 
         VStack(alignment: .leading, spacing: 14) {
             ForEach(blocks.indices, id: \.self) { idx in
-                renderBlock(blocks[idx])
+                renderBlock(blocks[idx], classMap: classMap)
             }
         }
         .textSelection(.enabled)
     }
 
     @ViewBuilder
-    private func renderBlock(_ block: MarkdownBlock) -> some View {
+    private func renderBlock(_ block: MarkdownBlock, classMap: [String: CSSStyleAttributes]) -> some View {
         switch block {
         case let .h1(text):
-            Text(LocalizedStringKey(text))
-                .font(.system(size: 24, weight: .bold, design: .rounded))
+            Text(CSSAndMarkdownParser.renderAttributedString(text, baseFont: .system(size: 24, weight: .bold, design: .rounded), baseFontSize: 24, accentColor: accentColor, classMap: classMap))
                 .foregroundStyle(.primary)
                 .padding(.top, 10)
                 .padding(.bottom, 2)
 
         case let .h2(text):
-            Text(LocalizedStringKey(text))
-                .font(.system(size: 20, weight: .bold, design: .rounded))
+            Text(CSSAndMarkdownParser.renderAttributedString(text, baseFont: .system(size: 20, weight: .bold, design: .rounded), baseFontSize: 20, accentColor: accentColor, classMap: classMap))
                 .foregroundStyle(.primary)
                 .padding(.top, 8)
                 .padding(.bottom, 2)
 
         case let .h3(text):
             VStack(alignment: .leading, spacing: 4) {
-                Text(LocalizedStringKey(text))
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                Text(CSSAndMarkdownParser.renderAttributedString(text, baseFont: .system(size: 16, weight: .semibold, design: .rounded), baseFontSize: 16, accentColor: accentColor, classMap: classMap))
                     .foregroundStyle(.primary)
             }
             .padding(.top, 6)
@@ -219,8 +218,7 @@ public struct MarkdownTextView: View {
                     .frame(width: 5, height: 5)
                     .padding(.top, 7)
 
-                Text(LocalizedStringKey(text))
-                    .font(baseFont)
+                Text(CSSAndMarkdownParser.renderAttributedString(text, baseFont: baseFont, baseFontSize: 13, accentColor: accentColor, classMap: classMap))
                     .lineSpacing(lineSpacing)
                     .foregroundStyle(.primary)
             }
@@ -234,8 +232,7 @@ public struct MarkdownTextView: View {
                     .foregroundStyle(accentColor)
                     .frame(minWidth: 20, alignment: .trailing)
 
-                Text(LocalizedStringKey(text))
-                    .font(baseFont)
+                Text(CSSAndMarkdownParser.renderAttributedString(text, baseFont: baseFont, baseFontSize: 13, accentColor: accentColor, classMap: classMap))
                     .lineSpacing(lineSpacing)
                     .foregroundStyle(.primary)
             }
@@ -247,8 +244,7 @@ public struct MarkdownTextView: View {
                     .fill(accentColor.opacity(0.8))
                     .frame(width: 3.5)
 
-                Text(LocalizedStringKey(text))
-                    .font(baseFont.italic())
+                Text(CSSAndMarkdownParser.renderAttributedString(text, baseFont: baseFont.italic(), baseFontSize: 13, accentColor: accentColor, classMap: classMap))
                     .foregroundStyle(.secondary)
                     .lineSpacing(lineSpacing)
             }
@@ -296,8 +292,7 @@ public struct MarkdownTextView: View {
                 .padding(.vertical, 6)
 
         case let .paragraph(text):
-            Text(LocalizedStringKey(text))
-                .font(baseFont)
+            Text(CSSAndMarkdownParser.renderAttributedString(text, baseFont: baseFont, baseFontSize: 13, accentColor: accentColor, classMap: classMap))
                 .lineSpacing(lineSpacing)
                 .foregroundStyle(.primary)
         }

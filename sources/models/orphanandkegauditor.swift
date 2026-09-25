@@ -387,7 +387,8 @@ final class OrphanAndKegAuditor: ObservableObject {
             manager?.refresh()
             return true
         } else {
-            auditError = result.standardError.isEmpty ? "Failed to prune \(packageID)." : result.standardError
+            let msg = BrewStoreHumanizedErrorResolver.humanizedMessage(from: result.standardError, fallback: "Failed to prune \(packageID).")
+            auditError = msg
             return false
         }
     }
@@ -398,6 +399,7 @@ final class OrphanAndKegAuditor: ObservableObject {
         defer { operatingPackageID = nil }
 
         let brewPath = manager?.brewPath ?? ((prefix as NSString).appendingPathComponent("bin") as NSString).appendingPathComponent("brew")
+
         let result = commandExecutor.run(
             executablePath: brewPath,
             arguments: ["autoremove"],
@@ -410,7 +412,7 @@ final class OrphanAndKegAuditor: ObservableObject {
             manager?.refresh()
             return (true, "Cleaned up all unneeded orphan dependencies.")
         } else {
-            let msg = result.standardError.isEmpty ? "Autoremove failed." : result.standardError
+            let msg = BrewStoreHumanizedErrorResolver.humanizedMessage(from: result.standardError, fallback: "Orphan cleanup did not complete.")
             auditError = msg
             return (false, msg)
         }
@@ -442,7 +444,7 @@ final class OrphanAndKegAuditor: ObservableObject {
             let actionName = forceLink ? "Force-linked" : "Unlinked"
             return (true, "\(actionName) \(packageID) successfully.")
         } else {
-            let msg = result.standardError.isEmpty ? "Operation failed on \(packageID)." : result.standardError
+            let msg = BrewStoreHumanizedErrorResolver.humanizedMessage(from: result.standardError, fallback: "Operation failed on \(packageID).")
             auditError = msg
             return (false, msg)
         }

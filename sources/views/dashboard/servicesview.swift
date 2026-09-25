@@ -616,13 +616,28 @@ struct ServicesView: View {
             .searchable(text: $search, prompt: "Search services")
             .overlay {
                 if let error = manager.errorMessage, manager.services.isEmpty, !manager.isLoading {
+                    let info = BrewStoreHumanizedErrorResolver.resolve(rawError: error)
                     ContentUnavailableView {
-                        Label("Services Unavailable", systemImage: "exclamationmark.triangle")
+                        Label(info.title, systemImage: info.iconName)
                     } description: {
-                        Text(error)
+                        VStack(spacing: 6) {
+                            Text(info.summary)
+                            Text(info.suggestion)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     } actions: {
-                        Button("Retry", action: manager.refresh)
-                            .buttonStyle(.borderedProminent)
+                        HStack(spacing: 8) {
+                            Button("Retry Refresh", action: manager.refresh)
+                                .buttonStyle(.borderedProminent)
+
+                            if info.category == .lock {
+                                Button("Clear Locks") {
+                                    manager.clearLocks()
+                                }
+                                .buttonStyle(.bordered)
+                            }
+                        }
                     }
                 } else if manager.services.isEmpty, !manager.isLoading {
                     ContentUnavailableView(

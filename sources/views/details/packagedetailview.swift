@@ -11,7 +11,8 @@ struct PackageDetailView: View {
     @State private var removalPlan: BrewStoreRemovalPlan?
     @State private var isScanningRemoval = false
     @State private var showingRemoval = false
-    @State private var removalError: String?
+    @State private var removalStatusMessage: String?
+    @State private var removalStatusIsSuccess = false
     @State private var dependencyTree: String?
     @State private var showingDependencyTree = false
     @State private var showingVisualGraph = false
@@ -581,19 +582,75 @@ struct PackageDetailView: View {
     }
 
     private func errorBanner(error: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(error).font(.callout).foregroundStyle(.red).textSelection(.enabled)
-            if manager.lastOperationRequiresElevation {
-                Button {
-                    let action: PackageAction = currentPackage.isInstalled ? .upgrade : .install
-                    manager.performElevated(package: currentPackage, action: action)
-                } label: {
-                    Label("Rerun with Administrator Privileges", systemImage: "lock.shield.fill")
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
+        let info = BrewStoreHumanizedErrorResolver.resolve(rawError: error)
+
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Image(systemName: info.iconName)
+                    .font(.headline)
+                    .foregroundStyle(.red)
+
+                Text(info.title)
+                    .font(.headline)
+                    .foregroundStyle(.red)
+
+                Spacer()
+
+                Text(info.category.rawValue)
+                    .font(.caption2.bold())
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.red.opacity(0.12), in: Capsule())
+                    .foregroundStyle(.red)
             }
+
+            Text(info.summary)
+                .font(.callout)
+                .foregroundStyle(.primary)
+
+            Text(info.suggestion)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            HStack(spacing: 8) {
+                if manager.lastOperationRequiresElevation || info.category == .permissions {
+                    Button {
+                        let action: PackageAction = currentPackage.isInstalled ? .upgrade : .install
+                        manager.performElevated(package: currentPackage, action: action)
+                    } label: {
+                        Label("Rerun with Administrator Privileges", systemImage: "lock.shield.fill")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                }
+
+                if info.category == .lock {
+                    Button {
+                        manager.clearLocks()
+                    } label: {
+                        Label("Clear Homebrew Locks", systemImage: "lock.open.fill")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                }
+
+                if info.category == .developerTools {
+                    Button {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString("xcode-select --install", forType: .string)
+                    } label: {
+                        Label("Copy Install Command", systemImage: "terminal.fill")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                }
+            }
+            .padding(.top, 2)
         }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.red.opacity(0.06), in: RoundedRectangle(cornerRadius: Radius.sm))
+        .overlay(RoundedRectangle(cornerRadius: Radius.sm).strokeBorder(Color.red.opacity(0.25), lineWidth: 1))
     }
 
     private func caveatsSection(caveats: String) -> some View {
@@ -1500,8 +1557,14 @@ struct PackageDetailView: View {
                 .controlSize(.small)
             }
 
-            if let removalError {
-                Text(removalError).font(.caption).foregroundStyle(.orange)
+            if let removalStatusMessage {
+                HStack(spacing: 6) {
+                    Image(systemName: removalStatusIsSuccess ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                        .foregroundStyle(removalStatusIsSuccess ? Color.green : Color.orange)
+                    Text(removalStatusMessage)
+                        .font(.caption)
+                        .foregroundStyle(removalStatusIsSuccess ? Color.primary : Color.orange)
+                }
             }
         }
     }
@@ -1677,12 +1740,13 @@ struct PackageDetailView: View {
         }
 
         guard let targetURL = appURL ?? (names.first.map { URL(fileURLWithPath: "/Applications").appendingPathComponent($0.hasSuffix(".app") ? $0 : "\($0).app") }) else {
-            removalError = "Homebrew did not report an application bundle for this cask."
+            removalStatusMessage = "Homebrew did not report an application bundle for this cask."
+            removalStatusIsSuccess = false
             return
         }
 
         isScanningRemoval = true
-        removalError = nil
+        removalStatusMessage = nil
         let bundleID = Bundle(url: targetURL)?.bundleIdentifier ?? ""
         let identity = BrewStoreAppIdentity(name: targetURL.deletingPathExtension().lastPathComponent, bundleIdentifier: bundleID, applicationURL: targetURL)
         Task.detached(priority: .userInitiated) {
@@ -1691,7 +1755,8 @@ struct PackageDetailView: View {
                 removalPlan = plan
                 isScanningRemoval = false
                 if plan.candidates.isEmpty {
-                    removalError = "No leftover files found."
+                    removalStatusMessage = "Your Mac is clean — no leftover files or caches were found for this app."
+                    removalStatusIsSuccess = true
                 } else {
                     showingRemoval = true
                 }

@@ -171,6 +171,58 @@ struct ActionConsoleDrawer: View {
 
             Divider()
 
+            // Humanized Troubleshooting Hint Bar
+            if let error = manager.errorMessage {
+                let info = BrewStoreHumanizedErrorResolver.resolve(rawError: error)
+                HStack(spacing: 8) {
+                    Image(systemName: info.iconName)
+                        .foregroundStyle(.orange)
+                        .font(.caption)
+
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(info.title)
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(.primary)
+                        Text(info.suggestion)
+                            .font(.system(size: 10))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+
+                    Spacer()
+
+                    if info.category == .lock {
+                        Button("Clear Locks") {
+                            showingClearLocksConfirmation = true
+                        }
+                        .controlSize(.mini)
+                        .buttonStyle(.bordered)
+                    } else if info.category == .developerTools {
+                        Button("Copy Command") {
+                            NSPasteboard.general.clearContents()
+                            NSPasteboard.general.setString("xcode-select --install", forType: .string)
+                        }
+                        .controlSize(.mini)
+                        .buttonStyle(.bordered)
+                    }
+
+                    Button {
+                        manager.errorMessage = nil
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Dismiss suggestion")
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(Color.orange.opacity(0.08))
+
+                Divider()
+            }
+
             // Terminal Output Area
             ScrollViewReader { proxy in
                 ScrollView {

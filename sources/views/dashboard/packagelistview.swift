@@ -457,17 +457,32 @@ struct PackageListView: View {
                 if manager.isLoading, packages.isEmpty {
                     ProgressView("Refreshing Homebrew…")
                 } else if packages.isEmpty, let error = manager.errorMessage {
+                    let info = BrewStoreHumanizedErrorResolver.resolve(rawError: error)
                     ContentUnavailableView {
-                        Label(updatesOnly ? "Updates Unavailable" : "Catalog Refresh Issue", systemImage: "exclamationmark.triangle")
+                        Label(info.title, systemImage: info.iconName)
                     } description: {
-                        Text(error)
-                    } actions: {
-                        Button {
-                            manager.retryRefresh()
-                        } label: {
-                            Label("Retry Refresh", systemImage: "arrow.clockwise")
+                        VStack(spacing: 6) {
+                            Text(info.summary)
+                            Text(info.suggestion)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
-                        .buttonStyle(.borderedProminent)
+                    } actions: {
+                        HStack(spacing: 8) {
+                            Button {
+                                manager.retryRefresh()
+                            } label: {
+                                Label("Retry Refresh", systemImage: "arrow.clockwise")
+                            }
+                            .buttonStyle(.borderedProminent)
+
+                            if info.category == .lock {
+                                Button("Clear Locks") {
+                                    manager.clearLocks()
+                                }
+                                .buttonStyle(.bordered)
+                            }
+                        }
                     }
                 } else if packages.isEmpty, manager.errorMessage == nil {
                     if updatesOnly {

@@ -222,9 +222,7 @@ struct UpgradeDiffViewSheet: View {
                     .font(.subheadline.bold())
             }
 
-            Text(caveats)
-                .font(.caption.monospaced())
-                .foregroundStyle(.secondary)
+            MarkdownTextView(markdown: caveats, baseFont: .caption, lineSpacing: 3)
                 .padding(8)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color(nsColor: .windowBackgroundColor), in: RoundedRectangle(cornerRadius: 6))

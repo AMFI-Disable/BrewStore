@@ -696,7 +696,7 @@ struct BrewStoreUninstallPreviewView: View {
         } else if !request.removalPlans.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Label("App Residuals & Leftover Baggage", systemImage: "sparkles")
+                    Label("App Residuals & Leftover Data", systemImage: "sparkles")
                         .font(.headline)
                     Spacer()
                     if totalSelectedResidualBytes > 0 {

@@ -37,19 +37,24 @@ enum HomebrewCatalogRefreshError: Error, LocalizedError, Equatable, Sendable {
     var errorDescription: String? {
         switch self {
         case let .listCasksFailed(reason):
-            "Failed to query installed casks: \(reason)"
+            let info = BrewStoreHumanizedErrorResolver.resolve(rawError: reason)
+            return "Failed to query installed casks: \(info.title) – \(info.summary)"
         case let .listFormulaeFailed(reason):
-            "Failed to query installed formulae: \(reason)"
+            let info = BrewStoreHumanizedErrorResolver.resolve(rawError: reason)
+            return "Failed to query installed formulae: \(info.title) – \(info.summary)"
         case let .outdatedFailed(reason):
-            "Failed to check outdated packages: \(reason)"
+            let info = BrewStoreHumanizedErrorResolver.resolve(rawError: reason)
+            return "Failed to check outdated packages: \(info.title) – \(info.summary)"
         case let .caskCatalogFailed(reason):
-            "Failed to load cask catalog: \(reason)"
+            let info = BrewStoreHumanizedErrorResolver.resolve(rawError: reason)
+            return "Failed to load cask catalog: \(info.title) – \(info.summary)"
         case let .formulaCatalogFailed(reason):
-            "Failed to load formula catalog: \(reason)"
+            let info = BrewStoreHumanizedErrorResolver.resolve(rawError: reason)
+            return "Failed to load formula catalog: \(info.title) – \(info.summary)"
         case let .truncatedOutput(command):
-            "Homebrew \(command) output exceeded buffer limit or was truncated."
+            return "Homebrew \(command) output exceeded buffer limit or was truncated."
         case let .malformedJSON(catalog):
-            "Homebrew \(catalog) catalog returned invalid or malformed JSON."
+            return "Homebrew \(catalog) catalog returned invalid or malformed JSON."
         }
     }
 
@@ -1592,13 +1597,22 @@ final class HomebrewManager: ObservableObject {
             return "Operation cancelled."
         }
         if result.didTimeOut {
-            return "Operation timed out."
+            let info = BrewStoreHumanizedErrorResolver.resolve(rawError: "", didTimeout: true)
+            return "\(info.title): \(info.summary) \(info.suggestion)"
         }
         if let launchError = result.launchErrorDescription {
-            return launchError
+            let info = BrewStoreHumanizedErrorResolver.resolve(rawError: launchError)
+            return "\(info.title): \(info.summary) \(info.suggestion)"
         }
         let message = result.standardError.trimmingCharacters(in: .whitespacesAndNewlines)
-        return message.isEmpty ? fallback : message
+        if !message.isEmpty {
+            return BrewStoreHumanizedErrorResolver.humanizedMessage(from: message, fallback: fallback)
+        }
+        if let code = result.terminationStatus, code != 0 {
+            let info = BrewStoreHumanizedErrorResolver.resolve(rawError: "", exitCode: Int(code))
+            return "\(info.title): \(info.summary) \(info.suggestion)"
+        }
+        return fallback
     }
 
     private func recordOperation(title: String, succeeded: Bool, detail: String) {
