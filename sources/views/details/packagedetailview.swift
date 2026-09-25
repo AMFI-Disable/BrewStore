@@ -20,6 +20,7 @@ struct PackageDetailView: View {
     @State private var showingSecurityApprovalSheet = false
     @State private var showingVersionSwitcherSheet = false
     @State private var showingUpgradeDiffSheet = false
+    @State private var showingBottleIntegritySheet = false
 
     @StateObject private var securityInspector = BrewStoreSecurityInspector()
     @StateObject private var entitlementsAuditor = CaskEntitlementsAuditor.shared
@@ -190,6 +191,9 @@ struct PackageDetailView: View {
         }
         .sheet(isPresented: $showingUpgradeDiffSheet) {
             UpgradeDiffViewSheet(package: currentPackage, manager: manager)
+        }
+        .sheet(isPresented: $showingBottleIntegritySheet) {
+            BottleIntegrityAuditorView(manager: manager)
         }
         .detailModalOverlay(item: $selectedDependencyPackage) { depPkg in
             PackageDetailView(manager: manager, package: depPkg, onDismiss: {
@@ -457,6 +461,11 @@ struct PackageDetailView: View {
 
             if let orphan = matchingOrphanItem {
                 orphanPruneCard(orphan: orphan)
+            }
+
+            let integrity = BrewStoreBottleIntegrityAuditor.auditPackage(package: currentPackage, prefix: effectivePrefix)
+            if integrity.hasIntegrityIssue {
+                integrityWarningCard(integrity: integrity)
             }
         }
 
@@ -970,25 +979,32 @@ struct PackageDetailView: View {
 
             if currentPackage.kind == .formula {
                 Divider()
-                let prefix = manager.brewPrefix ??
-                    (FileManager.default.fileExists(atPath: "/opt/homebrew") ? "/opt/homebrew" : "/usr/local")
-                let integrity = BrewStoreBottleIntegrityAuditor.auditPackage(package: currentPackage, prefix: prefix)
-                HStack {
-                    Image(systemName: integrity.status.icon)
-                        .font(.caption2)
-                        .foregroundStyle(integrity.status == .verifiedBottle ? Color.green : Color.orange)
-                    Text("Bottle Integrity").font(.caption).foregroundStyle(.secondary)
-                    Spacer()
-                    Text(integrity.status == .verifiedBottle ? "Verified" : "Source")
-                        .font(.caption2.bold())
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(
-                            (integrity.status == .verifiedBottle ? Color.green : Color.orange).opacity(0.12),
-                            in: Capsule()
-                        )
-                        .foregroundStyle(integrity.status == .verifiedBottle ? .green : .orange)
+                let integrity = BrewStoreBottleIntegrityAuditor.auditPackage(package: currentPackage, prefix: effectivePrefix)
+                Button {
+                    showingBottleIntegritySheet = true
+                } label: {
+                    HStack {
+                        Image(systemName: integrity.status.icon)
+                            .font(.caption2)
+                            .foregroundStyle(integrityStatusColor(integrity.status))
+                        Text("Bottle Integrity").font(.caption).foregroundStyle(.secondary)
+                        Spacer()
+                        Text(integrityStatusLabel(integrity.status))
+                            .font(.caption2.bold())
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(
+                                integrityStatusColor(integrity.status).opacity(0.12),
+                                in: Capsule()
+                            )
+                            .foregroundStyle(integrityStatusColor(integrity.status))
+                        Image(systemName: "chevron.right")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
                 }
+                .buttonStyle(.plain)
+                .help("Inspect cryptographic bottle checksums and Cellar Mach-O binaries")
             }
 
             let advisories = BrewStoreCVEScanningManager.advisories(for: currentPackage)
@@ -1754,6 +1770,71 @@ struct PackageDetailView: View {
         } message: {
             Text("This will run 'brew uninstall \(orphan.id)' to free up \(orphan.formattedSize) from your Cellar.")
         }
+    }
+
+    // MARK: - Bottle Integrity Helpers
+
+    private func integrityStatusColor(_ status: BottleIntegrityStatus) -> Color {
+        switch status {
+        case .verifiedBottle: return .green
+        case .builtFromSource: return .purple
+        case .unmanagedOrManual: return .orange
+        case .corruptedOrTampered: return .red
+        }
+    }
+
+    private func integrityStatusLabel(_ status: BottleIntegrityStatus) -> String {
+        switch status {
+        case .verifiedBottle: return "Verified"
+        case .builtFromSource: return "Source"
+        case .unmanagedOrManual: return "Unmanaged"
+        case .corruptedOrTampered: return "Corrupted"
+        }
+    }
+
+    @ViewBuilder
+    private func integrityWarningCard(integrity: BottleIntegrityReport) -> some View {
+        HStack(alignment: .center, spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(Color.red.opacity(0.15))
+                    .frame(width: 40, height: 40)
+                Image(systemName: "exclamationmark.shield.fill")
+                    .font(.system(size: 18))
+                    .foregroundStyle(.red)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 6) {
+                    Text("Bottle Integrity Alert")
+                        .font(.headline)
+                    Text("(\(integrityStatusLabel(integrity.status)))")
+                        .font(.caption.bold())
+                        .foregroundStyle(.red)
+                }
+
+                Text(integrity.failureReason ?? "Cellar binaries or receipts appear corrupted or altered.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Button(role: .destructive) {
+                Task {
+                    _ = await BrewStoreBottleIntegrityAuditor.shared.reinstallBottle(packageID: currentPackage.id, prefix: effectivePrefix, manager: manager)
+                }
+            } label: {
+                Label("Reinstall Clean Bottle", systemImage: "arrow.triangle.2.circlepath")
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.regular)
+        }
+        .brewCardStyle(elevation: .subtle, padding: Spacing.md)
+        .overlay(
+            RoundedRectangle(cornerRadius: Radius.panel)
+                .strokeBorder(Color.red.opacity(0.3), lineWidth: 1)
+        )
     }
 }
 

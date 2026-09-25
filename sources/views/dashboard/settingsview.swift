@@ -74,6 +74,7 @@ struct SettingsView: View {
     @State private var copiedSchemeURL: String?
     @State private var showingDualArchBridge = false
     @State private var showingOrphanAndKegAuditor = false
+    @State private var showingBottleIntegrityAuditor = false
 
     private var doctorDiagnostics: [BrewStoreDoctorDiagnostic] {
         BrewStoreDoctorParser.parse(manager.outputLog)
@@ -201,6 +202,9 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showingOrphanAndKegAuditor) {
             OrphanAndKegAuditorView(manager: manager)
+        }
+        .sheet(isPresented: $showingBottleIntegrityAuditor) {
+            BottleIntegrityAuditorView(manager: manager)
         }
         .confirmationDialog("Install this Brewfile?", isPresented: $showingBrewfileConfirmation, titleVisibility: .visible) {
             Button("Install Brewfile", role: .destructive) {
@@ -1255,6 +1259,12 @@ struct SettingsView: View {
 
                     Button("Audit Leaves & Keg-Only") {
                         showingOrphanAndKegAuditor = true
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(!manager.isAvailable || manager.isOperating)
+
+                    Button("Audit Bottle Integrity") {
+                        showingBottleIntegrityAuditor = true
                     }
                     .buttonStyle(.bordered)
                     .disabled(!manager.isAvailable || manager.isOperating)

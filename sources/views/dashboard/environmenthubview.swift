@@ -38,6 +38,7 @@ struct EnvironmentHubView: View {
     @State private var showingShellProfiler = false
     @State private var showingDualArchBridge = false
     @State private var showingOrphanAndKegAuditor = false
+    @State private var showingBottleIntegrityAuditor = false
 
     private var runningServicesCount: Int {
         manager.services.filter(\.isRunning).count
@@ -148,6 +149,14 @@ struct EnvironmentHubView: View {
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
+
+                    Button {
+                        showingBottleIntegrityAuditor = true
+                    } label: {
+                        Label("Bottle Integrity", systemImage: "checkmark.shield")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
                 }
 
                 ToolchainCompanionsCard(manager: manager)
@@ -185,6 +194,9 @@ struct EnvironmentHubView: View {
         }
         .sheet(isPresented: $showingOrphanAndKegAuditor) {
             OrphanAndKegAuditorView(manager: manager)
+        }
+        .sheet(isPresented: $showingBottleIntegrityAuditor) {
+            BottleIntegrityAuditorView(manager: manager)
         }
         .onAppear {
             syncFromSelection()
