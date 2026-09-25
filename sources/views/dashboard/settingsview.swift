@@ -78,6 +78,7 @@ struct SettingsView: View {
     @State private var showingTapHealthBenchmark = false
     @State private var showingBrewfileManager = false
     @State private var showingCaskQuarantineAuditor = false
+    @State private var showingSourceBuildStudio = false
 
     private var doctorDiagnostics: [BrewStoreDoctorDiagnostic] {
         BrewStoreDoctorParser.parse(manager.outputLog)
@@ -217,6 +218,9 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showingCaskQuarantineAuditor) {
             CaskQuarantineAuditorView(manager: manager)
+        }
+        .sheet(isPresented: $showingSourceBuildStudio) {
+            SourceBuildStudioView(manager: manager)
         }
         .confirmationDialog("Install this Brewfile?", isPresented: $showingBrewfileConfirmation, titleVisibility: .visible) {
             Button("Install Brewfile", role: .destructive) {
@@ -1295,6 +1299,12 @@ struct SettingsView: View {
 
                     Button("Cask Quarantine Auditor") {
                         showingCaskQuarantineAuditor = true
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(!manager.isAvailable || manager.isOperating)
+
+                    Button("Source Compiler & Build Logs") {
+                        showingSourceBuildStudio = true
                     }
                     .buttonStyle(.bordered)
                     .disabled(!manager.isAvailable || manager.isOperating)

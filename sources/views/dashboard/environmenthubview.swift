@@ -42,6 +42,7 @@ struct EnvironmentHubView: View {
     @State private var showingTapHealthBenchmark = false
     @State private var showingBrewfileManager = false
     @State private var showingCaskQuarantineAuditor = false
+    @State private var showingSourceBuildStudio = false
 
     private var runningServicesCount: Int {
         manager.services.filter(\.isRunning).count
@@ -184,6 +185,14 @@ struct EnvironmentHubView: View {
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
+
+                    Button {
+                        showingSourceBuildStudio = true
+                    } label: {
+                        Label("Compiler Matrix", systemImage: "hammer.fill")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
                 }
 
                 ToolchainCompanionsCard(manager: manager)
@@ -233,6 +242,9 @@ struct EnvironmentHubView: View {
         }
         .sheet(isPresented: $showingCaskQuarantineAuditor) {
             CaskQuarantineAuditorView(manager: manager)
+        }
+        .sheet(isPresented: $showingSourceBuildStudio) {
+            SourceBuildStudioView(manager: manager)
         }
         .onAppear {
             syncFromSelection()

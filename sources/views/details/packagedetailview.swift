@@ -22,6 +22,7 @@ struct PackageDetailView: View {
     @State private var showingUpgradeDiffSheet = false
     @State private var showingBottleIntegritySheet = false
     @State private var showingCaskQuarantineSheet = false
+    @State private var showingSourceBuildStudio = false
     @State private var caskQuarantineItem: CaskQuarantineItem? = nil
 
     @StateObject private var securityInspector = BrewStoreSecurityInspector()
@@ -200,6 +201,9 @@ struct PackageDetailView: View {
         }
         .sheet(isPresented: $showingCaskQuarantineSheet) {
             CaskQuarantineAuditorView(manager: manager)
+        }
+        .sheet(isPresented: $showingSourceBuildStudio) {
+            SourceBuildStudioView(manager: manager, targetPackage: currentPackage)
         }
         .detailModalOverlay(item: $selectedDependencyPackage) { depPkg in
             PackageDetailView(manager: manager, package: depPkg, onDismiss: {
@@ -1045,6 +1049,26 @@ struct PackageDetailView: View {
                 }
                 .buttonStyle(.plain)
                 .help("Audit Gatekeeper extended quarantine attributes and code signatures")
+            }
+
+            if currentPackage.kind == .formula {
+                Divider()
+                Button {
+                    showingSourceBuildStudio = true
+                } label: {
+                    HStack {
+                        Image(systemName: "hammer")
+                            .font(.caption2)
+                            .foregroundStyle(.indigo)
+                        Text("Source Compiler Studio").font(.caption).foregroundStyle(.secondary)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .buttonStyle(.plain)
+                .help("Configure source compilation flags (--build-from-source, --HEAD) and inspect build logs")
             }
 
             let advisories = BrewStoreCVEScanningManager.advisories(for: currentPackage)
