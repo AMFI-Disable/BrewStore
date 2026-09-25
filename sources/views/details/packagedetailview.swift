@@ -28,11 +28,33 @@ struct PackageDetailView: View {
     @StateObject private var shellAssistant = BrewStoreShellConfigAssistant()
     @ObservedObject private var pinningManager = BrewStorePackagePinningManager.shared
     @ObservedObject private var wishlistManager = BrewStoreWishlistManager.shared
+    @ObservedObject private var auditor = OrphanAndKegAuditor.shared
     @Environment(\.dismiss) private var dismiss
     var onDismiss: (() -> Void)?
     @State private var packageAnalytics: PackageInstallAnalytics?
     @State private var selectedDependencyPackage: BrewStorePackage?
     @State private var caveatAppliedSuccess = false
+    @State private var copiedExportsToast = false
+    @State private var showingPruneOrphanConfirm = false
+    @State private var showingToggleKegConfirm = false
+
+    private var effectivePrefix: String {
+        manager.brewPrefix ?? (FileManager.default.fileExists(atPath: "/opt/homebrew") ? "/opt/homebrew" : "/usr/local")
+    }
+
+    private var matchingKegOnlyItem: KegOnlyPackageItem? {
+        guard currentPackage.kind == .formula, currentPackage.isInstalled else { return nil }
+        return auditor.report?.kegOnlyPackages.first {
+            $0.id.lowercased() == currentPackage.id.lowercased() || $0.name.lowercased() == currentPackage.name.lowercased()
+        }
+    }
+
+    private var matchingOrphanItem: LeafPackageItem? {
+        guard currentPackage.kind == .formula, currentPackage.isInstalled else { return nil }
+        return auditor.report?.orphans.first {
+            $0.id.lowercased() == currentPackage.id.lowercased() || $0.name.lowercased() == currentPackage.name.lowercased()
+        }
+    }
 
     private var currentPackage: BrewStorePackage {
         manager.packages.first { $0.id == package.id && $0.kind == package.kind } ?? package
@@ -279,6 +301,30 @@ struct PackageDetailView: View {
                             .padding(.vertical, 2)
                             .background(Color.orange.opacity(0.12), in: Capsule())
                         }
+
+                        if let keg = matchingKegOnlyItem {
+                            HStack(spacing: 3) {
+                                Image(systemName: keg.isForceLinked ? "exclamationmark.triangle.fill" : "lock.shield.fill")
+                                Text(keg.isForceLinked ? "Keg-Only: Force-Linked" : "Keg-Only: Isolated")
+                            }
+                            .font(.caption2.bold())
+                            .foregroundStyle(keg.isForceLinked ? .orange : .blue)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background((keg.isForceLinked ? Color.orange : Color.blue).opacity(0.12), in: Capsule())
+                        }
+
+                        if let orphan = matchingOrphanItem {
+                            HStack(spacing: 3) {
+                                Image(systemName: "leaf.fill")
+                                Text("Orphan Dependency (\(orphan.formattedSize))")
+                            }
+                            .font(.caption2.bold())
+                            .foregroundStyle(.orange)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.orange.opacity(0.12), in: Capsule())
+                        }
                     }
 
                     HStack(spacing: 6) {
@@ -404,6 +450,14 @@ struct PackageDetailView: View {
 
         if currentPackage.kind == .formula, currentPackage.isInstalled {
             KegSnapshotCardView(manager: manager, packageID: currentPackage.id)
+
+            if let keg = matchingKegOnlyItem {
+                kegGovernanceCard(keg: keg)
+            }
+
+            if let orphan = matchingOrphanItem {
+                orphanPruneCard(orphan: orphan)
+            }
         }
 
         if preferences.enableAppCleaner, currentPackage.isInstalled {
@@ -1562,6 +1616,143 @@ struct PackageDetailView: View {
                     showingRemoval = true
                 }
             }
+        }
+    }
+
+    // MARK: - Keg-Only & Orphan Leaf Governance
+
+    @ViewBuilder
+    private func kegGovernanceCard(keg: KegOnlyPackageItem) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            HStack {
+                HStack(spacing: 6) {
+                    Image(systemName: keg.isForceLinked ? "exclamationmark.triangle.fill" : "lock.shield.fill")
+                        .foregroundStyle(keg.isForceLinked ? .orange : .blue)
+                    Text("Keg-Only PATH & Compiler Governance")
+                        .font(.headline)
+                }
+
+                Spacer()
+
+                Button {
+                    showingToggleKegConfirm = true
+                } label: {
+                    Text(keg.isForceLinked ? "Unlink (Restore Isolation)" : "Force Link Binary")
+                }
+                .controlSize(.small)
+                .buttonStyle(.bordered)
+                .disabled(auditor.operatingPackageID != nil)
+            }
+
+            Text(keg.humanReadableReason)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("Environment Exports")
+                        .font(.caption2.bold())
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+
+                    Button {
+                        auditor.copyToClipboard(keg.fullShellSnippet)
+                        copiedExportsToast = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            copiedExportsToast = false
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: copiedExportsToast ? "checkmark" : "doc.on.doc")
+                            Text(copiedExportsToast ? "Copied!" : "Copy Shell Exports")
+                        }
+                    }
+                    .buttonStyle(.borderless)
+                    .controlSize(.mini)
+                }
+
+                Text(keg.fullShellSnippet)
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundStyle(.primary)
+                    .padding(8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(NSColor.textBackgroundColor).opacity(0.6), in: RoundedRectangle(cornerRadius: 6))
+                    .textSelection(.enabled)
+            }
+        }
+        .brewCardStyle(elevation: .subtle, padding: Spacing.md)
+        .confirmationDialog(
+            keg.isForceLinked ? "Unlink \(keg.name)?" : "Force Link \(keg.name)?",
+            isPresented: $showingToggleKegConfirm,
+            titleVisibility: .visible
+        ) {
+            Button(keg.isForceLinked ? "Unlink (brew unlink)" : "Force Link (brew link --overwrite --force)", role: keg.isForceLinked ? .none : .destructive) {
+                Task {
+                    _ = await auditor.toggleKegLink(packageID: keg.id, forceLink: !keg.isForceLinked, prefix: effectivePrefix, manager: manager)
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            if keg.isForceLinked {
+                Text("This will remove symlinks from \(effectivePrefix)/bin, restoring safe isolated status.")
+            } else {
+                Text("Warning: Force linking a keg-only package symlinks its binaries directly into \(effectivePrefix)/bin, which may override macOS system binaries or other tools.")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func orphanPruneCard(orphan: LeafPackageItem) -> some View {
+        HStack(alignment: .center, spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(Color.orange.opacity(0.15))
+                    .frame(width: 40, height: 40)
+                Image(systemName: "leaf.fill")
+                    .font(.system(size: 18))
+                    .foregroundStyle(.orange)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 6) {
+                    Text("Orphan Dependency Leaf")
+                        .font(.headline)
+                    Text("(\(orphan.formattedSize))")
+                        .font(.caption.bold())
+                        .foregroundStyle(.orange)
+                }
+
+                Text("This package was installed as a dependency for software that has since been uninstalled. It is currently not required by any installed formula.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Button(role: .destructive) {
+                showingPruneOrphanConfirm = true
+            } label: {
+                Label("Prune (\(orphan.formattedSize))", systemImage: "trash")
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.regular)
+            .disabled(auditor.operatingPackageID != nil)
+        }
+        .brewCardStyle(elevation: .subtle, padding: Spacing.md)
+        .confirmationDialog(
+            "Prune \(orphan.name)?",
+            isPresented: $showingPruneOrphanConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Prune Dependency", role: .destructive) {
+                Task {
+                    _ = await auditor.pruneSingleOrphan(packageID: orphan.id, prefix: effectivePrefix, manager: manager)
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will run 'brew uninstall \(orphan.id)' to free up \(orphan.formattedSize) from your Cellar.")
         }
     }
 }

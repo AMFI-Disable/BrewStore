@@ -73,6 +73,7 @@ struct SettingsView: View {
     @State private var webhookTestResult: (success: Bool, message: String)?
     @State private var copiedSchemeURL: String?
     @State private var showingDualArchBridge = false
+    @State private var showingOrphanAndKegAuditor = false
 
     private var doctorDiagnostics: [BrewStoreDoctorDiagnostic] {
         BrewStoreDoctorParser.parse(manager.outputLog)
@@ -197,6 +198,9 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showingDualArchBridge) {
             DualArchitectureBridgeView(manager: manager)
+        }
+        .sheet(isPresented: $showingOrphanAndKegAuditor) {
+            OrphanAndKegAuditorView(manager: manager)
         }
         .confirmationDialog("Install this Brewfile?", isPresented: $showingBrewfileConfirmation, titleVisibility: .visible) {
             Button("Install Brewfile", role: .destructive) {
@@ -1245,6 +1249,12 @@ struct SettingsView: View {
 
                     Button("Remove Unused Dependencies", role: .destructive) {
                         BrewStoreUninstallCoordinator.shared.requestAutoremove(manager: manager)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(!manager.isAvailable || manager.isOperating)
+
+                    Button("Audit Leaves & Keg-Only") {
+                        showingOrphanAndKegAuditor = true
                     }
                     .buttonStyle(.bordered)
                     .disabled(!manager.isAvailable || manager.isOperating)

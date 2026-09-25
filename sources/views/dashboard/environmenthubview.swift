@@ -37,6 +37,7 @@ struct EnvironmentHubView: View {
     @State private var showingVersionSwitcher = false
     @State private var showingShellProfiler = false
     @State private var showingDualArchBridge = false
+    @State private var showingOrphanAndKegAuditor = false
 
     private var runningServicesCount: Int {
         manager.services.filter(\.isRunning).count
@@ -139,6 +140,14 @@ struct EnvironmentHubView: View {
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
+
+                    Button {
+                        showingOrphanAndKegAuditor = true
+                    } label: {
+                        Label("Orphans & Keg-Only", systemImage: "leaf.arrow.triangle.circlepath")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
                 }
 
                 ToolchainCompanionsCard(manager: manager)
@@ -173,6 +182,9 @@ struct EnvironmentHubView: View {
         }
         .sheet(isPresented: $showingDualArchBridge) {
             DualArchitectureBridgeView(manager: manager)
+        }
+        .sheet(isPresented: $showingOrphanAndKegAuditor) {
+            OrphanAndKegAuditorView(manager: manager)
         }
         .onAppear {
             syncFromSelection()
