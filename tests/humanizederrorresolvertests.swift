@@ -104,4 +104,17 @@ final class HumanizedErrorResolverTests: XCTestCase {
         let msg = BrewStoreHumanizedErrorResolver.humanizedMessage(from: "curl: (7) Failed to connect to host")
         XCTAssertTrue(msg.contains("Network Connection Interrupted"))
     }
+
+    func testHumanizedErrorBannerInitialization() {
+        let banner = HumanizedErrorBanner(
+            rawError: "curl: (6) Could not resolve host",
+            titleOverride: "Custom Network Title",
+            onDismiss: {},
+            customActionTitle: "Retry Now",
+            customAction: {}
+        )
+        XCTAssertNotNil(banner)
+        XCTAssertEqual(banner.titleOverride, "Custom Network Title")
+        XCTAssertEqual(banner.customActionTitle, "Retry Now")
+    }
 }

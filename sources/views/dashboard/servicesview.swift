@@ -416,13 +416,13 @@ struct ServicesView: View {
             }
 
             if let error = manager.errorMessage {
-                HStack {
-                    Text(error)
-                        .font(.caption)
-                        .foregroundStyle(Color.red)
-                        .textSelection(.enabled)
-                    Spacer()
-                }
+                HumanizedErrorBanner(
+                    rawError: error,
+                    manager: manager,
+                    onDismiss: {
+                        manager.clearErrorMessage()
+                    }
+                )
                 .padding(.horizontal)
                 .padding(.bottom, 8)
             } else if manager.isOperating, let op = manager.activeOperationTitle {

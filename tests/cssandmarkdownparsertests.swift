@@ -156,4 +156,67 @@ final class CSSAndMarkdownParserTests: XCTestCase {
             XCTFail("Second block should be bullet")
         }
     }
+
+    // MARK: - Markdown Table Parsing
+
+    func testMarkdownTableParsing() {
+        let md = """
+        # Summary Table
+
+        | Flag | Description | Default |
+        | :--- | :--- | :--- |
+        | `--all` | Process everything | false |
+        | `--force` | Bypass prompts | false |
+
+        End of documentation.
+        """
+        let blocks = MarkdownParser.parse(md)
+        XCTAssertEqual(blocks.count, 3)
+
+        if case let .h1(title) = blocks[0] {
+            XCTAssertEqual(title, "Summary Table")
+        } else {
+            XCTFail("Block 0 should be H1")
+        }
+
+        if case let .table(headers, rows) = blocks[1] {
+            XCTAssertEqual(headers, ["Flag", "Description", "Default"])
+            XCTAssertEqual(rows.count, 2)
+            XCTAssertEqual(rows[0], ["`--all`", "Process everything", "false"])
+            XCTAssertEqual(rows[1], ["`--force`", "Bypass prompts", "false"])
+        } else {
+            XCTFail("Block 1 should be table")
+        }
+
+        if case let .paragraph(text) = blocks[2] {
+            XCTAssertEqual(text, "End of documentation.")
+        } else {
+            XCTFail("Block 2 should be paragraph")
+        }
+    }
+
+    func testMarkdownTableWithUnevenCells() {
+        let md = """
+        | Header 1 | Header 2 | Header 3 |
+        |---|---|---|
+        | Row 1 Col 1 | Row 1 Col 2 |
+        | Row 2 Col 1 | Row 2 Col 2 | Row 2 Col 3 | Extra Col |
+        """
+        let blocks = MarkdownParser.parse(md)
+        XCTAssertEqual(blocks.count, 1)
+
+        if case let .table(headers, rows) = blocks[0] {
+            XCTAssertEqual(headers.count, 3)
+            XCTAssertEqual(rows.count, 2)
+            // Row 1 should be padded with empty string to match header count 3
+            XCTAssertEqual(rows[0].count, 3)
+            XCTAssertEqual(rows[0][2], "")
+            // Row 2 should be truncated to match header count 3
+            XCTAssertEqual(rows[1].count, 3)
+            XCTAssertEqual(rows[1][2], "Row 2 Col 3")
+        } else {
+            XCTFail("Block should be table")
+        }
+    }
 }
+

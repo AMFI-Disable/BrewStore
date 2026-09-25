@@ -88,6 +88,10 @@ final class HomebrewManager: ObservableObject {
     @Published var activeLockState: HomebrewLockState = .free
     @Published var isHomebrewLocked = false
     @Published var outputLog = ""
+
+    func clearErrorMessage() {
+        errorMessage = nil
+    }
     private static let maxLogCharacters = 150_000
 
     func appendLogChunk(_ chunk: String) {

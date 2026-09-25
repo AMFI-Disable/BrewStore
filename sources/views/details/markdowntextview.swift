@@ -10,6 +10,7 @@ public enum MarkdownBlock: Equatable, Identifiable {
     case codeBlock(code: String, language: String?)
     case blockquote(String)
     case divider
+    case table(headers: [String], rows: [[String]])
     case paragraph(String)
 
     public var id: String {
@@ -22,6 +23,7 @@ public enum MarkdownBlock: Equatable, Identifiable {
         case let .codeBlock(code, lang): "code-\(lang ?? "")-\(code.hashValue)"
         case let .blockquote(s): "quote-\(s)"
         case .divider: "divider-\(UUID().uuidString)"
+        case let .table(headers, rows): "table-\(headers.joined(separator: "-"))-\(rows.count)"
         case let .paragraph(s): "p-\(s.hashValue)"
         }
     }
@@ -123,6 +125,31 @@ public enum MarkdownParser {
                 continue
             }
 
+            // Markdown Table
+            if trimmed.contains("|"), i + 1 < lines.count, isTableDelimiterRow(lines[i + 1]) {
+                let headers = parseTableRowCells(trimmed)
+                i += 2 // skip header and delimiter row
+                var rows: [[String]] = []
+                while i < lines.count {
+                    let rLine = lines[i]
+                    let rTrimmed = rLine.trimmingCharacters(in: .whitespaces)
+                    if rTrimmed.isEmpty || !rTrimmed.contains("|") || rTrimmed.hasPrefix("#") || rTrimmed.hasPrefix("```") || rTrimmed == "---" {
+                        break
+                    }
+                    let cells = parseTableRowCells(rTrimmed)
+                    var normalizedCells = cells
+                    if normalizedCells.count < headers.count {
+                        normalizedCells.append(contentsOf: Array(repeating: "", count: headers.count - normalizedCells.count))
+                    } else if normalizedCells.count > headers.count {
+                        normalizedCells = Array(normalizedCells.prefix(headers.count))
+                    }
+                    rows.append(normalizedCells)
+                    i += 1
+                }
+                blocks.append(.table(headers: headers, rows: rows))
+                continue
+            }
+
             // Standard Paragraph
             var paragraphLines = [trimmed]
             i += 1
@@ -137,6 +164,7 @@ public enum MarkdownParser {
                     nextTrimmed.hasPrefix("• ") ||
                     nextTrimmed.hasPrefix("> ") ||
                     nextTrimmed == "---" ||
+                    (nextTrimmed.contains("|") && i + 1 < lines.count && isTableDelimiterRow(lines[i + 1])) ||
                     parseNumberedListItem(nextTrimmed) != nil {
                     break
                 }
@@ -147,6 +175,35 @@ public enum MarkdownParser {
         }
 
         return blocks
+    }
+
+    private static func isTableDelimiterRow(_ line: String) -> Bool {
+        let cleaned = line.trimmingCharacters(in: .whitespaces)
+        guard cleaned.contains("-") else { return false }
+        let cells = cleaned.split(separator: "|").map { $0.trimmingCharacters(in: .whitespaces) }
+        guard !cells.isEmpty else { return false }
+        for cell in cells {
+            guard !cell.isEmpty else { continue }
+            let allowed = CharacterSet(charactersIn: "-: ")
+            if cell.unicodeScalars.contains(where: { !allowed.contains($0) }) {
+                return false
+            }
+            if !cell.contains("-") {
+                return false
+            }
+        }
+        return true
+    }
+
+    private static func parseTableRowCells(_ line: String) -> [String] {
+        var trimmed = line.trimmingCharacters(in: .whitespaces)
+        if trimmed.hasPrefix("|") {
+            trimmed.removeFirst()
+        }
+        if trimmed.hasSuffix("|") {
+            trimmed.removeLast()
+        }
+        return trimmed.components(separatedBy: "|").map { $0.trimmingCharacters(in: .whitespaces) }
     }
 
     private static func parseNumberedListItem(_ line: String) -> (num: Int, text: String)? {
@@ -290,6 +347,59 @@ public struct MarkdownTextView: View {
         case .divider:
             Divider()
                 .padding(.vertical, 6)
+
+        case let .table(headers, rows):
+            ScrollView(.horizontal, showsIndicators: true) {
+                Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 6) {
+                    if !headers.isEmpty {
+                        GridRow {
+                            ForEach(headers.indices, id: \.self) { colIdx in
+                                Text(CSSAndMarkdownParser.renderAttributedString(
+                                    headers[colIdx],
+                                    baseFont: .system(size: 12, weight: .bold, design: .rounded),
+                                    baseFontSize: 12,
+                                    accentColor: accentColor,
+                                    classMap: classMap
+                                ))
+                                .foregroundStyle(.primary)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color.secondary.opacity(0.12), in: RoundedRectangle(cornerRadius: 5))
+                            }
+                        }
+                    }
+
+                    ForEach(rows.indices, id: \.self) { rowIdx in
+                        GridRow {
+                            ForEach(rows[rowIdx].indices, id: \.self) { colIdx in
+                                Text(CSSAndMarkdownParser.renderAttributedString(
+                                    rows[rowIdx][colIdx],
+                                    baseFont: baseFont,
+                                    baseFontSize: 12,
+                                    accentColor: accentColor,
+                                    classMap: classMap
+                                ))
+                                .foregroundStyle(.primary)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                        }
+                        if rowIdx < rows.count - 1 {
+                            Divider()
+                                .opacity(0.35)
+                        }
+                    }
+                }
+                .padding(8)
+            }
+            .background(Color(nsColor: .controlBackgroundColor).opacity(0.6), in: RoundedRectangle(cornerRadius: 8))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.secondary.opacity(0.15), lineWidth: 1)
+            )
+            .padding(.vertical, 4)
 
         case let .paragraph(text):
             Text(CSSAndMarkdownParser.renderAttributedString(text, baseFont: baseFont, baseFontSize: 13, accentColor: accentColor, classMap: classMap))

@@ -582,75 +582,14 @@ struct PackageDetailView: View {
     }
 
     private func errorBanner(error: String) -> some View {
-        let info = BrewStoreHumanizedErrorResolver.resolve(rawError: error)
-
-        return VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                Image(systemName: info.iconName)
-                    .font(.headline)
-                    .foregroundStyle(.red)
-
-                Text(info.title)
-                    .font(.headline)
-                    .foregroundStyle(.red)
-
-                Spacer()
-
-                Text(info.category.rawValue)
-                    .font(.caption2.bold())
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.red.opacity(0.12), in: Capsule())
-                    .foregroundStyle(.red)
+        HumanizedErrorBanner(
+            rawError: error,
+            manager: manager,
+            package: currentPackage,
+            onDismiss: {
+                manager.clearErrorMessage()
             }
-
-            Text(info.summary)
-                .font(.callout)
-                .foregroundStyle(.primary)
-
-            Text(info.suggestion)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-
-            HStack(spacing: 8) {
-                if manager.lastOperationRequiresElevation || info.category == .permissions {
-                    Button {
-                        let action: PackageAction = currentPackage.isInstalled ? .upgrade : .install
-                        manager.performElevated(package: currentPackage, action: action)
-                    } label: {
-                        Label("Rerun with Administrator Privileges", systemImage: "lock.shield.fill")
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
-                }
-
-                if info.category == .lock {
-                    Button {
-                        manager.clearLocks()
-                    } label: {
-                        Label("Clear Homebrew Locks", systemImage: "lock.open.fill")
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-                }
-
-                if info.category == .developerTools {
-                    Button {
-                        NSPasteboard.general.clearContents()
-                        NSPasteboard.general.setString("xcode-select --install", forType: .string)
-                    } label: {
-                        Label("Copy Install Command", systemImage: "terminal.fill")
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-                }
-            }
-            .padding(.top, 2)
-        }
-        .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.red.opacity(0.06), in: RoundedRectangle(cornerRadius: Radius.sm))
-        .overlay(RoundedRectangle(cornerRadius: Radius.sm).strokeBorder(Color.red.opacity(0.25), lineWidth: 1))
+        )
     }
 
     private func caveatsSection(caveats: String) -> some View {

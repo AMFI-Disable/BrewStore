@@ -1175,7 +1175,12 @@ struct SettingsView: View {
                         .disabled(manager.isOperating || selectedBrewfileURL == nil)
                 }
                 if let brewfileError {
-                    Text(brewfileError).font(.caption).foregroundStyle(.red).textSelection(.enabled)
+                    HumanizedErrorBanner(
+                        rawError: brewfileError,
+                        onDismiss: {
+                            self.brewfileError = nil
+                        }
+                    )
                 }
             }
 
@@ -1676,14 +1681,11 @@ private struct DoctorDiagnosticsSheet: View {
                                 .font(.caption2.bold())
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
-                                .background(diag.severity == .clean ? Color.green.opacity(0.12) : Color.orange.opacity(0.12), in: Capsule())
-                                .foregroundStyle(diag.severity == .clean ? .green : .orange)
+                                .background(diag.severity == .clean ? Color.green.opacity(0.12) : (diag.severity == .error ? Color.red.opacity(0.12) : Color.orange.opacity(0.12)), in: Capsule())
+                                .foregroundStyle(diag.severity == .clean ? .green : (diag.severity == .error ? .red : .orange))
                         }
 
-                        Text(diag.message)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .textSelection(.enabled)
+                        MarkdownTextView(markdown: diag.message, baseFont: .caption, lineSpacing: 2)
 
                         if let cmd = diag.suggestedCommand {
                             HStack {

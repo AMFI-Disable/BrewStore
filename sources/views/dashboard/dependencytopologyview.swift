@@ -185,29 +185,15 @@ struct DependencyTopologyView: View {
     }
 
     private func errorStateView(error: String) -> some View {
-        VStack(spacing: 12) {
-            HStack(spacing: 8) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.title2)
-                    .foregroundStyle(.orange)
-                Text("Topology Analysis Notice")
-                    .font(.headline)
-            }
-
-            Text(error)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-
-            Button("Retry Analysis") {
+        HumanizedErrorBanner(
+            rawError: error,
+            titleOverride: "Topology Analysis Notice",
+            manager: manager,
+            customActionTitle: "Retry Analysis",
+            customAction: {
                 topologyManager.analyzeTopology(manager: manager)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.small)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(24)
-        .background(Color.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
+        )
     }
 
     private func filteredFoundations(_ list: [SharedFoundationLibrary]) -> [SharedFoundationLibrary] {

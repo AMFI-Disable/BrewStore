@@ -417,24 +417,27 @@ struct PackageListView: View {
 
             BrewStoreLockBanner(manager: manager)
 
-            if !manager.statusMessage.isEmpty || manager.errorMessage != nil, !packages.isEmpty {
+            if let error = manager.errorMessage, !packages.isEmpty {
+                HumanizedErrorBanner(
+                    rawError: error,
+                    manager: manager,
+                    onDismiss: {
+                        manager.clearErrorMessage()
+                    },
+                    customActionTitle: "Retry Refresh",
+                    customAction: {
+                        manager.retryRefresh()
+                    }
+                )
+                .padding(.horizontal)
+                .padding(.bottom, 8)
+            } else if !manager.statusMessage.isEmpty, !packages.isEmpty {
                 HStack {
-                    Text(manager.errorMessage ?? manager.statusMessage)
+                    Text(manager.statusMessage)
                         .font(.caption)
-                        .foregroundStyle(manager.errorMessage == nil ? Color.secondary : Color.red)
+                        .foregroundStyle(Color.secondary)
                         .textSelection(.enabled)
                     Spacer()
-                    if manager.errorMessage != nil {
-                        Button {
-                            manager.retryRefresh()
-                        } label: {
-                            Label("Retry", systemImage: "arrow.clockwise")
-                                .font(.caption)
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.mini)
-                        .disabled(manager.isLoading || manager.isOperating)
-                    }
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 8)
