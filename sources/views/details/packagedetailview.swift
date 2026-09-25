@@ -19,6 +19,7 @@ struct PackageDetailView: View {
     @State private var showingAdvancedInstallSheet = false
     @State private var showingSecurityApprovalSheet = false
     @State private var showingVersionSwitcherSheet = false
+    @State private var showingUpgradeDiffSheet = false
 
     @StateObject private var securityInspector = BrewStoreSecurityInspector()
     @StateObject private var entitlementsAuditor = CaskEntitlementsAuditor.shared
@@ -165,6 +166,9 @@ struct PackageDetailView: View {
         .sheet(isPresented: $showingVersionSwitcherSheet) {
             VersionLinkView(manager: manager)
         }
+        .sheet(isPresented: $showingUpgradeDiffSheet) {
+            UpgradeDiffViewSheet(package: currentPackage, manager: manager)
+        }
         .detailModalOverlay(item: $selectedDependencyPackage) { depPkg in
             PackageDetailView(manager: manager, package: depPkg, onDismiss: {
                 selectedDependencyPackage = nil
@@ -291,6 +295,17 @@ struct PackageDetailView: View {
                 // Action Buttons Bar
                 HStack(spacing: 6) {
                     AppStoreActionButton(manager: manager, package: currentPackage, size: .regular)
+
+                    if currentPackage.isOutdated {
+                        Button {
+                            showingUpgradeDiffSheet = true
+                        } label: {
+                            Label("Preview Diff", systemImage: "doc.text.magnifyingglass")
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.regular)
+                        .help("Preview formula source diff and dependency changes before upgrading")
+                    }
 
                     if currentPackage.isInstalled {
                         let isPinned = pinningManager.isPinned(packageID: currentPackage.id)

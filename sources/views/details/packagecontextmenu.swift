@@ -9,6 +9,7 @@ struct BrewStorePackageContextMenu: ViewModifier {
 
     @ObservedObject private var pinningManager = BrewStorePackagePinningManager.shared
     @ObservedObject private var wishlistManager = BrewStoreWishlistManager.shared
+    @State private var showingUpgradeDiff = false
 
     init(
         manager: HomebrewManager,
@@ -179,6 +180,12 @@ struct BrewStorePackageContextMenu: ViewModifier {
 
                 if package.isInstalled {
                     if package.isOutdated {
+                        Button {
+                            showingUpgradeDiff = true
+                        } label: {
+                            Label("Preview Upgrade Diff…", systemImage: "doc.text.magnifyingglass")
+                        }
+
                         Button("Upgrade") {
                             manager.perform(package: package, action: .upgrade)
                         }
@@ -200,6 +207,9 @@ struct BrewStorePackageContextMenu: ViewModifier {
                     }
                     .disabled(manager.isOperating || !manager.isAvailable)
                 }
+            }
+            .sheet(isPresented: $showingUpgradeDiff) {
+                UpgradeDiffViewSheet(package: package, manager: manager)
             }
     }
 
