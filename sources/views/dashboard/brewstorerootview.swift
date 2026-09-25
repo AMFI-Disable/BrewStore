@@ -471,6 +471,7 @@ struct BrewStoreRootView: View {
             hubSummaryBadge(for: hub)
         }
         .padding(.vertical, 2)
+        .padding(.trailing, 20)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("Sidebar.HubHeader.\(hub.rawValue.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "&", with: ""))")
     }
@@ -571,7 +572,7 @@ struct BrewStoreRootView: View {
                 let running = manager.services.filter(\.isRunning).count
                 if running > 0 {
                     SidebarCountBadge(
-                        text: "\(running) running",
+                        text: "\(running)",
                         foregroundColor: .green,
                         backgroundColor: Color.green.opacity(0.12),
                         isAccentOrProminent: true,
@@ -589,7 +590,7 @@ struct BrewStoreRootView: View {
                     let tapCount = BrewStoreCreatorRepoManager.shared.taps.count
                     if tapCount > 0 {
                         SidebarCountBadge(
-                            text: "\(tapCount) taps",
+                            text: "\(tapCount)",
                             foregroundColor: Color.accentColor,
                             backgroundColor: Color.accentColor.opacity(0.12),
                             isAccentOrProminent: true
