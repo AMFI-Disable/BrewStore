@@ -40,6 +40,7 @@ struct EnvironmentHubView: View {
     @State private var showingOrphanAndKegAuditor = false
     @State private var showingBottleIntegrityAuditor = false
     @State private var showingTapHealthBenchmark = false
+    @State private var showingBrewfileManager = false
 
     private var runningServicesCount: Int {
         manager.services.filter(\.isRunning).count
@@ -166,6 +167,14 @@ struct EnvironmentHubView: View {
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
+
+                    Button {
+                        showingBrewfileManager = true
+                    } label: {
+                        Label("Brewfile Studio", systemImage: "shippingbox.and.arrow.backward")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
                 }
 
                 ToolchainCompanionsCard(manager: manager)
@@ -209,6 +218,9 @@ struct EnvironmentHubView: View {
         }
         .sheet(isPresented: $showingTapHealthBenchmark) {
             TapHealthBenchmarkView(manager: manager)
+        }
+        .sheet(isPresented: $showingBrewfileManager) {
+            BrewfileManagerView(manager: manager)
         }
         .onAppear {
             syncFromSelection()

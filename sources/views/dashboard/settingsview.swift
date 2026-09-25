@@ -76,6 +76,7 @@ struct SettingsView: View {
     @State private var showingOrphanAndKegAuditor = false
     @State private var showingBottleIntegrityAuditor = false
     @State private var showingTapHealthBenchmark = false
+    @State private var showingBrewfileManager = false
 
     private var doctorDiagnostics: [BrewStoreDoctorDiagnostic] {
         BrewStoreDoctorParser.parse(manager.outputLog)
@@ -209,6 +210,9 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showingTapHealthBenchmark) {
             TapHealthBenchmarkView(manager: manager)
+        }
+        .sheet(isPresented: $showingBrewfileManager) {
+            BrewfileManagerView(manager: manager)
         }
         .confirmationDialog("Install this Brewfile?", isPresented: $showingBrewfileConfirmation, titleVisibility: .visible) {
             Button("Install Brewfile", role: .destructive) {
@@ -1275,6 +1279,12 @@ struct SettingsView: View {
 
                     Button("Tap Health & Benchmark") {
                         showingTapHealthBenchmark = true
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(!manager.isAvailable || manager.isOperating)
+
+                    Button("Declarative Brewfile Studio") {
+                        showingBrewfileManager = true
                     }
                     .buttonStyle(.bordered)
                     .disabled(!manager.isAvailable || manager.isOperating)
