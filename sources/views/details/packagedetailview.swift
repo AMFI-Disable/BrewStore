@@ -24,6 +24,7 @@ struct PackageDetailView: View {
     @State private var showingBottleIntegritySheet = false
     @State private var showingCaskQuarantineSheet = false
     @State private var showingSourceBuildStudio = false
+    @State private var showingBlastRadiusSheet = false
     @State private var caskQuarantineItem: CaskQuarantineItem? = nil
 
     @StateObject private var securityInspector = BrewStoreSecurityInspector()
@@ -205,6 +206,16 @@ struct PackageDetailView: View {
         }
         .sheet(isPresented: $showingSourceBuildStudio) {
             SourceBuildStudioView(manager: manager, targetPackage: currentPackage)
+        }
+        .sheet(isPresented: $showingBlastRadiusSheet) {
+            RemovalBlastRadiusSimulatorView(
+                package: currentPackage,
+                manager: manager,
+                onDismiss: { showingBlastRadiusSheet = false },
+                onProceedUninstall: currentPackage.isInstalled ? {
+                    BrewStoreUninstallCoordinator.shared.requestUninstall(package: currentPackage, manager: manager)
+                } : nil
+            )
         }
         .detailModalOverlay(item: $selectedDependencyPackage) { depPkg in
             PackageDetailView(manager: manager, package: depPkg, onDismiss: {
@@ -672,6 +683,16 @@ struct PackageDetailView: View {
                     .controlSize(.small)
                 }
 
+                if currentPackage.isInstalled {
+                    Button {
+                        showingBlastRadiusSheet = true
+                    } label: {
+                        Label("Impact Simulator", systemImage: "waveform.path.ecg")
+                    }
+                    .controlSize(.small)
+                    .help("Simulate pre-removal blast radius on reverse dependencies and active daemons")
+                }
+
                 if currentPackage.kind == .formula {
                     Button(showingDependencyTree ? "Hide Tree" : "Tree View") {
                         showingDependencyTree.toggle()
@@ -730,13 +751,15 @@ struct PackageDetailView: View {
                 }
             }
 
-            if showingDependencyTree, let tree = dependencyTree {
-                Text(tree)
-                    .font(.caption.monospaced())
-                    .padding(8)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 6))
-                    .textSelection(.enabled)
+            if showingDependencyTree {
+                DependencyNodeTreeView(
+                    rootPackage: currentPackage,
+                    allPackages: manager.packages,
+                    asciiTree: dependencyTree,
+                    onSelectPackage: { selectedPkg in
+                        selectedDependencyPackage = selectedPkg
+                    }
+                )
             }
 
             if !dependents.isEmpty {

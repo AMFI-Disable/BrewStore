@@ -39,6 +39,33 @@ struct BrewStoreUninstallRequest: Identifiable {
         Self.uniqueSorted(impacts.flatMap(\.brokenDownstreamPackages))
     }
 
+    var transitiveBrokenPackages: [String] {
+        Self.uniqueSorted(impacts.flatMap(\.transitiveBrokenPackages))
+    }
+
+    var affectedRunningServices: [BrewStoreService] {
+        let allServices = impacts.flatMap(\.affectedRunningServices)
+        var seenIDs = Set<String>()
+        var unique: [BrewStoreService] = []
+        for s in allServices {
+            if !seenIDs.contains(s.id) {
+                seenIDs.insert(s.id)
+                unique.append(s)
+            }
+        }
+        return unique
+    }
+
+    var riskLevel: RemovalRiskLevel {
+        if !affectedRunningServices.isEmpty || transitiveBrokenPackages.count >= 3 {
+            return .critical
+        } else if !transitiveBrokenPackages.isEmpty {
+            return .moderate
+        } else {
+            return .zero
+        }
+    }
+
     var orphanableDependencies: [String] {
         Self.uniqueSorted(impacts.flatMap(\.orphanableDependencies))
     }
@@ -48,7 +75,7 @@ struct BrewStoreUninstallRequest: Identifiable {
     }
 
     var isDestructive: Bool {
-        !brokenDownstreamPackages.isEmpty
+        !brokenDownstreamPackages.isEmpty || !transitiveBrokenPackages.isEmpty || !affectedRunningServices.isEmpty
     }
 
     var totalResidualBytes: Int64 {
@@ -276,7 +303,7 @@ final class BrewStoreUninstallCoordinator: ObservableObject {
         manager: HomebrewManager,
         onCompletion: ((Bool) -> Void)? = nil
     ) -> BrewStoreUninstallRequest {
-        let impacts = Self.dependencyImpacts(for: packages, in: manager.packages)
+        let impacts = Self.dependencyImpacts(for: packages, in: manager.packages, services: manager.services)
         return BrewStoreUninstallRequest(
             packages: packages,
             impacts: impacts,
@@ -286,9 +313,13 @@ final class BrewStoreUninstallCoordinator: ObservableObject {
         )
     }
 
-    static func dependencyImpacts(for packages: [BrewStorePackage], in allPackages: [BrewStorePackage]) -> [UninstallBlastRadius] {
+    static func dependencyImpacts(
+        for packages: [BrewStorePackage],
+        in allPackages: [BrewStorePackage],
+        services: [BrewStoreService] = []
+    ) -> [UninstallBlastRadius] {
         packages.map {
-            BrewStorePreFlightDependencyChecker.simulateUninstallBlastRadius(package: $0, in: allPackages)
+            BrewStorePreFlightDependencyChecker.simulateUninstallBlastRadius(package: $0, in: allPackages, services: services)
         }
     }
 
@@ -649,34 +680,89 @@ struct BrewStoreUninstallPreviewView: View {
 
     @ViewBuilder
     private var dependencyImpactSection: some View {
-        if request.isDestructive {
-            warningCard(title: "High-Impact Dependency Warning", color: .red) {
-                let targetName = request.packages.first?.name ?? "these packages"
-                Text("Installed packages depend on \(targetName). Removing them may break those tools:")
-                Text(request.brokenDownstreamPackages.joined(separator: ", "))
-                    .font(.caption.bold())
-            }
-        } else if !request.orphanableDependencies.isEmpty {
-            warningCard(title: "Potential Orphan Dependencies", color: .orange) {
-                Text("These dependency packages may become orphanable after the operation:")
-                Text(request.orphanableDependencies.joined(separator: ", "))
-                    .font(.caption.bold())
-            }
-        } else if request.operation == .packages {
+        VStack(alignment: .leading, spacing: 10) {
+            // Risk Level Pill
             HStack(spacing: 8) {
-                Image(systemName: "checkmark.shield.fill")
-                    .foregroundStyle(.green)
-                Text("Safe uninstall: No other installed packages depend on this software.")
-                    .font(.subheadline)
+                Image(systemName: request.riskLevel.icon)
+                    .foregroundStyle(request.riskLevel.badgeColor)
+
+                Text(request.riskLevel.rawValue)
+                    .font(.caption.bold())
+                    .foregroundStyle(request.riskLevel.badgeColor)
+
+                Spacer()
+
+                if request.riskLevel == .zero && request.operation == .packages {
+                    Text("Safe to remove without breaking other formulae")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(request.riskLevel.badgeColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 6))
+
+            // Running Services Alert
+            if !request.affectedRunningServices.isEmpty {
+                warningCard(title: "Active Daemon Interruption Warning", color: .red) {
+                    Text("The following background services are currently RUNNING and depend on this software. Removing it will terminate or corrupt them:")
+                    VStack(alignment: .leading, spacing: 4) {
+                        ForEach(request.affectedRunningServices) { srv in
+                            HStack(spacing: 6) {
+                                Circle()
+                                    .fill(Color.green)
+                                    .frame(width: 7, height: 7)
+                                Text(srv.name)
+                                    .font(.caption.bold())
+                                Text("(\(srv.status))")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    .padding(.top, 2)
+                }
+            }
+
+            if request.isDestructive {
+                warningCard(title: "High-Impact Dependency Warning", color: .red) {
+                    let targetName = request.packages.first?.name ?? "these packages"
+                    Text("Installed packages depend on \(targetName). Removing them may break those tools:")
+
+                    if !request.brokenDownstreamPackages.isEmpty {
+                        Text("Direct Dependents: \(request.brokenDownstreamPackages.joined(separator: ", "))")
+                            .font(.caption.bold())
+                    }
+
+                    let indirect = request.transitiveBrokenPackages.filter { !request.brokenDownstreamPackages.contains($0) }
+                    if !indirect.isEmpty {
+                        Text("Transitive Downstream: \(indirect.joined(separator: ", "))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } else if !request.orphanableDependencies.isEmpty {
+                warningCard(title: "Potential Orphan Dependencies", color: .orange) {
+                    Text("These dependency packages may become orphanable after the operation:")
+                    Text(request.orphanableDependencies.joined(separator: ", "))
+                        .font(.caption.bold())
+                }
+            } else if request.operation == .packages {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.shield.fill")
+                        .foregroundStyle(.green)
+                    Text("Safe uninstall: No other installed packages or active background daemons depend on this software.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            if !request.safeSharedDependencies.isEmpty {
+                let retained = request.safeSharedDependencies.joined(separator: ", ")
+                Text("Shared dependencies retained: \(retained)")
+                    .font(.caption)
                     .foregroundStyle(.secondary)
             }
-        }
-
-        if !request.safeSharedDependencies.isEmpty {
-            let retained = request.safeSharedDependencies.joined(separator: ", ")
-            Text("Shared dependencies retained: \(retained)")
-                .font(.caption)
-                .foregroundStyle(.secondary)
         }
     }
 

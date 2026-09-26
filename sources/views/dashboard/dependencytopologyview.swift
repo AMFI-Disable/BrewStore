@@ -98,6 +98,28 @@ struct DependencyTopologyView: View {
                         .buttonStyle(.plain)
                         .accessibilityAddTraits(topologyManager.selectedTab == .integrity ? .isSelected : [])
                         .accessibilityIdentifier("Topology.Card.Integrity")
+
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.15)) {
+                                topologyManager.selectedTab = .coexistence
+                            }
+                        } label: {
+                            statCard(title: "Co-Existing", value: "\(top.versionCoexistenceGroups.count)", icon: "square.split.2x2.fill", color: .indigo, isSelected: topologyManager.selectedTab == .coexistence)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(topologyManager.selectedTab == .coexistence ? .isSelected : [])
+                        .accessibilityIdentifier("Topology.Card.Coexistence")
+
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.15)) {
+                                topologyManager.selectedTab = .buildBaggage
+                            }
+                        } label: {
+                            statCard(title: "Build Baggage", value: "\(top.buildBaggagePackages.count)", icon: "wrench.and.screwdriver.fill", color: .teal, isSelected: topologyManager.selectedTab == .buildBaggage)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(topologyManager.selectedTab == .buildBaggage ? .isSelected : [])
+                        .accessibilityIdentifier("Topology.Card.BuildBaggage")
                     }
 
                     // Segmented Tab Switcher and In-Section Search Bar
@@ -109,7 +131,7 @@ struct DependencyTopologyView: View {
                         }
                         .labelsHidden()
                         .pickerStyle(.segmented)
-                        .frame(maxWidth: 440)
+                        .frame(maxWidth: 620)
                         .accessibilityIdentifier("Topology.SegmentedPicker")
 
                         Spacer()
@@ -131,6 +153,10 @@ struct DependencyTopologyView: View {
                             orphansList(orphans: filteredOrphans(top.orphanLeaves), totalOrphanCount: top.orphanLeaves.count)
                         case .integrity:
                             integrityList(issues: filteredIssues(top.linkageIssues), totalCount: top.linkageIssues.count)
+                        case .coexistence:
+                            coexistenceList(groups: filteredCoexistence(top.versionCoexistenceGroups), totalCount: top.versionCoexistenceGroups.count)
+                        case .buildBaggage:
+                            buildBaggageList(baggage: filteredBaggage(top.buildBaggagePackages), totalCount: top.buildBaggagePackages.count, totalReclaimable: top.formattedReclaimableBuildBaggage)
                         }
                     }
                     .id(topologyManager.selectedTab)
@@ -222,6 +248,27 @@ struct DependencyTopologyView: View {
         return list.filter {
             $0.id.lowercased().contains(q) ||
                 $0.binaryPath.lowercased().contains(q) ||
+                $0.reason.lowercased().contains(q)
+        }
+    }
+
+    private func filteredCoexistence(_ list: [VersionCoexistenceGroup]) -> [VersionCoexistenceGroup] {
+        let q = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !q.isEmpty else { return list }
+        return list.filter { group in
+            group.familyName.lowercased().contains(q) ||
+                group.id.lowercased().contains(q) ||
+                group.installedVersions.contains { $0.name.lowercased().contains(q) || $0.id.lowercased().contains(q) }
+        }
+    }
+
+    private func filteredBaggage(_ list: [BuildBaggagePackage]) -> [BuildBaggagePackage] {
+        let q = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !q.isEmpty else { return list }
+        return list.filter {
+            $0.name.lowercased().contains(q) ||
+                $0.id.lowercased().contains(q) ||
+                $0.category.lowercased().contains(q) ||
                 $0.reason.lowercased().contains(q)
         }
     }
@@ -570,12 +617,293 @@ struct DependencyTopologyView: View {
             }
         }
     }
+
+    // MARK: - 4. Multi-Version Coexistence & ABI
+
+    private func coexistenceList(groups: [VersionCoexistenceGroup], totalCount: Int) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Multi-Version Coexistence & ABI Detective (\(groups.count))")
+                        .font(.headline)
+                    Text("Detects packages with multiple major versions installed simultaneously in your Cellar (e.g. openssl@1.1 vs openssl@3).")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+            }
+
+            if totalCount == 0 {
+                HStack(spacing: 10) {
+                    Image(systemName: "checkmark.seal.fill").foregroundStyle(.green)
+                    Text("Clean Environment: No multiple major versions of the same library family detected.").font(.subheadline)
+                }
+                .padding(20)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.green.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
+            } else if groups.isEmpty {
+                HStack(spacing: 10) {
+                    Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                    Text("No version coexistence groups match \"\(searchQuery)\".").font(.subheadline)
+                    Spacer()
+                    Button("Clear Filter") { searchQuery = "" }
+                        .controlSize(.small)
+                }
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.secondary.opacity(0.05), in: RoundedRectangle(cornerRadius: 8))
+            } else {
+                VStack(spacing: 12) {
+                    ForEach(groups) { group in
+                        coexistenceCard(group: group)
+                    }
+                }
+            }
+        }
+    }
+
+    private func coexistenceCard(group: VersionCoexistenceGroup) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: "square.split.2x2.fill")
+                    .font(.title3)
+                    .foregroundStyle(.indigo)
+
+                VStack(alignment: .leading, spacing: 1) {
+                    HStack(spacing: 8) {
+                        Text(group.familyName)
+                            .font(.headline)
+                        Text("(\(group.installedVersions.count) versions installed)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    if group.totalDiskBytes > 0 {
+                        Text("Total Disk Space: \(group.formattedTotalDiskSize)")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Spacer()
+
+                if group.hasUnusedVersion {
+                    HStack(spacing: 4) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                        Text("Unused Major Version")
+                    }
+                    .font(.caption2.bold())
+                    .foregroundStyle(.orange)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.orange.opacity(0.12), in: Capsule())
+                }
+            }
+
+            Divider()
+
+            VStack(spacing: 6) {
+                ForEach(group.installedVersions) { verPkg in
+                    coexistenceVersionRow(group: group, verPkg: verPkg)
+                }
+            }
+        }
+        .padding(14)
+        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.secondary.opacity(0.12), lineWidth: 1))
+    }
+
+    private func coexistenceVersionRow(group: VersionCoexistenceGroup, verPkg: BrewStorePackage) -> some View {
+        let dependents = group.divergentDependents[verPkg.id] ?? []
+        let isUnused = dependents.isEmpty
+        let versionText = verPkg.displayInstalledVersion ?? verPkg.displayVersion
+
+        return HStack(spacing: 10) {
+            Image(systemName: "shippingbox.fill")
+                .foregroundStyle(isUnused ? Color.orange : Color.accentColor)
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(verPkg.name)
+                        .font(.caption.monospaced().bold())
+                    if !versionText.isEmpty {
+                        Text(versionText)
+                            .font(.system(size: 9, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                if isUnused {
+                    Text("⚠️ 0 Dependents (Candidates for cleanup)")
+                        .font(.caption2)
+                        .foregroundStyle(.orange)
+                } else {
+                    Text("Used by: \(dependents.joined(separator: ", "))")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+
+            Spacer()
+
+            Button("Inspect") {
+                selectedPackageForDetail = verPkg
+            }
+            .controlSize(.small)
+
+            if isUnused {
+                Button("Prune", role: .destructive) {
+                    BrewStoreUninstallCoordinator.shared.requestUninstall(package: verPkg, manager: manager)
+                }
+                .controlSize(.small)
+                .disabled(manager.isOperating)
+            }
+        }
+        .padding(8)
+        .background(isUnused ? Color.orange.opacity(0.06) : Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 6))
+    }
+
+    // MARK: - 5. Build Baggage Scavenger
+
+    private func buildBaggageList(baggage: [BuildBaggagePackage], totalCount: Int, totalReclaimable: String) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Build Baggage Scavenger (\(baggage.count))")
+                        .font(.headline)
+                    Text("Packages installed as build tools (compilers, autotools, generators) that have 0 runtime dependents.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+            }
+
+            if totalCount == 0 {
+                HStack(spacing: 10) {
+                    Image(systemName: "sparkles").foregroundStyle(.green)
+                    Text("No build baggage detected! All build tools are either in use or have been cleanly pruned.").font(.subheadline)
+                }
+                .padding(20)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.green.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
+            } else if baggage.isEmpty {
+                HStack(spacing: 10) {
+                    Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                    Text("No build baggage matches \"\(searchQuery)\".").font(.subheadline)
+                    Spacer()
+                    Button("Clear Filter") { searchQuery = "" }
+                        .controlSize(.small)
+                }
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.secondary.opacity(0.05), in: RoundedRectangle(cornerRadius: 8))
+            } else {
+                // Reclaimable Summary Banner
+                HStack(spacing: 14) {
+                    Image(systemName: "wrench.and.screwdriver.fill")
+                        .font(.title2)
+                        .foregroundStyle(.teal)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Reclaimable Disk Space: \(totalReclaimable)")
+                            .font(.subheadline.bold())
+                        Text("\(baggage.count) build-only tools are sitting idle in your Cellar without any runtime dependents.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    Button {
+                        let pkgsToPrune = baggage.compactMap { bag in
+                            manager.packages.first { $0.id.caseInsensitiveCompare(bag.id) == .orderedSame }
+                        }
+                        BrewStoreUninstallCoordinator.shared.requestUninstall(packages: pkgsToPrune, manager: manager)
+                    } label: {
+                        Label("Prune All Unused Build Tools", systemImage: "trash")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.teal)
+                    .controlSize(.small)
+                    .disabled(manager.isOperating)
+                }
+                .padding(14)
+                .background(Color.teal.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.teal.opacity(0.2), lineWidth: 1))
+
+                // List of Build Baggage Packages
+                VStack(spacing: 8) {
+                    ForEach(baggage) { bag in
+                        buildBaggageRow(bag: bag)
+                    }
+                }
+            }
+        }
+    }
+
+    private func buildBaggageRow(bag: BuildBaggagePackage) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "shippingbox.fill")
+                .font(.title3)
+                .foregroundStyle(.teal)
+
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 8) {
+                    Text(bag.name)
+                        .font(.subheadline.bold())
+                    if !bag.version.isEmpty {
+                        Text(bag.version)
+                            .font(.caption2.monospaced())
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 1)
+                            .background(Color.secondary.opacity(0.1), in: Capsule())
+                    }
+                    Text(bag.category)
+                        .font(.caption2)
+                        .foregroundStyle(.purple)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 1)
+                        .background(Color.purple.opacity(0.12), in: Capsule())
+                }
+
+                Text(bag.reason)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+
+                if bag.diskBytes > 0 {
+                    Text("Disk footprint: \(bag.formattedDiskSize)")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Spacer()
+
+            Button("Inspect") {
+                if let pkg = manager.packages.first(where: { $0.id.caseInsensitiveCompare(bag.id) == .orderedSame }) {
+                    selectedPackageForDetail = pkg
+                }
+            }
+            .controlSize(.small)
+
+            Button("Prune Tool", role: .destructive) {
+                if let pkg = manager.packages.first(where: { $0.id.caseInsensitiveCompare(bag.id) == .orderedSame }) {
+                    BrewStoreUninstallCoordinator.shared.requestUninstall(package: pkg, manager: manager)
+                }
+            }
+            .controlSize(.small)
+            .disabled(manager.isOperating)
+        }
+        .padding(12)
+        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.1), lineWidth: 1))
+    }
 }
 
 struct DependencyExportSheet: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var manager: HomebrewManager
-    @State private var selectedExportFormat = 0 // 0: Mermaid, 1: Lockfile JSON, 2: Markdown Tree
+    @State private var selectedExportFormat = 0 // 0: Mermaid, 1: Graphviz DOT, 2: Lockfile JSON, 3: Markdown Tree
     @State private var copiedToast = false
 
     private var exportContent: String {
@@ -583,8 +911,10 @@ struct DependencyExportSheet: View {
         case 0:
             BrewStoreLockfileGenerator.generateMermaidGraph(packages: manager.packages)
         case 1:
-            BrewStoreLockfileGenerator.generateJSONString(packages: manager.packages, taps: manager.taps)
+            BrewStoreLockfileGenerator.generateGraphvizDot(packages: manager.packages)
         case 2:
+            BrewStoreLockfileGenerator.generateJSONString(packages: manager.packages, taps: manager.taps)
+        case 3:
             BrewStoreLockfileGenerator.generateMarkdownTree(packages: manager.packages)
         default:
             ""
@@ -594,8 +924,9 @@ struct DependencyExportSheet: View {
     private var exportFileExtension: String {
         switch selectedExportFormat {
         case 0: "mmd"
-        case 1: "json"
-        case 2: "md"
+        case 1: "dot"
+        case 2: "json"
+        case 3: "md"
         default: "txt"
         }
     }
@@ -603,8 +934,9 @@ struct DependencyExportSheet: View {
     private var exportFileName: String {
         switch selectedExportFormat {
         case 0: "Brewfile-dependency-graph.mmd"
-        case 1: "Brewfile.lock.json"
-        case 2: "Brewfile-dependency-tree.md"
+        case 1: "Brewfile-dependency-graph.dot"
+        case 2: "Brewfile.lock.json"
+        case 3: "Brewfile-dependency-tree.md"
         default: "export.txt"
         }
     }
@@ -644,12 +976,13 @@ struct DependencyExportSheet: View {
             HStack(spacing: 12) {
                 Picker("Export Format", selection: $selectedExportFormat) {
                     Text("Mermaid Graph (.mmd)").tag(0)
-                    Text("Deterministic Lockfile (JSON)").tag(1)
-                    Text("Markdown Hierarchy Tree (.md)").tag(2)
+                    Text("Graphviz DOT (.dot)").tag(1)
+                    Text("Deterministic Lockfile (JSON)").tag(2)
+                    Text("Markdown Hierarchy Tree (.md)").tag(3)
                 }
                 .labelsHidden()
                 .pickerStyle(.segmented)
-                .frame(maxWidth: 480)
+                .frame(maxWidth: 580)
 
                 Spacer()
 

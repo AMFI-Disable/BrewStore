@@ -109,3 +109,149 @@ enum DependencyTreeCalculator {
         )
     }
 }
+
+enum HomebrewBuildToolHeuristics {
+    static let knownBuildToolIDs: Set<String> = [
+        "cmake", "ninja", "pkg-config", "pkgconf", "meson", "autoconf",
+        "automake", "bison", "m4", "libtool", "nasm", "yasm", "doxygen",
+        "sphinx-doc", "swig", "gnu-sed", "flex", "help2man", "gettext",
+        "docbook", "docbook-xsl", "asciidoctor", "berkeley-db", "scons",
+        "make", "gnu-which"
+    ]
+
+    static func isBuildOnly(id: String) -> Bool {
+        let cleanID = (id.components(separatedBy: "/").last ?? id).lowercased()
+        let baseName = cleanID.components(separatedBy: "@").first ?? cleanID
+        return knownBuildToolIDs.contains(cleanID) || knownBuildToolIDs.contains(baseName)
+    }
+
+    static func buildCategory(for id: String) -> String {
+        let cleanID = (id.components(separatedBy: "/").last ?? id).lowercased()
+        let baseName = cleanID.components(separatedBy: "@").first ?? cleanID
+
+        switch baseName {
+        case "cmake", "ninja", "meson", "scons", "make":
+            return "Build System"
+        case "pkg-config", "pkgconf":
+            return "Package Configurator"
+        case "autoconf", "automake", "m4", "libtool":
+            return "Autotools Suite"
+        case "bison", "flex", "swig":
+            return "Code & Parser Generator"
+        case "nasm", "yasm":
+            return "Assembler"
+        case "doxygen", "sphinx-doc", "asciidoctor", "docbook", "docbook-xsl":
+            return "Documentation Generator"
+        default:
+            return "Build Dependency"
+        }
+    }
+}
+
+struct DependencyTreeNode: Identifiable, Hashable, Codable {
+    let id: String
+    let packageID: String
+    let name: String
+    let version: String
+    let kind: BrewPackageKind
+    let isInstalled: Bool
+    let isBuildOnly: Bool
+    let depth: Int
+    let children: [DependencyTreeNode]
+    let isCycle: Bool
+
+    var totalChildrenCount: Int {
+        children.reduce(children.count) { $0 + $1.totalChildrenCount }
+    }
+}
+
+enum DependencyTreeBuilder {
+    static func buildRecursiveTree(
+        for rootPackage: BrewStorePackage,
+        in allPackages: [BrewStorePackage],
+        maxDepth: Int = 5
+    ) -> DependencyTreeNode {
+        let packageMap = Dictionary(allPackages.map { ($0.id.lowercased(), $0) }, uniquingKeysWith: { first, _ in first })
+        var currentAncestors = Set<String>()
+        return buildNode(
+            packageID: rootPackage.id,
+            depth: 0,
+            packageMap: packageMap,
+            ancestors: &currentAncestors,
+            maxDepth: maxDepth
+        )
+    }
+
+    private static func buildNode(
+        packageID: String,
+        depth: Int,
+        packageMap: [String: BrewStorePackage],
+        ancestors: inout Set<String>,
+        maxDepth: Int
+    ) -> DependencyTreeNode {
+        let lowerID = packageID.lowercased()
+        let resolved = packageMap[lowerID]
+        let name = resolved?.name ?? packageID
+        let version = resolved?.displayInstalledVersion ?? resolved?.displayVersion ?? ""
+        let kind = resolved?.kind ?? .formula
+        let isInstalled = resolved?.isInstalled ?? false
+        let isBuildOnly = HomebrewBuildToolHeuristics.isBuildOnly(id: packageID)
+
+        if ancestors.contains(lowerID) {
+            return DependencyTreeNode(
+                id: "\(packageID)-depth\(depth)-cycle",
+                packageID: packageID,
+                name: name,
+                version: version,
+                kind: kind,
+                isInstalled: isInstalled,
+                isBuildOnly: isBuildOnly,
+                depth: depth,
+                children: [],
+                isCycle: true
+            )
+        }
+
+        if depth >= maxDepth {
+            return DependencyTreeNode(
+                id: "\(packageID)-depth\(depth)",
+                packageID: packageID,
+                name: name,
+                version: version,
+                kind: kind,
+                isInstalled: isInstalled,
+                isBuildOnly: isBuildOnly,
+                depth: depth,
+                children: [],
+                isCycle: false
+            )
+        }
+
+        ancestors.insert(lowerID)
+        let childIDs = resolved?.dependencies ?? []
+        var children: [DependencyTreeNode] = []
+        for childID in childIDs {
+            children.append(buildNode(
+                packageID: childID,
+                depth: depth + 1,
+                packageMap: packageMap,
+                ancestors: &ancestors,
+                maxDepth: maxDepth
+            ))
+        }
+        ancestors.remove(lowerID)
+
+        return DependencyTreeNode(
+            id: "\(packageID)-depth\(depth)-\(children.count)",
+            packageID: packageID,
+            name: name,
+            version: version,
+            kind: kind,
+            isInstalled: isInstalled,
+            isBuildOnly: isBuildOnly,
+            depth: depth,
+            children: children,
+            isCycle: false
+        )
+    }
+}

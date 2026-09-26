@@ -97,7 +97,7 @@ enum BrewStoreLockfileGenerator {
         return str
     }
 
-    static func generateMermaidGraph(
+    nonisolated static func generateMermaidGraph(
         packages: [BrewStorePackage],
         maxNodes: Int = 80
     ) -> String {
@@ -128,7 +128,44 @@ enum BrewStoreLockfileGenerator {
         return lines.joined(separator: "\n")
     }
 
-    static func generateMarkdownTree(packages: [BrewStorePackage]) -> String {
+    nonisolated static func generateGraphvizDot(
+        packages: [BrewStorePackage],
+        maxNodes: Int = 100
+    ) -> String {
+        let installed = packages.filter(\.isInstalled)
+        var lines: [String] = [
+            "digraph BrewStoreDependencies {",
+            "    rankdir=LR;",
+            "    node [shape=box, style=\"rounded,filled\", fontname=\"Helvetica\", fillcolor=\"#F8F9FA\", color=\"#B0C4DE\", fontsize=10];",
+            "    edge [color=\"#6C757D\", arrowhead=\"vee\", arrowsize=0.8];",
+            ""
+        ]
+
+        var addedEdges = 0
+        for pkg in installed {
+            let fromName = pkg.name.replacingOccurrences(of: "\"", with: "\\\"")
+            for dep in pkg.dependencies {
+                let toName = dep.replacingOccurrences(of: "\"", with: "\\\"")
+                lines.append("    \"\(fromName)\" -> \"\(toName)\";")
+                addedEdges += 1
+                if addedEdges >= maxNodes {
+                    break
+                }
+            }
+            if addedEdges >= maxNodes {
+                break
+            }
+        }
+
+        if addedEdges == 0 {
+            lines.append("    \"EmptyGraph\" [label=\"No Package Dependencies Mapped\", shape=note];")
+        }
+
+        lines.append("}")
+        return lines.joined(separator: "\n")
+    }
+
+    nonisolated static func generateMarkdownTree(packages: [BrewStorePackage]) -> String {
         let installed = packages.filter(\.isInstalled).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
         guard !installed.isEmpty else {
             return "No installed packages found."
@@ -149,7 +186,7 @@ enum BrewStoreLockfileGenerator {
         return lines.joined(separator: "\n")
     }
 
-    private static func sanitizeMermaidNodeID(_ id: String) -> String {
+    nonisolated private static func sanitizeMermaidNodeID(_ id: String) -> String {
         id.replacingOccurrences(of: "@", with: "_")
             .replacingOccurrences(of: ".", with: "_")
             .replacingOccurrences(of: "-", with: "_")

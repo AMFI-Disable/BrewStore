@@ -136,4 +136,135 @@ final class DependencyTopologyTests: XCTestCase {
         XCTAssertEqual(graph.downstreamNodes.first?.id, "git")
         XCTAssertTrue(graph.hasDependents)
     }
+
+    func testRecursiveDependencyTreeBuilderWithCycleDetection() {
+        let cmake = BrewStorePackage(id: "cmake", name: "CMake", description: "Build tool", homepage: "", version: "3.28", kind: .formula, isInstalled: true, dependencies: [])
+        let openssl = BrewStorePackage(id: "openssl@3", name: "OpenSSL 3", description: "Crypto", homepage: "", version: "3.2.1", kind: .formula, isInstalled: true, dependencies: [])
+        let curl = BrewStorePackage(id: "curl", name: "curl", description: "URL transfer", homepage: "", version: "8.5", kind: .formula, isInstalled: true, dependencies: ["openssl@3", "cmake"])
+        let app = BrewStorePackage(id: "my-app", name: "My App", description: "App", homepage: "", version: "1.0", kind: .formula, isInstalled: true, dependencies: ["curl"])
+
+        let all = [cmake, openssl, curl, app]
+        let rootNode = DependencyTreeBuilder.buildRecursiveTree(for: app, in: all)
+
+        XCTAssertEqual(rootNode.packageID, "my-app")
+        XCTAssertEqual(rootNode.depth, 0)
+        XCTAssertEqual(rootNode.children.count, 1)
+
+        let curlNode = rootNode.children.first
+        XCTAssertEqual(curlNode?.packageID, "curl")
+        XCTAssertEqual(curlNode?.depth, 1)
+        XCTAssertEqual(curlNode?.children.count, 2)
+
+        let cmakeNode = curlNode?.children.first { $0.packageID == "cmake" }
+        XCTAssertNotNil(cmakeNode)
+        XCTAssertTrue(cmakeNode?.isBuildOnly == true)
+        XCTAssertFalse(cmakeNode?.isCycle == true)
+
+        let opensslNode = curlNode?.children.first { $0.packageID == "openssl@3" }
+        XCTAssertNotNil(opensslNode)
+        XCTAssertFalse(opensslNode?.isBuildOnly == true)
+
+        // Verify cycle detection: create a cyclical dependency (pkgA -> pkgB -> pkgA)
+        let pkgA = BrewStorePackage(id: "pkgA", name: "pkgA", description: "", homepage: "", version: "1.0", kind: .formula, isInstalled: true, dependencies: ["pkgB"])
+        let pkgB = BrewStorePackage(id: "pkgB", name: "pkgB", description: "", homepage: "", version: "1.0", kind: .formula, isInstalled: true, dependencies: ["pkgA"])
+        let cycleTree = DependencyTreeBuilder.buildRecursiveTree(for: pkgA, in: [pkgA, pkgB])
+        XCTAssertEqual(cycleTree.packageID, "pkgA")
+        let bNode = cycleTree.children.first
+        XCTAssertEqual(bNode?.packageID, "pkgB")
+        let cycleNode = bNode?.children.first
+        XCTAssertEqual(cycleNode?.packageID, "pkgA")
+        XCTAssertTrue(cycleNode?.isCycle == true)
+        XCTAssertTrue(cycleNode?.children.isEmpty == true) // Halts cycle recursion
+    }
+
+    func testSimulateUninstallBlastRadiusWithTransitiveCascade() {
+        // openssl@3 -> curl -> git -> gh
+        let openssl = BrewStorePackage(id: "openssl@3", name: "openssl@3", description: "", homepage: "", version: "3.2", kind: .formula, isInstalled: true, dependencies: [])
+        let curl = BrewStorePackage(id: "curl", name: "curl", description: "", homepage: "", version: "8.5", kind: .formula, isInstalled: true, dependencies: ["openssl@3"])
+        let git = BrewStorePackage(id: "git", name: "git", description: "", homepage: "", version: "2.44", kind: .formula, isInstalled: true, dependencies: ["curl"])
+        let gh = BrewStorePackage(id: "gh", name: "gh", description: "", homepage: "", version: "2.45", kind: .formula, isInstalled: true, dependencies: ["git"])
+
+        let all = [openssl, curl, git, gh]
+        let blast = BrewStorePreFlightDependencyChecker.simulateUninstallBlastRadius(package: openssl, in: all)
+
+        XCTAssertTrue(blast.isDestructive)
+        // Direct broken is just curl
+        XCTAssertEqual(blast.brokenDownstreamPackages, ["curl"])
+        // Transitive broken contains curl, git, and gh
+        XCTAssertEqual(Set(blast.transitiveBrokenPackages), Set(["curl", "git", "gh"]))
+        // Risk level is critical since >= 3 packages broken
+        XCTAssertEqual(blast.riskLevel, .critical)
+        XCTAssertEqual(blast.impactSeverity, "critical")
+    }
+
+    func testSimulateUninstallBlastRadiusWithRunningServices() {
+        let pcre2 = BrewStorePackage(id: "pcre2", name: "pcre2", description: "", homepage: "", version: "10.42", kind: .formula, isInstalled: true, dependencies: [])
+        let nginx = BrewStorePackage(id: "nginx", name: "nginx", description: "Web server", homepage: "", version: "1.25", kind: .formula, isInstalled: true, dependencies: ["pcre2"])
+
+        let nginxService = BrewStoreService(id: "nginx", name: "nginx", status: "started", user: "even", file: nil)
+        XCTAssertTrue(nginxService.isRunning)
+
+        let all = [pcre2, nginx]
+        let blast = BrewStorePreFlightDependencyChecker.simulateUninstallBlastRadius(
+            package: pcre2,
+            in: all,
+            services: [nginxService]
+        )
+
+        XCTAssertTrue(blast.isDestructive)
+        XCTAssertEqual(blast.brokenDownstreamPackages, ["nginx"])
+        XCTAssertEqual(blast.affectedRunningServices.count, 1)
+        XCTAssertEqual(blast.affectedRunningServices.first?.name, "nginx")
+        XCTAssertEqual(blast.riskLevel, .critical)
+    }
+
+    func testMultiVersionCoexistenceDetection() {
+        let openssl1 = BrewStorePackage(id: "openssl@1.1", name: "OpenSSL 1.1", description: "", homepage: "", version: "1.1.1w", kind: .formula, isInstalled: true, dependencies: [])
+        let openssl3 = BrewStorePackage(id: "openssl@3", name: "OpenSSL 3", description: "", homepage: "", version: "3.2.1", kind: .formula, isInstalled: true, dependencies: [])
+        let curl = BrewStorePackage(id: "curl", name: "curl", description: "", homepage: "", version: "8.5", kind: .formula, isInstalled: true, dependencies: ["openssl@3"])
+        let standalone = BrewStorePackage(id: "bat", name: "bat", description: "", homepage: "", version: "0.24", kind: .formula, isInstalled: true, dependencies: [])
+
+        let all = [openssl1, openssl3, curl, standalone]
+        let topology = BrewStoreDependencyTopologyManager.analyze(packages: all)
+
+        XCTAssertEqual(topology.coexistenceCount, 1)
+        let group = topology.versionCoexistenceGroups.first
+        XCTAssertEqual(group?.id, "openssl")
+        XCTAssertEqual(group?.installedVersions.count, 2)
+        XCTAssertTrue(group?.hasUnusedVersion == true)
+        XCTAssertEqual(group?.unusedVersionIDs, ["openssl@1.1"])
+
+        // Divergent dependents
+        XCTAssertEqual(group?.divergentDependents["openssl@1.1"], [])
+        XCTAssertEqual(group?.divergentDependents["openssl@3"], ["curl"])
+    }
+
+    func testBuildBaggageScavengerDetection() {
+        let cmake = BrewStorePackage(id: "cmake", name: "cmake", description: "Build tool", homepage: "", version: "3.28", kind: .formula, isInstalled: true, dependencies: [])
+        let ninja = BrewStorePackage(id: "ninja", name: "ninja", description: "Build tool", homepage: "", version: "1.11", kind: .formula, isInstalled: true, dependencies: [])
+        let ripgrep = BrewStorePackage(id: "ripgrep", name: "ripgrep", description: "Grep", homepage: "", version: "14.1", kind: .formula, isInstalled: true, dependencies: ["ninja"])
+
+        // cmake has 0 dependents -> Build Baggage!
+        // ninja has 1 dependent (ripgrep) -> In active use, NOT baggage!
+        let all = [cmake, ninja, ripgrep]
+        let topology = BrewStoreDependencyTopologyManager.analyze(packages: all)
+
+        XCTAssertEqual(topology.buildBaggageCount, 1)
+        let baggage = topology.buildBaggagePackages.first
+        XCTAssertEqual(baggage?.id, "cmake")
+        XCTAssertEqual(baggage?.category, "Build System")
+        XCTAssertTrue(baggage?.reason.contains("build tool") == true)
+    }
+
+    func testGraphvizDotExportGeneration() {
+        let openssl = BrewStorePackage(id: "openssl@3", name: "openssl@3", description: "", homepage: "", version: "3.0", kind: .formula, isInstalled: true, dependencies: [])
+        let curl = BrewStorePackage(id: "curl", name: "curl", description: "", homepage: "", version: "8.5", kind: .formula, isInstalled: true, dependencies: ["openssl@3"])
+
+        let dot = BrewStoreLockfileGenerator.generateGraphvizDot(packages: [openssl, curl])
+
+        XCTAssertTrue(dot.contains("digraph BrewStoreDependencies {"))
+        XCTAssertTrue(dot.contains("rankdir=LR;"))
+        XCTAssertTrue(dot.contains("\"curl\" -> \"openssl@3\";"))
+        XCTAssertTrue(dot.hasSuffix("}"))
+    }
 }

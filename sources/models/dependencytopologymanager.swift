@@ -23,12 +23,35 @@ struct BrokenLinkageIssue: Identifiable, Hashable, Codable {
     let severity: String // "warning", "critical"
 }
 
+struct VersionCoexistenceGroup: Identifiable, Hashable, Codable {
+    let id: String // Family root name, e.g. "openssl", "python", "node"
+    let familyName: String
+    let installedVersions: [BrewStorePackage]
+    let totalDiskBytes: Int64
+    let formattedTotalDiskSize: String
+    let divergentDependents: [String: [String]] // Version ID -> [Dependent Names]
+    let hasUnusedVersion: Bool
+    let unusedVersionIDs: [String]
+}
+
+struct BuildBaggagePackage: Identifiable, Hashable, Codable {
+    let id: String
+    let name: String
+    let version: String
+    let diskBytes: Int64
+    let formattedDiskSize: String
+    let category: String
+    let reason: String
+}
+
 struct SystemDependencyTopology: Hashable, Codable {
     let totalPackagesInstalled: Int
     let totalDependenciesMapped: Int
     let sharedFoundations: [SharedFoundationLibrary]
     let orphanLeaves: [OrphanLeafPackage]
     let linkageIssues: [BrokenLinkageIssue]
+    let versionCoexistenceGroups: [VersionCoexistenceGroup]
+    let buildBaggagePackages: [BuildBaggagePackage]
 
     var orphanCount: Int {
         orphanLeaves.count
@@ -37,12 +60,30 @@ struct SystemDependencyTopology: Hashable, Codable {
     var hasOrphans: Bool {
         !orphanLeaves.isEmpty
     }
+
+    var coexistenceCount: Int {
+        versionCoexistenceGroups.count
+    }
+
+    var buildBaggageCount: Int {
+        buildBaggagePackages.count
+    }
+
+    var totalReclaimableBuildBaggageBytes: Int64 {
+        buildBaggagePackages.reduce(0) { $0 + $1.diskBytes }
+    }
+
+    var formattedReclaimableBuildBaggage: String {
+        ByteCountFormatter.string(fromByteCount: totalReclaimableBuildBaggageBytes, countStyle: .file)
+    }
 }
 
 enum TopologyTab: String, CaseIterable, Identifiable, Codable {
     case foundations = "Core Shared Libraries"
     case orphans = "Unused Dependencies"
     case integrity = "Binary Health & Linkage"
+    case coexistence = "Version Coexistence"
+    case buildBaggage = "Build Baggage"
 
     var id: String {
         rawValue
@@ -53,6 +94,8 @@ enum TopologyTab: String, CaseIterable, Identifiable, Codable {
         case .foundations: "pyramid.fill"
         case .orphans: "leaf.fill"
         case .integrity: "checkmark.shield.fill"
+        case .coexistence: "square.split.2x2.fill"
+        case .buildBaggage: "wrench.and.screwdriver.fill"
         }
     }
 }
@@ -168,12 +211,92 @@ final class BrewStoreDependencyTopologyManager: ObservableObject {
             }
         }
 
+        // 5. Multi-Version Coexistence: Installed packages with multiple major versions
+        var familyGroups: [String: [BrewStorePackage]] = [:]
+        for pkg in installed where pkg.kind == .formula {
+            let cleanID = (pkg.id.components(separatedBy: "/").last ?? pkg.id).lowercased()
+            let family = cleanID.components(separatedBy: "@").first ?? cleanID
+            familyGroups[family, default: []].append(pkg)
+        }
+
+        var versionCoexistenceGroups: [VersionCoexistenceGroup] = []
+        for (family, familyPackages) in familyGroups where familyPackages.count >= 2 {
+            let sortedPackages = familyPackages.sorted {
+                $0.id.localizedStandardCompare($1.id) == .orderedAscending
+            }
+            var divergentMap: [String: [String]] = [:]
+            var unusedIDs: [String] = []
+            var familyDiskBytes: Int64 = 0
+
+            for pkg in sortedPackages {
+                let deps = reverseMap[pkg.id.lowercased()] ?? []
+                let depNames = deps.compactMap { packageMap[$0.lowercased()]?.name ?? $0 }.sorted()
+                divergentMap[pkg.id] = depNames
+                if depNames.isEmpty {
+                    unusedIDs.append(pkg.id)
+                }
+                if let cellar = pkg.cellarURL() {
+                    familyDiskBytes += BrewStoreDiskStorageAnalyzerManager.computeDirectorySize(url: cellar)
+                }
+            }
+
+            let group = VersionCoexistenceGroup(
+                id: family,
+                familyName: family.capitalized,
+                installedVersions: sortedPackages,
+                totalDiskBytes: familyDiskBytes,
+                formattedTotalDiskSize: ByteCountFormatter.string(fromByteCount: familyDiskBytes, countStyle: .file),
+                divergentDependents: divergentMap,
+                hasUnusedVersion: !unusedIDs.isEmpty,
+                unusedVersionIDs: unusedIDs
+            )
+            versionCoexistenceGroups.append(group)
+        }
+        versionCoexistenceGroups.sort {
+            if $0.totalDiskBytes != $1.totalDiskBytes {
+                return $0.totalDiskBytes > $1.totalDiskBytes
+            }
+            return $0.familyName.localizedStandardCompare($1.familyName) == .orderedAscending
+        }
+
+        // 6. Build Baggage Scavenger: Packages installed solely as build tools with 0 current dependents
+        var buildBaggagePackages: [BuildBaggagePackage] = []
+        for pkg in installed where pkg.kind == .formula {
+            if HomebrewBuildToolHeuristics.isBuildOnly(id: pkg.id) {
+                let depCount = reverseMap[pkg.id.lowercased()]?.count ?? 0
+                if depCount == 0 {
+                    var pkgBytes: Int64 = 0
+                    if let cellar = pkg.cellarURL() {
+                        pkgBytes = BrewStoreDiskStorageAnalyzerManager.computeDirectorySize(url: cellar)
+                    }
+                    let category = HomebrewBuildToolHeuristics.buildCategory(for: pkg.id)
+                    buildBaggagePackages.append(BuildBaggagePackage(
+                        id: pkg.id,
+                        name: pkg.name,
+                        version: pkg.displayInstalledVersion ?? pkg.displayVersion,
+                        diskBytes: pkgBytes,
+                        formattedDiskSize: ByteCountFormatter.string(fromByteCount: pkgBytes, countStyle: .file),
+                        category: category,
+                        reason: "Installed as a build tool (\(category)), currently required by 0 installed formulae."
+                    ))
+                }
+            }
+        }
+        buildBaggagePackages.sort {
+            if $0.diskBytes != $1.diskBytes {
+                return $0.diskBytes > $1.diskBytes
+            }
+            return $0.name.localizedStandardCompare($1.name) == .orderedAscending
+        }
+
         return SystemDependencyTopology(
             totalPackagesInstalled: installed.count,
             totalDependenciesMapped: totalMappedDeps,
             sharedFoundations: sharedFoundations,
             orphanLeaves: orphanLeaves,
-            linkageIssues: linkageIssues
+            linkageIssues: linkageIssues,
+            versionCoexistenceGroups: versionCoexistenceGroups,
+            buildBaggagePackages: buildBaggagePackages
         )
     }
 }
