@@ -218,5 +218,69 @@ final class CSSAndMarkdownParserTests: XCTestCase {
             XCTFail("Block should be table")
         }
     }
+
+    // MARK: - Markdown Callouts & Task Lists
+
+    func testMarkdownCallouts() {
+        let md = """
+        > [!NOTE]
+        > This is an informative notice.
+
+        > [!WARNING] Migration Alert
+        > Breaking changes ahead in v3.
+        """
+        let blocks = MarkdownParser.parse(md)
+        XCTAssertEqual(blocks.count, 2)
+
+        if case let .callout(type, title, content) = blocks[0] {
+            XCTAssertEqual(type, .note)
+            XCTAssertNil(title)
+            XCTAssertEqual(content, "This is an informative notice.")
+        } else {
+            XCTFail("Block 0 should be callout")
+        }
+
+        if case let .callout(type, title, content) = blocks[1] {
+            XCTAssertEqual(type, .warning)
+            XCTAssertEqual(title, "Migration Alert")
+            XCTAssertEqual(content, "Breaking changes ahead in v3.")
+        } else {
+            XCTFail("Block 1 should be callout")
+        }
+    }
+
+    func testMarkdownTaskItems() {
+        let md = """
+        - [ ] Download latest formula
+        - [x] Check sha256 checksum
+          * [X] Validate bottles
+        """
+        let blocks = MarkdownParser.parse(md)
+        XCTAssertEqual(blocks.count, 3)
+
+        if case let .taskItem(checked, text, indent) = blocks[0] {
+            XCTAssertFalse(checked)
+            XCTAssertEqual(text, "Download latest formula")
+            XCTAssertEqual(indent, 0)
+        } else {
+            XCTFail("Block 0 should be taskItem")
+        }
+
+        if case let .taskItem(checked, text, indent) = blocks[1] {
+            XCTAssertTrue(checked)
+            XCTAssertEqual(text, "Check sha256 checksum")
+            XCTAssertEqual(indent, 0)
+        } else {
+            XCTFail("Block 1 should be taskItem")
+        }
+
+        if case let .taskItem(checked, text, indent) = blocks[2] {
+            XCTAssertTrue(checked)
+            XCTAssertEqual(text, "Validate bottles")
+            XCTAssertEqual(indent, 1)
+        } else {
+            XCTFail("Block 2 should be taskItem")
+        }
+    }
 }
 

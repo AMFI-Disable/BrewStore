@@ -363,15 +363,32 @@ struct UpgradeDiffViewSheet: View {
     }
 
     private var emptyOrErrorView: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "doc.text.magnifyingglass")
-                .font(.system(size: 32))
-                .foregroundStyle(.secondary)
-            Text("Unable to generate upgrade diff for '\(package.name)'.")
-                .font(.subheadline)
-            Text("Verify that the package is installed and connected to a valid Homebrew tap.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+        VStack(spacing: 12) {
+            if let error = engine.errorMessage {
+                HumanizedErrorBanner(
+                    rawError: error,
+                    titleOverride: "Unable to generate upgrade diff for '\(package.name)'",
+                    manager: manager,
+                    package: package,
+                    customActionTitle: "Retry Diff",
+                    customAction: {
+                        Task {
+                            let prefix = manager.brewPrefix ?? "/opt/homebrew"
+                            _ = await engine.generateUpgradeDiff(for: package, prefix: prefix)
+                        }
+                    }
+                )
+                .frame(maxWidth: 520)
+            } else {
+                Image(systemName: "doc.text.magnifyingglass")
+                    .font(.system(size: 32))
+                    .foregroundStyle(.secondary)
+                Text("Unable to generate upgrade diff for '\(package.name)'.")
+                    .font(.subheadline)
+                Text("Verify that the package is installed and connected to a valid Homebrew tap.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(48)

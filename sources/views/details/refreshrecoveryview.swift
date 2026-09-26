@@ -8,17 +8,26 @@ struct BrewStoreRefreshRecoveryBanner: View {
 
     var body: some View {
         if manager.catalogRefreshError != nil || discovery.errorMessage != nil {
+            let raw = manager.errorMessage ?? discovery.errorMessage ?? "Catalog refresh failed."
+            let info = BrewStoreHumanizedErrorResolver.resolve(rawError: raw)
+
             HStack(alignment: .top, spacing: 10) {
-                Image(systemName: "exclamationmark.triangle.fill")
+                Image(systemName: info.iconName)
                     .foregroundStyle(.orange)
+                    .font(.title3)
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Homebrew refresh failed")
+                    Text(info.title)
                         .font(.subheadline.bold())
-                    Text(manager.errorMessage ?? discovery.errorMessage ?? "Catalog refresh failed. Tap Retry to try again.")
+                    Text(info.summary)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .textSelection(.enabled)
+                    if !info.suggestion.isEmpty {
+                        Text(info.suggestion)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary.opacity(0.8))
+                    }
                 }
 
                 Spacer(minLength: 8)

@@ -23,7 +23,14 @@ struct HomebrewSetupView: View {
                 Text(manager.statusMessage).font(.callout).foregroundStyle(.secondary)
             }
             if let error = manager.errorMessage {
-                Text(error).font(.callout).foregroundStyle(.red).textSelection(.enabled)
+                HumanizedErrorBanner(
+                    rawError: error,
+                    manager: manager,
+                    onDismiss: {
+                        manager.clearErrorMessage()
+                    }
+                )
+                .frame(maxWidth: 540)
             }
             if !manager.outputLog.isEmpty {
                 TextEditor(text: .constant(manager.outputLog))

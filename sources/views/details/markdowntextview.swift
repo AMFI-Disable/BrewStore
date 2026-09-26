@@ -1,14 +1,54 @@
 import AppKit
 import SwiftUI
 
+public enum MarkdownCalloutType: String, Equatable, Sendable, CaseIterable {
+    case note = "NOTE"
+    case tip = "TIP"
+    case important = "IMPORTANT"
+    case warning = "WARNING"
+    case caution = "CAUTION"
+
+    public var title: String {
+        switch self {
+        case .note: "Note"
+        case .tip: "Tip"
+        case .important: "Important"
+        case .warning: "Warning"
+        case .caution: "Caution"
+        }
+    }
+
+    public var iconName: String {
+        switch self {
+        case .note: "info.circle.fill"
+        case .tip: "lightbulb.fill"
+        case .important: "exclamationmark.circle.fill"
+        case .warning: "exclamationmark.triangle.fill"
+        case .caution: "hand.raised.fill"
+        }
+    }
+
+    public var tintColor: Color {
+        switch self {
+        case .note: .blue
+        case .tip: .green
+        case .important: .purple
+        case .warning: .orange
+        case .caution: .red
+        }
+    }
+}
+
 public enum MarkdownBlock: Equatable, Identifiable {
     case h1(String)
     case h2(String)
     case h3(String)
     case bullet(text: String, indent: Int)
+    case taskItem(checked: Bool, text: String, indent: Int)
     case numbered(number: Int, text: String)
     case codeBlock(code: String, language: String?)
     case blockquote(String)
+    case callout(type: MarkdownCalloutType, title: String?, content: String)
     case divider
     case table(headers: [String], rows: [[String]])
     case paragraph(String)
@@ -19,9 +59,11 @@ public enum MarkdownBlock: Equatable, Identifiable {
         case let .h2(s): "h2-\(s)"
         case let .h3(s): "h3-\(s)"
         case let .bullet(text, indent): "b-\(indent)-\(text)"
+        case let .taskItem(checked, text, indent): "task-\(checked)-\(indent)-\(text)"
         case let .numbered(num, text): "n-\(num)-\(text)"
         case let .codeBlock(code, lang): "code-\(lang ?? "")-\(code.hashValue)"
         case let .blockquote(s): "quote-\(s)"
+        case let .callout(type, title, content): "callout-\(type.rawValue)-\(title ?? "")-\(content.hashValue)"
         case .divider: "divider-\(UUID().uuidString)"
         case let .table(headers, rows): "table-\(headers.joined(separator: "-"))-\(rows.count)"
         case let .paragraph(s): "p-\(s.hashValue)"
@@ -88,16 +130,45 @@ public enum MarkdownParser {
                 continue
             }
 
-            // Blockquote
-            if trimmed.hasPrefix("> ") {
-                var quoteLines = [String(trimmed.dropFirst(2))]
+            // Blockquote & GitHub Callouts (> ...)
+            if trimmed.hasPrefix(">") {
+                let isPrefixedSpace = trimmed.hasPrefix("> ")
+                let firstLineContent = trimmed == ">" ? "" : String(trimmed.dropFirst(isPrefixedSpace ? 2 : 1)).trimmingCharacters(in: .whitespaces)
+                if let calloutHeader = parseCalloutType(from: firstLineContent) {
+                    var calloutLines: [String] = []
+                    i += 1
+                    while i < lines.count {
+                        let nextLine = lines[i]
+                        let nextTrimmed = nextLine.trimmingCharacters(in: .whitespaces)
+                        if nextTrimmed.hasPrefix("> ") {
+                            calloutLines.append(String(nextTrimmed.dropFirst(2)))
+                            i += 1
+                        } else if nextTrimmed == ">" {
+                            calloutLines.append("")
+                            i += 1
+                        } else if nextTrimmed.isEmpty || nextTrimmed.hasPrefix("#") || nextTrimmed.hasPrefix("```") || nextTrimmed == "---" {
+                            break
+                        } else {
+                            calloutLines.append(nextTrimmed)
+                            i += 1
+                        }
+                    }
+                    blocks.append(.callout(type: calloutHeader.type, title: calloutHeader.customTitle, content: calloutLines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)))
+                    continue
+                }
+
+                // Standard Blockquote
+                var quoteLines = [firstLineContent]
                 i += 1
                 while i < lines.count {
                     let nextTrimmed = lines[i].trimmingCharacters(in: .whitespaces)
                     if nextTrimmed.hasPrefix("> ") {
                         quoteLines.append(String(nextTrimmed.dropFirst(2)))
                         i += 1
-                    } else if nextTrimmed.isEmpty {
+                    } else if nextTrimmed == ">" {
+                        quoteLines.append("")
+                        i += 1
+                    } else if nextTrimmed.isEmpty || nextTrimmed.hasPrefix("#") || nextTrimmed.hasPrefix("```") || nextTrimmed == "---" {
                         break
                     } else {
                         quoteLines.append(nextTrimmed)
@@ -105,6 +176,13 @@ public enum MarkdownParser {
                     }
                 }
                 blocks.append(.blockquote(quoteLines.joined(separator: " ")))
+                continue
+            }
+
+            // Task List (- [ ] or - [x] or * [ ] or * [x])
+            if let task = parseTaskListItem(trimmed, rawLine: line) {
+                blocks.append(.taskItem(checked: task.checked, text: task.text, indent: task.indent))
+                i += 1
                 continue
             }
 
@@ -162,10 +240,11 @@ public enum MarkdownParser {
                     nextTrimmed.hasPrefix("* ") ||
                     nextTrimmed.hasPrefix("- ") ||
                     nextTrimmed.hasPrefix("• ") ||
-                    nextTrimmed.hasPrefix("> ") ||
+                    nextTrimmed.hasPrefix(">") ||
                     nextTrimmed == "---" ||
                     (nextTrimmed.contains("|") && i + 1 < lines.count && isTableDelimiterRow(lines[i + 1])) ||
-                    parseNumberedListItem(nextTrimmed) != nil {
+                    parseNumberedListItem(nextTrimmed) != nil ||
+                    parseTaskListItem(nextTrimmed, rawLine: nextLine) != nil {
                     break
                 }
                 paragraphLines.append(nextTrimmed)
@@ -212,6 +291,32 @@ public enum MarkdownParser {
         guard let number = Int(prefix), number > 0, number < 1000 else { return nil }
         let remainder = line[line.index(after: dotIndex)...].trimmingCharacters(in: .whitespaces)
         return (number, remainder)
+    }
+
+    private static func parseCalloutType(from line: String) -> (type: MarkdownCalloutType, customTitle: String?)? {
+        guard line.hasPrefix("[!") else { return nil }
+        guard let closeBracket = line.firstIndex(of: "]") else { return nil }
+        let keyword = String(line[line.index(line.startIndex, offsetBy: 2)..<closeBracket]).uppercased().trimmingCharacters(in: .whitespaces)
+        guard let type = MarkdownCalloutType(rawValue: keyword) else { return nil }
+        let remainder = String(line[line.index(after: closeBracket)...]).trimmingCharacters(in: .whitespaces)
+        return (type, remainder.isEmpty ? nil : remainder)
+    }
+
+    private static func parseTaskListItem(_ trimmed: String, rawLine: String) -> (checked: Bool, text: String, indent: Int)? {
+        guard trimmed.hasPrefix("- [") || trimmed.hasPrefix("* [") else { return nil }
+        let leadingSpaces = rawLine.prefix(while: { $0 == " " || $0 == "\t" }).count
+        let indent = leadingSpaces / 2
+
+        if trimmed.hasPrefix("- [ ] ") || trimmed.hasPrefix("* [ ] ") {
+            let text = String(trimmed.dropFirst(6)).trimmingCharacters(in: .whitespaces)
+            return (false, text, indent)
+        }
+        if trimmed.hasPrefix("- [x] ") || trimmed.hasPrefix("- [X] ") ||
+           trimmed.hasPrefix("* [x] ") || trimmed.hasPrefix("* [X] ") {
+            let text = String(trimmed.dropFirst(6)).trimmingCharacters(in: .whitespaces)
+            return (true, text, indent)
+        }
+        return nil
     }
 }
 
@@ -282,6 +387,21 @@ public struct MarkdownTextView: View {
             .padding(.leading, CGFloat(indent * 16))
             .padding(.vertical, 1)
 
+        case let .taskItem(checked, text, indent):
+            HStack(alignment: .top, spacing: 8) {
+                Image(systemName: checked ? "checkmark.square.fill" : "square")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(checked ? accentColor : .secondary)
+                    .padding(.top, 2)
+
+                Text(CSSAndMarkdownParser.renderAttributedString(text, baseFont: baseFont, baseFontSize: 13, accentColor: accentColor, classMap: classMap))
+                    .lineSpacing(lineSpacing)
+                    .foregroundStyle(checked ? .secondary : .primary)
+                    .strikethrough(checked, color: .secondary.opacity(0.6))
+            }
+            .padding(.leading, CGFloat(indent * 16))
+            .padding(.vertical, 1)
+
         case let .numbered(number, text):
             HStack(alignment: .top, spacing: 8) {
                 Text("\(number).")
@@ -308,6 +428,30 @@ public struct MarkdownTextView: View {
             .padding(.vertical, 4)
             .padding(.horizontal, 8)
             .background(Color.secondary.opacity(0.04), in: RoundedRectangle(cornerRadius: 6))
+
+        case let .callout(type, customTitle, content):
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 6) {
+                    Image(systemName: type.iconName)
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(type.tintColor)
+                    Text(customTitle ?? type.title)
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundStyle(type.tintColor)
+                }
+                if !content.isEmpty {
+                    Text(CSSAndMarkdownParser.renderAttributedString(content, baseFont: baseFont, baseFontSize: 12.5, accentColor: accentColor, classMap: classMap))
+                        .foregroundStyle(.primary)
+                        .lineSpacing(lineSpacing)
+                }
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(type.tintColor.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(type.tintColor.opacity(0.25), lineWidth: 1)
+            )
 
         case let .codeBlock(code, lang):
             VStack(alignment: .leading, spacing: 6) {

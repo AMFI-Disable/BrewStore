@@ -371,7 +371,7 @@ struct CaskQuarantineAuditorView: View {
                             case .success:
                                 showToast("Cleared quarantine for \(item.caskName).")
                             case let .failure(error):
-                                showToast("Error: \(error.localizedDescription)")
+                                showToast("Could not clear quarantine for \(item.caskName): \(error.localizedDescription)")
                             }
                         }
                     } label: {

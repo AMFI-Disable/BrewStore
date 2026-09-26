@@ -86,7 +86,7 @@ final class BrewStoreCLIToolManager: ObservableObject {
 
     func installCLISymlink() {
         guard let sourceScript = bundledScriptPath else {
-            statusMessage = "Error: Could not locate bundled brewstore script."
+            statusMessage = "Could not locate the bundled BrewStore CLI helper tool in the application bundle."
             return
         }
 
