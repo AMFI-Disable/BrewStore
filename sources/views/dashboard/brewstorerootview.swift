@@ -471,7 +471,7 @@ struct BrewStoreRootView: View {
             hubSummaryBadge(for: hub)
         }
         .padding(.vertical, 2)
-        .padding(.trailing, 6)
+        .padding(.trailing, 14)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("Sidebar.HubHeader.\(hub.rawValue.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "&", with: ""))")
     }
@@ -526,80 +526,8 @@ struct BrewStoreRootView: View {
                 .lineLimit(1)
                 .fixedSize(horizontal: true, vertical: false)
                 .layoutPriority(1)
-            Spacer(minLength: 6)
-            switch section {
-            case .allApps:
-                let count = discovery.items.filter { $0.kind == .cask }.count
-                if count > 0 {
-                    SidebarCountBadge(text: "\(count)")
-                }
-            case .allFormulae:
-                let count = discovery.items.filter { $0.kind == .formula }.count
-                if count > 0 {
-                    SidebarCountBadge(text: "\(count)")
-                }
-            case .updates:
-                let outdatedCount = manager.packages.filter(\.isOutdated).count
-                if outdatedCount > 0 {
-                    SidebarCountBadge(
-                        text: "\(outdatedCount)",
-                        foregroundColor: .white,
-                        backgroundColor: .orange,
-                        isAccentOrProminent: true
-                    )
-                }
-            case .installed:
-                let count = manager.packages.filter(\.isInstalled).count
-                if count > 0 {
-                    SidebarCountBadge(text: "\(count)")
-                }
-            case .adoption:
-                let count = BrewStoreAppAdoptionManager.shared.adoptableApps.count
-                if count > 0 {
-                    SidebarCountBadge(
-                        text: "\(count)",
-                        foregroundColor: .blue,
-                        backgroundColor: Color.blue.opacity(0.12),
-                        isAccentOrProminent: true
-                    )
-                }
-            case .wishlist:
-                let count = BrewStoreWishlistManager.shared.wishlistIDs.count
-                if count > 0 {
-                    SidebarCountBadge(text: "\(count)")
-                }
-            case .services:
-                let running = manager.services.filter(\.isRunning).count
-                if running > 0 {
-                    SidebarCountBadge(
-                        text: "\(running)",
-                        foregroundColor: .green,
-                        backgroundColor: Color.green.opacity(0.12),
-                        isAccentOrProminent: true,
-                        leadingDotColor: .green
-                    )
-                    .accessibilityLabel("\(running) running")
-                }
-            case .taps:
-                let count = manager.taps.count
-                if count > 0 {
-                    SidebarCountBadge(text: "\(count)")
-                }
-            case .creator:
-                if githubAccount.isAuthenticated {
-                    let tapCount = BrewStoreCreatorRepoManager.shared.taps.count
-                    if tapCount > 0 {
-                        SidebarCountBadge(
-                            text: "\(tapCount)",
-                            foregroundColor: Color.accentColor,
-                            backgroundColor: Color.accentColor.opacity(0.12),
-                            isAccentOrProminent: true
-                        )
-                    }
-                }
-            default:
-                EmptyView()
-            }
+            Spacer(minLength: 4)
+            sidebarBadge(for: section)
         }
         .contentShape(Rectangle())
         .onTapGesture {
@@ -607,6 +535,83 @@ struct BrewStoreRootView: View {
         }
         .tag(section)
         .accessibilityIdentifier("Sidebar.\(section.rawValue.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "&", with: ""))")
+    }
+
+    @ViewBuilder
+    private func sidebarBadge(for section: BrewStoreSection) -> some View {
+        switch section {
+        case .allApps:
+            let count = discovery.items.filter { $0.kind == .cask }.count
+            if count > 0 {
+                SidebarCountBadge(text: "\(count)")
+            }
+        case .allFormulae:
+            let count = discovery.items.filter { $0.kind == .formula }.count
+            if count > 0 {
+                SidebarCountBadge(text: "\(count)")
+            }
+        case .updates:
+            let outdatedCount = manager.packages.filter(\.isOutdated).count
+            if outdatedCount > 0 {
+                SidebarCountBadge(
+                    text: "\(outdatedCount)",
+                    foregroundColor: .white,
+                    backgroundColor: .orange,
+                    isAccentOrProminent: true
+                )
+            }
+        case .installed:
+            let count = manager.packages.filter(\.isInstalled).count
+            if count > 0 {
+                SidebarCountBadge(text: "\(count)")
+            }
+        case .adoption:
+            let count = BrewStoreAppAdoptionManager.shared.adoptableApps.count
+            if count > 0 {
+                SidebarCountBadge(
+                    text: "\(count)",
+                    foregroundColor: .blue,
+                    backgroundColor: Color.blue.opacity(0.12),
+                    isAccentOrProminent: true
+                )
+            }
+        case .wishlist:
+            let count = BrewStoreWishlistManager.shared.wishlistIDs.count
+            if count > 0 {
+                SidebarCountBadge(text: "\(count)")
+            }
+        case .services:
+            let running = manager.services.filter(\.isRunning).count
+            if running > 0 {
+                SidebarCountBadge(
+                    text: "\(running)",
+                    foregroundColor: .green,
+                    backgroundColor: Color.green.opacity(0.12),
+                    isAccentOrProminent: true,
+                    leadingDotColor: .green
+                )
+                .accessibilityLabel("\(running) running")
+            }
+        case .taps:
+            let count = manager.taps.count
+            if count > 0 {
+                SidebarCountBadge(text: "\(count)")
+            }
+        case .creator:
+            if githubAccount.isAuthenticated {
+                let tapCount = BrewStoreCreatorRepoManager.shared.taps.count
+                if tapCount > 0 {
+                    SidebarCountBadge(
+                        text: "\(tapCount)",
+                        foregroundColor: Color.accentColor,
+                        backgroundColor: Color.accentColor.opacity(0.12),
+                        isAccentOrProminent: true
+                    )
+                }
+            }
+        default:
+            EmptyView()
+        }
     }
 
     private var sidebarFooter: some View {
@@ -1017,7 +1022,7 @@ struct SidebarCountBadge: View {
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 2)
-        .frame(minWidth: 20, minHeight: 18)
+        .frame(minHeight: 18)
         .background(backgroundColor, in: Capsule())
         .fixedSize()
     }
