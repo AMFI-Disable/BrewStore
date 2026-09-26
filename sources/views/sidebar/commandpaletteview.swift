@@ -380,6 +380,126 @@ struct CommandPaletteView: View {
             ) {
                 selection = .services
                 isPresented = false
+            },
+            PaletteItem(
+                id: "act-simulate-blast-radius",
+                title: "Simulate Package Blast Radius…",
+                subtitle: "Inspect reverse dependencies and daemon impacts before uninstallation",
+                icon: "waveform.path.ecg",
+                category: .actions,
+                shortcut: nil,
+                isInstalled: nil,
+                kind: nil,
+                package: nil,
+                service: nil,
+                commandSnippet: "brew uses --installed",
+                impactBadge: "Pre-Flight Check"
+            ) {
+                selection = .topology
+                isPresented = false
+            },
+            PaletteItem(
+                id: "act-scavenge-baggage",
+                title: "Scavenge Build Baggage & Orphaning",
+                subtitle: "Inspect and prune dormant build-only compilers and header dependencies",
+                icon: "archivebox.circle.fill",
+                category: .actions,
+                shortcut: nil,
+                isInstalled: nil,
+                kind: nil,
+                package: nil,
+                service: nil,
+                commandSnippet: "brew autoremove --dry-run",
+                impactBadge: "Build Baggage"
+            ) {
+                selection = .topology
+                isPresented = false
+            },
+            PaletteItem(
+                id: "act-export-dependency-graph",
+                title: "Export Dependency Graph (Graphviz / Mermaid)",
+                subtitle: "Generate topological graph visualizations and lockfile diagrams",
+                icon: "point.3.connected.trianglepath.dotted",
+                category: .actions,
+                shortcut: nil,
+                isInstalled: nil,
+                kind: nil,
+                package: nil,
+                service: nil,
+                commandSnippet: "brew deps --tree --installed",
+                impactBadge: "Topology Export"
+            ) {
+                selection = .topology
+                isPresented = false
+            },
+            PaletteItem(
+                id: "act-self-healing-doctor",
+                title: "Autonomous Doctor ICU & Remediation",
+                subtitle: "Automated root-cause analysis and 1-click self-healing for Homebrew issues",
+                icon: "cross.case.fill",
+                category: .actions,
+                shortcut: nil,
+                isInstalled: nil,
+                kind: nil,
+                package: nil,
+                service: nil,
+                commandSnippet: "brew doctor && brew cleanup",
+                impactBadge: "Self Healing"
+            ) {
+                selection = .settings
+                manager.runDoctor()
+                isPresented = false
+            },
+            PaletteItem(
+                id: "act-time-machine-timeline",
+                title: "Cellar Time Machine & Snapshot Replay",
+                subtitle: "Browse chronological system states and replay safe rollbacks",
+                icon: "clock.arrow.circlepath",
+                category: .actions,
+                shortcut: nil,
+                isInstalled: nil,
+                kind: nil,
+                package: nil,
+                service: nil,
+                commandSnippet: "brew bundle --rollback",
+                impactBadge: "Zero-Regret Replay"
+            ) {
+                selection = .backups
+                isPresented = false
+            },
+            PaletteItem(
+                id: "act-packaging-studio",
+                title: "Developer Formula & Cask Packaging Studio",
+                subtitle: "Create, SHA256-hash, audit, and publish custom Homebrew packages",
+                icon: "shippingbox.circle.fill",
+                category: .actions,
+                shortcut: nil,
+                isInstalled: nil,
+                kind: nil,
+                package: nil,
+                service: nil,
+                commandSnippet: "brew create",
+                impactBadge: "Packaging Studio"
+            ) {
+                selection = .creator
+                isPresented = false
+            },
+            PaletteItem(
+                id: "act-fleet-sync-profiles",
+                title: "Multi-Machine Fleet Sync & Profile Drift",
+                subtitle: "Reconcile configuration drift against curated developer role profiles",
+                icon: "macbook.and.iphone",
+                category: .actions,
+                shortcut: nil,
+                isInstalled: nil,
+                kind: nil,
+                package: nil,
+                service: nil,
+                commandSnippet: "brew bundle check",
+                impactBadge: "Fleet Drift"
+            ) {
+                selection = .backups
+                isPresented = false
             }
         ]
     }

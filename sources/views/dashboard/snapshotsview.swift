@@ -6,8 +6,9 @@ struct SnapshotsView: View {
     @StateObject private var snapshotManager = BrewStoreSnapshotManager()
     @ObservedObject private var preferences = BrewStorePreferences.shared
     @State private var selectedSnapshot: BrewStoreSnapshot?
-    @State private var selectedTab = 0 // 0: Local Snapshots, 1: Multi-Machine Sync
+    @State private var selectedTab = 0 // 0: Local Snapshots, 1: Multi-Machine Sync, 2: Time Machine Timeline
     @State private var snapshotSearch = ""
+    @State private var snapshotForReplay: BrewStoreSnapshot?
 
     private var baseSnapshots: [BrewStoreSnapshot] {
         let q = snapshotSearch.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -112,6 +113,7 @@ struct SnapshotsView: View {
             HStack(spacing: Spacing.md) {
                 Picker("", selection: $selectedTab) {
                     Text("Package Snapshots (\(snapshotManager.snapshots.count))").tag(0)
+                    Text("Cellar Time Machine").tag(2)
                     Text("Mac Blueprint & Transfer").tag(1)
                 }
                 .labelsHidden()
@@ -120,7 +122,7 @@ struct SnapshotsView: View {
 
                 Spacer()
 
-                if selectedTab == 0 {
+                if selectedTab == 0 || selectedTab == 2 {
                     BrewStoreSectionSearchBar(text: $snapshotSearch, placeholder: "Search snapshots & backup packages…", count: filteredSnapshots.count)
                         .frame(minWidth: 180, maxWidth: 260)
 
@@ -196,6 +198,16 @@ struct SnapshotsView: View {
                             .padding(.horizontal, Spacing.lg)
                             .padding(.vertical, Spacing.md)
                     }
+                } else if selectedTab == 2 {
+                    CellarTimeMachineTimelineView(
+                        snapshots: filteredSnapshots,
+                        manager: manager,
+                        snapshotManager: snapshotManager,
+                        onSelectSnapshot: { snap in
+                            selectedSnapshot = snap
+                            selectedTab = 0
+                        }
+                    )
                 } else if snapshotManager.snapshots.isEmpty {
                     VStack(spacing: 12) {
                         Spacer()
@@ -308,6 +320,9 @@ struct SnapshotsView: View {
                                 },
                                 onRestore: {
                                     triggerRestore(for: snapshot)
+                                },
+                                onReplay: {
+                                    snapshotForReplay = snapshot
                                 }
                             )
                         } else {
@@ -323,6 +338,9 @@ struct SnapshotsView: View {
             }
             .id(selectedTab)
             .animation(nil, value: selectedTab)
+        }
+        .sheet(item: $snapshotForReplay) { snap in
+            TimeMachineReplaySheet(snapshot: snap, manager: manager)
         }
         .onAppear {
             if selectedSnapshot == nil || (selectedSnapshot != nil && !filteredSnapshots.contains(where: { $0.id == selectedSnapshot?.id })) {
@@ -355,6 +373,7 @@ private struct SnapshotDetailInspector: View {
     let onDelete: () -> Void
     let onExport: () -> Void
     let onRestore: () -> Void
+    let onReplay: () -> Void
 
     @State private var packageQuery = ""
     @State private var showingDeleteConfirmation = false
@@ -425,11 +444,21 @@ private struct SnapshotDetailInspector: View {
                     .controlSize(.small)
 
                     Button {
+                        onReplay()
+                    } label: {
+                        Label("Time Machine Replay…", systemImage: "clock.arrow.circlepath")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.purple)
+                    .controlSize(.small)
+                    .disabled(manager.isOperating)
+
+                    Button {
                         onRestore()
                     } label: {
                         Label("Restore Missing Packages…", systemImage: "arrow.counterclockwise")
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.bordered)
                     .controlSize(.small)
                     .disabled(manager.isOperating)
 
@@ -680,3 +709,315 @@ private struct DiffGroupView: View {
         .background(isAddition ? Color.blue.opacity(0.05) : Color.orange.opacity(0.05), in: RoundedRectangle(cornerRadius: 8))
     }
 }
+
+struct TimeMachineReplaySheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let snapshot: BrewStoreSnapshot
+    @ObservedObject var manager: HomebrewManager
+    @StateObject private var rollbackManager = BrewStoreSnapshotRollbackManager.shared
+
+    private var plan: SnapshotRollbackPlan {
+        rollbackManager.computePlan(
+            currentPackages: manager.packages,
+            currentServices: manager.services,
+            currentTaps: manager.taps,
+            snapshot: snapshot
+        )
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Header
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .font(.title2)
+                            .foregroundStyle(Color.purple)
+                        Text("Cellar Time Machine Replay").font(.title2.bold())
+                    }
+                    Text("Revert your Homebrew system state to snapshot from \(snapshot.formattedDate)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button("Cancel") { dismiss() }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+            }
+
+            Divider()
+
+            if rollbackManager.isRollingBack {
+                VStack(spacing: 12) {
+                    ProgressView().controlSize(.large)
+                    Text(rollbackManager.statusMessage)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, minHeight: 180)
+            } else if plan.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.system(size: 40))
+                        .foregroundStyle(Color.green)
+                    Text("Already at Target State").font(.headline)
+                    Text("Your current system packages match this snapshot exactly.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, minHeight: 180)
+            } else {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 14) {
+                        // Blast Radius Alert Card
+                        if plan.hasCriticalBlastRadius {
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "bolt.trianglebadge.exclamationmark.fill")
+                                        .foregroundStyle(Color.red)
+                                    Text("Blast Radius Safeguard Warning")
+                                        .font(.subheadline.bold())
+                                        .foregroundStyle(Color.red)
+                                }
+                                Text("Reverting to this snapshot requires uninstalling packages with active reverse dependencies or background daemons:")
+                                    .font(.caption)
+
+                                if !plan.affectedRunningServices.isEmpty {
+                                    HStack(spacing: 6) {
+                                        Text("Active Daemons Disrupted:").font(.caption.bold())
+                                        Text(plan.affectedRunningServices.joined(separator: ", "))
+                                            .font(.caption.monospaced())
+                                            .foregroundStyle(Color.red)
+                                    }
+                                }
+
+                                if plan.totalBrokenDownstreamPackagesCount > 0 {
+                                    HStack(spacing: 6) {
+                                        Text("Reverse Dependents Broken:").font(.caption.bold())
+                                        Text("\(plan.totalBrokenDownstreamPackagesCount) downstream package(s)")
+                                            .font(.caption)
+                                            .foregroundStyle(Color.orange)
+                                    }
+                                }
+                            }
+                            .padding(12)
+                            .background(Color.red.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.red.opacity(0.25), lineWidth: 1))
+                        }
+
+                        // Summary Statistics
+                        HStack(spacing: 12) {
+                            statBox(title: "UNINSTALL", count: plan.packagesToUninstall.count, color: Color.red, icon: "trash.fill")
+                            statBox(title: "REINSTALL", count: plan.packagesToReinstall.count, color: Color.green, icon: "arrow.down.circle.fill")
+                            statBox(title: "RESTORE TAPS", count: plan.missingTaps.count, color: Color.blue, icon: "spigot.fill")
+                        }
+
+                        if !plan.packagesToUninstall.isEmpty {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Packages to Uninstall (\(plan.packagesToUninstall.count))").font(.caption.bold()).foregroundStyle(Color.red)
+                                LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 6)], spacing: 6) {
+                                    ForEach(plan.packagesToUninstall, id: \.self) { pkg in
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "minus.circle.fill").font(.caption2).foregroundStyle(Color.red)
+                                            Text(pkg).font(.caption.monospaced()).lineLimit(1)
+                                        }
+                                        .padding(6)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .background(Color.red.opacity(0.06), in: RoundedRectangle(cornerRadius: 6))
+                                    }
+                                }
+                            }
+                        }
+
+                        if !plan.packagesToReinstall.isEmpty {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Packages to Reinstall (\(plan.packagesToReinstall.count))").font(.caption.bold()).foregroundStyle(Color.green)
+                                LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 6)], spacing: 6) {
+                                    ForEach(plan.packagesToReinstall, id: \.self) { pkg in
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "plus.circle.fill").font(.caption2).foregroundStyle(Color.green)
+                                            Text(pkg).font(.caption.monospaced()).lineLimit(1)
+                                        }
+                                        .padding(6)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .background(Color.green.opacity(0.06), in: RoundedRectangle(cornerRadius: 6))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                .frame(maxHeight: 280)
+
+                Divider()
+
+                HStack {
+                    Spacer()
+                    Button("Cancel", role: .cancel) { dismiss() }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+
+                    Button {
+                        rollbackManager.executeRollback(plan: plan, manager: manager) { success in
+                            if success {
+                                dismiss()
+                            }
+                        }
+                    } label: {
+                        Label("Replay & Revert System", systemImage: "clock.arrow.circlepath")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color.purple)
+                    .controlSize(.small)
+                    .disabled(manager.isOperating)
+                }
+            }
+        }
+        .padding(20)
+        .frame(width: 580, height: 460)
+    }
+
+    private func statBox(title: String, count: Int, color: Color, icon: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon).foregroundStyle(color).font(.title3)
+            VStack(alignment: .leading, spacing: 1) {
+                Text("\(count)").font(.headline)
+                Text(title).font(.system(size: 9, weight: .bold, design: .monospaced)).foregroundStyle(.secondary)
+            }
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(color.opacity(0.07), in: RoundedRectangle(cornerRadius: 8))
+    }
+}
+
+struct CellarTimeMachineTimelineView: View {
+    let snapshots: [BrewStoreSnapshot]
+    @ObservedObject var manager: HomebrewManager
+    @ObservedObject var snapshotManager: BrewStoreSnapshotManager
+    let onSelectSnapshot: (BrewStoreSnapshot) -> Void
+
+    @State private var replayTargetSnapshot: BrewStoreSnapshot?
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Cellar Time Machine Timeline").font(.headline)
+                        Text("Chronological record of system states. Select any checkpoint to inspect deltas or rollback.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button {
+                        snapshotManager.createSnapshot(name: "Time Machine Checkpoint", manager: manager)
+                    } label: {
+                        Label("Capture Checkpoint Now", systemImage: "camera.badge.clock")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                    .disabled(manager.isOperating)
+                }
+
+                if snapshots.isEmpty {
+                    ContentUnavailableView("No Timeline Checkpoints", systemImage: "clock.arrow.2.circlepath", description: Text("Capture a snapshot to initialize the Cellar Time Machine timeline."))
+                        .frame(maxWidth: .infinity, minHeight: 200)
+                } else {
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(Array(snapshots.enumerated()), id: \.element.id) { index, snap in
+                            let diff = snapshotManager.computeDiff(for: snap, currentPackages: manager.packages, currentTaps: manager.taps)
+                            HStack(alignment: .top, spacing: 14) {
+                                // Timeline node and vertical connector
+                                VStack(spacing: 0) {
+                                    Circle()
+                                        .fill(diff.hasDifferences ? Color.purple : Color.green)
+                                        .frame(width: 14, height: 14)
+                                        .overlay(Circle().stroke(Color(nsColor: .windowBackgroundColor), lineWidth: 2))
+                                    if index < snapshots.count - 1 {
+                                        Rectangle()
+                                            .fill(Color.secondary.opacity(0.2))
+                                            .frame(width: 2)
+                                            .frame(maxHeight: .infinity)
+                                    }
+                                }
+                                .frame(width: 20)
+
+                                // Card Content
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 1) {
+                                            Text(snap.formattedDate).font(.subheadline.bold())
+                                            Text(snap.name).font(.caption).foregroundStyle(.secondary)
+                                        }
+                                        Spacer()
+
+                                        if !diff.hasDifferences {
+                                            Text("Live System Match")
+                                                .font(.caption2.bold())
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 2)
+                                                .background(Color.green.opacity(0.12), in: Capsule())
+                                                .foregroundStyle(Color.green)
+                                        } else {
+                                            HStack(spacing: 4) {
+                                                if !diff.missingFormulae.isEmpty || !diff.missingCasks.isEmpty {
+                                                    Text("+\(diff.missingFormulae.count + diff.missingCasks.count) to restore")
+                                                        .font(.caption2.bold())
+                                                        .foregroundStyle(Color.blue)
+                                                }
+                                                if !diff.addedFormulae.isEmpty || !diff.addedCasks.isEmpty {
+                                                    Text("-\(diff.addedFormulae.count + diff.addedCasks.count) to remove")
+                                                        .font(.caption2.bold())
+                                                        .foregroundStyle(Color.orange)
+                                                }
+                                            }
+                                            .padding(.horizontal, 6)
+                                            .padding(.vertical, 2)
+                                            .background(Color.secondary.opacity(0.1), in: Capsule())
+                                        }
+                                    }
+
+                                    HStack(spacing: 8) {
+                                        Text("\(snap.totalCount) total packages (\(snap.casks.count) casks, \(snap.formulae.count) formulae)")
+                                            .font(.caption2)
+                                            .foregroundStyle(.secondary)
+
+                                        Spacer()
+
+                                        Button("View Details") {
+                                            onSelectSnapshot(snap)
+                                        }
+                                        .buttonStyle(.bordered)
+                                        .controlSize(.mini)
+
+                                        Button {
+                                            replayTargetSnapshot = snap
+                                        } label: {
+                                            Label("Replay & Revert…", systemImage: "clock.arrow.circlepath")
+                                        }
+                                        .buttonStyle(.borderedProminent)
+                                        .tint(Color.purple)
+                                        .controlSize(.mini)
+                                        .disabled(manager.isOperating)
+                                    }
+                                }
+                                .padding(12)
+                                .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10))
+                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.secondary.opacity(0.12), lineWidth: 1))
+                                .padding(.bottom, 12)
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, Spacing.lg)
+            .padding(.vertical, Spacing.md)
+        }
+        .sheet(item: $replayTargetSnapshot) { snap in
+            TimeMachineReplaySheet(snapshot: snap, manager: manager)
+        }
+    }
+}
+

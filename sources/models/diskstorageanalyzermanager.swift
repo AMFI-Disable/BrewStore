@@ -222,9 +222,38 @@ final class BrewStoreDiskStorageAnalyzerManager: ObservableObject {
             topHogs: Array(storageItems.prefix(5))
         )
     }
+}
 
+private final class StorageSizeCache: @unchecked Sendable {
+    static let shared = StorageSizeCache()
+    private let lock = NSLock()
+    private var cache: [URL: (mtime: Date, size: Int64)] = [:]
+
+    func size(for url: URL, mtime: Date) -> Int64? {
+        lock.lock()
+        defer { lock.unlock() }
+        if let entry = cache[url], entry.mtime == mtime {
+            return entry.size
+        }
+        return nil
+    }
+
+    func setSize(_ size: Int64, for url: URL, mtime: Date) {
+        lock.lock()
+        defer { lock.unlock() }
+        cache[url] = (mtime: mtime, size: size)
+    }
+}
+
+extension BrewStoreDiskStorageAnalyzerManager {
     nonisolated static func computeDirectorySize(url: URL) -> Int64 {
         let fm = FileManager.default
+        let mtime = (try? url.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate ?? Date.distantPast
+
+        if let cached = StorageSizeCache.shared.size(for: url, mtime: mtime) {
+            return cached
+        }
+
         guard let enumerator = fm.enumerator(at: url, includingPropertiesForKeys: [.fileSizeKey, .isRegularFileKey], options: [.skipsHiddenFiles]) else {
             return 0
         }
@@ -239,6 +268,8 @@ final class BrewStoreDiskStorageAnalyzerManager: ObservableObject {
             }
             totalSize += Int64(size)
         }
+
+        StorageSizeCache.shared.setSize(totalSize, for: url, mtime: mtime)
         return totalSize
     }
 }

@@ -6,9 +6,15 @@ struct HealthScoreView: View {
     @ObservedObject var manager: HomebrewManager
     @StateObject private var optimizer = BrewStoreHealthOptimizer()
     @StateObject private var doctorManager = BrewStoreDependencyDoctorManager.shared
+    @StateObject private var remediationManager = BrewStoreDoctorRemediationManager.shared
     @State private var showingCVESecuritySheet = false
     @State private var pendingHealthIssue: HealthIssueItem?
     @State private var showingAutoHealConfirmation = false
+    @State private var showingBatchRemediationConfirmation = false
+    @State private var dryRunDiagnostic: BrewStoreDoctorDiagnostic?
+    @State private var dryRunOutput: String?
+    @State private var isExecutingDryRun = false
+    @State private var copiedDiagnosticID: String?
 
     private var doctorDiagnostics: [BrewStoreDoctorDiagnostic] {
         BrewStoreDoctorParser.parse(manager.outputLog)
@@ -31,6 +37,71 @@ struct HealthScoreView: View {
         }
         .sheet(isPresented: $showingCVESecuritySheet) {
             CVESecurityView(manager: manager)
+        }
+        .sheet(item: $dryRunDiagnostic) { diag in
+            VStack(alignment: .leading, spacing: 14) {
+                HStack {
+                    Label("Dry-Run Simulation", systemImage: "sparkles.rectangle.stack.fill")
+                        .font(.headline)
+                    Spacer()
+                    Button("Done") { dryRunDiagnostic = nil }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                }
+                Text("Diagnostic: \(diag.title)").font(.subheadline.bold())
+                if let cmd = diag.dryRunCommand ?? diag.autoFixCommand {
+                    Text("Simulating command: `\(cmd)`").font(.caption.monospaced()).foregroundStyle(.secondary)
+                }
+                Divider()
+                if isExecutingDryRun {
+                    HStack {
+                        ProgressView().controlSize(.small)
+                        Text("Executing dry-run check…").font(.caption).foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 120)
+                } else {
+                    ScrollView {
+                        Text(dryRunOutput ?? "No simulation output recorded.")
+                            .font(.system(.caption, design: .monospaced))
+                            .padding(10)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.15), lineWidth: 1))
+                    .frame(minHeight: 120, maxHeight: 220)
+                }
+                HStack {
+                    Spacer()
+                    if diag.autoFixCommand != nil {
+                        Button("Apply Real Remediation") {
+                            let target = diag
+                            dryRunDiagnostic = nil
+                            remediationManager.executeDiagnosticRemediation(diagnostic: target, isDryRun: false, manager: manager) { _, _ in
+                                optimizer.evaluateHealth(manager: manager, doctorDiagnostics: doctorDiagnostics)
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                        .disabled(isExecutingDryRun || manager.isOperating)
+                    }
+                }
+            }
+            .padding(20)
+            .frame(width: 540, height: 380)
+        }
+        .confirmationDialog(
+            "Auto-Remediate All Safe Issues?",
+            isPresented: $showingBatchRemediationConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Execute Safe Repairs") {
+                remediationManager.batchRemediateSafe(diagnostics: doctorDiagnostics, manager: manager) { _, _ in
+                    optimizer.evaluateHealth(manager: manager, doctorDiagnostics: doctorDiagnostics)
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will safely resolve issues flagged as Safe Auto-Remediation (e.g. relinking non-conflicting Cellar binaries, scrubbing dangling symlinks, and clearing download caches).")
         }
         .confirmationDialog(
             "Repair Common Issues?",
@@ -143,6 +214,10 @@ struct HealthScoreView: View {
                         toolchainDoctorSection(report: docReport)
                     }
 
+                    if !doctorDiagnostics.isEmpty {
+                        icuDiagnosticsSection(diagnostics: doctorDiagnostics)
+                    }
+
                     if !assessment.issues.isEmpty {
                         issuesList(issues: assessment.issues)
                     }
@@ -204,9 +279,175 @@ struct HealthScoreView: View {
                 .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10))
             }
         }
+    }
+
+    private func icuDiagnosticsSection(diagnostics: [BrewStoreDoctorDiagnostic]) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label("Homebrew ICU: Autonomous Doctor (\(diagnostics.count))", systemImage: "stethoscope.circle.fill")
+                    .font(.headline)
+                    .foregroundStyle(.purple)
+                Spacer()
+                let safeCount = diagnostics.filter { $0.isAutoFixable && $0.safetyLevel == .safeToAutoFix }.count
+                if safeCount > 0 {
+                    Button {
+                        showingBatchRemediationConfirmation = true
+                    } label: {
+                        Label("Auto-Remediate All Safe (\(safeCount))", systemImage: "bolt.fill")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.purple)
+                    .controlSize(.small)
+                    .disabled(remediationManager.isBatchRemediating || manager.isOperating)
+                }
+            }
+
+            if remediationManager.isBatchRemediating {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(remediationManager.batchStatusMessage ?? "Auto-remediating issues…")
+                            .font(.caption.bold())
+                        Spacer()
+                        Text("\(Int(remediationManager.batchRemediationProgress * 100))%")
+                            .font(.caption.monospaced())
+                    }
+                    ProgressView(value: remediationManager.batchRemediationProgress, total: 1.0)
+                        .progressViewStyle(.linear)
+                }
+                .padding(10)
+                .background(Color.purple.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+            }
+
+            ForEach(diagnostics) { diag in
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(spacing: 8) {
+                        Label(diag.faultDomain.rawValue, systemImage: diag.faultDomain.iconName)
+                            .font(.caption2.bold())
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.secondary.opacity(0.12), in: Capsule())
+
+                        Text(diag.safetyLevel.rawValue)
+                            .font(.caption2.bold())
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(safetyColor(diag.safetyLevel).opacity(0.14), in: Capsule())
+                            .foregroundStyle(safetyColor(diag.safetyLevel))
+
+                        Spacer()
+
+                        if diag.severity == .clean {
+                            Label("Clean", systemImage: "checkmark.circle.fill")
+                                .font(.caption2.bold())
+                                .foregroundStyle(Color.green)
+                        } else if diag.severity == .error {
+                            Label("Critical Fault", systemImage: "xmark.octagon.fill")
+                                .font(.caption2.bold())
+                                .foregroundStyle(Color.red)
+                        } else {
+                            Label("Degraded / Warning", systemImage: "exclamationmark.triangle.fill")
+                                .font(.caption2.bold())
+                                .foregroundStyle(Color.orange)
+                        }
+                    }
+
+                    Text(diag.title).font(.subheadline.bold())
+                    Text(diag.message).font(.caption).foregroundStyle(.secondary)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(alignment: .top, spacing: 6) {
+                            Image(systemName: "info.circle.fill")
+                                .foregroundStyle(Color.blue)
+                                .font(.caption2)
+                                .padding(.top, 2)
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack(spacing: 4) {
+                                    Text("Why this matters:")
+                                        .font(.caption2.bold())
+                                    Text(diag.impactExplanation)
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+                                HStack(spacing: 4) {
+                                    Text("Potential fallout:")
+                                        .font(.caption2.bold())
+                                    Text(diag.potentialFallout)
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    }
+                    .padding(8)
+                    .background(Color.secondary.opacity(0.05), in: RoundedRectangle(cornerRadius: 6))
+
+                    HStack(spacing: 8) {
+                        if diag.dryRunCommand != nil || diag.autoFixCommand != nil {
+                            Button {
+                                dryRunDiagnostic = diag
+                                isExecutingDryRun = true
+                                dryRunOutput = nil
+                                remediationManager.executeDiagnosticRemediation(diagnostic: diag, isDryRun: true, manager: manager) { _, output in
+                                    dryRunOutput = output
+                                    isExecutingDryRun = false
+                                }
+                            } label: {
+                                Label("Dry-Run Preview", systemImage: "play.circle")
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                            .disabled(manager.isOperating || remediationManager.isFixing)
+                        }
+
+                        if diag.isAutoFixable, diag.autoFixCommand != nil {
+                            Button {
+                                remediationManager.executeDiagnosticRemediation(diagnostic: diag, isDryRun: false, manager: manager) { _, _ in
+                                    optimizer.evaluateHealth(manager: manager, doctorDiagnostics: doctorDiagnostics)
+                                }
+                            } label: {
+                                if remediationManager.activeFixIssueID == diag.id {
+                                    ProgressView().controlSize(.mini)
+                                } else {
+                                    Label("Auto-Remediate", systemImage: "wand.and.stars")
+                                }
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(diag.safetyLevel == .safeToAutoFix ? Color.green : Color.purple)
+                            .controlSize(.small)
+                            .disabled(manager.isOperating || remediationManager.isFixing)
+                        } else if let suggested = diag.suggestedCommand {
+                            Button {
+                                NSPasteboard.general.clearContents()
+                                NSPasteboard.general.setString(suggested, forType: .string)
+                                copiedDiagnosticID = diag.id
+                                Task {
+                                    try? await Task.sleep(nanoseconds: 2_000_000_000)
+                                    if copiedDiagnosticID == diag.id { copiedDiagnosticID = nil }
+                                }
+                            } label: {
+                                Label(copiedDiagnosticID == diag.id ? "Copied Command!" : "Copy Suggested Command", systemImage: copiedDiagnosticID == diag.id ? "checkmark" : "doc.on.doc")
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                        }
+                    }
+                }
+                .padding(12)
+                .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10))
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.secondary.opacity(0.12), lineWidth: 1))
+            }
+        }
         .padding(16)
-        .background(Color.purple.opacity(0.05), in: RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.purple.opacity(0.18), lineWidth: 1))
+        .background(Color.purple.opacity(0.04), in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.purple.opacity(0.15), lineWidth: 1))
+    }
+
+    private func safetyColor(_ safety: RemediationSafetyLevel) -> Color {
+        switch safety {
+        case .safeToAutoFix: .green
+        case .requiresReview: .orange
+        case .manualIntervention: .purple
+        }
     }
 
     private func issueKindIcon(_ kind: ToolchainIssue.IssueKind) -> String {

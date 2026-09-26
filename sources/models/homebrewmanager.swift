@@ -97,6 +97,7 @@ final class HomebrewManager: ObservableObject {
     func appendLogChunk(_ chunk: String) {
         guard !chunk.isEmpty else { return }
         outputLog.append(chunk)
+        BrewStoreExecutionTelemetryManager.shared.processChunk(chunk)
         if outputLog.count > Self.maxLogCharacters {
             let overflow = outputLog.count - Self.maxLogCharacters
             outputLog = String(outputLog.dropFirst(overflow))
@@ -710,6 +711,7 @@ final class HomebrewManager: ObservableObject {
         activeOperationTitle = "\(action.title) \(package.name)"
         errorMessage = nil
         outputLog = ""
+        BrewStoreExecutionTelemetryManager.shared.reset()
         statusMessage = "Running \(action.title.lowercased()) for \(package.name)…"
 
         if action == .upgrade {
@@ -717,8 +719,9 @@ final class HomebrewManager: ObservableObject {
             updateSessionInitialCount = 1
         }
 
-        if action == .uninstall, BrewStorePreferences.shared.enableAutoSnapshotBeforeMutations {
-            BrewStoreSnapshotManager().createSnapshot(name: "Pre-uninstall \(package.name)", manager: self)
+        if (action == .uninstall || action == .upgrade), BrewStorePreferences.shared.enableAutoSnapshotBeforeMutations {
+            let label = action == .uninstall ? "Pre-uninstall" : "Pre-upgrade"
+            BrewStoreSnapshotManager().createSnapshot(name: "\(label) \(package.name)", manager: self)
         }
 
         let arguments = action.arguments(for: package)
@@ -790,6 +793,7 @@ final class HomebrewManager: ObservableObject {
                 self.updateSessionStartTime = nil
                 self.updateSessionInitialCount = 0
                 self.lastOperationRequiresElevation = isPrivError
+                BrewStoreExecutionTelemetryManager.shared.markFinished()
 
                 if result.succeeded {
                     self.statusMessage = "Completed \(action.title.lowercased()) for \(packageName)."
@@ -1128,6 +1132,9 @@ final class HomebrewManager: ObservableObject {
         let count = packages.filter(\.isOutdated).count
         updateSessionStartTime = Date()
         updateSessionInitialCount = max(1, count)
+        if BrewStorePreferences.shared.enableAutoSnapshotBeforeMutations {
+            BrewStoreSnapshotManager().createSnapshot(name: "Pre-upgrade-all", manager: self)
+        }
         runMaintenance(
             title: "Upgrade all packages",
             arguments: ["upgrade"],

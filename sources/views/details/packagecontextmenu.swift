@@ -10,6 +10,8 @@ struct BrewStorePackageContextMenu: ViewModifier {
     @ObservedObject private var pinningManager = BrewStorePackagePinningManager.shared
     @ObservedObject private var wishlistManager = BrewStoreWishlistManager.shared
     @State private var showingUpgradeDiff = false
+    @State private var showingBlastRadius = false
+    @State private var showingDependencyTree = false
 
     init(
         manager: HomebrewManager,
@@ -179,6 +181,22 @@ struct BrewStorePackageContextMenu: ViewModifier {
                 Divider()
 
                 if package.isInstalled {
+                    Button {
+                        showingBlastRadius = true
+                    } label: {
+                        Label("Simulate Removal Blast Radius…", systemImage: "waveform.path.ecg")
+                    }
+                }
+
+                Button {
+                    showingDependencyTree = true
+                } label: {
+                    Label("Explore Dependency Tree…", systemImage: "point.3.connected.trianglepath.dotted")
+                }
+
+                Divider()
+
+                if package.isInstalled {
                     if package.isOutdated {
                         Button {
                             showingUpgradeDiff = true
@@ -210,6 +228,44 @@ struct BrewStorePackageContextMenu: ViewModifier {
             }
             .sheet(isPresented: $showingUpgradeDiff) {
                 UpgradeDiffViewSheet(package: package, manager: manager)
+            }
+            .sheet(isPresented: $showingBlastRadius) {
+                RemovalBlastRadiusSimulatorView(
+                    package: package,
+                    manager: manager,
+                    onDismiss: { showingBlastRadius = false },
+                    onProceedUninstall: {
+                        showingBlastRadius = false
+                        BrewStoreUninstallCoordinator.shared.requestUninstall(package: package, manager: manager)
+                    }
+                )
+                .frame(minWidth: 540, minHeight: 460)
+            }
+            .sheet(isPresented: $showingDependencyTree) {
+                VStack(spacing: 0) {
+                    HStack {
+                        Label("Dependency Tree: \(package.name)", systemImage: "point.3.connected.trianglepath.dotted")
+                            .font(.headline)
+                        Spacer()
+                        Button("Done") {
+                            showingDependencyTree = false
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                    }
+                    .padding()
+
+                    Divider()
+
+                    ScrollView {
+                        DependencyNodeTreeView(
+                            rootPackage: package,
+                            allPackages: manager.packages
+                        )
+                        .padding()
+                    }
+                }
+                .frame(minWidth: 560, minHeight: 480)
             }
     }
 

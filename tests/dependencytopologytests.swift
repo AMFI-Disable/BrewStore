@@ -86,8 +86,11 @@ final class DependencyTopologyTests: XCTestCase {
         topologyManager.analyzeTopology(manager: manager)
         XCTAssertTrue(topologyManager.isAnalyzing)
 
-        // Wait briefly for detached task to complete
-        try? await Task.sleep(nanoseconds: 150_000_000)
+        // Wait cooperatively for detached task to complete
+        for _ in 0..<50 {
+            if !topologyManager.isAnalyzing { break }
+            try? await Task.sleep(nanoseconds: 50_000_000)
+        }
 
         XCTAssertFalse(topologyManager.isAnalyzing)
         XCTAssertNotNil(topologyManager.topology)

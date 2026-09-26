@@ -143,6 +143,65 @@ struct MultiMachineSyncView: View {
                 .background(Color.accentColor.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
             }
 
+            // Standard Role Profiles
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Text("Standard Role Profiles").font(.subheadline.bold())
+                    Spacer()
+                    Text("1-Click Align & Sync").font(.caption).foregroundStyle(.secondary)
+                }
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(RoleProfilePreset.presets) { preset in
+                            let profile = preset.asMacMachineProfile()
+                            let drift = syncManager.detectDrift(currentPackages: manager.packages, targetProfile: profile)
+                            Button {
+                                selectedRemoteProfile = profile
+                                let current = syncManager.createCurrentMachineProfile(manager: manager, name: "Current Mac")
+                                _ = syncManager.computeDiff(local: current, remote: profile)
+                            } label: {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    HStack {
+                                        Image(systemName: preset.icon)
+                                            .font(.headline)
+                                            .foregroundStyle(Color.accentColor)
+                                        Spacer()
+                                        if drift.isAligned {
+                                            Label("Aligned", systemImage: "checkmark.circle.fill")
+                                                .font(.caption2.bold())
+                                                .foregroundStyle(Color.green)
+                                        } else {
+                                            Text("\(drift.missingPackages.count) missing")
+                                                .font(.caption2.bold())
+                                                .padding(.horizontal, 4)
+                                                .padding(.vertical, 1)
+                                                .background(Color.orange.opacity(0.12), in: Capsule())
+                                                .foregroundStyle(Color.orange)
+                                        }
+                                    }
+
+                                    Text(preset.title).font(.subheadline.bold())
+                                    Text(preset.description)
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(2)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                                .padding(12)
+                                .frame(width: 220, alignment: .leading)
+                                .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(selectedRemoteProfile?.name == preset.title ? Color.accentColor : Color.secondary.opacity(0.12), lineWidth: selectedRemoteProfile?.name == preset.title ? 2 : 1)
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
+
             // Saved Machine Profiles
             VStack(alignment: .leading, spacing: 10) {
                 Text("Saved Mac Profiles").font(.subheadline.bold())

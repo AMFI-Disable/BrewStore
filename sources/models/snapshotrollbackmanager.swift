@@ -8,6 +8,8 @@ struct SnapshotRollbackPlan: Identifiable, Hashable, Codable {
     let packagesToReinstall: [String] // In snapshot, but missing now
     var missingTaps: [String] = []
     var caskIDs: [String] = []
+    var blastRadiusReports: [String: UninstallBlastRadius] = [:]
+    var affectedRunningServices: [String] = []
 
     var totalOperations: Int {
         packagesToUninstall.count + packagesToReinstall.count + missingTaps.count
@@ -15,6 +17,15 @@ struct SnapshotRollbackPlan: Identifiable, Hashable, Codable {
 
     var isEmpty: Bool {
         totalOperations == 0
+    }
+
+    var hasCriticalBlastRadius: Bool {
+        blastRadiusReports.values.contains { $0.riskLevel == .critical } || !affectedRunningServices.isEmpty
+    }
+
+    var totalBrokenDownstreamPackagesCount: Int {
+        let allBroken = blastRadiusReports.values.flatMap(\.brokenDownstreamPackages)
+        return Set(allBroken).count
     }
 }
 
@@ -25,8 +36,14 @@ final class BrewStoreSnapshotRollbackManager: ObservableObject {
     @Published var isRollingBack = false
     @Published var statusMessage = ""
 
-    func computePlan(currentPackages: [BrewStorePackage], currentTaps: [BrewStoreTap] = [], snapshot: BrewStoreSnapshot) -> SnapshotRollbackPlan {
-        let currentlyInstalledIDs = Set(currentPackages.filter(\.isInstalled).map { $0.id.lowercased() })
+    func computePlan(
+        currentPackages: [BrewStorePackage],
+        currentServices: [BrewStoreService] = [],
+        currentTaps: [BrewStoreTap] = [],
+        snapshot: BrewStoreSnapshot
+    ) -> SnapshotRollbackPlan {
+        let currentlyInstalled = currentPackages.filter(\.isInstalled)
+        let currentlyInstalledIDs = Set(currentlyInstalled.map { $0.id.lowercased() })
         let snapshotIDs = snapshot.formulae + snapshot.casks
         let snapshotPackageIDs = Set(snapshotIDs.map { $0.lowercased() })
 
@@ -36,6 +53,24 @@ final class BrewStoreSnapshotRollbackManager: ObservableObject {
         let currentTapNames = Set(currentTaps.map { $0.name.lowercased() })
         let missingTaps = snapshot.taps.filter { !currentTapNames.contains($0.lowercased()) }.sorted()
 
+        // Simulate Blast Radius for any package to be uninstalled
+        var blastReports: [String: UninstallBlastRadius] = [:]
+        var affectedServicesSet = Set<String>()
+
+        for pkgID in toUninstall {
+            if let pkg = currentlyInstalled.first(where: { $0.id.lowercased() == pkgID }) {
+                let blast = BrewStorePreFlightDependencyChecker.simulateUninstallBlastRadius(
+                    package: pkg,
+                    in: currentPackages,
+                    services: currentServices
+                )
+                blastReports[pkgID] = blast
+                for svc in blast.affectedRunningServices {
+                    affectedServicesSet.insert(svc.name)
+                }
+            }
+        }
+
         return SnapshotRollbackPlan(
             id: UUID().uuidString,
             snapshotID: snapshot.id,
@@ -43,7 +78,9 @@ final class BrewStoreSnapshotRollbackManager: ObservableObject {
             packagesToUninstall: toUninstall,
             packagesToReinstall: toReinstall,
             missingTaps: missingTaps,
-            caskIDs: snapshot.casks.map { $0.lowercased() }
+            caskIDs: snapshot.casks.map { $0.lowercased() },
+            blastRadiusReports: blastReports,
+            affectedRunningServices: Array(affectedServicesSet).sorted()
         )
     }
 

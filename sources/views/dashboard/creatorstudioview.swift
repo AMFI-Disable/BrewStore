@@ -17,6 +17,7 @@ struct CreatorStudioView: View {
     @State private var isLintPassing: Bool?
     @State private var tapScaffoldMessage: String?
     @State private var repoSearch = ""
+    @State private var selectedStudioTab = 0
     var showHeader: Bool = true
 
     @ViewBuilder
@@ -93,7 +94,17 @@ struct CreatorStudioView: View {
                     }
                 }
 
-                if !accountManager.isAuthenticated {
+                Picker("", selection: $selectedStudioTab) {
+                    Text("My Taps & Repositories").tag(0)
+                    Text("Formula & Cask Packaging Suite").tag(1)
+                }
+                .labelsHidden()
+                .pickerStyle(.segmented)
+                .frame(maxWidth: 340)
+
+                if selectedStudioTab == 1 {
+                    DeveloperPackagingView(manager: manager)
+                } else if !accountManager.isAuthenticated {
                     // Logged Out Promo Card
                     loggedOutPromoCard
                 } else if creatorManager.isLoading {

@@ -14,6 +14,78 @@ struct MacMachineProfile: Identifiable, Hashable, Codable {
     }
 }
 
+struct RoleProfilePreset: Identifiable, Hashable, Codable {
+    let id: String
+    let title: String
+    let description: String
+    let icon: String
+    let formulae: [String]
+    let casks: [String]
+    let taps: [String]
+
+    func asMacMachineProfile() -> MacMachineProfile {
+        MacMachineProfile(
+            id: "preset-\(id)",
+            name: title,
+            arch: "Universal",
+            timestamp: Date(),
+            formulae: formulae,
+            casks: casks,
+            taps: taps
+        )
+    }
+
+    static let presets: [RoleProfilePreset] = [
+        RoleProfilePreset(
+            id: "web-dev",
+            title: "Full-Stack Web Dev",
+            description: "Node.js, Yarn, pnpm, Deno, Git, GitHub CLI, VS Code, Docker, Postman",
+            icon: "globe.americas.fill",
+            formulae: ["node", "yarn", "pnpm", "deno", "git", "gh", "ripgrep", "jq"],
+            casks: ["visual-studio-code", "docker", "postman"],
+            taps: ["homebrew/core", "homebrew/cask"]
+        ),
+        RoleProfilePreset(
+            id: "data-science",
+            title: "Data Science & AI",
+            description: "Python 3.12, uv, DuckDB, Ollama, JupyterLab, FFmpeg toolchain",
+            icon: "brain.head.profile",
+            formulae: ["python@3.12", "uv", "duckdb", "ollama", "ffmpeg", "libomp"],
+            casks: ["jupyterlab"],
+            taps: ["homebrew/core", "homebrew/cask"]
+        ),
+        RoleProfilePreset(
+            id: "media-creator",
+            title: "Audio & Media Creator",
+            description: "FFmpeg, ImageMagick, SoX, yt-dlp, VLC, HandBrake, Audacity",
+            icon: "waveform.path.ecg",
+            formulae: ["ffmpeg", "imagemagick", "sox", "yt-dlp", "optipng"],
+            casks: ["vlc", "handbrake", "audacity"],
+            taps: ["homebrew/core", "homebrew/cask"]
+        ),
+        RoleProfilePreset(
+            id: "devops-cloud",
+            title: "DevOps & Cloud Engineer",
+            description: "Kubernetes CLI, Helm, Terraform, AWS CLI, k9s, jq, Docker",
+            icon: "cloud.fill",
+            formulae: ["kubernetes-cli", "helm", "terraform", "awscli", "k9s", "jq", "yq"],
+            casks: ["docker"],
+            taps: ["homebrew/core", "homebrew/cask"]
+        )
+    ]
+}
+
+struct ProfileDriftReport: Hashable, Codable {
+    let profileName: String
+    let missingPackages: [String]
+    let extraPackages: [String]
+    let alignedCount: Int
+
+    var isAligned: Bool {
+        missingPackages.isEmpty
+    }
+}
+
 struct CrossMacDiffReport: Hashable, Codable {
     let localMachine: String
     let remoteMachine: String
@@ -115,5 +187,21 @@ final class BrewStoreMultiMachineSyncManager: ObservableObject {
         )
         self.activeDiff = diff
         return diff
+    }
+
+    func detectDrift(currentPackages: [BrewStorePackage], targetProfile: MacMachineProfile) -> ProfileDriftReport {
+        let installedIDs = Set(currentPackages.filter(\.isInstalled).map { $0.id.lowercased() })
+        let profileIDs = Set((targetProfile.formulae + targetProfile.casks).map { $0.lowercased() })
+
+        let missing = Array(profileIDs.subtracting(installedIDs)).sorted()
+        let extra = Array(installedIDs.subtracting(profileIDs)).sorted()
+        let aligned = profileIDs.intersection(installedIDs).count
+
+        return ProfileDriftReport(
+            profileName: targetProfile.name,
+            missingPackages: missing,
+            extraPackages: extra,
+            alignedCount: aligned
+        )
     }
 }

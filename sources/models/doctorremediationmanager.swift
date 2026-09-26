@@ -55,6 +55,9 @@ final class BrewStoreDoctorRemediationManager: ObservableObject {
     @Published var isFixing = false
     @Published var lastFixOutput: String?
     @Published var activeFixIssueID: String?
+    @Published var isBatchRemediating = false
+    @Published var batchRemediationProgress: Double = 0.0
+    @Published var batchStatusMessage: String?
 
     init() {}
 
@@ -227,5 +230,112 @@ final class BrewStoreDoctorRemediationManager: ObservableObject {
 
     nonisolated func pruneBrokenSymlinks(links: [URL]) -> (removed: Int, errors: [String]) {
         Self.pruneBrokenSymlinks(links: links)
+    }
+
+    func executeDiagnosticRemediation(
+        diagnostic: BrewStoreDoctorDiagnostic,
+        isDryRun: Bool,
+        manager: HomebrewManager,
+        completion: @escaping (Bool, String) -> Void
+    ) {
+        guard let brewPath = manager.brewPath else {
+            completion(false, "Homebrew binary path is not resolved.")
+            return
+        }
+
+        let commandString: String? = isDryRun ? (diagnostic.dryRunCommand ?? diagnostic.autoFixCommand) : diagnostic.autoFixCommand
+        guard let cmd = commandString, !cmd.isEmpty else {
+            completion(false, "No automated command available for this diagnostic.")
+            return
+        }
+
+        let parts = cmd.split(separator: " ").map(String.init)
+        guard parts.first == "brew" else {
+            completion(false, "Only native brew commands can be executed automatically.")
+            return
+        }
+        let args = Array(parts.dropFirst())
+
+        isFixing = true
+        activeFixIssueID = diagnostic.id
+
+        Task.detached(priority: .userInitiated) {
+            let result = BrewStoreCommandExecutor.shared.run(
+                executablePath: brewPath,
+                arguments: args,
+                timeout: 90,
+                category: isDryRun ? .readOnly : .reversibleMutation
+            )
+
+            await MainActor.run {
+                self.isFixing = false
+                self.activeFixIssueID = nil
+                let output = result.succeeded
+                    ? (result.standardOutput.isEmpty ? "Successfully executed `brew \(args.joined(separator: " "))`" : result.standardOutput)
+                    : "Remediation failed: \(result.standardError)"
+                self.lastFixOutput = output
+                if !isDryRun && result.succeeded {
+                    manager.refresh()
+                }
+                completion(result.succeeded, output)
+            }
+        }
+    }
+
+    func batchRemediateSafe(
+        diagnostics: [BrewStoreDoctorDiagnostic],
+        manager: HomebrewManager,
+        completion: @escaping (Int, Int) -> Void
+    ) {
+        let safeToFix = diagnostics.filter { $0.isAutoFixable && $0.autoFixCommand != nil && $0.safetyLevel == .safeToAutoFix }
+        guard !safeToFix.isEmpty, let brewPath = manager.brewPath, !isBatchRemediating else {
+            completion(0, 0)
+            return
+        }
+
+        isBatchRemediating = true
+        batchRemediationProgress = 0.0
+        batchStatusMessage = "Starting auto-remediation of \(safeToFix.count) safe issue(s)…"
+
+        Task.detached(priority: .userInitiated) {
+            var successCount = 0
+            var failureCount = 0
+            let total = Double(safeToFix.count)
+
+            for (idx, diag) in safeToFix.enumerated() {
+                guard let cmd = diag.autoFixCommand else { continue }
+                let parts = cmd.split(separator: " ").map(String.init)
+                guard parts.first == "brew" else { continue }
+                let args = Array(parts.dropFirst())
+
+                await MainActor.run {
+                    self.batchStatusMessage = "Repairing (\(idx + 1)/\(safeToFix.count)): \(diag.title)…"
+                    self.batchRemediationProgress = Double(idx) / total
+                }
+
+                let result = BrewStoreCommandExecutor.shared.run(
+                    executablePath: brewPath,
+                    arguments: args,
+                    timeout: 90,
+                    category: .reversibleMutation
+                )
+
+                if result.succeeded {
+                    successCount += 1
+                } else {
+                    failureCount += 1
+                }
+            }
+
+            let finalSuccess = successCount
+            let finalFailure = failureCount
+            await MainActor.run {
+                self.isBatchRemediating = false
+                self.batchRemediationProgress = 1.0
+                self.batchStatusMessage = "Completed: \(finalSuccess) resolved, \(finalFailure) failed."
+                manager.refresh()
+                completion(finalSuccess, finalFailure)
+            }
+        }
     }
 }

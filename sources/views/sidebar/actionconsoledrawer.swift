@@ -10,14 +10,45 @@ struct ActionConsoleDrawer: View {
     @State private var copiedLog = false
     @State private var customCommand = ""
     @State private var showingClearLocksConfirmation = false
+    @State private var selectedLogLevel: LogFilterLevel = .all
     @AppStorage("BrewStore.consoleExpanded") private var isExpanded = false
+
+    enum LogFilterLevel: String, CaseIterable, Identifiable {
+        case all = "All"
+        case build = "Build"
+        case warnings = "Warn"
+        case errors = "Errors"
+
+        var id: String { rawValue }
+    }
 
     private var filteredLogLines: [String] {
         let lines = manager.outputLog.components(separatedBy: .newlines)
-        if filterText.isEmpty {
-            return lines
+        let levelFiltered: [String]
+        switch selectedLogLevel {
+        case .all:
+            levelFiltered = lines
+        case .build:
+            levelFiltered = lines.filter { line in
+                let l = line.lowercased()
+                return l.contains("==>") || l.contains("building") || l.contains("compiling") || l.contains("make") || l.contains("clang") || l.contains("cmake") || l.contains("curl")
+            }
+        case .warnings:
+            levelFiltered = lines.filter { line in
+                let l = line.lowercased()
+                return l.contains("warning:") || l.contains("warn:")
+            }
+        case .errors:
+            levelFiltered = lines.filter { line in
+                let l = line.lowercased()
+                return l.contains("error:") || l.contains("failed") || l.contains("fatal:")
+            }
         }
-        return lines.filter { $0.localizedCaseInsensitiveContains(filterText) }
+
+        if filterText.isEmpty {
+            return levelFiltered
+        }
+        return levelFiltered.filter { $0.localizedCaseInsensitiveContains(filterText) }
     }
 
     private var currentDownloadProgress: Double? {
@@ -96,13 +127,24 @@ struct ActionConsoleDrawer: View {
                         Divider().frame(height: 14)
                     }
 
+                    // Log Level Filter
+                    Picker("", selection: $selectedLogLevel) {
+                        ForEach(LogFilterLevel.allCases) { lvl in
+                            Text(lvl.rawValue).tag(lvl)
+                        }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.segmented)
+                    .controlSize(.mini)
+                    .fixedSize()
+
                     // Search Filter
                     HStack(spacing: 4) {
                         Image(systemName: "magnifyingglass").font(.caption2).foregroundStyle(.secondary)
                         TextField("Filter…", text: $filterText)
                             .textFieldStyle(.plain)
                             .font(.caption2)
-                            .frame(width: 85)
+                            .frame(width: 75)
                     }
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
@@ -220,6 +262,13 @@ struct ActionConsoleDrawer: View {
                 .padding(.vertical, 4)
                 .background(Color.orange.opacity(0.08))
 
+                Divider()
+            }
+
+            if manager.isOperating || !manager.outputLog.isEmpty {
+                LiveExecutionHUDView(manager: manager)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
                 Divider()
             }
 
