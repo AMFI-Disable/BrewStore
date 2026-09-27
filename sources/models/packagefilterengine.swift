@@ -164,10 +164,23 @@ enum BrewStorePackageFilterEngine {
             if editorial == .editorsPick, TrendingRankingsManager.badge(for: pkg) == nil {
                 return false
             }
-            if editorial == .official, !(pkg.tap?.hasPrefix("homebrew/") ?? true) {
+
+            let isOfficialTap: Bool
+            if let tap = pkg.tap {
+                isOfficialTap = tap.hasPrefix("homebrew/")
+            } else {
+                let parts = pkg.id.components(separatedBy: "/")
+                if parts.count >= 3 {
+                    isOfficialTap = parts[0].lowercased() == "homebrew"
+                } else {
+                    isOfficialTap = true
+                }
+            }
+
+            if editorial == .official, !isOfficialTap {
                 return false
             }
-            if editorial == .thirdParty, pkg.tap?.hasPrefix("homebrew/") ?? true {
+            if editorial == .thirdParty, isOfficialTap {
                 return false
             }
             // Search query with fuzzy scoring

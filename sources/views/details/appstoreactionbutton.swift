@@ -74,7 +74,9 @@ struct AppStoreActionButton: View {
                 .tint(.blue)
                 .controlSize(size.controlSize)
                 .font(.system(size: size == .small ? 11 : 12, weight: .bold, design: .rounded))
+                .lineLimit(1)
                 .clipShape(Capsule())
+                .frame(minHeight: size == .small ? 24 : 28)
                 .disabled(manager.isOperating)
             } else if currentPackage.isInstalled {
                 // OPEN / INSTALLED button with action menu
@@ -137,16 +139,19 @@ struct AppStoreActionButton: View {
                         if currentPackage.kind == .cask {
                             Text("OPEN")
                                 .font(.system(size: size == .small ? 11 : 12, weight: .bold, design: .rounded))
+                                .lineLimit(1)
                         } else {
                             Image(systemName: "checkmark")
                                 .font(.system(size: 9, weight: .bold))
                             Text("INSTALLED")
                                 .font(.system(size: size == .small ? 10 : 11, weight: .bold, design: .rounded))
+                                .lineLimit(1)
                                 .fixedSize(horizontal: true, vertical: false)
                         }
                     }
                     .padding(.horizontal, size == .small ? 8 : 14)
                     .padding(.vertical, size == .small ? 5 : 6)
+                    .frame(minHeight: size == .small ? 24 : 28)
                     .background(Color.secondary.opacity(0.12), in: Capsule())
                     .overlay(Capsule().stroke(Color.secondary.opacity(0.15), lineWidth: 1))
                     .foregroundStyle(.primary)
@@ -163,7 +168,9 @@ struct AppStoreActionButton: View {
                 .tint(Color.accentColor)
                 .controlSize(size.controlSize)
                 .font(.system(size: size == .small ? 11 : 12, weight: .bold, design: .rounded))
+                .lineLimit(1)
                 .clipShape(Capsule())
+                .frame(minHeight: size == .small ? 24 : 28)
                 .shadow(color: Color.accentColor.opacity(0.25), radius: 4, y: 2)
                 .disabled(manager.isOperating)
             }

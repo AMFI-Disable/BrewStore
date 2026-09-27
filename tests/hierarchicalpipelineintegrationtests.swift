@@ -97,6 +97,8 @@ final class HierarchicalPipelineIntegrationTests: XCTestCase {
             let contentView: AnyView = switch section {
             case .discover:
                 AnyView(DiscoveryView(manager: manager, catalog: discovery, initialMode: .spotlight))
+            case .allPackages:
+                AnyView(DiscoveryView(manager: manager, catalog: discovery, initialMode: .allCatalog))
             case .showdown:
                 AnyView(CommunityShowdownView(manager: manager, accountManager: githubAccount))
             case .allApps:

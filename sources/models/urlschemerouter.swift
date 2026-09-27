@@ -18,6 +18,7 @@ enum BrewStoreURLRoute: Equatable {
     case blueprint(id: String?)
     case quickInstall(ids: [String])
     case open
+    case allPackages
 }
 
 @MainActor
@@ -122,6 +123,9 @@ final class BrewStoreURLSchemeRouter: ObservableObject {
 
         case "clean", "cleanup", "purge":
             return .clean
+
+        case "allpackages", "packages", "catalog":
+            return .allPackages
 
         case "blueprint", "blueprints", "stack":
             let blueprintID = queryValue(for: ["id", "name", "stack"]) ?? pathFirst()

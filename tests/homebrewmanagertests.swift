@@ -1256,6 +1256,50 @@ final class HomebrewManagerTests: XCTestCase {
         XCTAssertEqual(grouped.count, 2)
     }
 
+    func testPackageFilterEngineTapClassification() {
+        let officialFormula = BrewStorePackage(id: "wget", name: "wget", description: "Internet downloader", homepage: "", version: "1.24", kind: .formula, tap: "homebrew/core")
+        let officialCaskNilTap = BrewStorePackage(id: "visual-studio-code", name: "Visual Studio Code", description: "Editor", homepage: "", version: "1.90", kind: .cask, tap: nil)
+        let thirdPartyTap = BrewStorePackage(id: "vault", name: "vault", description: "Secrets", homepage: "", version: "1.16", kind: .formula, tap: "hashicorp/tap")
+        let thirdPartyPathID = BrewStorePackage(id: "cloudflare/cloudflare/cloudflared", name: "cloudflared", description: "Tunnel", homepage: "", version: "2024.1", kind: .formula, tap: nil)
+
+        let packages = [officialFormula, officialCaskNilTap, thirdPartyTap, thirdPartyPathID]
+
+        // Filter by Official Taps
+        let officialResult = BrewStorePackageFilterEngine.filterAndSort(
+            packages: packages,
+            query: "",
+            kind: nil,
+            tap: "All Taps",
+            pinnedOnly: false,
+            updatesOnly: false,
+            license: .all,
+            editorial: .official,
+            sort: .nameAsc
+        )
+        XCTAssertEqual(officialResult.count, 2)
+        XCTAssertTrue(officialResult.contains(where: { $0.id == "wget" }))
+        XCTAssertTrue(officialResult.contains(where: { $0.id == "visual-studio-code" }))
+        XCTAssertFalse(officialResult.contains(where: { $0.id == "vault" }))
+        XCTAssertFalse(officialResult.contains(where: { $0.id == "cloudflare/cloudflare/cloudflared" }))
+
+        // Filter by Third-Party Taps
+        let thirdPartyResult = BrewStorePackageFilterEngine.filterAndSort(
+            packages: packages,
+            query: "",
+            kind: nil,
+            tap: "All Taps",
+            pinnedOnly: false,
+            updatesOnly: false,
+            license: .all,
+            editorial: .thirdParty,
+            sort: .nameAsc
+        )
+        XCTAssertEqual(thirdPartyResult.count, 2)
+        XCTAssertTrue(thirdPartyResult.contains(where: { $0.id == "vault" }))
+        XCTAssertTrue(thirdPartyResult.contains(where: { $0.id == "cloudflare/cloudflare/cloudflared" }))
+        XCTAssertFalse(thirdPartyResult.contains(where: { $0.id == "wget" }))
+    }
+
     @MainActor
     func testThemeAndVibrancyManager() {
         let themeMgr = BrewStoreThemeVibrancyManager.shared
@@ -2176,10 +2220,58 @@ final class HomebrewManagerTests: XCTestCase {
         for sort in DiscoverySortOrder.allCases {
             XCTAssertFalse(sort.id.isEmpty)
         }
+        XCTAssertTrue(BrewStoreSection.allCases.contains(.allPackages))
         XCTAssertTrue(BrewStoreSection.allCases.contains(.allApps))
         XCTAssertTrue(BrewStoreSection.allCases.contains(.allFormulae))
+        XCTAssertEqual(BrewStoreSection.allPackages.icon, "shippingbox.2.fill")
         XCTAssertEqual(BrewStoreSection.allApps.icon, "macwindow.on.rectangle")
         XCTAssertEqual(BrewStoreSection.allFormulae.icon, "terminal.fill")
+    }
+
+    @MainActor
+    func testDiscoveryCatalogTapNormalizationAndAliasSearch() {
+        let catalog = BrewStoreDiscoveryCatalog()
+        catalog.clearCache()
+
+        let localCask = BrewStorePackage(id: "google-chrome", name: "Google Chrome", description: "Browser", homepage: "", version: "125.0", kind: .cask, tap: nil)
+        let localFormula = BrewStorePackage(id: "ripgrep", name: "ripgrep", description: "Search", homepage: "", version: "14.1", kind: .formula, tap: nil)
+        let thirdParty = BrewStorePackage(id: "vault", name: "vault", description: "Secrets", homepage: "", version: "1.16", kind: .formula, tap: "hashicorp/tap")
+
+        catalog.mergeLocalPackages([localCask, localFormula, thirdParty])
+        XCTAssertEqual(catalog.items.count, 3)
+
+        let chromeItem = catalog.items.first { $0.id == "google-chrome" }
+        XCTAssertEqual(chromeItem?.tap, "homebrew/cask")
+
+        let rgItem = catalog.items.first { $0.id == "ripgrep" }
+        XCTAssertEqual(rgItem?.tap, "homebrew/core")
+
+        let vaultItem = catalog.items.first { $0.id == "vault" }
+        XCTAssertEqual(vaultItem?.tap, "hashicorp/tap")
+
+        // Test alias matching
+        let customItem = BrewStoreDiscoveryItem(
+            id: "kubernetes-cli",
+            name: "kubernetes-cli",
+            description: "Kubernetes CLI",
+            homepage: "https://kubernetes.io",
+            version: "1.30.0",
+            kind: .formula,
+            installCount30Days: 15000,
+            tap: "homebrew/core",
+            license: "Apache-2.0",
+            aliases: ["kubectl", "k8s"],
+            dependencies: [],
+            artifacts: []
+        )
+        catalog.setMockItems(catalog.items + [customItem])
+
+        let foundByAlias = catalog.findItem(id: "k8s")
+        XCTAssertNotNil(foundByAlias)
+        XCTAssertEqual(foundByAlias?.id, "kubernetes-cli")
+
+        let foundByExact = catalog.findItem(id: "kubernetes-cli")
+        XCTAssertNotNil(foundByExact)
     }
 
     func testUpdateEstimatorCalculationsAndFormatting() {

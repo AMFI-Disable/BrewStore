@@ -185,6 +185,10 @@ struct BrewStoreRootView: View {
                                 DiscoveryView(manager: manager, catalog: discovery, initialMode: .spotlight) { mode in
                                     syncSidebarSelection(for: mode)
                                 }
+                            case .allPackages:
+                                DiscoveryView(manager: manager, catalog: discovery, initialMode: .allCatalog) { mode in
+                                    syncSidebarSelection(for: mode)
+                                }
                             case .showdown:
                                 CommunityShowdownView(manager: manager, accountManager: githubAccount)
                             case .allApps:
@@ -347,6 +351,8 @@ struct BrewStoreRootView: View {
             self.deepLinkedPackage = targetPkg
         case .search:
             selection = .discover
+        case .allPackages:
+            selection = .allPackages
         case .doctor:
             showingHealthSheet = true
         case .adopt:
@@ -402,9 +408,13 @@ struct BrewStoreRootView: View {
 
     private func syncSidebarSelection(for mode: DiscoveryViewMode) {
         switch mode {
-        case .spotlight, .allCatalog:
+        case .spotlight:
             if selection != .discover {
                 selection = .discover
+            }
+        case .allCatalog:
+            if selection != .allPackages {
+                selection = .allPackages
             }
         case .allApps:
             if selection != .allApps {
@@ -471,7 +481,7 @@ struct BrewStoreRootView: View {
             hubSummaryBadge(for: hub)
         }
         .padding(.vertical, 2)
-        .padding(.trailing, 14)
+        .padding(.trailing, 12)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("Sidebar.HubHeader.\(hub.rawValue.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "&", with: ""))")
     }
@@ -527,14 +537,14 @@ struct BrewStoreRootView: View {
     private func subSidebarRow(for section: BrewStoreSection) -> some View {
         sidebarRow(for: section)
             .padding(.leading, 8)
+            .padding(.trailing, 12)
     }
 
     private func sidebarRow(for section: BrewStoreSection) -> some View {
         HStack(spacing: 8) {
             Label(section.rawValue, systemImage: section.icon)
                 .lineLimit(1)
-                .fixedSize(horizontal: true, vertical: false)
-                .layoutPriority(1)
+                .truncationMode(.tail)
             Spacer(minLength: 4)
             sidebarBadge(for: section)
         }
@@ -583,6 +593,11 @@ struct BrewStoreRootView: View {
     @ViewBuilder
     private func sidebarBadge(for section: BrewStoreSection) -> some View {
         switch section {
+        case .allPackages:
+            let count = discovery.items.count
+            if count > 0 {
+                SidebarCountBadge(text: "\(count)")
+            }
         case .allApps:
             let count = discovery.items.filter { $0.kind == .cask }.count
             if count > 0 {
@@ -1094,7 +1109,8 @@ struct SidebarCountBadge: View {
         .padding(.vertical, 2)
         .frame(minHeight: 18)
         .background(backgroundColor, in: Capsule())
-        .fixedSize()
+        .frame(minWidth: 28, alignment: .trailing)
+        .fixedSize(horizontal: true, vertical: false)
     }
 }
 

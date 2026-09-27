@@ -356,7 +356,7 @@ final class BrewStoreDiscoveryCatalog: ObservableObject {
                 version: pkg.version,
                 kind: pkg.kind,
                 installCount30Days: 0,
-                tap: nil,
+                tap: pkg.tap ?? (pkg.kind == .cask ? "homebrew/cask" : "homebrew/core"),
                 license: nil,
                 aliases: [],
                 dependencies: pkg.dependencies,
@@ -374,6 +374,12 @@ final class BrewStoreDiscoveryCatalog: ObservableObject {
             item.id.lowercased() == bare || item.aliases.contains(where: { $0.lowercased() == bare })
         }
     }
+
+    #if DEBUG
+    func setMockItems(_ mockItems: [BrewStoreDiscoveryItem]) {
+        self.items = mockItems
+    }
+    #endif
 
     private func saveCache() {
         let cache = Cache(
@@ -461,6 +467,7 @@ final class BrewStoreDiscoveryCatalog: ObservableObject {
             let artifacts = (entry["artifacts"] as? [[String: Any]])?.flatMap { artifact in
                 artifact.keys.filter { $0 != "zap" && $0 != "uninstall" }
             } ?? []
+            let tap = (entry["tap"] as? String) ?? (kind == .cask ? "homebrew/cask" : "homebrew/core")
             return RawItem(
                 id: id,
                 name: name.isEmpty ? id : name,
@@ -468,7 +475,7 @@ final class BrewStoreDiscoveryCatalog: ObservableObject {
                 homepage: (entry["homepage"] as? String) ?? "",
                 version: version,
                 kind: kind,
-                tap: entry["tap"] as? String,
+                tap: tap,
                 license: entry["license"] as? String,
                 aliases: entry["aliases"] as? [String] ?? [],
                 dependencies: dependencies,

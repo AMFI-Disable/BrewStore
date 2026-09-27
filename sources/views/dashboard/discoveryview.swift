@@ -46,6 +46,7 @@ struct DiscoveryView: View {
     @State private var selectedItem: BrewStoreDiscoveryItem?
     @State private var selectedStory: BrewStoreStory?
     @State private var displayLimit = 150
+    @AppStorage("brewstore_compact_discovery_view") private var isCompactView = false
 
     @State private var isTrendingLeaderboard = false
     @State private var onlineResults: [BrewStorePackage] = []
@@ -53,6 +54,18 @@ struct DiscoveryView: View {
     @State private var selectedOnlinePackage: BrewStorePackage?
 
     var onModeChange: ((DiscoveryViewMode) -> Void)?
+
+    private var hasActiveFilters: Bool {
+        selectedCategory != "All" || selectedTap != "All Taps" || selectedStatus != .all || !search.isEmpty
+    }
+
+    private func resetFilters() {
+        search = ""
+        selectedCategory = "All"
+        selectedTap = "All Taps"
+        selectedStatus = .all
+        selectedSort = .popular
+    }
 
     init(manager: HomebrewManager, catalog: BrewStoreDiscoveryCatalog, initialMode: DiscoveryViewMode = .spotlight, onModeChange: ((DiscoveryViewMode) -> Void)? = nil) {
         self.manager = manager
@@ -171,6 +184,8 @@ struct DiscoveryView: View {
                     modePicker
                     Spacer()
                 }
+
+                filterBar
             }
             .padding(.horizontal, Spacing.lg)
             .padding(.top, Spacing.sm)
@@ -204,16 +219,9 @@ struct DiscoveryView: View {
                             trendingShelfView
 
                             // Quick Navigation Cards
-                            ViewThatFits(in: .horizontal) {
-                                HStack(spacing: Spacing.md) {
-                                    browseAppsCard
-                                    browseFormulaeCard
-                                }
-
-                                VStack(spacing: Spacing.sm) {
-                                    browseAppsCard
-                                    browseFormulaeCard
-                                }
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 220, maximum: 400), spacing: Spacing.md)], spacing: Spacing.md) {
+                                browseAppsCard
+                                browseFormulaeCard
                             }
                             .padding(.horizontal, Spacing.lg)
                             .padding(.bottom, Spacing.xs)
@@ -234,51 +242,6 @@ struct DiscoveryView: View {
                     .listRowBackground(Color.clear)
                 }
 
-                // Filter & Sort Control Bar
-                Section {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: Spacing.sm) {
-                            if viewMode == .allCatalog {
-                                Picker("Type", selection: $selectedKind) {
-                                    Text("All Types").tag(BrewPackageKind?.none)
-                                    Text("Apps").tag(Optional(BrewPackageKind.cask))
-                                    Text("CLI").tag(Optional(BrewPackageKind.formula))
-                                }
-                                .labelsHidden()
-                                .pickerStyle(.segmented)
-                                .frame(maxWidth: 180)
-                            }
-
-                            Picker("Category", selection: $selectedCategory) {
-                                ForEach(categories, id: \.self) { Text($0).tag($0) }
-                            }
-                            .controlSize(.small)
-
-                            Picker("Status", selection: $selectedStatus) {
-                                ForEach(DiscoveryStatusFilter.allCases, id: \.self) { Text($0.rawValue).tag($0) }
-                            }
-                            .controlSize(.small)
-
-                            Picker("Sort", selection: $selectedSort) {
-                                ForEach(DiscoverySortOrder.allCases, id: \.self) { Text($0.rawValue).tag($0) }
-                            }
-                            .controlSize(.small)
-
-                            if availableTaps.count > 1 {
-                                Picker("Tap", selection: $selectedTap) {
-                                    ForEach(availableTaps, id: \.self) { Text($0).tag($0) }
-                                }
-                                .controlSize(.small)
-                            }
-                        }
-                        .padding(.horizontal, Spacing.lg)
-                    }
-                    .padding(.vertical, Spacing.xs)
-                }
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-
                 if let error = catalog.errorMessage {
                     Section {
                         Text(error).font(.caption).foregroundStyle(.orange).textSelection(.enabled)
@@ -292,28 +255,25 @@ struct DiscoveryView: View {
 
                 if viewMode == .spotlight, isTrendingLeaderboard {
                     Section("🔥 Trending Packages #4 to #50 (Top 30-Day Community Installs)") {
-                        ForEach(Array(leaderboardItems.dropFirst(3).enumerated()), id: \.element.id) { index, item in
-                            HStack(spacing: 12) {
-                                Text("#\(index + 4)")
-                                    .font(.headline.monospaced())
-                                    .foregroundStyle(Color.secondary)
-                                    .frame(width: 38, alignment: .leading)
-
-                                DiscoveryRow(item: item, manager: manager) { selectedItem = item }
-                            }
+                        ForEach(Array(leaderboardItems.dropFirst(3).enumerated()), id: \.element.id) { entry in
+                            leaderboardRow(index: entry.offset, item: entry.element)
                         }
                     }
                 } else if !search.isEmpty {
                     Section("Search Results (\(visibleItems.count) matching)") {
                         ForEach(visibleItems.prefix(displayLimit)) { item in
-                            DiscoveryRow(item: item, manager: manager) { selectedItem = item }
+                            packageRow(for: item)
                         }
                         if visibleItems.count > displayLimit {
-                            Button("Show More Results (\(visibleItems.count - displayLimit) remaining)…") {
-                                displayLimit += 150
+                            HStack {
+                                Spacer()
+                                Button("Load All \(visibleItems.count) Results…") {
+                                    displayLimit = visibleItems.count
+                                }
+                                .buttonStyle(.bordered)
+                                .controlSize(.small)
+                                Spacer()
                             }
-                            .buttonStyle(.borderless)
-                            .font(.caption.bold())
                             .padding(.vertical, 4)
                         }
                     }
@@ -321,7 +281,7 @@ struct DiscoveryView: View {
                     if !newlyDiscoveredItems.isEmpty {
                         Section("New since last refresh") {
                             ForEach(newlyDiscoveredItems) { item in
-                                DiscoveryRow(item: item, manager: manager) { selectedItem = item }
+                                packageRow(for: item)
                             }
                         }
                     }
@@ -329,21 +289,25 @@ struct DiscoveryView: View {
                     if !popularItems.isEmpty {
                         Section("Popular this month") {
                             ForEach(popularItems) { item in
-                                DiscoveryRow(item: item, manager: manager) { selectedItem = item }
+                                packageRow(for: item)
                             }
                         }
                     }
 
                     Section("Directory Spotlight (\(visibleItems.count))") {
                         ForEach(visibleItems.prefix(displayLimit)) { item in
-                            DiscoveryRow(item: item, manager: manager) { selectedItem = item }
+                            packageRow(for: item)
                         }
                         if visibleItems.count > displayLimit {
-                            Button("Load More (\(visibleItems.count - displayLimit) remaining)…") {
-                                displayLimit += 150
+                            HStack {
+                                Spacer()
+                                Button("Load All \(visibleItems.count) Spotlight Packages…") {
+                                    displayLimit = visibleItems.count
+                                }
+                                .buttonStyle(.bordered)
+                                .controlSize(.small)
+                                Spacer()
                             }
-                            .buttonStyle(.borderless)
-                            .font(.caption.bold())
                             .padding(.vertical, 4)
                         }
                     }
@@ -357,14 +321,18 @@ struct DiscoveryView: View {
 
                     Section(sectionHeader) {
                         ForEach(visibleItems.prefix(displayLimit)) { item in
-                            DiscoveryRow(item: item, manager: manager) { selectedItem = item }
+                            packageRow(for: item)
                         }
                         if visibleItems.count > displayLimit {
-                            Button("Load More (\(visibleItems.count - displayLimit) remaining)…") {
-                                displayLimit += 200
+                            HStack {
+                                Spacer()
+                                Button("Load All \(visibleItems.count) Packages…") {
+                                    displayLimit = visibleItems.count
+                                }
+                                .buttonStyle(.bordered)
+                                .controlSize(.small)
+                                Spacer()
                             }
-                            .buttonStyle(.borderless)
-                            .font(.caption.bold())
                             .padding(.vertical, 6)
                         }
                     }
@@ -377,6 +345,14 @@ struct DiscoveryView: View {
                 } else if visibleItems.isEmpty, onlineResults.isEmpty {
                     VStack(spacing: 12) {
                         ContentUnavailableView("No matching packages", systemImage: "sparkles", description: Text("Try a different search, filter, or category."))
+                        if hasActiveFilters {
+                            Button {
+                                resetFilters()
+                            } label: {
+                                Label("Reset All Filters", systemImage: "xmark.circle")
+                            }
+                            .buttonStyle(.bordered)
+                        }
                         if !search.isEmpty, manager.isAvailable {
                             Button {
                                 performOnlineSearch()
@@ -453,6 +429,16 @@ struct DiscoveryView: View {
         .onChange(of: manager.lastRefreshedAt) { _, _ in
             recomputeItems(debounce: false)
         }
+        .background {
+            Group {
+                Button("") { viewMode = .spotlight }.keyboardShortcut("1", modifiers: .command)
+                Button("") { viewMode = .allCatalog }.keyboardShortcut("2", modifiers: .command)
+                Button("") { viewMode = .allApps }.keyboardShortcut("3", modifiers: .command)
+                Button("") { viewMode = .allFormulae }.keyboardShortcut("4", modifiers: .command)
+            }
+            .opacity(0)
+            .allowsHitTesting(false)
+        }
     }
 
     private struct ComputedDiscoveryState: Sendable {
@@ -485,13 +471,20 @@ struct DiscoveryView: View {
         let totalFormulae = catalogItems.filter { $0.kind == .formula }.count
 
         let baseCategories = catalogItems.filter { item in
-            if let selectedKind {
-                return item.kind == selectedKind
+            if let effectiveKind {
+                return item.kind == effectiveKind
             }
             return true
         }
         let categories = ["All", "⭐️ Editor's Picks"] + Array(Set(baseCategories.map(\.category))).sorted()
-        let availableTaps = ["All Taps"] + Array(Set(catalogItems.compactMap(\.tap))).sorted()
+
+        let baseTaps = catalogItems.filter { item in
+            if let effectiveKind {
+                return item.kind == effectiveKind
+            }
+            return true
+        }
+        let availableTaps = ["All Taps"] + Array(Set(baseTaps.compactMap(\.tap))).sorted()
 
         let cleanSearch = search.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -505,13 +498,19 @@ struct DiscoveryView: View {
                     return false
                 }
             } else if selectedCategory != "All" {
-                if item.category != selectedCategory {
-                    return false
+                if categories.contains(selectedCategory) {
+                    if item.category != selectedCategory {
+                        return false
+                    }
                 }
             }
 
-            if selectedTap != "All Taps", item.tap != selectedTap {
-                return false
+            if selectedTap != "All Taps" {
+                if availableTaps.contains(selectedTap) {
+                    if item.tap != selectedTap {
+                        return false
+                    }
+                }
             }
 
             if selectedStatus != .all {
@@ -536,7 +535,9 @@ struct DiscoveryView: View {
             if !cleanSearch.isEmpty {
                 let matches = item.name.localizedCaseInsensitiveContains(cleanSearch) ||
                     item.id.localizedCaseInsensitiveContains(cleanSearch) ||
-                    item.description.localizedCaseInsensitiveContains(cleanSearch)
+                    item.description.localizedCaseInsensitiveContains(cleanSearch) ||
+                    item.aliases.contains(where: { $0.localizedCaseInsensitiveContains(cleanSearch) }) ||
+                    item.artifacts.contains(where: { $0.localizedCaseInsensitiveContains(cleanSearch) })
                 if !matches {
                     return false
                 }
@@ -614,7 +615,7 @@ struct DiscoveryView: View {
 
         filterTask = Task {
             if debounce {
-                try? await Task.sleep(nanoseconds: 100_000_000)
+                try? await Task.sleep(nanoseconds: 80_000_000)
                 guard !Task.isCancelled else { return }
             }
 
@@ -642,6 +643,12 @@ struct DiscoveryView: View {
             self.availableTapsList = result.taps
             self.totalAppsCount = result.totalApps
             self.totalFormulaeCount = result.totalFormulae
+            if self.selectedCategory != "All" && !result.categories.contains(self.selectedCategory) {
+                self.selectedCategory = "All"
+            }
+            if self.selectedTap != "All Taps" && !result.taps.contains(self.selectedTap) {
+                self.selectedTap = "All Taps"
+            }
         }
     }
 
@@ -660,14 +667,15 @@ struct DiscoveryView: View {
     private var modePicker: some View {
         Picker("View Mode", selection: $viewMode) {
             Text("⭐️ Spotlight").tag(DiscoveryViewMode.spotlight)
+            Text("📦 All Packages").tag(DiscoveryViewMode.allCatalog)
             Text("📱 All Apps").tag(DiscoveryViewMode.allApps)
             Text("⚙️ All CLI Tools").tag(DiscoveryViewMode.allFormulae)
-            Text("📦 All Packages").tag(DiscoveryViewMode.allCatalog)
         }
         .labelsHidden()
         .pickerStyle(.segmented)
         .fixedSize(horizontal: true, vertical: false)
         .onChange(of: viewMode) { _, newMode in
+            displayLimit = 150
             switch newMode {
             case .allApps:
                 selectedKind = .cask
@@ -703,6 +711,17 @@ struct DiscoveryView: View {
                 .help("Toggle Top 50 Trending Leaderboard")
             }
 
+            // Compact vs Rich layout toggle
+            Button {
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    isCompactView.toggle()
+                }
+            } label: {
+                Image(systemName: isCompactView ? "list.bullet" : "square.grid.2x2")
+            }
+            .controlSize(.small)
+            .help(isCompactView ? "Switch to Standard View" : "Switch to Compact List View")
+
             Button(action: {
                 catalog.load(force: true)
                 manager.retryRefresh()
@@ -712,6 +731,95 @@ struct DiscoveryView: View {
             .controlSize(.small)
             .help("Refresh Catalog")
             .disabled(catalog.isLoading || manager.isLoading || manager.isOperating)
+        }
+    }
+
+    private var filterBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: Spacing.sm) {
+                if viewMode == .allCatalog {
+                    Picker("Type", selection: $selectedKind) {
+                        Text("All Types").tag(BrewPackageKind?.none)
+                        Text("Apps").tag(Optional(BrewPackageKind.cask))
+                        Text("CLI").tag(Optional(BrewPackageKind.formula))
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.segmented)
+                    .frame(maxWidth: 180)
+                }
+
+                Picker("Category", selection: $selectedCategory) {
+                    ForEach(categories, id: \.self) { Text($0).tag($0) }
+                }
+                .controlSize(.small)
+
+                Picker("Status", selection: $selectedStatus) {
+                    ForEach(DiscoveryStatusFilter.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                }
+                .controlSize(.small)
+
+                Picker("Sort", selection: $selectedSort) {
+                    ForEach(DiscoverySortOrder.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                }
+                .controlSize(.small)
+
+                if availableTaps.count > 1 {
+                    Picker("Tap", selection: $selectedTap) {
+                        ForEach(availableTaps, id: \.self) { Text($0).tag($0) }
+                    }
+                    .controlSize(.small)
+                }
+
+                if hasActiveFilters {
+                    Button {
+                        resetFilters()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "xmark.circle.fill")
+                            Text("Reset")
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    .help("Reset all filters & search")
+                }
+            }
+            .padding(.vertical, 2)
+        }
+    }
+
+    @ViewBuilder
+    private func packageRow(for item: BrewStoreDiscoveryItem) -> some View {
+        Group {
+            if isCompactView {
+                CompactDiscoveryRow(item: item, manager: manager) {
+                    selectedItem = item
+                }
+            } else {
+                DiscoveryRow(item: item, manager: manager) {
+                    selectedItem = item
+                }
+            }
+        }
+        .onAppear {
+            if item.id == visibleItems.prefix(displayLimit).last?.id {
+                if visibleItems.count > displayLimit {
+                    displayLimit = min(displayLimit + 100, visibleItems.count)
+                }
+            }
+        }
+    }
+
+    private func leaderboardRow(index: Int, item: BrewStoreDiscoveryItem) -> some View {
+        HStack(spacing: 12) {
+            Text("#\(index + 4)")
+                .font(.headline.monospaced())
+                .foregroundStyle(Color.secondary)
+                .frame(width: 38, alignment: .leading)
+
+            DiscoveryRow(item: item, manager: manager) {
+                selectedItem = item
+            }
         }
     }
 
@@ -869,7 +977,7 @@ struct DiscoveryView: View {
             }
         }
         .padding(10)
-        .frame(width: 215)
+        .frame(width: 235)
         .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10))
         .overlay(
             RoundedRectangle(cornerRadius: 10)
@@ -907,18 +1015,10 @@ struct DiscoveryView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
 
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: 12) {
-                        podiumCard(item: top3[0], rank: 1, medal: "🥇", color: .orange)
-                        podiumCard(item: top3[1], rank: 2, medal: "🥈", color: .gray)
-                        podiumCard(item: top3[2], rank: 3, medal: "🥉", color: .brown)
-                    }
-
-                    VStack(spacing: 8) {
-                        podiumCard(item: top3[0], rank: 1, medal: "🥇", color: .orange)
-                        podiumCard(item: top3[1], rank: 2, medal: "🥈", color: .gray)
-                        podiumCard(item: top3[2], rank: 3, medal: "🥉", color: .brown)
-                    }
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 230, maximum: 450), spacing: 12)], spacing: 12) {
+                    podiumCard(item: top3[0], rank: 1, medal: "🥇", color: .orange)
+                    podiumCard(item: top3[1], rank: 2, medal: "🥈", color: .gray)
+                    podiumCard(item: top3[2], rank: 3, medal: "🥉", color: .brown)
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 6)
@@ -1033,10 +1133,16 @@ private struct DiscoveryRow: View {
             DiscoveryIcon(item: item, installedPackage: manager.packages.first { $0.id == item.id && $0.kind == item.kind })
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(item.name).font(.headline)
+                Text(item.name)
+                    .font(.headline)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
 
                 Text(item.description.isEmpty ? item.id : item.description)
-                    .font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
             }
 
             Spacer()
@@ -1053,6 +1159,83 @@ private struct DiscoveryRow: View {
             .accessibilityLabel("View details for \(item.name)")
         }
         .padding(.vertical, 8)
+        .contentShape(Rectangle())
+        .onTapGesture(perform: onDetails)
+        .brewStorePackageContextMenu(package: targetPackage, manager: manager, onShowDetails: onDetails)
+    }
+}
+
+private struct CompactDiscoveryRow: View {
+    let item: BrewStoreDiscoveryItem
+    @ObservedObject var manager: HomebrewManager
+    let onDetails: () -> Void
+
+    private var targetPackage: BrewStorePackage {
+        manager.packages.first { $0.id == item.id && $0.kind == item.kind } ?? BrewStorePackage(
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            homepage: item.homepage,
+            version: item.version,
+            kind: item.kind,
+            applicationNames: item.artifacts,
+            isInstalled: false,
+            isOutdated: false
+        )
+    }
+
+    var body: some View {
+        HStack(spacing: 10) {
+            DiscoveryIcon(item: item, installedPackage: manager.packages.first { $0.id == item.id && $0.kind == item.kind }, size: 20)
+
+            HStack(spacing: 6) {
+                Text(item.name)
+                    .font(.body.weight(.medium))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+
+                if !item.version.isEmpty {
+                    Text(item.version)
+                        .font(.caption2.monospaced())
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+            .frame(minWidth: 160, alignment: .leading)
+
+            Text(item.category)
+                .font(.system(size: 10, weight: .medium))
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(Color.secondary.opacity(0.12), in: Capsule())
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+
+            if item.installCount30Days > 0 {
+                HStack(spacing: 3) {
+                    Image(systemName: "flame.fill")
+                        .font(.system(size: 8))
+                        .foregroundStyle(.orange)
+                    Text(BrewStoreAnalyticsManager.formatCount(item.installCount30Days))
+                        .font(.system(size: 10, design: .rounded))
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Spacer()
+
+            AppStoreActionButton(manager: manager, package: targetPackage, size: .small, onShowDetail: onDetails)
+
+            Button(action: onDetails) {
+                Image(systemName: "chevron.right")
+                    .font(.caption2.bold())
+                    .foregroundStyle(.tertiary)
+            }
+            .buttonStyle(.plain)
+            .help("View package details")
+            .accessibilityLabel("View details for \(item.name)")
+        }
+        .padding(.vertical, 3)
         .contentShape(Rectangle())
         .onTapGesture(perform: onDetails)
         .brewStorePackageContextMenu(package: targetPackage, manager: manager, onShowDetails: onDetails)

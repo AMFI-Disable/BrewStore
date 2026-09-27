@@ -17,12 +17,12 @@ final class HubNavigationTests: XCTestCase {
 
     func testAllSectionsMapToCorrectHubs() {
         let sections = BrewStoreSection.allCases
-        XCTAssertEqual(sections.count, 18)
+        XCTAssertEqual(sections.count, 19)
 
         for section in sections {
             let hub = section.hub
             switch section {
-            case .discover, .showdown, .allApps, .allFormulae, .stories, .toolkits, .categories:
+            case .discover, .allPackages, .showdown, .allApps, .allFormulae, .stories, .toolkits, .categories:
                 XCTAssertEqual(hub, .storefront, "\(section.rawValue) should belong to Storefront Hub")
             case .installed, .updates, .wishlist, .adoption, .topology:
                 XCTAssertEqual(hub, .myMac, "\(section.rawValue) should belong to My Mac Hub")

@@ -148,6 +148,7 @@ struct BrewStoreTap: Identifiable, Hashable, Codable {
 enum BrewStoreSection: String, CaseIterable, Identifiable {
     // Storefront
     case discover = "Discover"
+    case allPackages = "All Packages"
     case showdown = "Community Picks"
     case allApps = "All Applications"
     case allFormulae = "All CLI Tools"
@@ -177,6 +178,7 @@ enum BrewStoreSection: String, CaseIterable, Identifiable {
     var icon: String {
         switch self {
         case .discover: "sparkles"
+        case .allPackages: "shippingbox.2.fill"
         case .showdown: "trophy.fill"
         case .allApps: "macwindow.on.rectangle"
         case .allFormulae: "terminal.fill"
@@ -232,7 +234,7 @@ enum BrewStoreHub: String, CaseIterable, Identifiable {
     var subSections: [BrewStoreSection] {
         switch self {
         case .storefront:
-            [.discover, .allApps, .allFormulae, .stories, .toolkits, .categories, .showdown]
+            [.discover, .allPackages, .allApps, .allFormulae, .stories, .toolkits, .categories, .showdown]
         case .myMac:
             [.installed, .updates, .wishlist, .adoption, .topology]
         case .environment:
@@ -248,7 +250,7 @@ enum BrewStoreHub: String, CaseIterable, Identifiable {
 extension BrewStoreSection {
     var hub: BrewStoreHub {
         switch self {
-        case .discover, .showdown, .allApps, .allFormulae, .stories, .toolkits, .categories:
+        case .discover, .allPackages, .showdown, .allApps, .allFormulae, .stories, .toolkits, .categories:
             .storefront
         case .installed, .updates, .wishlist, .adoption, .topology:
             .myMac
