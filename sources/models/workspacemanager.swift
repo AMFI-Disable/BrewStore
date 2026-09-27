@@ -39,7 +39,7 @@ final class BrewStoreWorkspaceManager: ObservableObject {
     private let storageURL: URL
 
     init() {
-        let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let appSupport = (fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first ?? fileManager.temporaryDirectory)
             .appendingPathComponent("BrewStore", isDirectory: true)
         try? fileManager.createDirectory(at: appSupport, withIntermediateDirectories: true)
         self.storageURL = appSupport.appendingPathComponent("workspaces.json")

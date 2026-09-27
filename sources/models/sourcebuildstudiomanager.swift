@@ -127,7 +127,7 @@ final class BrewStoreSourceBuildManager: ObservableObject {
 
         let info = await Task.detached(priority: .userInitiated) {
             let cltPath = Self.runSimpleCommand("/usr/bin/xcode-select", arguments: ["-p"])
-            let hasCLT = cltPath != nil && !cltPath!.isEmpty
+            let hasCLT = cltPath?.isEmpty == false
 
             let clangRaw = Self.runSimpleCommand("/usr/bin/clang", arguments: ["--version"]) ?? ""
             let parsedClang = Self.parseClangVersion(clangRaw)

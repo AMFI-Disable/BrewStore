@@ -299,7 +299,7 @@ struct TapHealthBenchmarkView: View {
 
             metricCard(
                 title: "Avg Latency",
-                value: averageLatencyMs != nil ? String(format: "%.0f ms", averageLatencyMs!) : "—",
+                value: averageLatencyMs.map { String(format: "%.0f ms", $0) } ?? "—",
                 icon: "gauge.with.needle.fill",
                 color: (averageLatencyMs ?? 0) > 400 ? .orange : .green
             )

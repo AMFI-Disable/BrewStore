@@ -211,13 +211,21 @@ enum BrewStorePackageFilterEngine {
             return filtered.sorted {
                 let badge0 = TrendingRankingsManager.badge(for: $0)
                 let badge1 = TrendingRankingsManager.badge(for: $1)
-                return (badge0 != nil) && (badge1 == nil)
+                let has0 = badge0 != nil
+                let has1 = badge1 != nil
+                if has0 != has1 {
+                    return has0 && !has1
+                }
+                return $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
             }
         case .largestDisk:
             return filtered.sorted {
                 let size0 = BrewStoreBottleFootprintEstimator.estimateFootprint(for: $0).estimatedCellarFootprintMB
                 let size1 = BrewStoreBottleFootprintEstimator.estimateFootprint(for: $1).estimatedCellarFootprintMB
-                return size0 > size1
+                if size0 != size1 {
+                    return size0 > size1
+                }
+                return $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
             }
         }
     }

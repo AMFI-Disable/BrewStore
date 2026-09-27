@@ -36,13 +36,23 @@ final class BrewStoreLockManager: @unchecked Sendable {
 
     init(pidsChecker: ActivePIDsChecker? = nil) {
         self.pidsChecker = pidsChecker ?? {
-            let result = BrewStoreCommandExecutor.shared.run(
-                executablePath: "/usr/bin/pgrep",
-                arguments: ["-x", "brew"],
-                timeout: 5,
-                category: .readOnly
-            )
-            return result.standardOutput.split(whereSeparator: \.isNewline).compactMap { Int32($0.trimmingCharacters(in: .whitespaces)) }
+            var pids = Set<Int32>()
+            let patterns = ["brew.rb", "bin/brew", "brew"]
+            for pattern in patterns {
+                let args = pattern == "brew" ? ["-x", pattern] : ["-f", pattern]
+                let result = BrewStoreCommandExecutor.shared.run(
+                    executablePath: "/usr/bin/pgrep",
+                    arguments: args,
+                    timeout: 3,
+                    category: .readOnly
+                )
+                for line in result.standardOutput.split(whereSeparator: \.isNewline) {
+                    if let pid = Int32(line.trimmingCharacters(in: .whitespaces)) {
+                        pids.insert(pid)
+                    }
+                }
+            }
+            return Array(pids)
         }
     }
 

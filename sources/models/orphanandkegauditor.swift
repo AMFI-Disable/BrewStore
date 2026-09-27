@@ -325,7 +325,7 @@ final class OrphanAndKegAuditor: ObservableObject {
 
             // Check whether it is force linked:
             // Either info.linkedKeg is non-nil or bin/package exists in <prefix>/bin as a link
-            var isForceLinked = (info.linkedKeg != nil && !info.linkedKeg!.isEmpty)
+            var isForceLinked = (info.linkedKeg?.isEmpty == false)
             if !isForceLinked, binExists {
                 let binDir = (prefix as NSString).appendingPathComponent("bin")
                 let defaultBinPath = (binDir as NSString).appendingPathComponent(pkgID)

@@ -114,9 +114,18 @@ enum HomebrewJSONParser {
     }
 
     static func pinnedIdentifiers(from output: String) -> Set<String> {
-        Set(output.split(whereSeparator: \.isNewline)
-            .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty })
+        var result = Set<String>()
+        for line in output.split(whereSeparator: \.isNewline) {
+            let trimmed = String(line).trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else { continue }
+            result.insert(trimmed)
+            let lower = trimmed.lowercased()
+            result.insert(lower)
+            if let last = lower.components(separatedBy: "/").last, !last.isEmpty {
+                result.insert(last)
+            }
+        }
+        return result
     }
 
     static func services(from data: Data) -> [BrewStoreService] {

@@ -748,7 +748,18 @@ final class HomebrewManager: ObservableObject {
                     await MainActor.run {
                         self.activeLockMessage = nil
                     }
-                    if !freed, !cancellationState.isCancelled {
+                    if cancellationState.isCancelled {
+                        await MainActor.run {
+                            self.isOperating = false
+                            self.activeOperationTitle = nil
+                            self.isHomebrewLocked = false
+                            self.activeLockState = .free
+                            self.statusMessage = "Operation cancelled."
+                            completion?(false)
+                        }
+                        return
+                    }
+                    if !freed {
                         await MainActor.run {
                             self.isOperating = false
                             self.activeOperationTitle = nil
@@ -801,6 +812,9 @@ final class HomebrewManager: ObservableObject {
                     self.recordOperation(title: "\(action.title) \(packageName)", succeeded: true, detail: self.outputLog.isEmpty ? result.standardOutput : self.outputLog)
                     BrewStoreNotificationManager.shared.notifyOperationCompleted(action: action.title, packageName: packageName, success: true)
                     self.refresh()
+                } else if result.wasCancelled || cancellationState.isCancelled {
+                    self.statusMessage = "\(action.title) cancelled."
+                    self.recordOperation(title: "\(action.title) \(packageName)", succeeded: false, detail: "Operation cancelled by user.")
                 } else {
                     var failureDetail = self.failureMessage(for: result)
                     if isPrivError {
@@ -997,7 +1011,11 @@ final class HomebrewManager: ObservableObject {
             await MainActor.run {
                 self.isOperating = false
                 self.activeOperationTitle = nil
-                self.statusMessage = "\(action.title) completed for \(succeededCount) of \(packages.count) packages."
+                if cancellationState.isCancelled {
+                    self.statusMessage = "Batch \(action.title.lowercased()) cancelled (\(succeededCount) of \(packages.count) completed)."
+                } else {
+                    self.statusMessage = "\(action.title) completed for \(succeededCount) of \(packages.count) packages."
+                }
                 self.refresh()
                 completion?(finalResults)
             }
@@ -1513,6 +1531,9 @@ final class HomebrewManager: ObservableObject {
                     if refreshAfterSuccess {
                         self.refresh()
                     }
+                } else if result.wasCancelled || cancellationState.isCancelled {
+                    self.statusMessage = "\(title) cancelled."
+                    self.recordOperation(title: title, succeeded: false, detail: "Cancelled by user.")
                 } else {
                     self.statusMessage = "\(title) failed."
                     self.errorMessage = self.failureMessage(for: result)

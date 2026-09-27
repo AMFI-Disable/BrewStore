@@ -88,7 +88,7 @@ final class KegSnapshotManager: ObservableObject {
     // MARK: - Directory Path Resolvers
 
     func baseSnapshotsDirectory() -> URL {
-        let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first ?? fileManager.temporaryDirectory
         let snapshotsURL = appSupport.appendingPathComponent("BrewStore/KegSnapshots", isDirectory: true)
         if !fileManager.fileExists(atPath: snapshotsURL.path) {
             try? fileManager.createDirectory(at: snapshotsURL, withIntermediateDirectories: true)

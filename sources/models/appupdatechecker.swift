@@ -94,6 +94,8 @@ final class BrewStoreAppUpdateChecker: ObservableObject {
                             self.statusMessage = "You're on the latest version (\(self.currentVersion))."
                         }
                     }
+                } else {
+                    await checkFallbackAppcast()
                 }
             } catch {
                 await checkFallbackAppcast()
