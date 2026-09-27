@@ -46,6 +46,7 @@ final class BrewStorePreferences: ObservableObject {
         static let autoCleanupOnQuit = "pref_auto_cleanup_on_quit"
         static let showNotifications = "pref_show_notifications"
         static let showMenuBarBadge = "pref_show_menubar_badge"
+        static let showDockBadge = "pref_show_dock_badge"
         static let menuBarBadgeStyle = "pref_menubar_badge_style"
         static let defaultMenuBarTab = "pref_default_menubar_tab"
         static let menuBarCloseOnAction = "pref_menubar_close_on_action"
@@ -123,6 +124,13 @@ final class BrewStorePreferences: ObservableObject {
         didSet {
             defaults.set(hideDockIconWhenWindowClosed, forKey: Keys.hideDockIconWhenWindowClosed)
             NotificationCenter.default.post(name: .brewStoreDockLifecyclePreferenceDidChange, object: nil)
+        }
+    }
+
+    @Published var showDockBadge: Bool {
+        didSet {
+            defaults.set(showDockBadge, forKey: Keys.showDockBadge)
+            NotificationCenter.default.post(name: .brewStoreDockBadgePreferenceDidChange, object: nil)
         }
     }
 
@@ -238,6 +246,7 @@ final class BrewStorePreferences: ObservableObject {
             Keys.autoCleanupOnQuit: false,
             Keys.showNotifications: true,
             Keys.showMenuBarBadge: true,
+            Keys.showDockBadge: true,
             Keys.menuBarBadgeStyle: "count",
             Keys.defaultMenuBarTab: "Updates",
             Keys.menuBarCloseOnAction: false,
@@ -293,6 +302,7 @@ final class BrewStorePreferences: ObservableObject {
         self.autoCleanupOnQuit = defaults.bool(forKey: Keys.autoCleanupOnQuit)
         self.showNotifications = defaults.bool(forKey: Keys.showNotifications)
         self.showMenuBarBadge = defaults.bool(forKey: Keys.showMenuBarBadge)
+        self.showDockBadge = defaults.object(forKey: Keys.showDockBadge) != nil ? defaults.bool(forKey: Keys.showDockBadge) : true
         self.menuBarBadgeStyle = defaults.string(forKey: Keys.menuBarBadgeStyle) ?? "count"
         self.defaultMenuBarTab = defaults.string(forKey: Keys.defaultMenuBarTab) ?? "Updates"
         self.menuBarCloseOnAction = defaults.bool(forKey: Keys.menuBarCloseOnAction)
@@ -313,6 +323,7 @@ final class BrewStorePreferences: ObservableObject {
 
     func resetToDefaults() {
         hideDockIconWhenWindowClosed = true
+        showDockBadge = true
         showConsoleDrawer = false
         isAutoRefreshEnabled = true
         autoRefreshIntervalSeconds = 15
@@ -352,4 +363,5 @@ final class BrewStorePreferences: ObservableObject {
 extension Notification.Name {
     static let brewStoreAutoRefreshPreferencesDidChange = Notification.Name("brewStoreAutoRefreshPreferencesDidChange")
     static let brewStoreDockLifecyclePreferenceDidChange = Notification.Name("brewStoreDockLifecyclePreferenceDidChange")
+    static let brewStoreDockBadgePreferenceDidChange = Notification.Name("brewStoreDockBadgePreferenceDidChange")
 }

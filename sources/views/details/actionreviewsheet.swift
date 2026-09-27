@@ -92,6 +92,47 @@ struct BrewStoreActionReviewSheet: View {
                         }
                     }
 
+                    // Pre-Install Disk Space & Footprint Guard
+                    if estimatedFootprintMB > 0 {
+                        let isCriticallyLow = (availableDiskSpaceGB ?? 10) < max((estimatedFootprintMB / 1024.0) * 1.5, 3.0)
+                        HStack(spacing: Spacing.sm) {
+                            Image(systemName: isCriticallyLow ? "exclamationmark.triangle.fill" : "internaldrive.fill")
+                                .font(.title3)
+                                .foregroundStyle(isCriticallyLow ? Color.orange : Color.accentColor)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack(spacing: 6) {
+                                    Text(isCriticallyLow ? "Low Disk Space Advisory" : "Estimated Storage Footprint")
+                                        .font(.subheadline.bold())
+                                        .foregroundStyle(isCriticallyLow ? Color.orange : Color.primary)
+
+                                    Text("~\(formattedFootprint)")
+                                        .font(.caption2.bold().monospacedDigit())
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 1.5)
+                                        .background((isCriticallyLow ? Color.orange : Color.accentColor).opacity(0.12), in: Capsule())
+                                        .foregroundStyle(isCriticallyLow ? Color.orange : Color.accentColor)
+                                }
+
+                                if let freeGB = availableDiskSpaceGB {
+                                    Text(isCriticallyLow 
+                                         ? "Drive has only \(String(format: "%.1f GB", freeGB)) available. Ensure you maintain sufficient disk buffer."
+                                         : "\(String(format: "%.1f GB", freeGB)) available on local APFS volume.")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+
+                            Spacer()
+                        }
+                        .padding(10)
+                        .background((isCriticallyLow ? Color.orange : Color.secondary).opacity(0.06), in: RoundedRectangle(cornerRadius: Radius.sm))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: Radius.sm)
+                                .stroke((isCriticallyLow ? Color.orange : Color.secondary).opacity(0.15), lineWidth: 1)
+                        )
+                    }
+
                     // Command Preview Section
                     if let cmdPreview = request.commandPreview, !cmdPreview.isEmpty {
                         VStack(alignment: .leading, spacing: Spacing.xxs) {
@@ -147,5 +188,34 @@ struct BrewStoreActionReviewSheet: View {
         }
         .padding(Spacing.lg)
         .frame(minWidth: 540, minHeight: 380)
+    }
+
+    private var estimatedFootprintMB: Double {
+        switch request.kind {
+        case let .install(pkgs), let .upgrade(pkgs):
+            return pkgs.reduce(0.0) { sum, pkg in
+                sum + BrewStoreBottleFootprintEstimator.estimateFootprint(for: pkg).estimatedCellarFootprintMB
+            }
+        default:
+            return 0.0
+        }
+    }
+
+    private var formattedFootprint: String {
+        if estimatedFootprintMB >= 1000 {
+            return String(format: "%.1f GB", estimatedFootprintMB / 1024.0)
+        } else {
+            return String(format: "%.1f MB", estimatedFootprintMB)
+        }
+    }
+
+    private var availableDiskSpaceGB: Double? {
+        do {
+            let values = try URL(fileURLWithPath: "/").resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
+            if let bytes = values.volumeAvailableCapacityForImportantUsage {
+                return Double(bytes) / (1024.0 * 1024.0 * 1024.0)
+            }
+        } catch {}
+        return nil
     }
 }

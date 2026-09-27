@@ -64,7 +64,7 @@ struct PackageListView: View {
     }
 
     private var hasActiveFilters: Bool {
-        licenseFilter != .all || editorialFilter != .all || groupingOption != .none || sortOption != .nameAsc
+        licenseFilter != .all || editorialFilter != .all || groupingOption != .none || sortOption != .nameAsc || showPinnedOnly
     }
 
     private var activeFilterCount: Int {
@@ -79,6 +79,9 @@ struct PackageListView: View {
             count += 1
         }
         if sortOption != .nameAsc {
+            count += 1
+        }
+        if showPinnedOnly {
             count += 1
         }
         return count
@@ -317,6 +320,7 @@ struct PackageListView: View {
                                 editorialFilter = .all
                                 groupingOption = .none
                                 sortOption = .nameAsc
+                                showPinnedOnly = false
                             }
                         } label: {
                             HStack(spacing: 4) {
@@ -623,6 +627,28 @@ struct PackageListView: View {
                 Label(editorialFilter.rawValue, systemImage: editorialFilter.icon)
             }
             .controlSize(.small)
+
+            let pinnedCount = basePackages.filter { pinningManager.isPinned(packageID: $0.id) }.count
+            if pinnedCount > 0 {
+                Button {
+                    withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                        showPinnedOnly.toggle()
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: showPinnedOnly ? "pin.fill" : "pin")
+                            .font(.caption2)
+                        Text("Pinned (\(pinnedCount))")
+                            .font(.caption2.bold())
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(showPinnedOnly ? Color.indigo : Color.secondary.opacity(0.12), in: Capsule())
+                    .foregroundStyle(showPinnedOnly ? Color.white : Color.primary)
+                }
+                .buttonStyle(.plain)
+                .help(showPinnedOnly ? "Show all packages" : "Filter to pinned packages only")
+            }
         }
         .fixedSize(horizontal: true, vertical: false)
     }
@@ -709,6 +735,20 @@ private struct PackageListRow: View {
                         .truncationMode(.tail)
 
                     PackageInstallCountBadge(package: package)
+
+                    if BrewStorePackagePinningManager.shared.isPinned(packageID: package.id) {
+                        HStack(spacing: 2) {
+                            Image(systemName: "pin.fill")
+                                .font(.system(size: 8))
+                            Text("Pinned")
+                                .font(.system(size: 9, weight: .bold))
+                        }
+                        .foregroundStyle(Color.indigo)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 2)
+                        .background(Color.indigo.opacity(0.12), in: Capsule())
+                        .help("This package version is pinned. It will not be upgraded during batch upgrades.")
+                    }
 
                     if package.isInstalled {
                         PackageArchitectureBadge(

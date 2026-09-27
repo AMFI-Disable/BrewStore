@@ -32,6 +32,13 @@ final class BrewStoreDockLifecycleManager: NSObject, ObservableObject {
             object: nil
         )
 
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleBadgePreferenceChange(_:)),
+            name: .brewStoreDockBadgePreferenceDidChange,
+            object: nil
+        )
+
         // SwiftUI creates the WindowGroup after applicationDidFinishLaunching.
         // Do not treat the temporarily empty NSApp.windows collection as a
         // closed-window state or switch to accessory mode before the main
@@ -40,6 +47,25 @@ final class BrewStoreDockLifecycleManager: NSObject, ObservableObject {
         if NSApp.activationPolicy() != .regular {
             NSApp.setActivationPolicy(.regular)
         }
+    }
+
+    private var lastOutdatedCount: Int = 0
+
+    func updateBadge(outdatedCount: Int) {
+        lastOutdatedCount = outdatedCount
+        guard BrewStorePreferences.shared.showDockBadge else {
+            NSApp.dockTile.badgeLabel = nil
+            return
+        }
+        if outdatedCount > 0 {
+            NSApp.dockTile.badgeLabel = "\(outdatedCount)"
+        } else {
+            NSApp.dockTile.badgeLabel = nil
+        }
+    }
+
+    @objc private func handleBadgePreferenceChange(_: Notification) {
+        updateBadge(outdatedCount: lastOutdatedCount)
     }
 
     @objc private func handleWindowWillClose(_ note: Notification) {

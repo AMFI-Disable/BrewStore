@@ -676,6 +676,7 @@ final class HomebrewManager: ObservableObject {
                 self.services = HomebrewJSONParser.services(from: Data(serviceResult.standardOutput.utf8))
                 self.taps = HomebrewJSONParser.taps(from: tapResult.standardOutput)
                 self.lastRefreshedAt = Date()
+                BrewStoreDockLifecycleManager.shared.updateBadge(outdatedCount: totalOutdated)
                 if totalOutdated > 0 {
                     self.statusMessage = "Synced \(totalInstalled) installed packages (\(totalOutdated) updates available)."
                 } else {

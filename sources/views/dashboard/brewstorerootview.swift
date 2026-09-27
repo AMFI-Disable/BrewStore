@@ -500,8 +500,17 @@ struct BrewStoreRootView: View {
                 }
             }
         case .environment:
+            let errorCount = manager.services.filter(\.isError).count
             let running = manager.services.filter(\.isRunning).count
-            if running > 0 {
+            if errorCount > 0 {
+                SidebarCountBadge(
+                    text: "\(errorCount)",
+                    foregroundColor: .white,
+                    backgroundColor: .red,
+                    isAccentOrProminent: true,
+                    leadingDotColor: .white
+                )
+            } else if running > 0 {
                 SidebarCountBadge(
                     text: "\(running)",
                     foregroundColor: .green,
@@ -533,6 +542,40 @@ struct BrewStoreRootView: View {
         .onTapGesture {
             selection = section
         }
+        .contextMenu {
+            if section == .updates {
+                let outdated = manager.packages.filter(\.isOutdated)
+                if !outdated.isEmpty {
+                    Button {
+                        BrewStoreActionReviewCoordinator.shared.requestUpgrade(packages: outdated, manager: manager) {
+                            manager.upgradeAllPackages()
+                        }
+                    } label: {
+                        Label("Upgrade All (\(outdated.count))", systemImage: "arrow.triangle.2.circlepath")
+                    }
+                    Divider()
+                }
+                Button {
+                    manager.retryRefresh()
+                } label: {
+                    Label("Check for Updates", systemImage: "arrow.clockwise")
+                }
+            } else if section == .services {
+                let runningServices = manager.services.filter(\.isRunning)
+                Button {
+                    manager.batchPerform(services: runningServices, action: .restart)
+                } label: {
+                    Label("Restart Running Services (\(runningServices.count))", systemImage: "arrow.counterclockwise")
+                }
+                .disabled(runningServices.isEmpty)
+            } else if section == .installed {
+                Button {
+                    manager.cleanup()
+                } label: {
+                    Label("Clean Disk Cache (brew cleanup)", systemImage: "trash")
+                }
+            }
+        }
         .tag(section)
         .accessibilityIdentifier("Sidebar.\(section.rawValue.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "&", with: ""))")
     }
@@ -551,14 +594,17 @@ struct BrewStoreRootView: View {
                 SidebarCountBadge(text: "\(count)")
             }
         case .updates:
-            let outdatedCount = manager.packages.filter(\.isOutdated).count
-            if outdatedCount > 0 {
+            let outdated = manager.packages.filter(\.isOutdated)
+            if !outdated.isEmpty {
+                let summary = outdated.prefix(5).map { "\($0.name) (\($0.installedVersion ?? "") -> \($0.version))" }.joined(separator: "\n• ")
+                let moreText = outdated.count > 5 ? "\n...and \(outdated.count - 5) more." : ""
                 SidebarCountBadge(
-                    text: "\(outdatedCount)",
+                    text: "\(outdated.count)",
                     foregroundColor: .white,
                     backgroundColor: .orange,
                     isAccentOrProminent: true
                 )
+                .help("\(outdated.count) Update\(outdated.count == 1 ? "" : "s") Available:\n• \(summary)\(moreText)\n\nShortcut: ⌥⌘U to upgrade all.")
             }
         case .installed:
             let count = manager.packages.filter(\.isInstalled).count
@@ -581,8 +627,19 @@ struct BrewStoreRootView: View {
                 SidebarCountBadge(text: "\(count)")
             }
         case .services:
+            let errorCount = manager.services.filter(\.isError).count
             let running = manager.services.filter(\.isRunning).count
-            if running > 0 {
+            if errorCount > 0 {
+                SidebarCountBadge(
+                    text: "\(errorCount)",
+                    foregroundColor: .white,
+                    backgroundColor: .red,
+                    isAccentOrProminent: true,
+                    leadingDotColor: .white
+                )
+                .accessibilityLabel("\(errorCount) failed")
+                .help("\(errorCount) service\(errorCount == 1 ? "" : "s") in error/failed state.")
+            } else if running > 0 {
                 SidebarCountBadge(
                     text: "\(running)",
                     foregroundColor: .green,
@@ -591,6 +648,7 @@ struct BrewStoreRootView: View {
                     leadingDotColor: .green
                 )
                 .accessibilityLabel("\(running) running")
+                .help("\(running) background service\(running == 1 ? "" : "s") running.")
             }
         case .taps:
             let count = manager.taps.count
@@ -749,6 +807,18 @@ struct BrewStoreRootView: View {
                         .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 3))
                         .fixedSize(horizontal: true, vertical: false)
                 }
+
+                Button {
+                    manager.cleanup()
+                } label: {
+                    Image(systemName: "trash.circle")
+                        .font(.caption)
+                        .foregroundStyle(Color.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("Reclaim Disk Space (brew cleanup)")
+                .disabled(manager.isOperating)
+                .accessibilityIdentifier("Sidebar.QuickCleanupButton")
 
                 Button {
                     selection = .settings

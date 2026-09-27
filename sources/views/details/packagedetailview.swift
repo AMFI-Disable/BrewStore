@@ -39,6 +39,7 @@ struct PackageDetailView: View {
     var onDismiss: (() -> Void)?
     @State private var packageAnalytics: PackageInstallAnalytics?
     @State private var selectedDependencyPackage: BrewStorePackage?
+    @State private var showdownAlternativePackage: BrewStorePackage?
     @State private var caveatAppliedSuccess = false
     @State private var copiedExportsToast = false
     @State private var showingPruneOrphanConfirm = false
@@ -215,6 +216,13 @@ struct PackageDetailView: View {
                 onProceedUninstall: currentPackage.isInstalled ? {
                     BrewStoreUninstallCoordinator.shared.requestUninstall(package: currentPackage, manager: manager)
                 } : nil
+            )
+        }
+        .sheet(item: $showdownAlternativePackage) { altPkg in
+            BrewStorePackageShowdownSheet(
+                packageA: currentPackage,
+                packageB: altPkg,
+                manager: manager
             )
         }
         .detailModalOverlay(item: $selectedDependencyPackage) { depPkg in
@@ -1635,38 +1643,80 @@ struct PackageDetailView: View {
                     Image(systemName: "arrow.triangle.swap")
                         .foregroundStyle(Color.accentColor)
                     Text("Similar Tools & Alternatives").font(.title3.bold())
+
+                    Text("\(alternatives.count)")
+                        .font(.caption2.bold().monospacedDigit())
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.accentColor.opacity(0.12), in: Capsule())
+                        .foregroundStyle(Color.accentColor)
+
+                    Spacer()
+
+                    if let firstAlt = alternatives.first {
+                        Button {
+                            showdownAlternativePackage = firstAlt
+                        } label: {
+                            Label("Compare in Showdown", systemImage: "flame.fill")
+                                .font(.caption.bold())
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.orange)
+                        .controlSize(.small)
+                        .help("Launch head-to-head comparison showdown between \(currentPackage.name) and \(firstAlt.name)")
+                    }
                 }
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 14) {
                         ForEach(alternatives) { alt in
                             VStack(alignment: .leading, spacing: 8) {
-                                HStack(spacing: 10) {
-                                    Image(systemName: alt.kind == .cask ? "app.fill" : "terminal.fill")
-                                        .font(.system(size: 18))
-                                        .foregroundStyle(Color.accentColor)
-                                        .frame(width: 34, height: 34)
-                                        .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+                                Button {
+                                    selectedDependencyPackage = alt
+                                } label: {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        HStack(spacing: 10) {
+                                            Image(systemName: alt.kind == .cask ? "app.fill" : "terminal.fill")
+                                                .font(.system(size: 18))
+                                                .foregroundStyle(Color.accentColor)
+                                                .frame(width: 34, height: 34)
+                                                .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
 
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(alt.name)
-                                            .font(.headline)
-                                            .lineLimit(1)
-                                        Text(alt.displayKind)
-                                            .font(.caption2)
+                                            VStack(alignment: .leading, spacing: 2) {
+                                                Text(alt.name)
+                                                    .font(.headline)
+                                                    .foregroundStyle(.primary)
+                                                    .lineLimit(1)
+                                                Text(alt.displayKind)
+                                                    .font(.caption2)
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                        }
+
+                                        Text(alt.description.isEmpty ? "Alternative tool in the same category." : alt.description)
+                                            .font(.caption)
                                             .foregroundStyle(.secondary)
+                                            .lineLimit(2)
+                                            .frame(height: 32, alignment: .topLeading)
+                                            .multilineTextAlignment(.leading)
                                     }
                                 }
-
-                                Text(alt.description.isEmpty ? "Alternative tool in the same category." : alt.description)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(2)
-                                    .frame(height: 32, alignment: .topLeading)
+                                .buttonStyle(.plain)
 
                                 HStack {
                                     AppStoreActionButton(manager: manager, package: alt, size: .small)
                                     Spacer()
+                                    Button {
+                                        showdownAlternativePackage = alt
+                                    } label: {
+                                        Image(systemName: "flame.fill")
+                                            .font(.caption2)
+                                            .foregroundStyle(Color.orange)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .padding(6)
+                                    .background(Color.orange.opacity(0.12), in: Circle())
+                                    .help("Compare \(currentPackage.name) vs \(alt.name) in Showdown")
                                 }
                             }
                             .padding(14)

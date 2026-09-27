@@ -86,6 +86,7 @@ final class BrewStoreUpdateMonitor: ObservableObject {
                 self.isChecking = false
                 self.lastCheckDate = Date()
                 let outdated = manager.packages.filter(\.isOutdated)
+                BrewStoreDockLifecycleManager.shared.updateBadge(outdatedCount: outdated.count)
                 if !outdated.isEmpty || forceNotification {
                     self.postUpdateNotification(outdatedPackages: outdated)
                 }
