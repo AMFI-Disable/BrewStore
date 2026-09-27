@@ -4,20 +4,20 @@ import SwiftUI
 final class BrewStoreAppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_: Notification) {
         BrewStoreDockLifecycleManager.shared.setup()
-
-        // SwiftUI creates the WindowGroup after the app delegate callback.
-        // Reveal it on the next run-loop turn so a menu-bar-only launch does
-        // not leave the primary application window hidden at startup.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-            BrewStoreDockLifecycleManager.shared.showMainWindowAndDock()
-        }
     }
 
-    func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if !flag {
-            BrewStoreDockLifecycleManager.shared.showMainWindowAndDock()
-        }
+    func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows _: Bool) -> Bool {
+        BrewStoreWindowManager.shared.showMainWindow()
         return true
+    }
+
+    func application(_: NSApplication, open _: [URL]) {
+        BrewStoreWindowManager.shared.showMainWindow()
+    }
+
+    func applicationShouldTerminate(_: NSApplication) -> NSApplication.TerminateReply {
+        BrewStoreWindowManager.shared.isAppTerminating = true
+        return .terminateNow
     }
 }
 
@@ -45,7 +45,7 @@ struct BrewStoreApp: App {
             if Self.isRunningTests {
                 Text("Running Unit Tests…")
             } else {
-                BrewStoreRootView(
+                BrewStoreWindowHostView(
                     manager: manager,
                     discovery: discovery,
                     updateMonitor: updateMonitor,
@@ -53,13 +53,9 @@ struct BrewStoreApp: App {
                     showingCommandPalette: $showingCommandPalette,
                     showingHelpSheet: $showingHelpSheet
                 )
-                .frame(minWidth: 860, minHeight: 560)
-                .background(BrewStoreWindowAccessor())
-                .onAppear {
-                    updateMonitor.setManager(manager)
-                }
             }
         }
+        .handlesExternalEvents(matching: Set(["*"]))
         .defaultSize(width: 1080, height: 720)
         .windowResizability(.contentMinSize)
         .commands {
@@ -285,18 +281,68 @@ private struct BrewStoreCommands: Commands {
     }
 }
 
+private struct BrewStoreWindowHostView: View {
+    @ObservedObject var manager: HomebrewManager
+    @ObservedObject var discovery: BrewStoreDiscoveryCatalog
+    @ObservedObject var updateMonitor: BrewStoreUpdateMonitor
+    @Binding var selection: BrewStoreSection?
+    @Binding var showingCommandPalette: Bool
+    @Binding var showingHelpSheet: Bool
+
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        BrewStoreRootView(
+            manager: manager,
+            discovery: discovery,
+            updateMonitor: updateMonitor,
+            selection: $selection,
+            showingCommandPalette: $showingCommandPalette,
+            showingHelpSheet: $showingHelpSheet
+        )
+        .handlesExternalEvents(preferring: Set(["*"]), allowing: Set(["*"]))
+        .frame(minWidth: 860, minHeight: 560)
+        .background(BrewStoreWindowAccessor(onDuplicate: {
+            dismiss()
+        }))
+        .onAppear {
+            updateMonitor.setManager(manager)
+        }
+    }
+}
+
 private struct BrewStoreWindowAccessor: NSViewRepresentable {
+    var onDuplicate: () -> Void
+
     func makeNSView(context _: Context) -> NSView {
-        WindowTrackingView()
+        WindowTrackingView(onDuplicate: onDuplicate)
     }
 
     func updateNSView(_: NSView, context _: Context) {}
 }
 
 private final class WindowTrackingView: NSView {
+    private let onDuplicate: () -> Void
+
+    init(onDuplicate: @escaping () -> Void) {
+        self.onDuplicate = onDuplicate
+        super.init(frame: .zero)
+    }
+
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         guard let window else { return }
         BrewStoreWindowFrameManager.shared.attach(to: window)
+        let isPrimary = BrewStoreWindowManager.shared.register(window: window)
+        if !isPrimary {
+            DispatchQueue.main.async { [weak self] in
+                self?.onDuplicate()
+            }
+        }
     }
 }

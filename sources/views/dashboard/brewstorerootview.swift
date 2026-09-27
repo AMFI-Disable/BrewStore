@@ -342,6 +342,7 @@ struct BrewStoreRootView: View {
     }
 
     private func handleIncomingURL(_ url: URL) {
+        BrewStoreWindowManager.shared.showMainWindow()
         guard let route = BrewStoreURLSchemeRouter.parse(url: url) else { return }
         dismissSecondarySheets()
         switch route {

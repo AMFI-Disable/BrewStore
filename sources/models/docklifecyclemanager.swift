@@ -90,20 +90,7 @@ final class BrewStoreDockLifecycleManager: NSObject, ObservableObject {
     }
 
     func showMainWindowAndDock() {
-        if NSApp.activationPolicy() != .regular {
-            NSApp.setActivationPolicy(.regular)
-        }
-        NSApp.activate()
-
-        let mainWindows = NSApp.windows.filter { !isPanelOrSpecial($0) && $0.canBecomeMain }
-        if let existing = mainWindows.first {
-            existing.makeKeyAndOrderFront(nil)
-            existing.deminiaturize(nil)
-        } else {
-            if let openURL = URL(string: "brewstore://open") {
-                NSWorkspace.shared.open(openURL)
-            }
-        }
+        BrewStoreWindowManager.shared.showMainWindow()
     }
 
     func checkVisibleWindowsAndAdjustPolicy() {
@@ -115,7 +102,7 @@ final class BrewStoreDockLifecycleManager: NSObject, ObservableObject {
         }
 
         let visibleMainWindows = NSApp.windows.filter { win in
-            win.isVisible && !isPanelOrSpecial(win) && win.canBecomeMain
+            win.isVisible && !isPanelOrSpecial(win)
         }
 
         if visibleMainWindows.isEmpty {
@@ -129,11 +116,7 @@ final class BrewStoreDockLifecycleManager: NSObject, ObservableObject {
         }
     }
 
-    private func isPanelOrSpecial(_ window: NSWindow) -> Bool {
-        window is NSPanel ||
-            window.className.contains("StatusBar") ||
-            window.className.contains("MenuBar") ||
-            window.className.contains("Popover") ||
-            window.className.contains("NSPopoverWindow")
+    func isPanelOrSpecial(_ window: NSWindow) -> Bool {
+        BrewStoreWindowManager.shared.isPanelOrSpecial(window)
     }
 }
