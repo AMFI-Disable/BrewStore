@@ -21,19 +21,24 @@ final class BrewStoreWindowManager: NSObject, NSWindowDelegate, @unchecked Senda
         isAppTerminating = false
     }
 
+    var hasActiveOrHiddenMainWindow: Bool {
+        mainWindow != nil
+    }
+
     @discardableResult
     func register(window: NSWindow) -> Bool {
         guard !isPanelOrSpecial(window) else { return true }
 
+        // Enforce no window tabbing on all primary application windows
+        window.tabbingMode = .disallowed
+
         // Deduplication check: if we already have an active main window
-        // and a different window attempts to attach, close the duplicate immediately
+        // and a different window attempts to attach, hide the duplicate immediately
         // and bring the primary window to front.
         if let existing = mainWindow, existing !== window {
             window.isReleasedWhenClosed = false
             window.orderOut(nil)
             DispatchQueue.main.async {
-                window.delegate = nil
-                window.close()
                 existing.makeKeyAndOrderFront(nil)
                 existing.deminiaturize(nil)
             }
@@ -89,23 +94,7 @@ final class BrewStoreWindowManager: NSObject, NSWindowDelegate, @unchecked Senda
         }
     }
 
-    // MARK: - Forwarding Unknown Delegate Methods
-
-    override func responds(to aSelector: Selector!) -> Bool {
-        if super.responds(to: aSelector) {
-            return true
-        }
-        return systemDelegate?.responds(to: aSelector) ?? false
-    }
-
-    override func forwardingTarget(for aSelector: Selector!) -> Any? {
-        if let systemDelegate, systemDelegate.responds(to: aSelector) {
-            return systemDelegate
-        }
-        return super.forwardingTarget(for: aSelector)
-    }
-
-    // MARK: - NSWindowDelegate
+    // MARK: - Safe Explicit NSWindowDelegate Forwarding
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
         if isAppTerminating {
@@ -130,8 +119,33 @@ final class BrewStoreWindowManager: NSObject, NSWindowDelegate, @unchecked Senda
     func windowWillClose(_ notification: Notification) {
         systemDelegate?.windowWillClose?(notification)
         if let win = notification.object as? NSWindow, win === mainWindow {
+            win.identifier = nil
             mainWindow = nil
         }
+    }
+
+    func windowDidBecomeKey(_ notification: Notification) {
+        systemDelegate?.windowDidBecomeKey?(notification)
+    }
+
+    func windowDidResignKey(_ notification: Notification) {
+        systemDelegate?.windowDidResignKey?(notification)
+    }
+
+    func windowDidResize(_ notification: Notification) {
+        systemDelegate?.windowDidResize?(notification)
+    }
+
+    func windowDidMove(_ notification: Notification) {
+        systemDelegate?.windowDidMove?(notification)
+    }
+
+    func windowDidMiniaturize(_ notification: Notification) {
+        systemDelegate?.windowDidMiniaturize?(notification)
+    }
+
+    func windowDidDeminiaturize(_ notification: Notification) {
+        systemDelegate?.windowDidDeminiaturize?(notification)
     }
 
     func isPanelOrSpecial(_ window: NSWindow) -> Bool {

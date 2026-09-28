@@ -98,6 +98,7 @@ final class BrewStoreWindowFrameManager: NSObject, @unchecked Sendable {
         guard !window.styleMask.contains(.fullScreen) else { return false }
 
         window.minSize = NSSize(width: Self.minWidth, height: Self.minHeight)
+        window.tabbingMode = .disallowed
         window.setFrameAutosaveName(Self.autosaveName)
 
         // 1. Try standard AppKit frame restoration

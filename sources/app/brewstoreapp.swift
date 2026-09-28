@@ -2,12 +2,25 @@ import AppKit
 import SwiftUI
 
 final class BrewStoreAppDelegate: NSObject, NSApplicationDelegate {
+    override init() {
+        super.init()
+        NSWindow.allowsAutomaticWindowTabbing = false
+    }
+
     func applicationDidFinishLaunching(_: Notification) {
+        NSWindow.allowsAutomaticWindowTabbing = false
         BrewStoreDockLifecycleManager.shared.setup()
     }
 
-    func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows _: Bool) -> Bool {
-        BrewStoreWindowManager.shared.showMainWindow()
+    func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if flag {
+            BrewStoreWindowManager.shared.showMainWindow()
+            return false
+        }
+        if BrewStoreWindowManager.shared.hasActiveOrHiddenMainWindow {
+            BrewStoreWindowManager.shared.showMainWindow()
+            return false
+        }
         return true
     }
 
@@ -41,7 +54,7 @@ struct BrewStoreApp: App {
     @State private var showingHelpSheet = false
 
     var body: some Scene {
-        WindowGroup(id: "main") {
+        Window("BrewStore", id: "main") {
             if Self.isRunningTests {
                 Text("Running Unit Tests…")
             } else {
@@ -113,6 +126,8 @@ private struct BrewStoreCommands: Commands {
                 BrewStoreAppUpdateChecker.shared.checkForAppUpdates()
             }
         }
+
+        CommandGroup(replacing: .windowArrangement) {}
 
         CommandGroup(replacing: .newItem) {
             Button("Quick Open…") {
@@ -337,9 +352,10 @@ private final class WindowTrackingView: NSView {
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         guard let window else { return }
-        BrewStoreWindowFrameManager.shared.attach(to: window)
         let isPrimary = BrewStoreWindowManager.shared.register(window: window)
-        if !isPrimary {
+        if isPrimary {
+            BrewStoreWindowFrameManager.shared.attach(to: window)
+        } else {
             DispatchQueue.main.async { [weak self] in
                 self?.onDuplicate()
             }

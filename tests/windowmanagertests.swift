@@ -119,4 +119,88 @@ final class WindowManagerTests: XCTestCase {
 
         XCTAssertNil(manager.mainWindow)
     }
+
+    func testEnforcesWindowTabbingDisallowed() {
+        let manager = BrewStoreWindowManager.shared
+        manager.attach(to: testWindow1)
+
+        XCTAssertEqual(testWindow1.tabbingMode, .disallowed)
+    }
+
+    func testHasActiveOrHiddenMainWindow() {
+        let manager = BrewStoreWindowManager.shared
+        XCTAssertFalse(manager.hasActiveOrHiddenMainWindow)
+
+        manager.attach(to: testWindow1)
+        XCTAssertTrue(manager.hasActiveOrHiddenMainWindow)
+
+        // Even when ordered out / hidden, it still reports active/hidden window
+        testWindow1.orderOut(nil)
+        XCTAssertTrue(manager.hasActiveOrHiddenMainWindow)
+
+        // Clear window
+        let notification = Notification(
+            name: NSWindow.willCloseNotification,
+            object: testWindow1,
+            userInfo: nil
+        )
+        manager.windowWillClose(notification)
+        XCTAssertFalse(manager.hasActiveOrHiddenMainWindow)
+    }
+
+    func testSafeExplicitDelegateForwarding() {
+        let manager = BrewStoreWindowManager.shared
+        let mockDelegate = MockWindowDelegate()
+        testWindow1.delegate = mockDelegate
+
+        manager.attach(to: testWindow1)
+
+        let notif = Notification(name: NSWindow.didBecomeKeyNotification, object: testWindow1)
+        manager.windowDidBecomeKey(notif)
+        XCTAssertTrue(mockDelegate.didBecomeKeyCalled)
+
+        manager.windowDidResignKey(notif)
+        XCTAssertTrue(mockDelegate.didResignKeyCalled)
+
+        manager.windowDidResize(notif)
+        XCTAssertTrue(mockDelegate.didResizeCalled)
+
+        manager.windowDidMove(notif)
+        XCTAssertTrue(mockDelegate.didMoveCalled)
+
+        manager.windowDidMiniaturize(notif)
+        XCTAssertTrue(mockDelegate.didMiniaturizeCalled)
+
+        manager.windowDidDeminiaturize(notif)
+        XCTAssertTrue(mockDelegate.didDeminiaturizeCalled)
+
+        _ = manager.windowShouldClose(testWindow1)
+        XCTAssertTrue(mockDelegate.shouldCloseCalled)
+
+        manager.windowWillClose(notif)
+        XCTAssertTrue(mockDelegate.willCloseCalled)
+    }
+}
+
+private final class MockWindowDelegate: NSObject, NSWindowDelegate {
+    var didBecomeKeyCalled = false
+    var didResignKeyCalled = false
+    var didResizeCalled = false
+    var didMoveCalled = false
+    var didMiniaturizeCalled = false
+    var didDeminiaturizeCalled = false
+    var willCloseCalled = false
+    var shouldCloseCalled = false
+
+    func windowDidBecomeKey(_: Notification) { didBecomeKeyCalled = true }
+    func windowDidResignKey(_: Notification) { didResignKeyCalled = true }
+    func windowDidResize(_: Notification) { didResizeCalled = true }
+    func windowDidMove(_: Notification) { didMoveCalled = true }
+    func windowDidMiniaturize(_: Notification) { didMiniaturizeCalled = true }
+    func windowDidDeminiaturize(_: Notification) { didDeminiaturizeCalled = true }
+    func windowWillClose(_: Notification) { willCloseCalled = true }
+    func windowShouldClose(_: NSWindow) -> Bool {
+        shouldCloseCalled = true
+        return true
+    }
 }
