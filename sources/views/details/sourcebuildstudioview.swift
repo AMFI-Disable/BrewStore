@@ -19,8 +19,8 @@ enum SourceStudioTab: String, CaseIterable, Identifiable {
 
 struct SourceBuildStudioView: View {
     @ObservedObject var manager: HomebrewManager
-    var targetPackage: BrewStorePackage? = nil
-    @StateObject private var buildManager = BrewStoreSourceBuildManager.shared
+    var targetPackage: BrewStorePackage?
+    @ObservedObject private var buildManager = BrewStoreSourceBuildManager.shared
     @Environment(\.dismiss) private var dismiss
 
     @State private var selectedTab: SourceStudioTab = .toolchain

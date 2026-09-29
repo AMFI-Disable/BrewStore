@@ -720,7 +720,7 @@ final class HomebrewManager: ObservableObject {
             updateSessionInitialCount = 1
         }
 
-        if (action == .uninstall || action == .upgrade), BrewStorePreferences.shared.enableAutoSnapshotBeforeMutations {
+        if action == .uninstall || action == .upgrade, BrewStorePreferences.shared.enableAutoSnapshotBeforeMutations {
             let label = action == .uninstall ? "Pre-uninstall" : "Pre-upgrade"
             BrewStoreSnapshotManager().createSnapshot(name: "\(label) \(package.name)", manager: self)
         }

@@ -3,14 +3,14 @@ import SwiftUI
 struct KegSnapshotCardView: View {
     @ObservedObject var manager: HomebrewManager
     let packageID: String
-    @StateObject private var snapshotManager = KegSnapshotManager.shared
+    @ObservedObject private var snapshotManager = KegSnapshotManager.shared
     @State private var showingConfirmRollback = false
     @State private var targetVersionToRollback: String?
     @State private var showingSnapshotSuccess = false
 
     private var kegState: KegPackageState {
         snapshotManager.stateByPackage[packageID] ??
-        snapshotManager.scanPackageKegs(for: packageID, prefix: manager.brewPrefix)
+        snapshotManager.inspectPackageKegs(for: packageID, prefix: manager.brewPrefix)
     }
 
     var body: some View {
@@ -92,6 +92,9 @@ struct KegSnapshotCardView: View {
             }
         } message: {
             Text("BrewStore will unlink the currently active version and repoint all binaries and symlinks to v\(targetVersionToRollback ?? "").")
+        }
+        .task(id: packageID) {
+            snapshotManager.scanPackageKegs(for: packageID, prefix: manager.brewPrefix)
         }
     }
 

@@ -3,14 +3,14 @@ import SwiftUI
 
 struct HumanizedErrorBanner: View {
     let rawError: String
-    var titleOverride: String? = nil
-    var manager: HomebrewManager? = nil
-    var package: BrewStorePackage? = nil
-    var onDismiss: (() -> Void)? = nil
-    var customActionTitle: String? = nil
-    var customAction: (() -> Void)? = nil
+    var titleOverride: String?
+    var manager: HomebrewManager?
+    var package: BrewStorePackage?
+    var onDismiss: (() -> Void)?
+    var customActionTitle: String?
+    var customAction: (() -> Void)?
 
-    @State private var copiedCommand: String? = nil
+    @State private var copiedCommand: String?
 
     init(
         rawError: String,
@@ -77,7 +77,7 @@ struct HumanizedErrorBanner: View {
 
             // Quick Action Buttons
             HStack(spacing: 8) {
-                if let mgr = manager, let pkg = package, (mgr.lastOperationRequiresElevation || info.category == .permissions) {
+                if let mgr = manager, let pkg = package, mgr.lastOperationRequiresElevation || info.category == .permissions {
                     Button {
                         let action: PackageAction = pkg.isInstalled ? .upgrade : .install
                         mgr.performElevated(package: pkg, action: action)

@@ -129,8 +129,8 @@ final class BrewStoreCaskQuarantineAuditor: ObservableObject {
     @Published var auditedItems: [CaskQuarantineItem] = []
     @Published var isAuditing: Bool = false
     @Published var auditProgress: Double = 0.0
-    @Published var activeOperationItem: String? = nil
-    @Published var lastAuditDate: Date? = nil
+    @Published var activeOperationItem: String?
+    @Published var lastAuditDate: Date?
 
     init() {}
 

@@ -264,4 +264,3 @@ enum BrewStoreDoctorParser {
         return nil
     }
 }
-

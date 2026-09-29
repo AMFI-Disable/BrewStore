@@ -136,7 +136,9 @@ final class BrewStoreAnalyticsManager: ObservableObject {
 
         // Check disk cache
         if let diskCached = loadFromDisk(key: key) {
-            cachedAnalytics[key] = diskCached
+            DispatchQueue.main.async { [weak self] in
+                self?.cachedAnalytics[key] = diskCached
+            }
             return diskCached
         }
 

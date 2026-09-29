@@ -334,7 +334,7 @@ public enum BrewStoreHumanizedErrorResolver {
         fallback: String = "Homebrew did not complete the operation."
     ) -> String {
         let info = resolve(rawError: rawError)
-        if info.category == .generic, (info.technicalDetails == nil || info.technicalDetails?.isEmpty == true) {
+        if info.category == .generic, info.technicalDetails?.isEmpty ?? true {
             return fallback
         }
         return "\(info.title): \(info.summary) \(info.suggestion)"

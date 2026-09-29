@@ -289,7 +289,7 @@ final class ServiceCrashDiagnostician: ObservableObject {
 
         let stalePath = foundStalePath ?? candidatePIDPaths.first(where: { fm.fileExists(atPath: $0) }) ?? (hasPIDLogMention ? (candidatePIDPaths.first ?? "\(prefix)/var/run/\(service.name).pid") : nil)
 
-        if (hasPIDLogMention || foundStalePath != nil), let resolvedPath = stalePath {
+        if hasPIDLogMention || foundStalePath != nil, let resolvedPath = stalePath {
             return ServiceCrashDiagnosis(
                 serviceName: service.name,
                 issueType: .stalePIDLock,

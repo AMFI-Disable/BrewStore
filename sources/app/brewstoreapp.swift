@@ -68,7 +68,6 @@ struct BrewStoreApp: App {
                 )
             }
         }
-        .handlesExternalEvents(matching: Set(["*"]))
         .defaultSize(width: 1080, height: 720)
         .windowResizability(.contentMinSize)
         .commands {
@@ -315,7 +314,6 @@ private struct BrewStoreWindowHostView: View {
             showingCommandPalette: $showingCommandPalette,
             showingHelpSheet: $showingHelpSheet
         )
-        .handlesExternalEvents(preferring: Set(["*"]), allowing: Set(["*"]))
         .frame(minWidth: 860, minHeight: 560)
         .background(BrewStoreWindowAccessor(onDuplicate: {
             dismiss()

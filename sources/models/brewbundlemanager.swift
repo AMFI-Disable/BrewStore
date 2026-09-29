@@ -113,8 +113,8 @@ final class BrewStoreBundleManager: ObservableObject {
     @Published var scannedProjectBrewfiles: [URL] = []
     @Published var isOperating: Bool = false
     @Published var isCheckingDrift: Bool = false
-    @Published var activeOperationTitle: String? = nil
-    @Published var errorMessage: String? = nil
+    @Published var activeOperationTitle: String?
+    @Published var errorMessage: String?
     @Published var dryRunCleanupList: [String] = []
 
     private let commandExecutor: BrewStoreCommandExecutor

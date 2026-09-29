@@ -5,6 +5,7 @@ import Foundation
 
 enum HostHardwareArchitecture: String, Codable, Hashable, Sendable {
     case arm64 = "Apple Silicon (ARM64)"
+    // swiftlint:disable:next identifier_name
     case x86_64 = "Intel (x86_64)"
     case unknown = "Unknown Architecture"
 

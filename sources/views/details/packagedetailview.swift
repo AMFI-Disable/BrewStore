@@ -25,12 +25,12 @@ struct PackageDetailView: View {
     @State private var showingCaskQuarantineSheet = false
     @State private var showingSourceBuildStudio = false
     @State private var showingBlastRadiusSheet = false
-    @State private var caskQuarantineItem: CaskQuarantineItem? = nil
+    @State private var caskQuarantineItem: CaskQuarantineItem?
 
     @StateObject private var securityInspector = BrewStoreSecurityInspector()
-    @StateObject private var entitlementsAuditor = CaskEntitlementsAuditor.shared
+    @ObservedObject private var entitlementsAuditor = CaskEntitlementsAuditor.shared
     @StateObject private var storageInspector = BrewStoreAppStorageInspector()
-    @StateObject private var analyticsManager = BrewStoreAnalyticsManager.shared
+    @ObservedObject private var analyticsManager = BrewStoreAnalyticsManager.shared
     @StateObject private var shellAssistant = BrewStoreShellConfigAssistant()
     @ObservedObject private var pinningManager = BrewStorePackagePinningManager.shared
     @ObservedObject private var wishlistManager = BrewStoreWishlistManager.shared

@@ -117,8 +117,8 @@ final class BrewStoreBottleIntegrityAuditor: ObservableObject {
 
     @Published private(set) var summary: SystemBottleAuditSummary?
     @Published private(set) var isAuditing: Bool = false
-    @Published private(set) var operatingPackageID: String? = nil
-    @Published var auditError: String? = nil
+    @Published private(set) var operatingPackageID: String?
+    @Published var auditError: String?
 
     private let commandExecutor: BrewStoreCommandExecutor
 
@@ -249,7 +249,7 @@ final class BrewStoreBottleIntegrityAuditor: ObservableObject {
         let (checksums, missing, totalCount) = inspectCellarFiles(versionDir: versionDir, receiptJson: receiptJson)
 
         var finalStatus = report.status
-        var failureReason: String? = nil
+        var failureReason: String?
 
         if !missing.isEmpty {
             finalStatus = .corruptedOrTampered

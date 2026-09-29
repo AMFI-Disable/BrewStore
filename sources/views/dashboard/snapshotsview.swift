@@ -1020,4 +1020,3 @@ struct CellarTimeMachineTimelineView: View {
         }
     }
 }
-

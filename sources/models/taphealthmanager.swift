@@ -188,9 +188,9 @@ final class BrewStoreTapHealthManager: ObservableObject {
     @Published var isAuditing: Bool = false
     @Published var isBenchmarking: Bool = false
     @Published var isOperating: Bool = false
-    @Published var operatingTapName: String? = nil
-    @Published var lastAuditDate: Date? = nil
-    @Published var errorMessage: String? = nil
+    @Published var operatingTapName: String?
+    @Published var lastAuditDate: Date?
+    @Published var errorMessage: String?
 
     private let commandExecutor: BrewStoreCommandExecutor
     private let urlSession: URLSession

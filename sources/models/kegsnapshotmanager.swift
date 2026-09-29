@@ -153,7 +153,7 @@ final class KegSnapshotManager: ObservableObject {
         return nil
     }
 
-    func scanPackageKegs(for packageID: String, prefix: String? = nil) -> KegPackageState {
+    func inspectPackageKegs(for packageID: String, prefix: String? = nil) -> KegPackageState {
         let cellarDir = cellarDirectory(for: packageID, prefix: prefix)
         let activeVersion = detectActiveVersion(for: packageID, prefix: prefix)
 
@@ -214,12 +214,17 @@ final class KegSnapshotManager: ObservableObject {
         }
         snapshots.sort { $0.createdAt > $1.createdAt }
 
-        let state = KegPackageState(
+        return KegPackageState(
             packageID: packageID,
             installedVersions: installedVersions,
             snapshots: snapshots,
             activeLinkedVersion: activeVersion
         )
+    }
+
+    @discardableResult
+    func scanPackageKegs(for packageID: String, prefix: String? = nil) -> KegPackageState {
+        let state = inspectPackageKegs(for: packageID, prefix: prefix)
         self.stateByPackage[packageID] = state
         return state
     }

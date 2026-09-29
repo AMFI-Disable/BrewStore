@@ -105,8 +105,8 @@ final class OrphanAndKegAuditor: ObservableObject {
 
     @Published private(set) var report: OrphanAndKegAuditReport?
     @Published private(set) var isAuditing: Bool = false
-    @Published private(set) var operatingPackageID: String? = nil
-    @Published var auditError: String? = nil
+    @Published private(set) var operatingPackageID: String?
+    @Published var auditError: String?
 
     private let commandExecutor: BrewStoreCommandExecutor
 

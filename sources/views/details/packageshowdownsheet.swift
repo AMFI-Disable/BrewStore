@@ -55,7 +55,7 @@ struct BrewStorePackageShowdownSheet: View {
                     // Head-to-Head Cards
                     HStack(spacing: Spacing.md) {
                         packageBannerCard(package: currentPackageA, footprint: footprintA, accent: Color.blue)
-                        
+
                         // VS Badge
                         VStack(spacing: 4) {
                             Circle()

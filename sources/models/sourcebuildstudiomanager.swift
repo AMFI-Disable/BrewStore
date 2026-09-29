@@ -31,8 +31,8 @@ struct SourceBuildConfig: Equatable, Codable {
     var head: Bool = false
     var fetchHead: Bool = false
     var verbose: Bool = true
-    var selectedCompiler: String? = nil
-    var parallelJobs: Int? = nil
+    var selectedCompiler: String?
+    var parallelJobs: Int?
     var customArgs: String = ""
 
     func generateArguments(for package: BrewStorePackage) -> [String] {
@@ -115,7 +115,7 @@ final class BrewStoreSourceBuildManager: ObservableObject {
     @Published var buildHistory: [FormulaBuildHistoryItem] = []
     @Published var isDetectingToolchain: Bool = false
     @Published var isExecutingBuild: Bool = false
-    @Published var buildStatusMessage: String? = nil
+    @Published var buildStatusMessage: String?
 
     private init() {}
 

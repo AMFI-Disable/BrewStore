@@ -115,7 +115,7 @@ struct BrewStoreActionReviewSheet: View {
                                 }
 
                                 if let freeGB = availableDiskSpaceGB {
-                                    Text(isCriticallyLow 
+                                    Text(isCriticallyLow
                                          ? "Drive has only \(String(format: "%.1f GB", freeGB)) available. Ensure you maintain sufficient disk buffer."
                                          : "\(String(format: "%.1f GB", freeGB)) available on local APFS volume.")
                                         .font(.caption)
