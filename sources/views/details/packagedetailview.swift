@@ -10,28 +10,18 @@ struct PackageDetailView: View {
     @State private var isLoadingDependents = false
     @State private var removalPlan: BrewStoreRemovalPlan?
     @State private var isScanningRemoval = false
-    @State private var showingRemoval = false
     @State private var removalStatusMessage: String?
     @State private var removalStatusIsSuccess = false
     @State private var dependencyTree: String?
     @State private var showingDependencyTree = false
-    @State private var showingVisualGraph = false
 
-    @State private var showingAdvancedInstallSheet = false
-    @State private var showingSecurityApprovalSheet = false
-    @State private var showingVersionSwitcherSheet = false
-    @State private var showingUpgradeDiffSheet = false
-    @State private var showingBottleIntegritySheet = false
-    @State private var showingCaskQuarantineSheet = false
-    @State private var showingSourceBuildStudio = false
-    @State private var showingBlastRadiusSheet = false
+    @State private var activeSheet: PackageDetailSheet?
     @State private var caskQuarantineItem: CaskQuarantineItem?
 
     @StateObject private var securityInspector = BrewStoreSecurityInspector()
     @ObservedObject private var entitlementsAuditor = CaskEntitlementsAuditor.shared
     @StateObject private var storageInspector = BrewStoreAppStorageInspector()
     @ObservedObject private var analyticsManager = BrewStoreAnalyticsManager.shared
-    @StateObject private var shellAssistant = BrewStoreShellConfigAssistant()
     @ObservedObject private var pinningManager = BrewStorePackagePinningManager.shared
     @ObservedObject private var wishlistManager = BrewStoreWishlistManager.shared
     @ObservedObject private var auditor = OrphanAndKegAuditor.shared
@@ -39,8 +29,6 @@ struct PackageDetailView: View {
     var onDismiss: (() -> Void)?
     @State private var packageAnalytics: PackageInstallAnalytics?
     @State private var selectedDependencyPackage: BrewStorePackage?
-    @State private var showdownAlternativePackage: BrewStorePackage?
-    @State private var caveatAppliedSuccess = false
     @State private var copiedExportsToast = false
     @State private var showingPruneOrphanConfirm = false
     @State private var showingToggleKegConfirm = false
@@ -117,10 +105,18 @@ struct PackageDetailView: View {
             let isWide = geometry.size.width >= 680
 
             VStack(spacing: 0) {
-                headerView
-                    .padding(.horizontal, Spacing.lg)
-                    .padding(.top, Spacing.md)
-                    .padding(.bottom, Spacing.sm)
+                PackageDetailHeaderView(
+                    package: currentPackage,
+                    manager: manager,
+                    installedAppIcon: installedAppIcon,
+                    matchingKegOnlyItem: matchingKegOnlyItem,
+                    matchingOrphanItem: matchingOrphanItem,
+                    onDismiss: { handleDismiss() },
+                    activeSheet: $activeSheet
+                )
+                .padding(.horizontal, Spacing.lg)
+                .padding(.top, Spacing.md)
+                .padding(.bottom, Spacing.sm)
 
                 Divider()
 
@@ -178,267 +174,48 @@ struct PackageDetailView: View {
                 isLoadingDependents = false
             }
         }
-        .sheet(isPresented: $showingRemoval) {
-            if let plan = removalPlan {
+        .sheet(item: $activeSheet) { sheet in
+            switch sheet {
+            case .removal(let plan):
                 RemovalPreviewView(manager: manager, package: currentPackage, plan: plan)
+            case .visualGraph:
+                DependencyGraphView(manager: manager, rootPackage: currentPackage)
+            case .advancedInstall:
+                AdvancedInstallView(manager: manager, package: currentPackage)
+            case .securityApproval:
+                let requiredPerms = TCCPermissionManager.shared.detectPermissions(for: currentPackage)
+                SecurityApprovalSheet(package: currentPackage, permissions: requiredPerms)
+            case .versionSwitcher:
+                VersionLinkView(manager: manager)
+            case .upgradeDiff:
+                UpgradeDiffViewSheet(package: currentPackage, manager: manager)
+            case .bottleIntegrity:
+                BottleIntegrityAuditorView(manager: manager)
+            case .caskQuarantine:
+                CaskQuarantineAuditorView(manager: manager)
+            case .sourceBuildStudio:
+                SourceBuildStudioView(manager: manager, targetPackage: currentPackage)
+            case .blastRadius:
+                RemovalBlastRadiusSimulatorView(
+                    package: currentPackage,
+                    manager: manager,
+                    onDismiss: { activeSheet = nil },
+                    onProceedUninstall: currentPackage.isInstalled ? {
+                        BrewStoreUninstallCoordinator.shared.requestUninstall(package: currentPackage, manager: manager)
+                    } : nil
+                )
+            case .showdown(let altPkg):
+                BrewStorePackageShowdownSheet(
+                    packageA: currentPackage,
+                    packageB: altPkg,
+                    manager: manager
+                )
             }
-        }
-        .sheet(isPresented: $showingVisualGraph) {
-            DependencyGraphView(manager: manager, rootPackage: currentPackage)
-        }
-        .sheet(isPresented: $showingAdvancedInstallSheet) {
-            AdvancedInstallView(manager: manager, package: currentPackage)
-        }
-        .sheet(isPresented: $showingSecurityApprovalSheet) {
-            let requiredPerms = TCCPermissionManager.shared.detectPermissions(for: currentPackage)
-            SecurityApprovalSheet(package: currentPackage, permissions: requiredPerms)
-        }
-        .sheet(isPresented: $showingVersionSwitcherSheet) {
-            VersionLinkView(manager: manager)
-        }
-        .sheet(isPresented: $showingUpgradeDiffSheet) {
-            UpgradeDiffViewSheet(package: currentPackage, manager: manager)
-        }
-        .sheet(isPresented: $showingBottleIntegritySheet) {
-            BottleIntegrityAuditorView(manager: manager)
-        }
-        .sheet(isPresented: $showingCaskQuarantineSheet) {
-            CaskQuarantineAuditorView(manager: manager)
-        }
-        .sheet(isPresented: $showingSourceBuildStudio) {
-            SourceBuildStudioView(manager: manager, targetPackage: currentPackage)
-        }
-        .sheet(isPresented: $showingBlastRadiusSheet) {
-            RemovalBlastRadiusSimulatorView(
-                package: currentPackage,
-                manager: manager,
-                onDismiss: { showingBlastRadiusSheet = false },
-                onProceedUninstall: currentPackage.isInstalled ? {
-                    BrewStoreUninstallCoordinator.shared.requestUninstall(package: currentPackage, manager: manager)
-                } : nil
-            )
-        }
-        .sheet(item: $showdownAlternativePackage) { altPkg in
-            BrewStorePackageShowdownSheet(
-                packageA: currentPackage,
-                packageB: altPkg,
-                manager: manager
-            )
         }
         .detailModalOverlay(item: $selectedDependencyPackage) { depPkg in
             PackageDetailView(manager: manager, package: depPkg, onDismiss: {
                 selectedDependencyPackage = nil
             })
-        }
-    }
-
-    // MARK: - App Store Pinned Header View
-
-    @ViewBuilder
-    private var headerView: some View {
-        let isWishlisted = wishlistManager.isWishlisted(id: currentPackage.id)
-
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            // Navigation Bar with Back and Close affordances
-            HStack {
-                Button {
-                    handleDismiss()
-                } label: {
-                    HStack(spacing: 5) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 13, weight: .bold))
-                        Text("Back")
-                            .font(.system(size: 13, weight: .medium))
-                    }
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-                .keyboardShortcut(.cancelAction)
-                .keyboardShortcut("[", modifiers: .command)
-                .help("Back (Esc or ⌘[)")
-                .accessibilityIdentifier("PackageDetail.BackButton")
-
-                Spacer()
-
-                Button {
-                    handleDismiss()
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 18))
-                        .foregroundStyle(.secondary)
-                }
-                .buttonStyle(.plain)
-                .help("Close (Esc)")
-                .accessibilityIdentifier("PackageDetail.CloseButton")
-            }
-
-            // Identity & Primary Actions Row
-            HStack(alignment: .center, spacing: Spacing.md) {
-                if let icon = installedAppIcon {
-                    Image(nsImage: icon)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 48, height: 48)
-                        .clipShape(RoundedRectangle(cornerRadius: Radius.panel, style: .continuous))
-                        .shadow(color: Color.black.opacity(0.1), radius: 4, y: 2)
-                } else {
-                    Image(systemName: currentPackage.kind == .cask ? "app.fill" : "terminal.fill")
-                        .font(.system(size: 26))
-                        .foregroundStyle(.tint)
-                        .frame(width: 48, height: 48)
-                        .background(
-                            Color.accentColor.opacity(0.12),
-                            in: RoundedRectangle(cornerRadius: Radius.panel, style: .continuous)
-                        )
-                }
-
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 6) {
-                        Text(currentPackage.name)
-                            .font(.title2.bold())
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-
-                        if currentPackage.isInstalled, pinningManager.isPinned(packageID: currentPackage.id) {
-                            HStack(spacing: 3) {
-                                Image(systemName: "pin.fill")
-                                Text("Pinned")
-                            }
-                            .font(.caption2.bold())
-                            .foregroundStyle(.purple)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.purple.opacity(0.12), in: Capsule())
-                        }
-
-                        if let badge = TrendingRankingsManager.badge(for: currentPackage) {
-                            HStack(spacing: 3) {
-                                Image(systemName: badge.icon)
-                                Text(badge.title)
-                            }
-                            .font(.caption2.bold())
-                            .foregroundStyle(.orange)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.orange.opacity(0.12), in: Capsule())
-                        }
-
-                        if currentPackage.isOutdated {
-                            let est = BrewStoreUpdateEstimator.estimate(for: currentPackage)
-                            HStack(spacing: 3) {
-                                Image(systemName: "timer").font(.caption2)
-                                Text("~\(est.formattedEstimate)")
-                                    .font(.caption2.bold().monospaced())
-                            }
-                            .foregroundStyle(.orange)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.orange.opacity(0.12), in: Capsule())
-                        }
-
-                        if let keg = matchingKegOnlyItem {
-                            HStack(spacing: 3) {
-                                Image(systemName: keg.isForceLinked ? "exclamationmark.triangle.fill" : "lock.shield.fill")
-                                Text(keg.isForceLinked ? "Keg-Only: Force-Linked" : "Keg-Only: Isolated")
-                            }
-                            .font(.caption2.bold())
-                            .foregroundStyle(keg.isForceLinked ? .orange : .blue)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background((keg.isForceLinked ? Color.orange : Color.blue).opacity(0.12), in: Capsule())
-                        }
-
-                        if let orphan = matchingOrphanItem {
-                            HStack(spacing: 3) {
-                                Image(systemName: "leaf.fill")
-                                Text("Orphan Dependency (\(orphan.formattedSize))")
-                            }
-                            .font(.caption2.bold())
-                            .foregroundStyle(.orange)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.orange.opacity(0.12), in: Capsule())
-                        }
-                    }
-
-                    HStack(spacing: 6) {
-                        Text(currentPackage.id).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1)
-                        Text("•").font(.caption2).foregroundStyle(.secondary)
-                        Text("v\(currentPackage.version)").font(.caption.monospaced()).foregroundStyle(.secondary)
-                        Text("•").font(.caption2).foregroundStyle(.secondary)
-                        Text(currentPackage.displayKind).font(.caption).foregroundStyle(.secondary)
-                    }
-                }
-
-                Spacer()
-
-                // Action Buttons Bar
-                HStack(spacing: 6) {
-                    AppStoreActionButton(manager: manager, package: currentPackage, size: .regular)
-
-                    if currentPackage.isOutdated {
-                        Button {
-                            showingUpgradeDiffSheet = true
-                        } label: {
-                            Label("Preview Diff", systemImage: "doc.text.magnifyingglass")
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.regular)
-                        .help("Preview formula source diff and dependency changes before upgrading")
-                    }
-
-                    if currentPackage.isInstalled {
-                        let isPinned = pinningManager.isPinned(packageID: currentPackage.id)
-                        let isPinning = pinningManager.isPinningInProgress(packageID: currentPackage.id)
-                        Button {
-                            withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
-                                pinningManager.togglePin(package: currentPackage, manager: manager)
-                            }
-                        } label: {
-                            if isPinning {
-                                HStack(spacing: 4) {
-                                    ProgressView().controlSize(.mini)
-                                    Text(isPinned ? "Unpinning…" : "Pinning…")
-                                }
-                            } else {
-                                Label(isPinned ? "Unpin" : "Pin", systemImage: isPinned ? "pin.slash.fill" : "pin.fill")
-                            }
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.regular)
-                        .disabled(manager.isOperating || isPinning)
-                        .accessibilityIdentifier("PackageDetail.PinButton")
-                        .help(isPinned ? "Unpin version to allow updates" : "Pin version to prevent automatic updates")
-                    }
-
-                    Button {
-                        showingAdvancedInstallSheet = true
-                    } label: {
-                        Label("Options", systemImage: "slider.horizontal.3")
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.regular)
-
-                    Button {
-                        wishlistManager.toggleWishlist(id: currentPackage.id)
-                    } label: {
-                        Image(systemName: isWishlisted ? "star.fill" : "star")
-                            .foregroundStyle(isWishlisted ? Color.yellow : Color.secondary)
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.regular)
-                    .help(isWishlisted ? "Unstar (Remove from Wishlist)" : "Star (Add to Wishlist)")
-
-                    if let url = URL(string: currentPackage.homepage), !currentPackage.homepage.isEmpty {
-                        ShareLink(item: url) {
-                            Image(systemName: "square.and.arrow.up")
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.regular)
-                        .help("Share Package")
-                    }
-                }
-            }
         }
     }
 
@@ -471,7 +248,7 @@ struct PackageDetailView: View {
         .brewCardStyle(elevation: .subtle, padding: Spacing.md)
 
         if let caveats = currentPackage.caveats, !caveats.isEmpty {
-            caveatsSection(caveats: caveats)
+            PackageDetailCaveatsCard(package: currentPackage, manager: manager, caveats: caveats)
         }
 
         if !currentPackage.dependencies.isEmpty || !dependents.isEmpty {
@@ -530,11 +307,19 @@ struct PackageDetailView: View {
 
     private var inspectorColumn: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
-            specificationsCard
+            PackageDetailSpecificationsCard(package: currentPackage, packageAnalytics: packageAnalytics)
 
-            informationCard
+            PackageDetailInformationCard(package: currentPackage, brewPrefix: manager.brewPrefix)
 
-            securityInspectorCard
+            PackageDetailSecurityCard(
+                package: currentPackage,
+                manager: manager,
+                effectivePrefix: effectivePrefix,
+                securityInspector: securityInspector,
+                entitlementsAuditor: entitlementsAuditor,
+                caskQuarantineItem: caskQuarantineItem,
+                activeSheet: $activeSheet
+            )
 
             if currentPackage.isInstalled {
                 packageControlsCard
@@ -611,66 +396,6 @@ struct PackageDetailView: View {
         )
     }
 
-    private func caveatsSection(caveats: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Image(systemName: "terminal.fill").foregroundStyle(.blue).font(.caption)
-                Text("Configuration & Shell Setup").font(.headline)
-            }
-
-            MarkdownTextView(markdown: caveats, baseFont: .caption, lineSpacing: 3)
-                .padding(8)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.secondary.opacity(0.06), in: RoundedRectangle(cornerRadius: Radius.sm))
-
-            let exportLines = shellAssistant.extractCaveatExports(from: caveats)
-            if !exportLines.isEmpty {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(exportLines.joined(separator: "\n"))
-                        .font(.system(.caption2, design: .monospaced))
-                        .padding(6)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.black.opacity(0.2), in: RoundedRectangle(cornerRadius: 6))
-
-                    HStack {
-                        Button {
-                            let snippet = exportLines.joined(separator: "\n")
-                            if shellAssistant.injectCaveatSnippet(
-                                packageName: currentPackage.name,
-                                snippet: snippet,
-                                manager: manager
-                            ) {
-                                caveatAppliedSuccess = true
-                            }
-                        } label: {
-                            Label(
-                                caveatAppliedSuccess ?
-                                    "Applied to .\(shellAssistant.detectedShell)rc" :
-                                    "1-Click Apply to .\(shellAssistant.detectedShell)rc",
-                                systemImage: caveatAppliedSuccess ? "checkmark.circle.fill" : "arrow.down.doc.fill"
-                            )
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(caveatAppliedSuccess ? .green : .blue)
-                        .controlSize(.small)
-                        .disabled(caveatAppliedSuccess)
-
-                        if let status = shellAssistant.statusMessage {
-                            Text(status)
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                        }
-                    }
-                }
-                .padding(8)
-                .background(Color.blue.opacity(0.06), in: RoundedRectangle(cornerRadius: Radius.sm))
-                .overlay(RoundedRectangle(cornerRadius: Radius.sm).stroke(Color.blue.opacity(0.2), lineWidth: 1))
-            }
-        }
-        .brewCardStyle(elevation: .subtle, padding: Spacing.md)
-    }
-
     private var dependenciesSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
@@ -684,7 +409,7 @@ struct PackageDetailView: View {
 
                 if preferences.enableVisualDependencyGraph {
                     Button {
-                        showingVisualGraph = true
+                        activeSheet = .visualGraph
                     } label: {
                         Label("Visual Graph", systemImage: "point.3.connected.trianglepath.dotted")
                     }
@@ -693,7 +418,7 @@ struct PackageDetailView: View {
 
                 if currentPackage.isInstalled {
                     Button {
-                        showingBlastRadiusSheet = true
+                        activeSheet = .blastRadius
                     } label: {
                         Label("Impact Simulator", systemImage: "waveform.path.ecg")
                     }
@@ -793,7 +518,7 @@ struct PackageDetailView: View {
                     .font(.headline)
                 Spacer()
                 Button("Full Switcher Hub…") {
-                    showingVersionSwitcherSheet = true
+                    activeSheet = .versionSwitcher
                 }
                 .buttonStyle(.borderless)
                 .font(.caption)
@@ -814,312 +539,6 @@ struct PackageDetailView: View {
     }
 
     // MARK: - Inspector Column Helper Subviews
-
-    private var specificationsCard: some View {
-        let footprint = BrewStoreBottleFootprintEstimator.estimateFootprint(for: currentPackage)
-        return VStack(alignment: .leading, spacing: 8) {
-            Text("Specifications").font(.headline)
-
-            VStack(spacing: 6) {
-                specRow(
-                    title: "Type",
-                    value: currentPackage.kind == .cask ? "macOS App" : "CLI Binary",
-                    icon: currentPackage.kind == .cask ? "app.fill" : "terminal.fill"
-                )
-                Divider()
-                specRow(
-                    title: "Status",
-                    value: currentPackage.isInstalled ?
-                        (currentPackage.isOutdated ? "Update" : "Installed") :
-                        "Available",
-                    icon: currentPackage.isInstalled ? "checkmark.circle.fill" : "circle"
-                )
-                Divider()
-                specRow(title: "Download", value: "~" + footprint.formattedDownloadSize, icon: "arrow.down.circle")
-                Divider()
-                specRow(title: "Disk Space", value: "~" + footprint.formattedFootprintSize, icon: "internaldrive")
-                Divider()
-                specRow(title: "30d Installs", value: packageAnalytics?.formatted30d ?? "—", icon: "calendar")
-                if currentPackage.isOutdated {
-                    let est = BrewStoreUpdateEstimator.estimate(for: currentPackage)
-                    Divider()
-                    specRow(title: "Est. Update", value: "~" + est.formattedEstimate, icon: "timer")
-                }
-            }
-        }
-        .brewCardStyle(elevation: .subtle, padding: Spacing.md)
-    }
-
-    private func specRow(title: String, value: String, icon: String) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.caption2)
-                .foregroundStyle(.tint)
-                .frame(width: 14)
-            Text(title)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            Spacer()
-            Text(value)
-                .font(.caption.bold())
-                .lineLimit(1)
-        }
-    }
-
-    private var informationCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Information").font(.headline)
-
-            VStack(spacing: 6) {
-                HStack {
-                    Text("Tap / Source").font(.caption).foregroundStyle(.secondary)
-                    Spacer()
-                    Text(currentPackage.tap ?? "homebrew/core").font(.caption.monospaced()).lineLimit(1)
-                }
-                Divider()
-                HStack {
-                    Text("Kind").font(.caption).foregroundStyle(.secondary)
-                    Spacer()
-                    Text(currentPackage.displayKind).font(.caption)
-                }
-                if let cellar = currentPackage.cellarURL(prefix: manager.brewPrefix) {
-                    Divider()
-                    HStack {
-                        Text("Cellar").font(.caption).foregroundStyle(.secondary)
-                        Spacer()
-                        Text(cellar.lastPathComponent).font(.caption.monospaced()).lineLimit(1)
-                    }
-                    .help(cellar.path)
-                }
-                if let homepage = URL(string: currentPackage.homepage), !currentPackage.homepage.isEmpty {
-                    Divider()
-                    HStack {
-                        Text("Homepage").font(.caption).foregroundStyle(.secondary)
-                        Spacer()
-                        Link(destination: homepage) {
-                            HStack(spacing: 3) {
-                                Text("Visit Site")
-                                Image(systemName: "arrow.up.right.square")
-                            }
-                            .font(.caption)
-                        }
-                    }
-                }
-            }
-        }
-        .brewCardStyle(elevation: .subtle, padding: Spacing.md)
-    }
-
-    private var securityInspectorCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Security & Integrity").font(.headline)
-
-            if securityInspector.isInspecting {
-                HStack(spacing: 6) {
-                    ProgressView().controlSize(.small)
-                    Text("Inspecting binary…").font(.caption).foregroundStyle(.secondary)
-                }
-            } else if let report = securityInspector.report {
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack {
-                        Text("Architecture").font(.caption).foregroundStyle(.secondary)
-                        Spacer()
-                        let isSilicon = report.architecture == .appleSilicon || report.architecture == .universal2
-                        Text(isSilicon ? "Apple Silicon" : "Rosetta 2")
-                            .font(.caption2.bold())
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(
-                                (isSilicon ? Color.green : Color.orange).opacity(0.15),
-                                in: Capsule()
-                            )
-                            .foregroundStyle(isSilicon ? Color.green : Color.orange)
-                    }
-
-                    Divider()
-
-                    HStack {
-                        Text("Signing").font(.caption).foregroundStyle(.secondary)
-                        Spacer()
-                        Text(report.codeSignAuthority).font(.caption.monospaced()).lineLimit(1)
-                    }
-
-                    if report.isHardenedRuntime {
-                        Divider()
-                        HStack {
-                            Text("Runtime").font(.caption).foregroundStyle(.secondary)
-                            Spacer()
-                            Label("Hardened", systemImage: "lock.shield.fill")
-                                .font(.caption2.bold())
-                                .foregroundStyle(.blue)
-                        }
-                    }
-
-                    Divider()
-
-                    if report.isQuarantined {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Label("Quarantine Active", systemImage: "exclamationmark.shield.fill")
-                                    .font(.caption.bold())
-                                    .foregroundStyle(.orange)
-                                Spacer()
-                                Button("Remove") {
-                                    securityInspector.removeQuarantine(package: currentPackage, manager: manager)
-                                }
-                                .buttonStyle(.bordered)
-                                .controlSize(.mini)
-                            }
-                            Text("macOS will prompt for approval before launch.")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding(6)
-                    } else {
-                        HStack(spacing: 4) {
-                            Image(systemName: "checkmark.shield.fill").foregroundStyle(.green).font(.caption2)
-                            Text("Clean Gatekeeper").font(.caption).foregroundStyle(.secondary)
-                        }
-                    }
-
-                    if currentPackage.kind == .cask, let entReport = entitlementsAuditor.reportsByPackageID[currentPackage.id] {
-                        Divider()
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text("App Sandbox").font(.caption).foregroundStyle(.secondary)
-                                Spacer()
-                                Text(entReport.isSandboxed ? "Enforced" : "Unrestricted")
-                                    .font(.caption2.bold())
-                                    .foregroundStyle(entReport.isSandboxed ? Color.green : Color.secondary)
-                            }
-
-                            if !entReport.badges.isEmpty {
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 4) {
-                                        ForEach(entReport.badges) { badge in
-                                            Label(badge.title, systemImage: badge.systemImage)
-                                                .font(.system(size: 9, weight: .semibold))
-                                                .padding(.horizontal, 6)
-                                                .padding(.vertical, 2)
-                                                .background(Color.secondary.opacity(0.12), in: Capsule())
-                                                .help(badge.description)
-                                        }
-                                    }
-                                }
-                                .padding(.top, 2)
-                            }
-                        }
-                    }
-                }
-            } else {
-                HStack(spacing: 4) {
-                    Image(systemName: "shield").foregroundStyle(.secondary).font(.caption2)
-                    Text("Standard Security").font(.caption).foregroundStyle(.secondary)
-                }
-            }
-
-            if currentPackage.kind == .formula {
-                Divider()
-                let integrity = BrewStoreBottleIntegrityAuditor.auditPackage(package: currentPackage, prefix: effectivePrefix)
-                Button {
-                    showingBottleIntegritySheet = true
-                } label: {
-                    HStack {
-                        Image(systemName: integrity.status.icon)
-                            .font(.caption2)
-                            .foregroundStyle(integrityStatusColor(integrity.status))
-                        Text("Bottle Integrity").font(.caption).foregroundStyle(.secondary)
-                        Spacer()
-                        Text(integrityStatusLabel(integrity.status))
-                            .font(.caption2.bold())
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(
-                                integrityStatusColor(integrity.status).opacity(0.12),
-                                in: Capsule()
-                            )
-                            .foregroundStyle(integrityStatusColor(integrity.status))
-                        Image(systemName: "chevron.right")
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-                .buttonStyle(.plain)
-                .help("Inspect cryptographic bottle checksums and Cellar Mach-O binaries")
-            }
-
-            if currentPackage.kind == .cask, currentPackage.isInstalled {
-                Divider()
-                Button {
-                    showingCaskQuarantineSheet = true
-                } label: {
-                    HStack {
-                        let status = caskQuarantineItem?.status ?? .uninspected
-                        Image(systemName: status.iconName)
-                            .font(.caption2)
-                            .foregroundStyle(status.badgeColor)
-                        Text("Gatekeeper & Quarantine").font(.caption).foregroundStyle(.secondary)
-                        Spacer()
-                        Text(status.rawValue)
-                            .font(.caption2.bold())
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(
-                                status.badgeColor.opacity(0.12),
-                                in: Capsule()
-                            )
-                            .foregroundStyle(status.badgeColor)
-                        Image(systemName: "chevron.right")
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-                .buttonStyle(.plain)
-                .help("Audit Gatekeeper extended quarantine attributes and code signatures")
-            }
-
-            if currentPackage.kind == .formula {
-                Divider()
-                Button {
-                    showingSourceBuildStudio = true
-                } label: {
-                    HStack {
-                        Image(systemName: "hammer")
-                            .font(.caption2)
-                            .foregroundStyle(.indigo)
-                        Text("Source Compiler Studio").font(.caption).foregroundStyle(.secondary)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-                .buttonStyle(.plain)
-                .help("Configure source compilation flags (--build-from-source, --HEAD) and inspect build logs")
-            }
-
-            let advisories = BrewStoreCVEScanningManager.advisories(for: currentPackage)
-            if !advisories.isEmpty {
-                Divider()
-                VStack(alignment: .leading, spacing: 4) {
-                    ForEach(advisories) { adv in
-                        HStack(spacing: 4) {
-                            Image(systemName: adv.severity.symbol)
-                                .font(.caption2)
-                                .foregroundStyle(adv.severity.color)
-                            Text(adv.id).font(.caption2.bold())
-                            Spacer()
-                            if let url = URL(string: adv.advisoryURL) {
-                                Link("Advisory", destination: url)
-                                    .font(.caption2)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        .brewCardStyle(elevation: .subtle, padding: Spacing.md)
-    }
 
     private var packageControlsCard: some View {
         let isPinned = pinningManager.isPinned(packageID: currentPackage.id)
@@ -1214,7 +633,7 @@ struct PackageDetailView: View {
                 .font(.caption.bold())
                 .foregroundStyle(.blue)
             Button("Review Approvals") {
-                showingSecurityApprovalSheet = true
+                activeSheet = .securityApproval
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
@@ -1655,7 +1074,7 @@ struct PackageDetailView: View {
 
                     if let firstAlt = alternatives.first {
                         Button {
-                            showdownAlternativePackage = firstAlt
+                            activeSheet = .showdown(firstAlt)
                         } label: {
                             Label("Compare in Showdown", systemImage: "flame.fill")
                                 .font(.caption.bold())
@@ -1707,7 +1126,7 @@ struct PackageDetailView: View {
                                     AppStoreActionButton(manager: manager, package: alt, size: .small)
                                     Spacer()
                                     Button {
-                                        showdownAlternativePackage = alt
+                                        activeSheet = .showdown(alt)
                                     } label: {
                                         Image(systemName: "flame.fill")
                                             .font(.caption2)
@@ -1770,7 +1189,7 @@ struct PackageDetailView: View {
                     removalStatusMessage = "Your Mac is clean — no leftover files or caches were found for this app."
                     removalStatusIsSuccess = true
                 } else {
-                    showingRemoval = true
+                    activeSheet = .removal(plan)
                 }
             }
         }
@@ -2020,7 +1439,7 @@ struct PackageDetailView: View {
             .controlSize(.regular)
 
             Button {
-                showingCaskQuarantineSheet = true
+                activeSheet = .caskQuarantine
             } label: {
                 Image(systemName: "info.circle")
             }
