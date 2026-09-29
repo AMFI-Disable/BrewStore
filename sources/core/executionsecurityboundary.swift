@@ -24,7 +24,12 @@ enum ExecutionSecurityBoundary {
         "/usr/bin/lipo",
         "/usr/bin/uname",
         "/usr/sbin/sysctl",
-        "/usr/sbin/softwareupdate"
+        "/usr/sbin/softwareupdate",
+        "/usr/bin/xcode-select",
+        "/usr/bin/clang",
+        "/usr/bin/make",
+        "/usr/bin/cmake",
+        "/usr/bin/ninja"
     ]
 
     /// Dangerous environment variables that must be scrubbed before executing child processes.
@@ -56,6 +61,10 @@ enum ExecutionSecurityBoundary {
             normalized == "/opt/homebrew/bin/speedtest-go" || normalized == "/usr/local/bin/speedtest-go" {
             return true
         }
+        if normalized == "/opt/homebrew/bin/cmake" || normalized == "/usr/local/bin/cmake" ||
+            normalized == "/opt/homebrew/bin/ninja" || normalized == "/usr/local/bin/ninja" {
+            return true
+        }
 
         let homeDir = FileManager.default.homeDirectoryForCurrentUser.path
         if normalized == "\(homeDir)/.local/bin/speedtest" || normalized == "\(homeDir)/.local/bin/speedtest-go" {
@@ -78,6 +87,14 @@ enum ExecutionSecurityBoundary {
             }
             let speedtestGoInPrefix = ((prefix as NSString).appendingPathComponent("bin") as NSString).appendingPathComponent("speedtest-go")
             if normalized == speedtestGoInPrefix {
+                return true
+            }
+            let cmakeInPrefix = ((prefix as NSString).appendingPathComponent("bin") as NSString).appendingPathComponent("cmake")
+            if normalized == cmakeInPrefix {
+                return true
+            }
+            let ninjaInPrefix = ((prefix as NSString).appendingPathComponent("bin") as NSString).appendingPathComponent("ninja")
+            if normalized == ninjaInPrefix {
                 return true
             }
         }

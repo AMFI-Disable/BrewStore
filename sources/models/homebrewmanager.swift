@@ -88,6 +88,8 @@ final class HomebrewManager: ObservableObject {
     @Published var activeLockState: HomebrewLockState = .free
     @Published var isHomebrewLocked = false
     @Published var outputLog = ""
+    private var pendingLogBuffer = ""
+    private var logFlushScheduled = false
 
     func clearErrorMessage() {
         errorMessage = nil
@@ -96,12 +98,33 @@ final class HomebrewManager: ObservableObject {
 
     func appendLogChunk(_ chunk: String) {
         guard !chunk.isEmpty else { return }
-        outputLog.append(chunk)
         BrewStoreExecutionTelemetryManager.shared.processChunk(chunk)
+        pendingLogBuffer.append(chunk)
+
+        if !logFlushScheduled {
+            logFlushScheduled = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [weak self] in
+                self?.flushLogBuffer()
+            }
+        }
+    }
+
+    func flushLogBuffer() {
+        logFlushScheduled = false
+        guard !pendingLogBuffer.isEmpty else { return }
+        let chunk = pendingLogBuffer
+        pendingLogBuffer = ""
+        outputLog.append(chunk)
         if outputLog.count > Self.maxLogCharacters {
             let overflow = outputLog.count - Self.maxLogCharacters
             outputLog = String(outputLog.dropFirst(overflow))
         }
+    }
+
+    func resetOutputLog() {
+        pendingLogBuffer = ""
+        logFlushScheduled = false
+        outputLog = ""
     }
 
     @Published private(set) var operationHistory: [BrewStoreOperationRecord] = [] {
@@ -800,6 +823,7 @@ final class HomebrewManager: ObservableObject {
             )
 
             await MainActor.run {
+                self.flushLogBuffer()
                 self.isOperating = false
                 self.activeOperationTitle = nil
                 self.updateSessionStartTime = nil
@@ -1521,6 +1545,7 @@ final class HomebrewManager: ObservableObject {
                 }
             )
             await MainActor.run {
+                self.flushLogBuffer()
                 self.isOperating = false
                 self.activeOperationTitle = nil
                 self.updateSessionStartTime = nil

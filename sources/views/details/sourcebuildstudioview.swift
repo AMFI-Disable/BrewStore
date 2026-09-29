@@ -240,10 +240,14 @@ struct SourceBuildStudioView: View {
 
             if !hasCLT {
                 Button {
-                    let process = Process()
-                    process.executableURL = URL(fileURLWithPath: "/usr/bin/xcode-select")
-                    process.arguments = ["--install"]
-                    try? process.run()
+                    Task.detached {
+                        _ = BrewStoreCommandExecutor.shared.run(
+                            executablePath: "/usr/bin/xcode-select",
+                            arguments: ["--install"],
+                            timeout: 10,
+                            category: .reversibleMutation
+                        )
+                    }
                     showToast("Launched Apple Command Line Tools installer.")
                 } label: {
                     Label("Install Tools", systemImage: "arrow.down.circle")

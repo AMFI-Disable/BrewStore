@@ -10,6 +10,7 @@ struct PackageListView: View {
     var installedOnly = false
     var showHeader = true
     @State private var search = ""
+    @State private var debouncedSearch = ""
     @State private var selectedKindFilter: BrewPackageKind?
     @State private var selectedTap = "All Taps"
     @State private var showPinnedOnly = false
@@ -39,7 +40,7 @@ struct PackageListView: View {
     private var packages: [BrewStorePackage] {
         BrewStorePackageFilterEngine.filterAndSort(
             packages: basePackages,
-            query: search,
+            query: debouncedSearch,
             kind: kind ?? selectedKindFilter,
             tap: selectedTap,
             pinnedOnly: showPinnedOnly,
@@ -493,7 +494,7 @@ struct PackageListView: View {
                     }
                 } else if packages.isEmpty, manager.errorMessage == nil {
                     if updatesOnly {
-                        if !search.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || hasActiveFilters || selectedKindFilter != nil || showPinnedOnly {
+                        if !debouncedSearch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || hasActiveFilters || selectedKindFilter != nil || showPinnedOnly {
                             ContentUnavailableView(
                                 "No Updates Match Filter",
                                 systemImage: "magnifyingglass",
@@ -523,10 +524,10 @@ struct PackageListView: View {
                 if let ql = quickLookPackage {
                     ZStack {
                         Color.black.opacity(0.35)
-                            .ignoresSafeArea()
-                            .onTapGesture {
-                                quickLookPackage = nil
-                            }
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            quickLookPackage = nil
+                        }
 
                         BrewStoreQuickLookView(
                             package: ql,
@@ -546,6 +547,18 @@ struct PackageListView: View {
             .task {
                 if installedOnly {
                     BrewStoreAppleSiliconMigrationManager.shared.scanMigrationCandidates(manager: manager)
+                }
+            }
+            .task(id: search) {
+                if search.isEmpty {
+                    debouncedSearch = ""
+                    return
+                }
+                do {
+                    try await Task.sleep(for: .milliseconds(150))
+                    debouncedSearch = search
+                } catch {
+                    // Query changed before debounce delay elapsed
                 }
             }
         }

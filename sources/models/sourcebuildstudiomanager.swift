@@ -436,22 +436,13 @@ final class BrewStoreSourceBuildManager: ObservableObject {
 
     nonisolated static func runSimpleCommand(_ executable: String, arguments: [String]) -> String? {
         guard FileManager.default.isExecutableFile(atPath: executable) else { return nil }
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: executable)
-        process.arguments = arguments
-
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = pipe
-
-        do {
-            try process.run()
-            process.waitUntilExit()
-            guard process.terminationStatus == 0 else { return nil }
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            return String(data: data, encoding: .utf8)
-        } catch {
-            return nil
-        }
+        let result = BrewStoreCommandExecutor.shared.run(
+            executablePath: executable,
+            arguments: arguments,
+            timeout: 5,
+            category: .readOnly
+        )
+        guard result.succeeded else { return nil }
+        return result.standardOutput
     }
 }
