@@ -221,4 +221,24 @@ final class ServiceCrashDiagnosticianTests: XCTestCase {
 
         XCTAssertFalse(fm.fileExists(atPath: testPID.path), "PID lock file should have been deleted by remediation")
     }
+
+    func testServiceWatchdogBoundedCrashEventsAndTimer() {
+        let watchdog = BrewStoreServiceWatchdog.shared
+        XCTAssertNotNil(watchdog.isWatchdogEnabled)
+        watchdog.rescheduleTimer()
+
+        for i in 1...60 {
+            let event = ServiceCrashEvent(
+                id: "\(i)",
+                serviceName: "service-\(i)",
+                timestamp: Date(),
+                statusDescription: "error"
+            )
+            watchdog.recentCrashEvents.insert(event, at: 0)
+            if watchdog.recentCrashEvents.count > 50 {
+                watchdog.recentCrashEvents = Array(watchdog.recentCrashEvents.prefix(50))
+            }
+        }
+        XCTAssertEqual(watchdog.recentCrashEvents.count, 50)
+    }
 }

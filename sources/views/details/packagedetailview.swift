@@ -1180,17 +1180,19 @@ struct PackageDetailView: View {
         removalStatusMessage = nil
         let bundleID = Bundle(url: targetURL)?.bundleIdentifier ?? ""
         let identity = BrewStoreAppIdentity(name: targetURL.deletingPathExtension().lastPathComponent, bundleIdentifier: bundleID, applicationURL: targetURL)
-        Task.detached(priority: .userInitiated) {
-            let plan = BrewStoreAppRemovalScanner().scan(application: identity)
-            await MainActor.run {
-                removalPlan = plan
-                isScanningRemoval = false
-                if plan.candidates.isEmpty {
-                    removalStatusMessage = "Your Mac is clean — no leftover files or caches were found for this app."
-                    removalStatusIsSuccess = true
-                } else {
-                    activeSheet = .removal(plan)
-                }
+        Task {
+            let plan = await Task.detached(priority: .userInitiated) {
+                BrewStoreAppRemovalScanner().scan(application: identity)
+            }.value
+
+            guard !Task.isCancelled else { return }
+            removalPlan = plan
+            isScanningRemoval = false
+            if plan.candidates.isEmpty {
+                removalStatusMessage = "Your Mac is clean — no leftover files or caches were found for this app."
+                removalStatusIsSuccess = true
+            } else {
+                activeSheet = .removal(plan)
             }
         }
     }

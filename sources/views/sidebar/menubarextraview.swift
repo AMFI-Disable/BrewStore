@@ -13,11 +13,18 @@ enum MenuBarTab: String, CaseIterable, Identifiable {
 
 @MainActor
 struct MenuBarExtraView: View {
+    @Environment(\.openWindow) private var openWindow
     @ObservedObject var manager: HomebrewManager
     @ObservedObject var updateMonitor: BrewStoreUpdateMonitor
     @ObservedObject var preferences = BrewStorePreferences.shared
     @StateObject private var serviceTelemetry = BrewStoreServiceTelemetryMonitor()
     @State private var selectedTab: MenuBarTab = .updates
+
+    private func presentMainWindow() {
+        openWindow(id: "main")
+        BrewStoreDockLifecycleManager.shared.showMainWindowAndDock()
+        BrewStoreMenuBarCompanionManager.shared.closeMenuBarPanel()
+    }
     private var outdatedPackages: [BrewStorePackage] {
         manager.packages.filter(\.isOutdated)
     }
@@ -61,8 +68,7 @@ struct MenuBarExtraView: View {
 
                 if rosettaCount > 0 {
                     Button {
-                        BrewStoreDockLifecycleManager.shared.showMainWindowAndDock()
-                        BrewStoreMenuBarCompanionManager.shared.closeMenuBarPanel()
+                        presentMainWindow()
                     } label: {
                         HStack(spacing: 3) {
                             Image(systemName: "exclamationmark.triangle.fill")
@@ -154,8 +160,7 @@ struct MenuBarExtraView: View {
             // Footer (Rigid 36pt height)
             HStack {
                 Button("Open BrewStore") {
-                    BrewStoreDockLifecycleManager.shared.showMainWindowAndDock()
-                    BrewStoreMenuBarCompanionManager.shared.closeMenuBarPanel()
+                    presentMainWindow()
                 }
                 .buttonStyle(.plain)
                 .font(.caption.bold())
@@ -371,9 +376,8 @@ struct MenuBarExtraView: View {
                 title: "Remove Unused Dependencies",
                 icon: "scissors"
             ) {
-                BrewStoreDockLifecycleManager.shared.showMainWindowAndDock()
+                presentMainWindow()
                 BrewStoreUninstallCoordinator.shared.requestAutoremove(manager: manager)
-                BrewStoreMenuBarCompanionManager.shared.closeMenuBarPanel()
             }
 
             if rosettaCount > 0 {
@@ -392,8 +396,7 @@ struct MenuBarExtraView: View {
                 title: "Open Full Application",
                 icon: "arrow.up.forward.app"
             ) {
-                BrewStoreDockLifecycleManager.shared.showMainWindowAndDock()
-                BrewStoreMenuBarCompanionManager.shared.closeMenuBarPanel()
+                presentMainWindow()
             }
         }
         .padding(4)

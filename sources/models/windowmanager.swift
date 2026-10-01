@@ -7,7 +7,6 @@ final class BrewStoreWindowManager: NSObject, NSWindowDelegate, @unchecked Senda
 
     private(set) weak var mainWindow: NSWindow?
     private weak var systemDelegate: NSWindowDelegate?
-    private var lastReopenTimestamp: TimeInterval = 0
     var isAppTerminating = false
 
     override private init() {
@@ -17,7 +16,6 @@ final class BrewStoreWindowManager: NSObject, NSWindowDelegate, @unchecked Senda
     func resetForTesting() {
         mainWindow = nil
         systemDelegate = nil
-        lastReopenTimestamp = 0
         isAppTerminating = false
     }
 
@@ -78,19 +76,6 @@ final class BrewStoreWindowManager: NSObject, NSWindowDelegate, @unchecked Senda
             first.makeKeyAndOrderFront(nil)
             first.deminiaturize(nil)
             return
-        }
-
-        // Debounced fallback to trigger window creation if no window exists
-        reopenWindowDebounced()
-    }
-
-    private func reopenWindowDebounced() {
-        let now = ProcessInfo.processInfo.systemUptime
-        guard now - lastReopenTimestamp > 1.0 else { return }
-        lastReopenTimestamp = now
-
-        if let openURL = URL(string: "brewstore://open") {
-            NSWorkspace.shared.open(openURL)
         }
     }
 

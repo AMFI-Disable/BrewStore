@@ -180,6 +180,14 @@ final class WindowManagerTests: XCTestCase {
         manager.windowWillClose(notif)
         XCTAssertTrue(mockDelegate.willCloseCalled)
     }
+
+    func testShowMainWindowWithoutExistingWindowDoesNotCrash() {
+        let manager = BrewStoreWindowManager.shared
+        manager.showMainWindow()
+        if let window = manager.mainWindow {
+            XCTAssertFalse(manager.isPanelOrSpecial(window))
+        }
+    }
 }
 
 private final class MockWindowDelegate: NSObject, NSWindowDelegate {

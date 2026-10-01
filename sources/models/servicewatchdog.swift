@@ -42,11 +42,13 @@ final class BrewStoreServiceWatchdog: ObservableObject {
 
         guard isWatchdogEnabled else { return }
 
-        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+        let newTimer = Timer(timeInterval: 60, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
                 self?.evaluateServices()
             }
         }
+        RunLoop.main.add(newTimer, forMode: .common)
+        self.timer = newTimer
     }
 
     func evaluateServices() {
@@ -77,6 +79,9 @@ final class BrewStoreServiceWatchdog: ObservableObject {
                             statusDescription: "Service entered \(s.status) state unexpectedly."
                         )
                         self.recentCrashEvents.insert(event, at: 0)
+                        if self.recentCrashEvents.count > 50 {
+                            self.recentCrashEvents = Array(self.recentCrashEvents.prefix(50))
+                        }
                         Self.dispatchCrashNotification(serviceName: s.name)
 
                         if self.autoRestartOnCrash {

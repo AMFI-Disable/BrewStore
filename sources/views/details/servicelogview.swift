@@ -1,17 +1,32 @@
 import AppKit
 import SwiftUI
 
+@MainActor
 struct ServiceLogView: View {
     @Environment(\.dismiss) private var dismiss
     let service: BrewStoreService
+    @ObservedObject var manager: HomebrewManager
     let brewPrefix: String?
     @State private var logContent = ""
     @State private var search = ""
     @State private var isAutoRefresh = true
     @State private var timerTask: Task<Void, Never>?
+    @State private var readTask: Task<Void, Never>?
     @State private var copied = false
     @StateObject private var diagnostician = ServiceCrashDiagnostician.shared
     @State private var showingDiagnosticSheet = false
+
+    init(service: BrewStoreService, manager: HomebrewManager, brewPrefix: String? = nil) {
+        self.service = service
+        self.manager = manager
+        self.brewPrefix = brewPrefix ?? manager.brewPrefix
+    }
+
+    init(service: BrewStoreService, brewPrefix: String? = nil) {
+        self.service = service
+        self.manager = HomebrewManager()
+        self.brewPrefix = brewPrefix
+    }
 
     private var logURL: URL? {
         if let direct = service.logURL(prefix: brewPrefix), FileManager.default.fileExists(atPath: direct.path) {
@@ -116,8 +131,7 @@ struct ServiceLogView: View {
                     if let rec = diag.remediations.first(where: { $0.isRecommended }) {
                         Button(rec.title) {
                             Task {
-                                let mgr = HomebrewManager()
-                                try? await diagnostician.executeRemediation(rec, for: service, manager: mgr)
+                                try? await diagnostician.executeRemediation(rec, for: service, manager: manager)
                             }
                         }
                         .buttonStyle(.borderedProminent)
@@ -222,7 +236,7 @@ struct ServiceLogView: View {
         }
         .frame(minWidth: 700, minHeight: 480)
         .sheet(isPresented: $showingDiagnosticSheet) {
-            ServiceCrashDiagnosticView(manager: HomebrewManager(), service: service)
+            ServiceCrashDiagnosticView(manager: manager, service: service)
         }
         .onAppear {
             readLogs()
@@ -235,6 +249,9 @@ struct ServiceLogView: View {
         }
         .onDisappear {
             timerTask?.cancel()
+            timerTask = nil
+            readTask?.cancel()
+            readTask = nil
         }
     }
 
@@ -244,15 +261,21 @@ struct ServiceLogView: View {
             return
         }
 
-        Task.detached(priority: .userInitiated) {
-            if let data = try? Data(contentsOf: url),
-               let string = String(data: data, encoding: .utf8) {
-                // Keep latest 2000 lines if very large
-                let lines = string.components(separatedBy: .newlines)
-                let trimmed = lines.suffix(2000).joined(separator: "\n")
-                await MainActor.run {
-                    self.logContent = trimmed
+        readTask?.cancel()
+        readTask = Task {
+            guard !Task.isCancelled else { return }
+            let content = await Task.detached(priority: .userInitiated) { () -> String? in
+                guard let data = try? Data(contentsOf: url),
+                      let string = String(data: data, encoding: .utf8) else {
+                    return nil
                 }
+                let lines = string.components(separatedBy: .newlines)
+                return lines.suffix(2000).joined(separator: "\n")
+            }.value
+
+            guard !Task.isCancelled else { return }
+            if let content {
+                self.logContent = content
             }
         }
     }

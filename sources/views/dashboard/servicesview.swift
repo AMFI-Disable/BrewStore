@@ -193,7 +193,7 @@ struct ServicesView: View {
             .animation(nil, value: serviceCategoryTab)
         }
         .sheet(item: $selectedLogService) { svc in
-            ServiceLogView(service: svc, brewPrefix: manager.brewPrefix)
+            ServiceLogView(service: svc, manager: manager, brewPrefix: manager.brewPrefix)
         }
         .sheet(isPresented: $showingPortMatrixSheet) {
             ServicePortMatrixView(manager: manager)
