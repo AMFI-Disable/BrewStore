@@ -16,7 +16,6 @@ final class CellarFileSystemSentry: ObservableObject {
 
     private let monitorQueue = DispatchQueue(label: "com.amfi-disable.brewstore.cellarsentry", qos: .utility)
     private var sources: [DispatchSourceFileSystemObject] = []
-    private var fileDescriptors: [Int32] = []
     private var debounceTask: Task<Void, Never>?
     private let debounceInterval: TimeInterval
     private let targetPaths: [String]
@@ -32,12 +31,9 @@ final class CellarFileSystemSentry: ObservableObject {
     }
 
     deinit {
-        // Cancel active monitors
+        // Cancel active monitors; their cancel handlers safely close the file descriptors
         for source in sources {
             source.cancel()
-        }
-        for fd in fileDescriptors {
-            close(fd)
         }
     }
 
@@ -85,7 +81,6 @@ final class CellarFileSystemSentry: ObservableObject {
 
             source.resume()
             sources.append(source)
-            fileDescriptors.append(fd)
             activePaths.append(path)
         }
 
@@ -102,7 +97,6 @@ final class CellarFileSystemSentry: ObservableObject {
             source.cancel()
         }
         sources.removeAll()
-        fileDescriptors.removeAll()
 
         isMonitoring = false
         monitoredPaths.removeAll()

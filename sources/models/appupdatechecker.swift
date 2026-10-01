@@ -168,8 +168,11 @@ final class BrewStoreAppUpdateChecker: ObservableObject {
         let cleanRemote = remote.trimmingCharacters(in: CharacterSet(charactersIn: "vV "))
         let cleanLocal = local.trimmingCharacters(in: CharacterSet(charactersIn: "vV "))
 
-        let remoteParts = cleanRemote.split(separator: ".").compactMap { Int($0) }
-        let localParts = cleanLocal.split(separator: ".").compactMap { Int($0) }
+        let baseRemote = cleanRemote.components(separatedBy: CharacterSet(charactersIn: "-+")).first ?? cleanRemote
+        let baseLocal = cleanLocal.components(separatedBy: CharacterSet(charactersIn: "-+")).first ?? cleanLocal
+
+        let remoteParts = baseRemote.split(separator: ".").compactMap { Int($0) }
+        let localParts = baseLocal.split(separator: ".").compactMap { Int($0) }
 
         for i in 0 ..< max(remoteParts.count, localParts.count) {
             let r = i < remoteParts.count ? remoteParts[i] : 0
