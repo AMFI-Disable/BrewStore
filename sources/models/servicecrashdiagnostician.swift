@@ -18,7 +18,7 @@ enum ServiceCrashIssueType: String, Identifiable, CaseIterable, Codable, Sendabl
         case .stalePIDLock: return "lock.slash.fill"
         case .portConflict: return "network.slash"
         case .permissionDenied: return "hand.raised.fill"
-        case .configurationSyntaxError: return "doc.text.fill.badge.ellipsis"
+        case .configurationSyntaxError: return "doc.badge.ellipsis"
         case .uninitializedDataDirectory: return "folder.badge.gearshape"
         case .resourceExhaustion: return "gauge.with.needle.fill"
         case .unknownCrash: return "exclamationmark.triangle.fill"

@@ -37,12 +37,18 @@ struct BrewStoreRootView: View {
                     hubCollapsibleSection(for: .health, isExpanded: $isHealthExpanded)
 
                     Section {
-                        sidebarRow(for: .settings)
+                        subSidebarRow(for: .settings)
                     } header: {
-                        Text("System")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.secondary)
-                            .accessibilityAddTraits(.isHeader)
+                        HStack(spacing: 6) {
+                            Image(systemName: "gearshape.fill")
+                                .font(.system(size: 11.5, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                            Text("System")
+                                .font(.system(size: 11.5, weight: .bold))
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.top, 4)
+                        .accessibilityAddTraits(.isHeader)
                     }
                 }
                 .listStyle(.sidebar)
@@ -441,15 +447,16 @@ struct BrewStoreRootView: View {
     }
 
     private func hubHeaderRow(for hub: BrewStoreHub, isExpanded: Binding<Bool>) -> some View {
-        HStack(spacing: 6) {
+        let isStorefront = hub == .storefront
+        return HStack(spacing: isStorefront ? 8 : 6) {
             Button {
                 withAnimation(.easeInOut(duration: 0.2)) {
                     isExpanded.wrappedValue.toggle()
                 }
             } label: {
                 Image(systemName: isExpanded.wrappedValue ? "chevron.down" : "chevron.right")
-                    .font(.system(size: 10, weight: .bold))
-                    .frame(width: 14, height: 14)
+                    .font(.system(size: isStorefront ? 11 : 9.5, weight: isStorefront ? .heavy : .bold))
+                    .frame(width: isStorefront ? 16 : 14, height: isStorefront ? 16 : 14)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
@@ -463,13 +470,21 @@ struct BrewStoreRootView: View {
                     }
                 }
             } label: {
-                HStack(spacing: 6) {
+                HStack(spacing: isStorefront ? 7 : 6) {
                     Image(systemName: hub.icon)
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(selection?.hub == hub ? Color.accentColor : .secondary)
+                        .font(.system(size: isStorefront ? 15 : 11.5, weight: isStorefront ? .bold : .semibold))
+                        .foregroundStyle(
+                            isStorefront
+                                ? (selection?.hub == .storefront ? Color.accentColor : Color.primary)
+                                : (selection?.hub == hub ? Color.accentColor : .secondary)
+                        )
                     Text(hub.rawValue)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(selection?.hub == hub ? Color.primary : .secondary)
+                        .font(isStorefront ? .system(size: 15, weight: .bold) : .system(size: 11.5, weight: .bold))
+                        .foregroundStyle(
+                            isStorefront
+                                ? (selection?.hub == .storefront ? Color.accentColor : Color.primary)
+                                : (selection?.hub == hub ? Color.primary : .secondary)
+                        )
                         .lineLimit(1)
                         .fixedSize(horizontal: true, vertical: false)
                 }
@@ -481,10 +496,13 @@ struct BrewStoreRootView: View {
 
             hubSummaryBadge(for: hub)
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, isStorefront ? 4 : 2)
+        .padding(.top, isStorefront ? 2 : 4)
         .padding(.trailing, 12)
         .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("Sidebar.HubHeader.\(hub.rawValue.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "&", with: ""))")
+        .accessibilityIdentifier(
+            "Sidebar.HubHeader.\(hub.rawValue.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "&", with: ""))"
+        )
     }
 
     @ViewBuilder
@@ -543,9 +561,15 @@ struct BrewStoreRootView: View {
 
     private func sidebarRow(for section: BrewStoreSection) -> some View {
         HStack(spacing: 8) {
-            Label(section.rawValue, systemImage: section.icon)
-                .lineLimit(1)
-                .truncationMode(.tail)
+            Label {
+                Text(section.rawValue)
+                    .font(.system(size: 13, weight: .regular))
+            } icon: {
+                Image(systemName: section.icon)
+                    .font(.system(size: 13, weight: .medium))
+            }
+            .lineLimit(1)
+            .truncationMode(.tail)
             Spacer(minLength: 4)
             sidebarBadge(for: section)
         }

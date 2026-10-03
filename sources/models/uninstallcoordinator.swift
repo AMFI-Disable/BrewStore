@@ -612,7 +612,7 @@ struct BrewStoreUninstallPreviewView: View {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(.red)
             } else if request.operation == .autoremove {
-                Image(systemName: "broom.fill")
+                Image(systemName: "scissors")
                     .foregroundStyle(.blue)
             } else if !request.removalPlans.isEmpty {
                 Image(systemName: "trash.circle.fill")

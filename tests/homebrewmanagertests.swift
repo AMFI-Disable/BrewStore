@@ -2223,7 +2223,7 @@ final class HomebrewManagerTests: XCTestCase {
         XCTAssertTrue(BrewStoreSection.allCases.contains(.allPackages))
         XCTAssertTrue(BrewStoreSection.allCases.contains(.allApps))
         XCTAssertTrue(BrewStoreSection.allCases.contains(.allFormulae))
-        XCTAssertEqual(BrewStoreSection.allPackages.icon, "shippingbox.2.fill")
+        XCTAssertEqual(BrewStoreSection.allPackages.icon, "cube.box.fill")
         XCTAssertEqual(BrewStoreSection.allApps.icon, "macwindow.on.rectangle")
         XCTAssertEqual(BrewStoreSection.allFormulae.icon, "terminal.fill")
     }

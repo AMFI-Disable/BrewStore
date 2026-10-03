@@ -178,7 +178,7 @@ enum BrewStoreSection: String, CaseIterable, Identifiable {
     var icon: String {
         switch self {
         case .discover: "sparkles"
-        case .allPackages: "shippingbox.2.fill"
+        case .allPackages: "cube.box.fill"
         case .showdown: "trophy.fill"
         case .allApps: "macwindow.on.rectangle"
         case .allFormulae: "terminal.fill"

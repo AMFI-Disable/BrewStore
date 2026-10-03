@@ -529,7 +529,7 @@ struct BottleIntegrityAuditorView: View {
 
     private var initialAuditView: some View {
         VStack(spacing: 12) {
-            Image(systemName: "shield.dashed")
+            Image(systemName: "shield")
                 .font(.system(size: 40))
                 .foregroundStyle(.secondary)
             Text("Ready to Audit Bottle Integrity")

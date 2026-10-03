@@ -435,7 +435,7 @@ struct BrewfileManagerView: View {
                 Button {
                     pickDirectoryAndScan()
                 } label: {
-                    Label("Select Directory to Scan…", systemImage: "folder.badge.magnifyingglass")
+                    Label("Select Directory to Scan…", systemImage: "doc.text.magnifyingglass")
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.regular)
