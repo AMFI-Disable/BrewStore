@@ -83,7 +83,7 @@ enum SettingsSearchEngine {
         SettingsSearchItem(
             id: "general_scheduler",
             tab: .general,
-            title: "Automated Update Scheduler",
+            title: "Update Scheduler",
             summary: "Schedule automatic background checks for outdated Homebrew packages and dependencies.",
             keywords: ["scheduler", "schedule", "interval", "hours", "auto-update", "outdated", "background check"],
             icon: "clock.badge.checkmark.fill"
@@ -167,23 +167,23 @@ enum SettingsSearchEngine {
         SettingsSearchItem(
             id: "features_modules",
             tab: .features,
-            title: "Storefront & Discovery Modules",
-            summary: "Toggle Editorial Stories and Developer Toolkits suites in sidebar and storefront.",
+            title: "Storefront Modules",
+            summary: "Toggle Editorial Stories and Developer Toolkits in the sidebar and storefront.",
             keywords: ["editorial stories", "toolkits", "developer stacks", "discovery modules", "articles", "suites"],
             icon: "sparkles"
         ),
         SettingsSearchItem(
             id: "features_innovations",
             tab: .features,
-            title: "Package Detail Innovations",
-            summary: "Interactive Visual Dependency Graphs, App Cleaner residual file scanner, and uninstallation strategies.",
+            title: "Package Details",
+            summary: "Dependency graphs, App Cleaner leftover scanner, and default uninstallation strategy.",
             keywords: ["dependency graph", "app cleaner", "residuals", "caches", "leftovers", "uninstall mode", "clean uninstall"],
             icon: "cube.transparent"
         ),
         SettingsSearchItem(
             id: "features_safety_sync",
             tab: .features,
-            title: "Safety & Cloud Sync",
+            title: "Backups & Sync",
             summary: "Automatically create snapshot before package mutations and sync Brewfile to GitHub Gist.",
             keywords: ["snapshot", "safety", "cloud sync", "gist", "github gist", "auto backup", "rollback safety"],
             icon: "shield.lefthalf.filled"
@@ -191,8 +191,8 @@ enum SettingsSearchEngine {
         SettingsSearchItem(
             id: "features_watchdog",
             tab: .features,
-            title: "Background Service Watchdog",
-            summary: "Monitor Homebrew services (databases, web servers) and automatically restart crashed daemons.",
+            title: "Service Watchdog",
+            summary: "Monitor Homebrew background services and automatically restart stopped daemons.",
             keywords: ["watchdog", "services", "daemon", "auto-restart", "crash recovery", "mysql", "postgres", "redis", "nginx"],
             icon: "bolt.shield.fill"
         ),

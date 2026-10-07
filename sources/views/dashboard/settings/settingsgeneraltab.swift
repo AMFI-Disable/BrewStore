@@ -124,15 +124,11 @@ struct SettingsGeneralTab: View {
 
     private var dockAndWindowSection: some View {
         SettingsCardSection(title: "Dock & Window Behavior", icon: "menubar.dock.rectangle") {
-            Toggle("Hide from Dock when window is closed (Keep Menu Bar active)", isOn: $preferences.hideDockIconWhenWindowClosed)
+            Toggle("Hide Dock icon when window is closed", isOn: $preferences.hideDockIconWhenWindowClosed)
 
-            Text(
-                "When enabled, closing BrewStore's window hides it from the macOS Dock and ⌘Tab switcher " +
-                    "while keeping the Menu Bar mug icon and background checks active. Click the Menu Bar icon " +
-                    "or open BrewStore from Applications to restore the window."
-            )
-            .font(.caption2)
-            .foregroundStyle(.secondary)
+            Text("Keeps the menu bar icon and background checks running when the window is closed.")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -145,12 +141,9 @@ struct SettingsGeneralTab: View {
             }
             .pickerStyle(.menu)
 
-            Text(
-                "When an application is available on both Homebrew and the Mac App Store, " +
-                    "BrewStore recommends Homebrew for faster updates, CLI scriptability, and zero Apple ID prompts."
-            )
-            .font(.caption2)
-            .foregroundStyle(.secondary)
+            Text("Select which source to prioritize when an application is available on both Homebrew and the App Store.")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -170,13 +163,13 @@ struct SettingsGeneralTab: View {
     }
 
     private var launchAgentSection: some View {
-        SettingsCardSection(title: "macOS Background LaunchAgent", icon: "clock.badge.checkmark.fill") {
-            Toggle("Run background check LaunchAgent (Runs even when BrewStore is closed)", isOn: Binding(
+        SettingsCardSection(title: "Background Launch Agent", icon: "clock.badge.checkmark.fill") {
+            Toggle("Start background checks on login", isOn: Binding(
                 get: { launchAgent.isEnabled },
                 set: { launchAgent.toggleLaunchAgent(enabled: $0) }
             ))
 
-            Text("Background checking is non-destructive. Automatic upgrades remain strictly disabled by default.")
+            Text("Checks for outdated packages periodically in the background.")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
 
@@ -405,7 +398,7 @@ struct SettingsGeneralTab: View {
     }
 
     private var autoUpdateSchedulerSection: some View {
-        SettingsCardSection(title: "Background Auto-Updating & Auto-Upgrading", icon: "arrow.triangle.2.circlepath.circle.fill") {
+        SettingsCardSection(title: "Update Scheduler", icon: "arrow.triangle.2.circlepath.circle.fill") {
             Picker("Auto-Update Check Frequency", selection: Binding(
                 get: { BrewStoreAutoUpdateScheduler.shared.frequency },
                 set: { BrewStoreAutoUpdateScheduler.shared.frequency = $0 }
