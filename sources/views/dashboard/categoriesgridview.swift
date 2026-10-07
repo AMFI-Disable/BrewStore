@@ -279,22 +279,7 @@ private struct CategoryPackageCard: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .top, spacing: 12) {
                     // App Icon / Symbol
-                    if resolvedPackage.kind == .cask,
-                       let icon = BrewStoreAppIconResolver.localAppIcon(for: resolvedPackage.applicationNames.isEmpty ? [resolvedPackage.name] : resolvedPackage.applicationNames) {
-                        Image(nsImage: icon)
-                            .resizable().scaledToFit()
-                            .frame(width: 44, height: 44)
-                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    } else {
-                        Image(systemName: resolvedPackage.kind == .cask ? "app.fill" : "terminal.fill")
-                            .font(.title2)
-                            .foregroundStyle(resolvedPackage.kind == .cask ? Color.blue : Color.green)
-                            .frame(width: 44, height: 44)
-                            .background(
-                                (resolvedPackage.kind == .cask ? Color.blue : Color.green).opacity(0.12),
-                                in: RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            )
-                    }
+                    PackageIconView(package: resolvedPackage, size: 44, cornerRadius: 10)
 
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 6) {

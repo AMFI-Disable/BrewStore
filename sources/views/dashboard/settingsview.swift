@@ -33,14 +33,33 @@ struct SettingsView: View {
     var discovery: BrewStoreDiscoveryCatalog = BrewStoreDiscoveryCatalog()
 
     @ObservedObject private var resetManager = BrewStoreResetManager.shared
-    @State private var selectedTab: SettingsTab = .general
+    @AppStorage("Settings.SelectedTab") private var selectedTab: SettingsTab = .general
+    @State private var searchText = ""
+
+    private var isSearching: Bool {
+        !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             headerBar
-            tabPicker
-            Divider()
-            tabContent
+            if isSearching {
+                Divider()
+                SettingsSearchResultsView(
+                    query: searchText,
+                    onSelectTab: { tab in
+                        selectedTab = tab
+                        searchText = ""
+                    },
+                    onClearSearch: {
+                        searchText = ""
+                    }
+                )
+            } else {
+                tabPicker
+                Divider()
+                tabContent
+            }
         }
         .sheet(isPresented: $resetManager.showingResetSheet) {
             ResetViewSheet(manager: manager, discovery: discovery)
@@ -48,24 +67,57 @@ struct SettingsView: View {
     }
 
     private var headerBar: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: Spacing.xxs) {
-                Text("Settings").font(.largeTitle.bold())
-                Text("Manage updates, appearance, package sources, backups, and privacy.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-
-            Button {
-                BrewStoreActionReviewCoordinator.shared.requestSettingsReset(options: [.clearPersonalSettings]) {
-                    resetManager.showingResetSheet = true
+        VStack(spacing: Spacing.sm) {
+            HStack {
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
+                    Text("Settings").font(.largeTitle.bold())
+                    Text("Manage updates, appearance, package sources, backups, and privacy.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
-            } label: {
-                Label("Reset App…", systemImage: "arrow.counterclockwise")
+                Spacer()
+
+                Button {
+                    BrewStoreActionReviewCoordinator.shared.requestSettingsReset(options: [.clearPersonalSettings]) {
+                        resetManager.showingResetSheet = true
+                    }
+                } label: {
+                    Label("Reset App…", systemImage: "arrow.counterclockwise")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
             }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
+
+            // Search Bar
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(.secondary)
+                    .font(.system(size: 13))
+
+                TextField("Search settings, features, preferences…", text: $searchText)
+                    .textFieldStyle(.plain)
+                    .font(.body)
+                    .accessibilityIdentifier("Settings.SearchField")
+
+                if !searchText.isEmpty {
+                    Button {
+                        searchText = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                            .font(.system(size: 13))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("Settings.ClearSearchButton")
+                }
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.secondary.opacity(0.15), lineWidth: 1)
+            )
         }
         .padding(.horizontal, Spacing.lg)
         .padding(.top, Spacing.md)

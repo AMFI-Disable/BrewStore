@@ -17,8 +17,11 @@ struct BrewStoreDiscoveryItem: Identifiable, Codable, Hashable, Sendable {
     let category: String
 
     var iconURL: URL? {
-        guard kind == .cask, let host = URL(string: homepage)?.host else { return nil }
-        return URL(string: "https://\(host)/favicon.ico")
+        let trimmed = homepage.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        let urlWithScheme = (trimmed.hasPrefix("http://") || trimmed.hasPrefix("https://")) ? trimmed : "https://\(trimmed)"
+        guard let host = URL(string: urlWithScheme)?.host, !host.isEmpty else { return nil }
+        return URL(string: "https://www.google.com/s2/favicons?domain=\(host)&sz=128")
     }
 
     init(

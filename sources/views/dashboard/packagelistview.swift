@@ -727,18 +727,7 @@ private struct PackageListRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            if package.kind == .cask,
-               let icon = BrewStoreAppIconResolver.localAppIcon(for: package.applicationNames.isEmpty ? [package.name] : package.applicationNames) {
-                Image(nsImage: icon)
-                    .resizable().scaledToFit()
-                    .frame(width: 34, height: 34)
-                    .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
-            } else {
-                Image(systemName: package.kind == .cask ? "app.fill" : "terminal.fill")
-                    .frame(width: 34, height: 34)
-                    .foregroundStyle(.tint)
-                    .background(Color.accentColor.opacity(0.1), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
-            }
+            PackageIconView(package: package, size: 34, cornerRadius: 7)
 
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {

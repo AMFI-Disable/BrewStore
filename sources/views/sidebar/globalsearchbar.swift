@@ -336,23 +336,7 @@ struct BrewStoreGlobalSearchBar: View {
             openPackage(resolvedPkg)
         } label: {
             HStack(spacing: 10) {
-                // App Icon or Symbol
-                if resolvedPkg.kind == .cask,
-                   let icon = BrewStoreAppIconResolver.localAppIcon(for: resolvedPkg.applicationNames.isEmpty ? [resolvedPkg.name] : resolvedPkg.applicationNames) {
-                    Image(nsImage: icon)
-                        .resizable().scaledToFit()
-                        .frame(width: 32, height: 32)
-                        .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
-                } else {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 7, style: .continuous)
-                            .fill(resolvedPkg.kind == .cask ? Color.blue.opacity(0.15) : Color.green.opacity(0.15))
-                            .frame(width: 32, height: 32)
-                        Image(systemName: resolvedPkg.kind == .cask ? "app.fill" : "terminal.fill")
-                            .font(.system(size: 16))
-                            .foregroundStyle(resolvedPkg.kind == .cask ? Color.blue : Color.green)
-                    }
-                }
+                PackageIconView(package: resolvedPkg, size: 32, cornerRadius: 7)
 
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {

@@ -16,19 +16,7 @@ struct BrewStoreQuickLookView: View {
         VStack(alignment: .leading, spacing: 16) {
             // Header
             HStack(spacing: 14) {
-                if currentPackage.kind == .cask,
-                   let icon = BrewStoreAppIconResolver.localAppIcon(for: currentPackage.applicationNames.isEmpty ? [currentPackage.name] : currentPackage.applicationNames) {
-                    Image(nsImage: icon)
-                        .resizable().scaledToFit()
-                        .frame(width: 48, height: 48)
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                } else {
-                    Image(systemName: currentPackage.kind == .cask ? "app.fill" : "terminal.fill")
-                        .font(.title2)
-                        .frame(width: 48, height: 48)
-                        .foregroundStyle(.tint)
-                        .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                }
+                PackageIconView(package: currentPackage, size: 48, cornerRadius: 10)
 
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 8) {

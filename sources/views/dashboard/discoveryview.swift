@@ -1530,30 +1530,12 @@ private struct DiscoveryIcon: View {
     var size: CGFloat = 28
 
     var body: some View {
-        Group {
-            if let installedPackage, installedPackage.kind == .cask,
-               let icon = BrewStoreAppIconResolver.localAppIcon(for: installedPackage.applicationNames.isEmpty ? [installedPackage.name] : installedPackage.applicationNames) {
-                Image(nsImage: icon)
-                    .resizable()
-                    .scaledToFit()
-            } else if let iconURL = item.iconURL {
-                AsyncImage(url: iconURL) { phase in
-                    if let image = phase.image {
-                        image.resizable().scaledToFit()
-                    } else {
-                        fallback
-                    }
-                }
-            } else {
-                fallback
-            }
-        }
-        .frame(width: size, height: size)
-    }
-
-    private var fallback: some View {
-        Image(systemName: item.kind == .cask ? "app.fill" : "terminal.fill")
-            .resizable().scaledToFit().foregroundStyle(.tint).padding(size * 0.12)
+        PackageIconView(
+            item: item,
+            installedPackage: installedPackage,
+            size: size,
+            cornerRadius: 6
+        )
     }
 }
 

@@ -51,23 +51,8 @@ struct PackageDetailHeaderView: View {
 
             // Identity & Primary Actions Row
             HStack(alignment: .center, spacing: Spacing.md) {
-                if let icon = installedAppIcon {
-                    Image(nsImage: icon)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 48, height: 48)
-                        .clipShape(RoundedRectangle(cornerRadius: Radius.panel, style: .continuous))
-                        .shadow(color: Color.black.opacity(0.1), radius: 4, y: 2)
-                } else {
-                    Image(systemName: package.kind == .cask ? "app.fill" : "terminal.fill")
-                        .font(.system(size: 26))
-                        .foregroundStyle(.tint)
-                        .frame(width: 48, height: 48)
-                        .background(
-                            Color.accentColor.opacity(0.12),
-                            in: RoundedRectangle(cornerRadius: Radius.panel, style: .continuous)
-                        )
-                }
+                PackageIconView(package: package, size: 48, cornerRadius: Radius.panel)
+                    .shadow(color: Color.black.opacity(0.1), radius: 4, y: 2)
 
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {

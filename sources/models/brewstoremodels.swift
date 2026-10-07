@@ -58,6 +58,14 @@ struct BrewStorePackage: Identifiable, Hashable, Codable, Sendable {
         return Self.formatDisplayVersion(installedVersion)
     }
 
+    public var iconURL: URL? {
+        let trimmed = homepage.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        let urlWithScheme = (trimmed.hasPrefix("http://") || trimmed.hasPrefix("https://")) ? trimmed : "https://\(trimmed)"
+        guard let host = URL(string: urlWithScheme)?.host, !host.isEmpty else { return nil }
+        return URL(string: "https://www.google.com/s2/favicons?domain=\(host)&sz=128")
+    }
+
     init(
         id: String,
         name: String,
