@@ -733,9 +733,12 @@ struct DependencyTopologyView: View {
                 }
 
                 if isUnused {
-                    Text("⚠️ 0 Dependents (Candidates for cleanup)")
-                        .font(.caption2)
-                        .foregroundStyle(.orange)
+                    HStack(spacing: 3) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                        Text("0 Dependents (Candidate for cleanup)")
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(.orange)
                 } else {
                     Text("Used by: \(dependents.joined(separator: ", "))")
                         .font(.caption2)

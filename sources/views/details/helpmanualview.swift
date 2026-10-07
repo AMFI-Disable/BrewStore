@@ -48,9 +48,9 @@ struct HelpManualView: View {
                     codeSnippet: nil
                 ),
                 HelpSection(
-                    heading: "1-Click App Store Action Button",
+                    heading: "App Store Action Button",
                     paragraphs: [
-                        "Package rows and product pages feature a dynamic App Store action pill:",
+                        "Package rows and product pages feature a native action button:",
                         "• GET: Downloads and installs the package.",
                         "• Progress Ring: Shows active execution with an inline click-to-cancel button.",
                         "• OPEN / INSTALLED: Opens installed casks or provides an action menu with Cellar reveal, Pinning, and Uninstall options.",
@@ -70,10 +70,10 @@ struct HelpManualView: View {
                 HelpSection(
                     heading: "Storefront: Discover, Showdowns & Toolkits",
                     paragraphs: [
-                        "• Discover: Editorial Hero spotlight carousel with adaptive full-screen width, curated shelves, category tags, and instant GET action pills.",
+                        "• Discover: Editorial Hero spotlight carousel with adaptive full-screen width, curated shelves, category tags, and instant GET action buttons.",
                         "• Community Picks: Head-to-head showdowns (Ghostty vs Alacritty, Neovim vs Helix, OrbStack vs Docker) with live voting and spec comparison matrix.",
                         "• All Applications & CLI Tools: Full directories of 4,500+ Casks and 7,500+ Formulae with real-time app icon extraction and bottle status.",
-                        "• Stories & Toolkits: Curated editorial guides with inline package installers, plus turnkey developer stacks with 1-click batch installation."
+                        "• Stories & Toolkits: Curated editorial guides with inline package installers, plus developer stacks with batch installation."
                     ],
                     tip: nil,
                     codeSnippet: nil
@@ -82,7 +82,7 @@ struct HelpManualView: View {
                     heading: "Library: Installed, Adoption & Dependencies",
                     paragraphs: [
                         "• Installed Wall: Tri-source inventory (Homebrew Casks, Formulae, Mac App Store apps) with Mach-O architecture badges (ARM64, Universal, Rosetta 2).",
-                        "• Adoption & Replacements: 1-Click adoption of unmanaged DMG/PKG apps into Homebrew, MAS-to-Cask conversion, and modern CLI tool suggestions.",
+                        "• Adoption & Replacements: Adoption of unmanaged apps into Homebrew, MAS-to-Cask conversion, and modern CLI tool suggestions.",
                         "• Topology & Dependencies: Interactive visual DAG graph and 'Why is this installed?' reverse dependency inspector.",
                         "• Updates & Wishlist: Centralized update reconciler and personal package bookmark collection."
                     ],

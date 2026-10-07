@@ -189,12 +189,12 @@ final class BrewStoreAutoUpdateScheduler: ObservableObject {
             }
 
             Self.dispatchNotification(
-                title: "⚡ BrewStore Auto-Upgraded Packages",
+                title: "BrewStore Auto-Upgraded Packages",
                 body: "Successfully upgraded \(targetPackages.count) package\(targetPackages.count == 1 ? "" : "s"): \(targetPackages.prefix(4).joined(separator: ", "))"
             )
 
             Self.dispatchWebhook(
-                title: "⚡ BrewStore Auto-Upgraded Packages",
+                title: "BrewStore Auto-Upgraded Packages",
                 body: "Successfully upgraded \(targetPackages.count) package\(targetPackages.count == 1 ? "" : "s").",
                 packages: targetPackages,
                 onlyIfUpdatesFoundSetting: false
@@ -283,8 +283,8 @@ final class BrewStoreAutoUpdateScheduler: ObservableObject {
         }
 
         let payload: [String: Any] = [
-            "text": "🧪 BrewStore Webhook Test: Connection successful!",
-            "content": "🧪 **BrewStore Webhook Test**: Connection successful at \(Date().formatted(date: .abbreviated, time: .standard))",
+            "text": "BrewStore Webhook Test: Connection successful!",
+            "content": "**BrewStore Webhook Test**: Connection successful at \(Date().formatted(date: .abbreviated, time: .standard))",
             "source": "BrewStore",
             "timestamp": ISO8601DateFormatter().string(from: Date())
         ]

@@ -450,16 +450,16 @@ struct CreatorStudioView: View {
         }
         if localHomepage.contains("example.com") || localUrl.contains("example.com") {
             isLintPassing = false
-            lintStatusMessage = "⚠️ Template placeholder detected: Replace 'example.com' with your project's actual release URL."
+            lintStatusMessage = "Template placeholder detected: Replace 'example.com' with your project's actual release URL."
             return
         }
         if calculatedSHA256 == nil {
             isLintPassing = false
-            lintStatusMessage = "⚠️ Checksum needed: Click 'Fetch SHA-256' or compute your archive's SHA-256 before publishing."
+            lintStatusMessage = "Checksum required: Click 'Fetch SHA-256' or compute your archive's SHA-256 before publishing."
             return
         }
         isLintPassing = true
-        lintStatusMessage = "✅ Recipe syntax and release checksum validated successfully!"
+        lintStatusMessage = "Recipe syntax and release checksum validated successfully."
     }
 
     private func scaffoldLocalTapFolder() {

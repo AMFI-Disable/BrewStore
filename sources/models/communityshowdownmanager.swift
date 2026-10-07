@@ -374,7 +374,7 @@ public final class CommunityShowdownManager: ObservableObject {
 
         // 1. Must not be in Hall of Fame (retired)
         if let season = currentSeason, season.retiredPackageIDs.contains(lowerID) {
-            return (false, "\(package.name) is currently retired in the Hall of Fame 👑")
+            return (false, "\(package.name) is currently retired in the Hall of Fame.")
         }
 
         // 2. Must not be already nominated

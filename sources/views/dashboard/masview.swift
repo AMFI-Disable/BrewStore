@@ -216,9 +216,13 @@ struct MASView: View {
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                     if let latest = app.latestVersion {
-                                        Text("➔ v\(latest)")
-                                            .font(.caption.bold())
-                                            .foregroundStyle(.orange)
+                                        HStack(spacing: 3) {
+                                            Image(systemName: "arrow.right")
+                                                .font(.caption2)
+                                            Text("v\(latest)")
+                                        }
+                                        .font(.caption.bold())
+                                        .foregroundStyle(.orange)
                                     }
                                 }
                             }

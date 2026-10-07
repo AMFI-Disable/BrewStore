@@ -174,7 +174,7 @@ enum BrewStoreLockfileGenerator {
         var lines: [String] = ["# Package Dependency Tree", ""]
 
         for pkg in installed {
-            let pinMark = pkg.isPinned ? " 🔒" : ""
+            let pinMark = pkg.isPinned ? " (Pinned)" : ""
             lines.append("- **\(pkg.name)** (`\(pkg.version)`)\(pinMark) - *\(pkg.kind.rawValue)*")
             if !pkg.dependencies.isEmpty {
                 for dep in pkg.dependencies.sorted() {

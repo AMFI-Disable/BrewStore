@@ -131,7 +131,7 @@ public struct CommunityShowdownView: View {
                         isShowingHallOfFameSheet = true
                     } label: {
                         HStack(spacing: 6) {
-                            Text("👑")
+                            Image(systemName: "trophy")
                             Text("Hall of Fame")
                         }
                         .padding(.horizontal, 10)
@@ -705,8 +705,9 @@ struct HallOfFameSheet: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 HStack(spacing: 8) {
-                    Text("👑")
+                    Image(systemName: "trophy.fill")
                         .font(.title)
+                        .foregroundStyle(.yellow)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Hall of Fame")
                             .font(.title2.bold())
@@ -733,8 +734,9 @@ struct HallOfFameSheet: View {
 
             List(showdown.hallOfFame) { entry in
                 HStack(spacing: 14) {
-                    Text("👑")
+                    Image(systemName: "trophy.fill")
                         .font(.title2)
+                        .foregroundStyle(.yellow)
 
                     VStack(alignment: .leading, spacing: 3) {
                         HStack(spacing: 6) {

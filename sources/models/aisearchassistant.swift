@@ -206,11 +206,11 @@ final class BrewStoreAIAssistant: ObservableObject {
 
         // Educational inquiries detection
         if workingQuery.contains("what is a cask") || workingQuery.contains("cask vs formula") || workingQuery.contains("what is formula") {
-            self.educationalNote = "💡 **Casks vs Formulae**: In Homebrew, **Casks** are full graphical macOS desktop apps installed into `/Applications` (e.g. VS Code, Chrome, Ghostty). **Formulae** are command-line tools, libraries, compilers, and background services installed into the Cellar (e.g. git, python, ffmpeg, nginx)."
+            self.educationalNote = "**Casks vs Formulae**: In Homebrew, **Casks** are full graphical macOS desktop apps installed into `/Applications` (e.g. VS Code, Chrome, Ghostty). **Formulae** are command-line tools, libraries, compilers, and background services installed into the Cellar (e.g. git, python, ffmpeg, nginx)."
         } else if workingQuery.contains("how to tap") || workingQuery.contains("what is a tap") {
-            self.educationalNote = "🚰 **Homebrew Taps**: A Tap is a third-party Git repository containing custom formulae and casks not in the default official core (e.g. `brew tap homebrew/cask-fonts` for fonts, or `brew tap nikitabobko/tap` for AeroSpace)."
+            self.educationalNote = "**Homebrew Taps**: A Tap is a third-party Git repository containing custom formulae and casks not in the default official core (e.g. `brew tap homebrew/cask-fonts` for fonts, or `brew tap nikitabobko/tap` for AeroSpace)."
         } else if workingQuery.contains("how to pin") || workingQuery.contains("what is pin") {
-            self.educationalNote = "📌 **Package Pinning**: Pinning a formula (`brew pin <name>`) locks its version so `brew upgrade` will never automatically upgrade or overwrite it."
+            self.educationalNote = "**Package Pinning**: Pinning a formula (`brew pin <name>`) locks its version so `brew upgrade` will never automatically upgrade or overwrite it."
         }
 
         let queryWords = Set(workingQuery.components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty })

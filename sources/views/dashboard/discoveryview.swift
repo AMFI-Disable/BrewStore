@@ -1016,9 +1016,9 @@ struct DiscoveryView: View {
                 .padding(.top, 8)
 
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 230, maximum: 450), spacing: 12)], spacing: 12) {
-                    podiumCard(item: top3[0], rank: 1, medal: "🥇", color: .orange)
-                    podiumCard(item: top3[1], rank: 2, medal: "🥈", color: .gray)
-                    podiumCard(item: top3[2], rank: 3, medal: "🥉", color: .brown)
+                    podiumCard(item: top3[0], rank: 1, color: .orange)
+                    podiumCard(item: top3[1], rank: 2, color: .gray)
+                    podiumCard(item: top3[2], rank: 3, color: .brown)
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 6)
@@ -1027,7 +1027,7 @@ struct DiscoveryView: View {
     }
 
     @ViewBuilder
-    private func podiumCard(item: BrewStoreDiscoveryItem, rank: Int, medal: String, color: Color) -> some View {
+    private func podiumCard(item: BrewStoreDiscoveryItem, rank: Int, color: Color) -> some View {
         let targetPackage = manager.packages.first { $0.id == item.id && $0.kind == item.kind } ?? BrewStorePackage(
             id: item.id,
             name: item.name,
@@ -1040,10 +1040,12 @@ struct DiscoveryView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .center) {
                 HStack(spacing: 4) {
-                    Text(medal)
+                    Image(systemName: rank == 1 ? "trophy.fill" : (rank == 2 ? "medal.fill" : "award.fill"))
+                        .font(.caption2)
                     Text("#\(rank)")
                         .font(.caption.bold())
                 }
+                .foregroundStyle(color)
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)
                 .background(color.opacity(0.15), in: Capsule())

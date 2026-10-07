@@ -173,7 +173,7 @@ enum SettingsSearchEngine {
             icon: "sparkles"
         ),
         SettingsSearchItem(
-            id: "features_innovations",
+            id: "features_details",
             tab: .features,
             title: "Package Details",
             summary: "Dependency graphs, App Cleaner leftover scanner, and default uninstallation strategy.",
