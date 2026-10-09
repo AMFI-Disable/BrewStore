@@ -1,13 +1,180 @@
-.DS_Store
-*.xcodeproj
-*.xcworkspace
-DerivedData/
-build/
-*.app
-*.dmg
+# ==============================================================================
+# BrewStore .gitignore
+# ==============================================================================
+# Controls file visibility and repository hygiene:
+# - Hides transient build artifacts, machine-specific caches, editor states, and secrets.
+# - Preserves active working files, configuration definitions, and distribution assets.
+# ==============================================================================
+
+# ==============================================================================
+# SECTION 1: WORKING & PRESERVED FILES (Explicit Whitelists)
+# (Guarantees vital project sources, configs, and assets are preserved)
+# ==============================================================================
+
+# Core Project Configuration
+!project.yml
+!.gitignore
+!.swiftformat
+!.markdownlint.json
+
+# Documentation & Readmes
+!readme*.md
+!changelog.md
+!license
+
+# Whitelist Public Distribution Metadata
 !website/downloads/
-!website/downloads/brewstore-1.0.0.dmg
-*.zip
+!website/downloads/appcast.xml
+website/downloads/*.dmg
+website/downloads/*.sha256
+*.dmg
+
+# ==============================================================================
+# SECTION 2: HIDDEN & IGNORED ARTIFACTS
+# (Local caches, intermediate builds, user states, credentials, diagnostics)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 2.1 macOS System & Volume Metadata
+# ------------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+Icon?
+
+# ------------------------------------------------------------------------------
+# 2.2 Xcode Generated Projects, Workspaces & User State
+# Note: project.yml is the sole source of truth for Xcode project generation.
+# ------------------------------------------------------------------------------
+*.xcodeproj/
+*.xcodeproj
+*.xcworkspace/
+*.xcworkspace
+*.xcuserdata/
+xcuserdata/
 *.xcuserstate
 *.xcscmblueprint
+*.xccheckout
+*.moved-aside
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# ------------------------------------------------------------------------------
+# 2.3 Swift Package Manager & Tooling Caches
+# ------------------------------------------------------------------------------
+.build/
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.swiftpm/xcode/xcuserdata/
+
+# ------------------------------------------------------------------------------
+# 2.4 Build Products, Compilation Outputs & DerivedData
+# ------------------------------------------------------------------------------
+build/
+Build/
+DerivedData/
+*.app
+*.ipa
+*.pkg
+*.dSYM.zip
+*.dSYM
+*.o
+*.a
+*.dylib
+*.profdata
+*.profraw
+*.coverage
+
+# ------------------------------------------------------------------------------
+# 2.5 Package Distribution & Release Archives
+# (Except website/downloads whitelisted in Section 1)
+# ------------------------------------------------------------------------------
+*.dmg
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+
+# Re-apply website downloads whitelist
+!website/downloads/*.dmg
+!website/downloads/*.sha256
+!website/downloads/appcast.xml
+
+# ------------------------------------------------------------------------------
+# 2.6 Environment Secrets, Private Keys & Tokens
+# ------------------------------------------------------------------------------
+.env
+.env.*
+*.env
+*.key
+*.pem
+*.p12
+*.pfx
+*.cer
+*.crt
+*.mobileprovision
+*.token
+*.pat
+.credentials
+credentials.json
+token.json
+*secret*
+*dsa_priv.pem
+*ed25519_priv*
+
+# ------------------------------------------------------------------------------
+# 2.7 Diagnostics, Crash Logs & Local Telemetry
+# ------------------------------------------------------------------------------
+*.log
+logs/
+crash_reports/
+*.crash
+*.ips
+*.diag
+
+# ------------------------------------------------------------------------------
+# 2.8 Package Managers & Web Hosting Scaffolding
+# ------------------------------------------------------------------------------
+node_modules/
+.npm
+.yarn
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 .vercel
+.netlify
+
+# ------------------------------------------------------------------------------
+# 2.9 IDEs, Text Editors & AI Agent Working Contexts
+# ------------------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.gemini/
+.claude/
+.cursor/
+.windsurf/
+.omp/
+
+# ------------------------------------------------------------------------------
+# 2.10 Temporary Files, Local Scratchpads & Local Internal Documents
+# ------------------------------------------------------------------------------
+*.tmp
+*.temp
+*.bak
+tmp/
+temp/
+scratch/
+local/
+docs/internal/
+task.md
+todo.md
+report.md
+report_template.md
