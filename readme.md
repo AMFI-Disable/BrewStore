@@ -29,7 +29,6 @@
 
 ### 🧭 Quick Directing Links
 
-[📥 Download DMG](website/downloads/brewstore-1.0.0.dmg) •
 [🍺 Homebrew Cask](#option-1-official-homebrew-cask-recommended) •
 [✨ Feature Highlights](#-feature-highlights) •
 [⌨️ Keyboard Shortcuts](#power-keyboard-shortcuts) •
@@ -165,37 +164,7 @@ brew upgrade --cask brewstore
 
 ---
 
-### Option 2: Direct DMG Release Download
-
-Download the signed disk image directly from the release mirror:
-
-- **Installer DMG**: [`website/downloads/brewstore-1.0.0.dmg`](website/downloads/brewstore-1.0.0.dmg)
-- **Release Version**: `v1.0.0`
-- **Verified SHA-256 Checksum**:
-
-  ```text
-  d702a472a3080cbc246dafe9ea810cdcb6e88b886bdca6c92e934b2c278f33a6
-  ```
-
-To verify the integrity of your download:
-
-```bash
-shasum -a 256 website/downloads/brewstore-1.0.0.dmg
-```
-
-#### 🛡️ macOS Gatekeeper Note (Ad-Hoc Signing)
-
-BrewStore is an independent open-source project. If macOS presents an *"Unverified Developer"* prompt on first launch, clear the quarantine attribute:
-
-```bash
-xattr -cr /Applications/BrewStore.app
-```
-
-Alternatively, **Right-Click** `BrewStore.app` in Finder and select **Open**.
-
----
-
-### Option 3: Build from Source
+### Option 2: Build from Source
 
 ```bash
 # Clone repository

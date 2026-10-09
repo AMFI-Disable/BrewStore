@@ -22,11 +22,12 @@
 !changelog.md
 !license
 
-# Whitelist Public Distribution Artifacts (overriding binary archive rules below)
+# Whitelist Public Distribution Metadata
 !website/downloads/
-!website/downloads/*.dmg
-!website/downloads/*.sha256
 !website/downloads/appcast.xml
+website/downloads/*.dmg
+website/downloads/*.sha256
+*.dmg
 
 # ==============================================================================
 # SECTION 2: HIDDEN & IGNORED ARTIFACTS

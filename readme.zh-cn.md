@@ -29,7 +29,6 @@
 
 ### 🧭 快捷导航链接
 
-[📥 下载 DMG 安装包](website/downloads/brewstore-1.0.0.dmg) •
 [🍺 Homebrew Cask 安装](#选项-1官方-homebrew-cask-推荐) •
 [✨ 功能特性亮点](#-功能特性亮点) •
 [⌨️ 快捷键速查指南](#高效键盘快捷键) •
@@ -170,37 +169,7 @@ brew upgrade --cask brewstore
 
 ---
 
-### 选项 2：直接下载 DMG 安装镜像
-
-从官方镜像源直接下载带代码签名的 DMG 安装文件：
-
-- **DMG 安装包**：[`website/downloads/brewstore-1.0.0.dmg`](website/downloads/brewstore-1.0.0.dmg)
-- **发布版本**：`v1.0.0`
-- **已校验 SHA-256 校验码**：
-
-  ```text
-  d702a472a3080cbc246dafe9ea810cdcb6e88b886bdca6c92e934b2c278f33a6
-  ```
-
-验证下载文件的完整性：
-
-```bash
-shasum -a 256 website/downloads/brewstore-1.0.0.dmg
-```
-
-#### 🛡️ macOS Gatekeeper 提示处理说明
-
-由于 BrewStore 为独立开源项目且未参与 Apple 付费开发者公证计划，首次启动若提示“无法验证开发者”：
-
-```bash
-xattr -cr /Applications/BrewStore.app
-```
-
-或在访达（Finder）中**右键点击** `BrewStore.app` 并选择**“打开”**即可。
-
----
-
-### 选项 3：从源代码构建
+### 选项 2：从源代码构建
 
 ```bash
 # 克隆仓库

@@ -29,7 +29,6 @@
 
 ### 🧭 クイックナビゲーション
 
-[📥 DMG をダウンロード](website/downloads/brewstore-1.0.0.dmg) •
 [🍺 Homebrew Cask でインストール](#オプション-1公式-homebrew-cask-推奨) •
 [✨ 主な機能と特徴](#-主な機能と特徴) •
 [⌨️ キーボードショートカット](#便利なキーボードショートカット) •
@@ -163,35 +162,7 @@ brew upgrade --cask brewstore
 
 ---
 
-### オプション 2: DMG の直接ダウンロード
-
-- **インストーラー DMG**: [`website/downloads/brewstore-1.0.0.dmg`](website/downloads/brewstore-1.0.0.dmg)
-- **バージョン**: `v1.0.0`
-- **検証済み SHA-256 チェックサム**:
-
-  ```text
-  d702a472a3080cbc246dafe9ea810cdcb6e88b886bdca6c92e934b2c278f33a6
-  ```
-
-検証コマンド:
-
-```bash
-shasum -a 256 website/downloads/brewstore-1.0.0.dmg
-```
-
-#### 🛡️ macOS Gatekeeper の注意（アドホック署名）
-
-初回起動時に「開発元を検証できない」警告が表示された場合：
-
-```bash
-xattr -cr /Applications/BrewStore.app
-```
-
-または Finder で `BrewStore.app` を**右クリック**して**「開く」**を選択してください。
-
----
-
-### オプション 3: ソースからビルド
+### オプション 2: ソースからビルド
 
 ```bash
 # リポジトリのクローン
