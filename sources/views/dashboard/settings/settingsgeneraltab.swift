@@ -292,7 +292,7 @@ struct SettingsGeneralTab: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            Text("brew tap amfi-disable/brewstore && brew install --cask brewstore")
+            Text("brew tap AMFI-Disable/brewstore && brew install --cask brewstore")
                 .font(.caption.monospaced())
                 .padding(8)
                 .frame(maxWidth: .infinity, alignment: .leading)

@@ -27,8 +27,8 @@ final class BrewStoreAppUpdateChecker: ObservableObject {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
     }
 
-    private let releaseAPIURL = URL(string: "https://api.github.com/repos/amfi-disable/BrewStore/releases/latest") ?? URL(fileURLWithPath: "/dev/null")
-    private let appcastFallbackURL = URL(string: "https://raw.githubusercontent.com/amfi-disable/BrewStore/main/website/downloads/appcast.xml") ?? URL(fileURLWithPath: "/dev/null")
+    private let releaseAPIURL = URL(string: "https://api.github.com/repos/AMFI-Disable/BrewStore/releases/latest") ?? URL(fileURLWithPath: "/dev/null")
+    private let appcastFallbackURL = URL(string: "https://raw.githubusercontent.com/AMFI-Disable/BrewStore/main/website/downloads/appcast.xml") ?? URL(fileURLWithPath: "/dev/null")
 
     init() {
         if let timestamp = UserDefaults.standard.object(forKey: "brewstore.appupdate.lastcheck") as? Double, timestamp > 0 {
@@ -70,7 +70,7 @@ final class BrewStoreAppUpdateChecker: ObservableObject {
                     }
 
                     if downloadURL == nil {
-                        downloadURL = URL(string: "https://github.com/amfi-disable/BrewStore/releases/download/v\(tagName)/brewstore-\(tagName).dmg")
+                        downloadURL = URL(string: "https://github.com/AMFI-Disable/BrewStore/releases/download/v\(tagName)/brewstore-\(tagName).dmg")
                     }
 
                     let release = AppReleaseInfo(
@@ -159,7 +159,7 @@ final class BrewStoreAppUpdateChecker: ObservableObject {
     func downloadAndOpenRelease() {
         if isUpdateAvailable, let url = latestRelease?.downloadURL {
             NSWorkspace.shared.open(url)
-        } else if let siteURL = URL(string: "https://github.com/amfi-disable/BrewStore") {
+        } else if let siteURL = URL(string: "https://github.com/AMFI-Disable/BrewStore") {
             NSWorkspace.shared.open(siteURL)
         }
     }

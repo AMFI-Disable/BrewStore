@@ -2188,7 +2188,7 @@ final class HomebrewManagerTests: XCTestCase {
             <item>
               <title>Version 1.0.1</title>
               <enclosure
-                url="https://github.com/amfi-disable/BrewStore/releases/download/v1.0.1/brewstore-1.0.1.dmg"
+                url="https://github.com/AMFI-Disable/BrewStore/releases/download/v1.0.1/brewstore-1.0.1.dmg"
                 sparkle:shortVersionString="1.0.1"
                 length="9632448"
               />
@@ -2199,7 +2199,7 @@ final class HomebrewManagerTests: XCTestCase {
 
         let release = BrewStoreAppUpdateChecker.parseAppcast(xml: sampleXML, currentVersion: "1.0.0")
         XCTAssertEqual(release.version, "1.0.1")
-        XCTAssertEqual(release.downloadURL?.absoluteString, "https://github.com/amfi-disable/BrewStore/releases/download/v1.0.1/brewstore-1.0.1.dmg")
+        XCTAssertEqual(release.downloadURL?.absoluteString, "https://github.com/AMFI-Disable/BrewStore/releases/download/v1.0.1/brewstore-1.0.1.dmg")
     }
 
     @MainActor

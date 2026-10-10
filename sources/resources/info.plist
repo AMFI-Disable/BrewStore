@@ -21,7 +21,7 @@
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2026 Juicer contributors. Licensed under MIT.</string>
 	<key>SUFeedURL</key>
-	<string>https://github.com/amfi-disable/BrewStore/releases/latest/download/appcast.xml</string>
+	<string>https://github.com/AMFI-Disable/BrewStore/releases/latest/download/appcast.xml</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

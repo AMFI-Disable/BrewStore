@@ -7,7 +7,7 @@
 
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/平台-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
-[![Release: v1.0.0](https://img.shields.io/badge/版本-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/amfi-disable/BrewStore/releases)
+[![Release: v1.0.0](https://img.shields.io/badge/版本-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/AMFI-Disable/BrewStore/releases)
 [![Tests: 345 / 345 Passed](https://img.shields.io/badge/測試-339%20%2F%20339%20全數通過%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-自動化測試與品質保障)
 [![License: MIT](https://img.shields.io/badge/開源協議-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/價格-100%25%20免費開源-success.svg?style=flat-square)](#為什麼選擇-brewstore而不是-caskhub-或-taphouse-pro-1999)
@@ -150,7 +150,7 @@
 ### 選項 1：官方 Homebrew Cask 安裝（推薦） <a id="選項-1官方-homebrew-cask-推薦"></a>
 
 ```bash
-brew tap amfi-disable/brewstore
+brew tap AMFI-Disable/brewstore
 brew install --cask brewstore
 ```
 
@@ -166,7 +166,7 @@ brew upgrade --cask brewstore
 
 ```bash
 # 複製存放庫
-git clone https://github.com/amfi-disable/BrewStore.git
+git clone https://github.com/AMFI-Disable/BrewStore.git
 cd BrewStore
 
 # 透過 XcodeGen 產生專案

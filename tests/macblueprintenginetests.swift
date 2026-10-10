@@ -60,7 +60,7 @@ final class MacBlueprintEngineTests: XCTestCase {
             macModel: "MacBook Pro",
             architecture: "arm64",
             exportDate: Date(),
-            taps: ["amfi-disable/taps"],
+            taps: ["AMFI-Disable/taps"],
             formulae: [MacRigPackageBundle(name: "ripgrep", version: "14.1.0", kind: "formula", tap: nil)],
             casks: [MacRigPackageBundle(name: "ghostty", version: "1.0", kind: "cask", tap: nil)],
             masApps: [MacRigPackageBundle(name: "Slack", version: "4.38.0", kind: "mas", tap: "803453959")],
@@ -69,7 +69,7 @@ final class MacBlueprintEngineTests: XCTestCase {
         )
 
         let script = BrewStoreMacTransferManager.shared.generateBootstrapScript(bundle: bundle)
-        XCTAssertTrue(script.contains("brew tap amfi-disable/taps"))
+        XCTAssertTrue(script.contains("brew tap AMFI-Disable/taps"))
         XCTAssertTrue(script.contains("brew install ripgrep"))
         XCTAssertTrue(script.contains("brew install --cask ghostty"))
         XCTAssertTrue(script.contains("mas install 803453959 # Slack"))

@@ -23,10 +23,9 @@
         <h1>The complete package &amp; app manager for macOS.</h1>
         <p class="lede">Unifying Homebrew, Mac App Store apps, per-app cache cleaning, Apple Silicon native migration, macOS launch daemons, and 1-command Mac Blueprint backups in an Apple Design Award-caliber interface.</p>
         <div class="actions">
-          <a class="button primary" href="/downloads/brewstore-1.0.0.dmg">Download DMG (v1.0.0)</a>
-          <a class="button secondary" href="https://github.com/amfi-disable/BrewStore">GitHub Repository</a>
+          <a class="button primary" href="https://github.com/AMFI-Disable/BrewStore/releases">Get BrewStore Releases</a>
+          <a class="button secondary" href="https://github.com/AMFI-Disable/BrewStore">GitHub Repository</a>
         </div>
-        <p class="note">Verified SHA-256: <code class="hash">6feeca33809eb2d8b59945591bbb7f636f63139c576684f3a38de7d7d853a871</code></p>
       </div>
     </section>
 
@@ -210,19 +209,15 @@
     </section>
 
     <section class="panel">
-      <h2>Installation &amp; Gatekeeper Instructions</h2>
-      <ol>
-        <li>Download the DMG installer: <a href="/downloads/brewstore-1.0.0.dmg"><code>brewstore-1.0.0.dmg</code></a></li>
-        <li>Drag <code>BrewStore.app</code> to your <code>/Applications</code> folder.</li>
-        <li>If macOS Gatekeeper flags an ad-hoc signed alert, open <strong>System Settings → Privacy &amp; Security → Click "Open Anyway"</strong>, or remove the quarantine attribute:</li>
-      </ol>
-      <pre><code>xattr -d com.apple.quarantine /Applications/BrewStore.app</code></pre>
-      <p><a href="/downloads/brewstore-1.0.0.sha256">Download Checksum File</a> · <a href="https://github.com/amfi-disable/BrewStore/issues">Submit Feedback &amp; Issues</a></p>
+      <h2>Installation via Homebrew Tap</h2>
+      <pre><code>brew tap AMFI-Disable/brewstore &amp;&amp; brew install --cask brewstore</code></pre>
+      <p>Or visit the official <a href="https://github.com/AMFI-Disable/BrewStore/releases">GitHub Releases page</a> to download the latest releases.</p>
+      <p><a href="https://github.com/AMFI-Disable/BrewStore/issues">Submit Feedback &amp; Issues</a></p>
     </section>
 
     <footer>
       <span>MIT License · Built with Swift &amp; SwiftUI for macOS 14+</span>
-      <a href="https://github.com/amfi-disable/BrewStore">GitHub</a>
+      <a href="https://github.com/AMFI-Disable/BrewStore">GitHub</a>
     </footer>
   </main>
   <script>

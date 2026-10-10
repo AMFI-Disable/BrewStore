@@ -7,7 +7,7 @@
 
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/Plataforma-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
-[![Release: v1.0.0](https://img.shields.io/badge/Versi%C3%B3n-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/amfi-disable/BrewStore/releases)
+[![Release: v1.0.0](https://img.shields.io/badge/Versi%C3%B3n-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/AMFI-Disable/BrewStore/releases)
 [![Tests: 345 / 345 Passed](https://img.shields.io/badge/Pruebas-339%20%2F%20339%20Superadas%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-pruebas-automatizadas-y-control-de-calidad)
 [![License: MIT](https://img.shields.io/badge/Licencia-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/Precio-100%25%20Gratuito%20y%20C%C3%B3digo%20Abierto-success.svg?style=flat-square)](#-por-qu%C3%A9-brewstore-frente-a-caskhub-y-taphouse-pro-1999)
@@ -148,7 +148,7 @@
 ### Opción 1: Cask Oficial de Homebrew (Recomendado) <a id="opcion-1-cask-oficial-de-homebrew-recomendado"></a>
 
 ```bash
-brew tap amfi-disable/brewstore
+brew tap AMFI-Disable/brewstore
 brew install --cask brewstore
 ```
 
@@ -164,7 +164,7 @@ brew upgrade --cask brewstore
 
 ```bash
 # Clonar repositorio
-git clone https://github.com/amfi-disable/BrewStore.git
+git clone https://github.com/AMFI-Disable/BrewStore.git
 cd BrewStore
 
 # Generar proyecto con XcodeGen

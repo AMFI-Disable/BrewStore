@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <channel>
     <title>BrewStore Changelog</title>
-    <link>https://github.com/amfi-disable/BrewStore/releases</link>
+    <link>https://github.com/AMFI-Disable/BrewStore/releases</link>
     <description>Most recent changes with links to updates.</description>
     <language>en</language>
     <item>
@@ -24,7 +24,7 @@
       </description>
       <pubDate>Fri, 15 Aug 2026 12:00:00 +0000</pubDate>
       <enclosure
-        url="https://github.com/amfi-disable/BrewStore/releases/download/v1.0.0/brewstore-1.0.0.dmg"
+        url="https://github.com/AMFI-Disable/BrewStore/releases/download/v1.0.0/brewstore-1.0.0.dmg"
         sparkle:version="100"
         sparkle:shortVersionString="1.0.0"
         length="7659421"

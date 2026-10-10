@@ -7,7 +7,7 @@
 
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/platform-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
-[![Release: v1.0.0](https://img.shields.io/badge/release-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/amfi-disable/BrewStore/releases)
+[![Release: v1.0.0](https://img.shields.io/badge/release-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/AMFI-Disable/BrewStore/releases)
 [![Tests: 345 / 345 Passed](https://img.shields.io/badge/tests-339%20%2F%20339%20Passed%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-automated-tests--quality-assurance)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/price-100%25%20Free%20%26%20Open%20Source-success.svg?style=flat-square)](#why-brewstore-over-caskhub--taphouse-pro)
@@ -152,7 +152,7 @@ Whether you're a software engineer orchestrating multiple runtimes, a designer c
 Install BrewStore and the terminal CLI companion directly through Homebrew:
 
 ```bash
-brew tap amfi-disable/brewstore
+brew tap AMFI-Disable/brewstore
 brew install --cask brewstore
 ```
 
@@ -168,7 +168,7 @@ brew upgrade --cask brewstore
 
 ```bash
 # Clone repository
-git clone https://github.com/amfi-disable/BrewStore.git
+git clone https://github.com/AMFI-Disable/BrewStore.git
 cd BrewStore
 
 # Generate Xcode project via XcodeGen

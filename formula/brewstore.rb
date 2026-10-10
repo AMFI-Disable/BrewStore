@@ -1,7 +1,7 @@
 class Brewstore < Formula
   desc "Terminal companion CLI for BrewStore"
-  homepage "https://github.com/amfi-disable/BrewStore"
-  url "https://github.com/amfi-disable/BrewStore/raw/main/scripts/brewstore"
+  homepage "https://github.com/AMFI-Disable/BrewStore"
+  url "https://github.com/AMFI-Disable/BrewStore/raw/main/scripts/brewstore"
   version "1.0.0"
   sha256 "0524458f44ff5cb3e390cbeeb3544ec2f69ec99119934fa79326f5d52c114ce9"
   license "MIT"

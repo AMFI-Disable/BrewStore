@@ -25,10 +25,10 @@ The settings interface is organized into **7 Dedicated Sections** accessible via
 - **Launch & Startup**:
   - `Launch BrewStore at Login` toggle (`SMAppService` integration).
   - `Open Minimized to Menu Bar` toggle.
-- **Unnotarized Release Updater & Gatekeeper Helper**:
+- **Official Application Release Updater**:
   - Displays current version (`v1.0.0`) and release status.
   - "Check for App Updates" button.
-  - 1-Click "Copy Gatekeeper Clearance Command" (`xattr -cr /Applications/BrewStore.app`).
+  - Quick access to download DMG or view GitHub release notes.
 - **Official Homebrew Tap Auto-Sync**:
   - 1-Click commands to repair or tap `homebrew/core` and `homebrew/cask`.
 - **Background Scan Frequency**:
