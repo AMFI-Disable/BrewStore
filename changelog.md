@@ -4,6 +4,21 @@ All notable changes, features, and architectural capabilities of BrewStore are d
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- Automated offline quality checks in GitHub Actions CI (`ci.yml`), including Ruby YAML verification, lowercase filename validation, and strict commit message conventions.
+
+### Changed
+
+- Standardized repository references and URLs to `AMFI-Disable/BrewStore` across documentation, source code, and formula manifests.
+- Standardized asset catalog metadata filenames to lowercase (`contents.json`).
+- Updated copyright notices and human-readable metadata to `AMFI-Disable`.
+- Enhanced release download routing to official GitHub Releases and Homebrew Tap.
+
+---
+
 ## [1.0.0] - Production Release (Inaugural Release)
 
 BrewStore transforms Homebrew into a beautiful, native, high-performance macOS App Store and system management ecosystem. Designed exclusively for macOS (Apple Silicon & Intel), BrewStore combines visual software discovery, dual-store package reconciliation (Homebrew & Mac App Store), granular developer cache cleaning, Mach-O architecture intelligence, background daemon controls, time-machine rollback snapshots, multi-machine dotfiles sync, and an embedded CLI companion.
