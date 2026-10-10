@@ -11,7 +11,7 @@
 [![Tests: 345 / 345 Passed](https://img.shields.io/badge/測試-339%20%2F%20339%20全數通過%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-自動化測試與品質保障)
 [![License: MIT](https://img.shields.io/badge/開源協議-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/價格-100%25%20免費開源-success.svg?style=flat-square)](#為什麼選擇-brewstore而不是-caskhub-或-taphouse-pro-1999)
-[![Zero Telemetry](https://img.shields.io/badge/隱私-零遙測%20%2F%20100%25%20純本地-purple.svg?style=flat-square)](#隱私與安全第一原則)
+[![隱私: 零遙測](https://img.shields.io/badge/隱私-零遙測%20%2F%20100%25%20純本地-purple.svg?style=flat-square)](#隱私與安全第一原則)
 
 ---
 

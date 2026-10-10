@@ -11,7 +11,7 @@
 [![Tests: 345 / 345 Passed](https://img.shields.io/badge/Tests-339%20%2F%20339%20R%C3%A9ussis%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-tests-automatis%C3%A9s-et-assurance-qualit%C3%A9)
 [![License: MIT](https://img.shields.io/badge/Licence-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/Prix-100%25%20Gratuit%20%26%20Open%20Source-success.svg?style=flat-square)](#pourquoi-brewstore-face-a-caskhub-et-taphouse-pro-1999)
-[![Zero Telemetry](https://img.shields.io/badge/Confidentialit%C3%A9-Z%C3%A9ro%20T%C3%A9l%C3%A9m%C3%A9trie%20%2F%20100%25%20Local-purple.svg?style=flat-square)](#confidentialite-et-securite-dabord)
+[![Confidentialité: Zéro Télémétrie](https://img.shields.io/badge/Confidentialit%C3%A9-Z%C3%A9ro%20T%C3%A9l%C3%A9m%C3%A9trie%20%2F%20100%25%20Local-purple.svg?style=flat-square)](#confidentialite-et-securite-dabord)
 
 ---
 

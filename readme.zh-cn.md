@@ -11,7 +11,7 @@
 [![Tests: 345 / 345 Passed](https://img.shields.io/badge/测试-339%20%2F%20339%20全数通过-success.svg?style=flat-square&logo=checkmarx)](#-自动化测试与质量保障)
 [![License: MIT](https://img.shields.io/badge/开源协议-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/价格-100%25%20免费开源-success.svg?style=flat-square)](#为什么选择-brewstore而不是-caskhub-或-taphouse-pro-1999)
-[![Zero Telemetry](https://img.shields.io/badge/隐私-零遥测%20%2F%20100%25%20本地-purple.svg?style=flat-square)](#隐私与安全第一原则)
+[![隐私: 零遥测](https://img.shields.io/badge/隐私-零遥测%20%2F%20100%25%20本地-purple.svg?style=flat-square)](#隐私与安全第一原则)
 
 ---
 

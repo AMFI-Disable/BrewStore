@@ -11,7 +11,7 @@
 [![Tests: 345 / 345 Passed](https://img.shields.io/badge/テスト-339%20%2F%20339%20合格%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-自動テストと品質保証)
 [![License: MIT](https://img.shields.io/badge/ライセンス-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/価格-100%25%20無料＆オープンソース-success.svg?style=flat-square)](#-なぜ-brewstore-が選ばれるのか)
-[![Zero Telemetry](https://img.shields.io/badge/プライバシー-完全ローカル%20%2F%20テレメトリゼロ-purple.svg?style=flat-square)](#セキュリティとプライバシー最優先)
+[![プライバシー: 完全ローカル](https://img.shields.io/badge/プライバシー-完全ローカル%20%2F%20テレメトリゼロ-purple.svg?style=flat-square)](#セキュリティとプライバシー最優先)
 
 ---
 
