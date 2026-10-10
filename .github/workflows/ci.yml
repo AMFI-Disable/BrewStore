@@ -10,9 +10,50 @@ permissions:
   contents: read
 
 jobs:
+  quality:
+    name: Fast Offline Quality Checks
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate YAML Files
+        run: |
+          ruby -ryaml -e '
+            Dir.glob(".github/**/*.{yml,yaml}").each do |f|
+              YAML.safe_load(File.read(f))
+              puts "Validated: #{f}"
+            end
+          '
+
+      - name: Verify Lowercase Filenames
+        run: |
+          if git ls-files | grep '[A-Z]'; then
+            echo "Error: uppercase tracked files found"
+            exit 1
+          fi
+          echo "All tracked files are lowercase."
+
+      - name: Verify Commit Message Conventions
+        run: |
+          python3 -c '
+          import subprocess, re
+          pattern = re.compile(r"^[a-z]+: [a-z0-9]+ [a-z0-9]+ [a-z0-9]+$")
+          commits = subprocess.check_output(["git", "log", "--format=%H %s"]).decode().strip().split("\n")
+          for c in commits:
+              sha, msg = c.split(" ", 1)
+              if not pattern.match(msg):
+                  raise SystemExit(f"Invalid commit message {sha[:7]}: {msg}")
+          print(f"Validated all {len(commits)} commit messages.")
+          '
+
   build-and-test:
     name: Build & Test macOS Application
     runs-on: macos-14
+    needs: [ quality ]
 
     steps:
       - name: Checkout Code
