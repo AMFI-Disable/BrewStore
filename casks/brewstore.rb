@@ -20,6 +20,13 @@ cask "brewstore" do
                    sudo: false
   end
 
+  caveats <<~EOS
+    BrewStore is an unnotarized open-source build.
+    If macOS Gatekeeper prevents opening on launch:
+      sudo xattr -r -c /Applications/BrewStore.app
+    Or allow it via System Settings > Privacy & Security > Open Anyway.
+  EOS
+
   zap trash: [
     "~/Library/Application Support/BrewStore",
     "~/Library/Caches/com.amfi-disable.BrewStore",

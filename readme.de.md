@@ -160,7 +160,29 @@ brew upgrade --cask brewstore
 
 ---
 
-### Option 2: Aus dem Quellcode bauen
+### Option 2: Manuelles DMG-Paket (GitHub Releases)
+
+Laden Sie das verifizierte `.dmg`-Paket über [GitHub Releases](https://github.com/AMFI-Disable/BrewStore/releases) herunter. Es wird empfohlen, die SHA-256-Prüfsumme nach dem Download zu überprüfen:
+
+```bash
+shasum -a 256 brewstore-1.0.0.dmg
+```
+
+#### macOS Gatekeeper Quarantäne-Aufhebung (Nicht Notarierte Open-Source-Version)
+
+Da BrewStore ein Open-Source-Projekt ohne kostenpflichtiges Apple Developer ID Zertifikat (99 $/Jahr) ist, versetzt macOS Gatekeeper heruntergeladene Anwendungspakete beim ersten Start in Quarantäne.
+
+So heben Sie das Quarantäne-Attribut über das Terminal auf:
+
+```bash
+sudo xattr -r -c /Applications/BrewStore.app
+```
+
+Alternativ öffnen Sie **Systemeinstellungen > Datenschutz & Sicherheit**, scrollen zum Abschnitt Sicherheit und klicken auf **Dennoch öffnen** (oder halten Sie `Control` gedrückt, während Sie im Finder auf die App klicken, und wählen Sie **Öffnen**).
+
+---
+
+### Option 3: Aus dem Quellcode bauen
 
 ```bash
 # Repository klonen

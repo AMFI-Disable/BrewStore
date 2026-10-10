@@ -164,7 +164,29 @@ brew upgrade --cask brewstore
 
 ---
 
-### Option 2: Build from Source
+### Option 2: Manual DMG Package (GitHub Releases)
+
+Download the verified `.dmg` package from [GitHub Releases](https://github.com/AMFI-Disable/BrewStore/releases). Verify the SHA-256 checksum after download:
+
+```bash
+shasum -a 256 brewstore-1.0.0.dmg
+```
+
+#### macOS Gatekeeper Clearance (Unnotarized Open-Source Build)
+
+Because BrewStore is an open-source build provided without a paid Apple Developer ID certificate ($99/year), macOS Gatekeeper quarantines downloaded application bundles on first launch.
+
+To clear the quarantine flag via Terminal:
+
+```bash
+sudo xattr -r -c /Applications/BrewStore.app
+```
+
+Alternatively, open **System Settings > Privacy & Security**, scroll down to the Security section, and click **Open Anyway** (or hold `Control` while clicking the app in Finder and select **Open**).
+
+---
+
+### Option 3: Build from Source
 
 ```bash
 # Clone repository

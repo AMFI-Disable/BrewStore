@@ -162,7 +162,29 @@ brew upgrade --cask brewstore
 
 ---
 
-### オプション 2: ソースからビルド
+### オプション 2: 手動 DMG パッケージのインストール（GitHub Releases）
+
+公式 [GitHub Releases](https://github.com/AMFI-Disable/BrewStore/releases) ページから検証済みの `.dmg` パッケージをダウンロードします。ダウンロード後に SHA-256 チェックサムの確認を推奨します:
+
+```bash
+shasum -a 256 brewstore-1.0.0.dmg
+```
+
+#### macOS Gatekeeper 検疫解除（未署名オープンソースビルド）
+
+BrewStore は有償の Apple Developer ID 証明書（年額 99 ドル）を取得していないオープンソースビルドのため、初回起動時に macOS Gatekeeper により検疫隔離警告（「開発元を検証できない」等）が表示されます。
+
+ターミナルから次のコマンドを実行して検疫属性を解除できます:
+
+```bash
+sudo xattr -r -c /Applications/BrewStore.app
+```
+
+または、**システム設定 > プライバシーとセキュリティ** を開き、セキュリティ項目までスクロールして **このまま開く** をクリックします（もしくは Finder で `Control` キーを押しながらアプリをクリックして **開く** を選択します）。
+
+---
+
+### オプション 3: ソースからビルド
 
 ```bash
 # リポジトリのクローン

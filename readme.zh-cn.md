@@ -169,7 +169,29 @@ brew upgrade --cask brewstore
 
 ---
 
-### 选项 2：从源代码构建
+### 选项 2：手动下载 DMG 安装包（GitHub Releases）
+
+从官方 [GitHub Releases](https://github.com/AMFI-Disable/BrewStore/releases) 页面下载经过校验的 `.dmg` 安装包。下载后建议核对 SHA-256 校验和：
+
+```bash
+shasum -a 256 brewstore-1.0.0.dmg
+```
+
+#### macOS Gatekeeper 安全隔离解除（非签名开源应用）
+
+由于 BrewStore 为个人开源维护项目，未购买年费 99 美元的 Apple 开发者证书，macOS Gatekeeper 在首次启动时会弹出安全隔离提示（“无法验证开发者”或“提示恶意软件”）。
+
+可通过终端执行以下命令清除隔离属性：
+
+```bash
+sudo xattr -r -c /Applications/BrewStore.app
+```
+
+或者打开 **系统设置 > 隐私与安全性**，向下滚动至“安全性”区域，点击 **仍要打开**（或在访达中按住 `Control` 键点击应用图标并选择 **打开**）。
+
+---
+
+### 选项 3：从源代码构建
 
 ```bash
 # 克隆仓库
