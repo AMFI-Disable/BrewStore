@@ -30,6 +30,28 @@ final class BrewStoreCLIToolManager: ObservableObject {
                 return direct
             }
         }
+        // Fallback for CI runner / GitHub Actions environment
+        if let ghWorkspace = ProcessInfo.processInfo.environment["GITHUB_WORKSPACE"] {
+            let ciScript = "\(ghWorkspace)/scripts/brewstore"
+            if fileManager.fileExists(atPath: ciScript) {
+                return ciScript
+            }
+        }
+        // Fallback relative to source tree during compilation / testing
+        let compileSourceRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("scripts/brewstore").path
+        if fileManager.fileExists(atPath: compileSourceRoot) {
+            return compileSourceRoot
+        }
+        // Fallback relative to current working directory
+        let cwdScript = URL(fileURLWithPath: fileManager.currentDirectoryPath)
+            .appendingPathComponent("scripts/brewstore").path
+        if fileManager.fileExists(atPath: cwdScript) {
+            return cwdScript
+        }
         // Fallback for local development / testing
         let localWorkspace = "/Users/even/Desktop/Projects/Apps/BrewStore/scripts/brewstore"
         if fileManager.fileExists(atPath: localWorkspace) {

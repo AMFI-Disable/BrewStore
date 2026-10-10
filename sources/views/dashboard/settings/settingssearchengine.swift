@@ -68,7 +68,7 @@ enum SettingsSearchEngine {
             id: "general_tap",
             tab: .general,
             title: "Official BrewStore Homebrew Tap",
-            summary: "Inspect and manage the official BrewStore tap (even/brewstore) for casks and formulas.",
+            summary: "Inspect and manage the official BrewStore tap (AMFI-Disable/brewstore) for casks and formulas.",
             keywords: ["tap", "official tap", "cask tap", "formula tap", "repository"],
             icon: "spigot.fill"
         ),
