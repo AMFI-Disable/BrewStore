@@ -39,6 +39,7 @@ website/downloads/*.sha256
 # ------------------------------------------------------------------------------
 .DS_Store
 .DS_Store?
+.ds_store
 ._*
 .AppleDouble
 .LSOverride
@@ -54,7 +55,7 @@ Icon?
 *.xcodeproj
 *.xcworkspace/
 *.xcworkspace
-*.xcuserdata/
+*.xcuserdatad/
 xcuserdata/
 *.xcuserstate
 *.xcscmblueprint
@@ -69,14 +70,12 @@ xcuserdata/
 # 2.3 Swift Package Manager & Tooling Caches
 # ------------------------------------------------------------------------------
 .build/
-.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
-.swiftpm/xcode/xcuserdata/
+.swiftpm/
 
 # ------------------------------------------------------------------------------
 # 2.4 Build Products, Compilation Outputs & DerivedData
 # ------------------------------------------------------------------------------
 build/
-Build/
 DerivedData/
 *.app
 *.ipa
@@ -161,6 +160,9 @@ yarn-error.log*
 .claude/
 .cursor/
 .windsurf/
+.codex/
+antigravity.json
+.nodeterm/
 .omp/
 
 # ------------------------------------------------------------------------------
@@ -176,5 +178,6 @@ local/
 docs/internal/
 task.md
 todo.md
+plan.md
 report.md
 report_template.md
