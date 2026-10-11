@@ -42,7 +42,7 @@
 
 ---
 
-## 📖 What is BrewStore?
+## 📖 What Is BrewStore?
 
 **BrewStore** is the definitive desktop application for macOS package management. Built from the ground up in native **SwiftUI** and **AppKit**, it bridges the raw flexibility of Homebrew’s CLI with the elegance, discoverability, and fluid ergonomics of an Apple Design Award-winning App Store experience.
 
@@ -186,7 +186,7 @@ Alternatively, open **System Settings > Privacy & Security**, scroll down to the
 
 ---
 
-### Option 3: Build from Source
+### Option 3: Build From Source
 
 ```bash
 # Clone repository
