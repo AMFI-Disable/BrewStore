@@ -278,7 +278,7 @@ public final class CommunityShowdownManager: ObservableObject {
 
     public static func makeDefaultSeason(hallOfFame: [HallOfFameEntry]) -> ShowdownSeason {
         let calendar = Calendar.current
-        let threeDaysLater = calendar.date(byAdding: .day, value: 3, to: Date()) ?? Date()
+        let threeMonthsLater = calendar.date(byAdding: .month, value: 3, to: Date()) ?? Date()
         let retired = Set(hallOfFame.map { $0.packageID.lowercased() })
 
         let initialNominees = [
@@ -287,7 +287,7 @@ public final class CommunityShowdownManager: ObservableObject {
                 packageKind: "formula",
                 name: "ripgrep",
                 summary: "Fast code search tool written in Rust that respects your .gitignore.",
-                voteCount: 42,
+                voteCount: 0,
                 hasVoted: false,
                 authorLogin: "burntsushi"
             ),
@@ -296,7 +296,7 @@ public final class CommunityShowdownManager: ObservableObject {
                 packageKind: "formula",
                 name: "fd",
                 summary: "Simple, fast and user-friendly alternative to find.",
-                voteCount: 38,
+                voteCount: 0,
                 hasVoted: false,
                 authorLogin: "sharkdp"
             ),
@@ -305,7 +305,7 @@ public final class CommunityShowdownManager: ObservableObject {
                 packageKind: "formula",
                 name: "bat",
                 summary: "Cat clone with syntax highlighting and Git integration.",
-                voteCount: 35,
+                voteCount: 0,
                 hasVoted: false,
                 authorLogin: "sharkdp"
             ),
@@ -314,7 +314,7 @@ public final class CommunityShowdownManager: ObservableObject {
                 packageKind: "formula",
                 name: "eza",
                 summary: "Modern, maintained replacement for ls with colors and icons.",
-                voteCount: 29,
+                voteCount: 0,
                 hasVoted: false,
                 authorLogin: "eza-community"
             ),
@@ -323,7 +323,7 @@ public final class CommunityShowdownManager: ObservableObject {
                 packageKind: "cask",
                 name: "Ghostty",
                 summary: "Fast, native, GPU-accelerated terminal emulator for macOS.",
-                voteCount: 24,
+                voteCount: 0,
                 hasVoted: false,
                 authorLogin: "mitchellh"
             ),
@@ -332,7 +332,7 @@ public final class CommunityShowdownManager: ObservableObject {
                 packageKind: "formula",
                 name: "dust",
                 summary: "A more intuitive version of du in Rust.",
-                voteCount: 19,
+                voteCount: 0,
                 hasVoted: false,
                 authorLogin: "bootandy"
             )
@@ -344,25 +344,25 @@ public final class CommunityShowdownManager: ObservableObject {
                 title: "Speed Grep vs Modern Find",
                 candidateA: initialNominees[0],
                 candidateB: initialNominees[1],
-                votesA: 64,
-                votesB: 51
+                votesA: 0,
+                votesB: 0
             ),
             ShowdownMatchup(
                 id: "matchup_semi_2",
                 title: "Smarter Cat vs Modern Ls",
                 candidateA: initialNominees[2],
                 candidateB: initialNominees[3],
-                votesA: 48,
-                votesB: 55
+                votesA: 0,
+                votesB: 0
             )
         ]
 
         return ShowdownSeason(
-            id: "season_2026_w35",
+            id: "season_1",
             title: "Season 1: Modern Rust CLI Rewrites",
             themeDescription: "Vote for the ultimate modern CLI tools that speed up your daily terminal workflow! Qualifying is open: nominate your top picks or upvote existing contenders.",
             phase: .qualifying,
-            phaseEndTime: threeDaysLater,
+            phaseEndTime: threeMonthsLater,
             retiredPackageIDs: retired,
             nominees: initialNominees,
             matchups: matchups
