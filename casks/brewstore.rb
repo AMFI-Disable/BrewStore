@@ -1,6 +1,6 @@
 cask "brewstore" do
   version "1.0.0"
-  sha256 "6feeca33809eb2d8b59945591bbb7f636f63139c576684f3a38de7d7d853a871"
+  sha256 "d1ba23eaa7fa3223048c51c16eac19637d0eb720a280a9551b213c0c1207ab0e"
 
   url "https://github.com/AMFI-Disable/BrewStore/releases/download/v#{version}/brewstore-#{version}.dmg"
   name "BrewStore"
@@ -8,17 +8,22 @@ cask "brewstore" do
   homepage "https://github.com/AMFI-Disable/BrewStore"
 
   auto_updates true
-  depends_on macos: ">= :sonoma"
+  depends_on macos: :sonoma
 
   app "BrewStore.app"
   binary "#{appdir}/BrewStore.app/Contents/Resources/scripts/brewstore", target: "brewstore"
 
-  postflight do
-    # Remove quarantine attribute for unnotarized ad-hoc builds
-    system_command "/usr/bin/xattr",
-                   args: ["-cr", "#{appdir}/BrewStore.app"],
-                   sudo: false
+  postflight_steps do
+    run "/usr/bin/xattr", args: ["-cr", "/Applications/BrewStore.app"]
   end
+
+  zap trash: [
+    "~/Library/Application Support/BrewStore",
+    "~/Library/Caches/com.amfi-disable.BrewStore",
+    "~/Library/LaunchAgents/com.amfi-disable.brewstore.autoupdate.plist",
+    "~/Library/Logs/BrewStore",
+    "~/Library/Preferences/com.amfi-disable.BrewStore.plist",
+  ]
 
   caveats <<~EOS
     BrewStore is an unnotarized open-source build.
@@ -26,12 +31,4 @@ cask "brewstore" do
       sudo xattr -r -c /Applications/BrewStore.app
     Or allow it via System Settings > Privacy & Security > Open Anyway.
   EOS
-
-  zap trash: [
-    "~/Library/Application Support/BrewStore",
-    "~/Library/Caches/com.amfi-disable.BrewStore",
-    "~/Library/Preferences/com.amfi-disable.BrewStore.plist",
-    "~/Library/LaunchAgents/com.amfi-disable.brewstore.autoupdate.plist",
-    "~/Library/Logs/BrewStore",
-  ]
 end

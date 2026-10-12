@@ -29,6 +29,16 @@ if [[ ! -d "$app_path" ]]; then
   exit 1
 fi
 
+mkdir -p "$app_path/Contents/Resources/scripts"
+cp -f "$repo_root/scripts/brewstore" "$app_path/Contents/Resources/scripts/"
+cp -f "$repo_root/scripts/brewstore-agent.sh" "$app_path/Contents/Resources/scripts/"
+if [[ -d "$repo_root/scripts/completions" ]]; then
+  cp -Rf "$repo_root/scripts/completions" "$app_path/Contents/Resources/scripts/"
+fi
+chmod +x "$app_path/Contents/Resources/scripts/brewstore" "$app_path/Contents/Resources/scripts/brewstore-agent.sh"
+
+codesign --force --sign - -o runtime --entitlements "$repo_root/sources/resources/brewstore.entitlements" --timestamp=none "$app_path"
+
 rm -rf "$staging_root"
 mkdir -p "$staging_root"
 ditto "$app_path" "$staging_root/BrewStore.app"

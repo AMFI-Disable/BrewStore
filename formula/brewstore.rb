@@ -3,7 +3,7 @@ class Brewstore < Formula
   homepage "https://github.com/AMFI-Disable/BrewStore"
   url "https://github.com/AMFI-Disable/BrewStore/raw/main/scripts/brewstore"
   version "1.0.0"
-  sha256 "0524458f44ff5cb3e390cbeeb3544ec2f69ec99119934fa79326f5d52c114ce9"
+  sha256 "d73e910f0984531cb494bcad3f396739cf8131e45257da7bfafe2da9b5c42c10"
   license "MIT"
 
   def install
