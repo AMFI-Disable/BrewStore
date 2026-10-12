@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -38,16 +38,32 @@ jobs:
           echo "All tracked files are lowercase."
 
       - name: Verify Commit Message Conventions
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
           python3 -c '
-          import subprocess, re
+          import subprocess, re, os
           pattern = re.compile(r"^[a-z]+: [a-z0-9]+ [a-z0-9]+ [a-z0-9]+$")
-          commits = subprocess.check_output(["git", "log", "--format=%H %s"]).decode().strip().split("\n")
+          base_sha = os.environ.get("BASE_SHA", "")
+
+          if base_sha and not re.match(r"^0+$", base_sha):
+              rev_range = f"{base_sha}..HEAD"
+          else:
+              rev_range = "HEAD~1..HEAD"
+
+          try:
+              commits = subprocess.check_output(["git", "log", rev_range, "--format=%H %s"]).decode().strip().split("\n")
+          except Exception:
+              commits = subprocess.check_output(["git", "log", "-1", "--format=%H %s"]).decode().strip().split("\n")
+
+          commits = [c for c in commits if c.strip()]
           for c in commits:
               sha, msg = c.split(" ", 1)
+              if msg.startswith("Merge "):
+                  continue
               if not pattern.match(msg):
                   raise SystemExit(f"Invalid commit message {sha[:7]}: {msg}")
-          print(f"Validated all {len(commits)} commit messages.")
+          print(f"Validated {len(commits)} commit messages.")
           '
 
   build-and-test:
@@ -57,7 +73,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Select Xcode Version
         run: sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer || sudo xcode-select -s $(ls -d /Applications/Xcode*.app | sort -r | head -1)/Contents/Developer
