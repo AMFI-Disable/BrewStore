@@ -43,6 +43,10 @@ rm -rf "$staging_root"
 mkdir -p "$staging_root"
 ditto "$app_path" "$staging_root/BrewStore.app"
 ln -s /Applications "$staging_root/Applications"
+if [[ -f "$app_path/Contents/Resources/appicon.icns" ]]; then
+  cp "$app_path/Contents/Resources/appicon.icns" "$staging_root/.VolumeIcon.icns"
+  SetFile -a C "$staging_root" 2>/dev/null || true
+fi
 
 mkdir -p "$release_dir"
 rm -f "$dmg_path"
