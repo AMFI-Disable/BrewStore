@@ -205,10 +205,10 @@ ditto "$TARGET_APP" "$APP_DEST"
 
 # Ensure embedded CLI companion scripts exist with executable permissions
 mkdir -p "$APP_DEST/Contents/Resources/scripts"
-cp -f "$PROJECT_DIR/scripts/brewstore" "$APP_DEST/Contents/Resources/scripts/"
-cp -f "$PROJECT_DIR/scripts/brewstore-agent.sh" "$APP_DEST/Contents/Resources/scripts/"
-if [[ -d "$PROJECT_DIR/scripts/completions" ]]; then
-  cp -Rf "$PROJECT_DIR/scripts/completions" "$APP_DEST/Contents/Resources/scripts/"
+cp -f "$REPO_ROOT/scripts/brewstore" "$APP_DEST/Contents/Resources/scripts/"
+cp -f "$REPO_ROOT/scripts/brewstore-agent.sh" "$APP_DEST/Contents/Resources/scripts/"
+if [[ -d "$REPO_ROOT/scripts/completions" ]]; then
+  cp -Rf "$REPO_ROOT/scripts/completions" "$APP_DEST/Contents/Resources/scripts/"
 fi
 chmod +x "$APP_DEST/Contents/Resources/scripts/brewstore" "$APP_DEST/Contents/Resources/scripts/brewstore-agent.sh"
 

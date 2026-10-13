@@ -498,7 +498,7 @@ struct BrewStoreRootView: View {
         }
         .padding(.vertical, isStorefront ? 4 : 2)
         .padding(.top, isStorefront ? 2 : 4)
-        .padding(.trailing, 12)
+        .padding(.trailing, 14)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(
             "Sidebar.HubHeader.\(hub.rawValue.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "&", with: ""))"
@@ -556,7 +556,6 @@ struct BrewStoreRootView: View {
     private func subSidebarRow(for section: BrewStoreSection) -> some View {
         sidebarRow(for: section)
             .padding(.leading, 8)
-            .padding(.trailing, 12)
     }
 
     private func sidebarRow(for section: BrewStoreSection) -> some View {
@@ -1132,7 +1131,7 @@ struct SidebarCountBadge: View {
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 2)
-        .frame(minHeight: 18)
+        .frame(minWidth: 18, minHeight: 18)
         .background(backgroundColor, in: Capsule())
         .frame(minWidth: 28, alignment: .trailing)
         .fixedSize(horizontal: true, vertical: false)
