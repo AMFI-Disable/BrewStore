@@ -4,7 +4,7 @@ This document specifies **EVERY SINGLE feature, filter, batch action, contextual
 
 ---
 
-## 🧭 Overview of Secondary Panes Architecture
+## 🧭 Overview Of Secondary Panes Architecture
 
 When a primary sidebar item is selected, the adjacent **Secondary Pane** presents dedicated sub-navigation, multi-facet filtering, sorting engines, batch selection toolbars, and inspector panels:
 

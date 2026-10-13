@@ -4,7 +4,7 @@ This document is an exhaustive, feature-by-feature test and verification specifi
 
 ---
 
-## 🧭 Overview of Sidebar Architecture
+## 🧭 Overview Of Sidebar Architecture
 
 The primary sidebar (`BrewStoreRootView.swift`) is structured into **4 Primary Sections**, **7 Toolbar Quick-Action Items**, **1 Persistent Bottom Status / Profile Deck**, and **1 Collapsible Action Console Drawer**.
 
@@ -101,13 +101,13 @@ Every button in the top toolbar provides instant access to global modal sheets a
   - **App Store Action Pill (`AppStoreActionButton`)**: Displays `GET`, `UPDATE`, `OPEN`, or `INSTALLED` with dropdown context actions.
   - **Detail Sheet (`DiscoveryDetailView`)**: Shows complete metadata, licenses, tap sources, dependency pills, Star toggle, and Pin/Unpin button.
 
-### 2. `Stories` (`book.pages.fill`) *(Toggleable in Settings)*
+### 2. `Stories` (`book.pages.fill`) *(Toggleable In Settings)*
 
 - **Features**:
   - Rich markdown editorial articles, workflow guides, and featured developer setups.
   - Inline package mention pills with 1-click install action.
 
-### 3. `Toolkits` / `Stacks` (`square.stack.3d.up.fill`) *(Toggleable in Settings)*
+### 3. `Toolkits` / `Stacks` (`square.stack.3d.up.fill`) *(Toggleable In Settings)*
 
 - **Features**:
   - **Curated 100% Free & Open-Source Bundles**: DevOps Kit, AI Engineer Suite, Privacy & Security, Web Developer Toolkit.

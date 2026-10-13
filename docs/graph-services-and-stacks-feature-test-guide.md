@@ -10,7 +10,7 @@ This document details **EVERY SINGLE feature, interactive gesture, service telem
 
 ---
 
-## 🧭 Overview of Advanced Visual & System Panes
+## 🧭 Overview Of Advanced Visual & System Panes
 
 ```mermaid
 graph TD

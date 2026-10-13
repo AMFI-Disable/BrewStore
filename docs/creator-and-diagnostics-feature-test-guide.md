@@ -4,7 +4,7 @@ This document details **EVERY SINGLE feature, maintainer tool, AI recommendation
 
 ---
 
-## 🧭 Overview of Advanced Auxiliary Interfaces
+## 🧭 Overview Of Advanced Auxiliary Interfaces
 
 ```mermaid
 graph TD

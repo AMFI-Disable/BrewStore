@@ -27,7 +27,7 @@ Below is the comprehensive page-by-page and component-by-component directory of 
 
 ---
 
-### Table of Contents
+### Table Of Contents
 
 1. [Storefront Hub](#1-storefront-hub)
    - [Discover (`/discover`)](#discover-discover)

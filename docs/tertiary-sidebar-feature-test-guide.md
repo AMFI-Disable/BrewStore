@@ -4,7 +4,7 @@ This document details **EVERY SINGLE feature, setting toggle, documentation topi
 
 ---
 
-## 🧭 Overview of Dedicated Navigation Sidebars
+## 🧭 Overview Of Dedicated Navigation Sidebars
 
 ```mermaid
 graph TD

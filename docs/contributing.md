@@ -1,4 +1,4 @@
-# Contributing to BrewStore
+# Contributing To BrewStore
 
 Thank you for your interest in contributing to BrewStore! As an open-source utility, we welcome community improvements, bug fixes, and feature contributions.
 

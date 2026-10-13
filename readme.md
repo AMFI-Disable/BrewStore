@@ -91,7 +91,7 @@ Whether you're a software engineer orchestrating multiple runtimes, a designer c
 
 ## ✨ Feature Highlights
 
-### 👑 The 5 Pillars of the Complete Mac App Manager
+### 👑 The 5 Pillars Of The Complete Mac App Manager
 
 1. **🏬 Unified Dual-Store App Management & Homebrew Preference**
    - Seamlessly unifies Homebrew Casks, CLI Formulae, Mac App Store apps (`mas-cli`), and external unmanaged apps in a single searchable inventory.
@@ -114,7 +114,7 @@ Whether you're a software engineer orchestrating multiple runtimes, a designer c
    - Comprehensive **Mac Blueprint** export capturing all Homebrew packages, taps, Mac App Store apps (`mas "<name>", id: <id>`), pinned versions, and app preferences.
    - Generates an idempotent, 1-command bootstrap shell script and provides native in-app restoration in `MultiMachineSyncView` to clone your Mac environment in minutes.
 
-### 🛍️ 6. Modern App Store Experience for Homebrew
+### 🛍️ 6. Modern App Store Experience For Homebrew
 
 - **Curated Spotlight & Editorial Stories**: Discover top-tier macOS utilities with handcrafted editorial narratives, release breakdowns, and developer highlights.
 - **Community Showdown & Tournament Brackets**: Zero-server community brackets powered by GitHub Discussions. Vote for your favorite tools and follow seasonal matchups.
