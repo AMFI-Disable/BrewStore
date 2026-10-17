@@ -26,7 +26,7 @@ xcodebuild test \
 
 echo -e "\033[1;36m==>\033[0m [3/3] Validating Fixture Environment Teardown…"
 # Ensure no lingering temporary fixture folders exist in /tmp
-if [ -d "/tmp/brewstore_fixture_*" ]; then
+if compgen -G "/tmp/brewstore_fixture_*" >/dev/null; then
   echo -e "\033[1;33m  Notice: cleaning up temporary fixture directories\033[0m"
   rm -rf /tmp/brewstore_fixture_*
 fi

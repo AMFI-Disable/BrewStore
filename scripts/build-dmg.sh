@@ -12,7 +12,8 @@ dmg_path="$release_dir/brewstore-${version}.dmg"
 
 cd "$repo_root"
 
-/opt/homebrew/bin/xcodegen generate
+XCODEGEN_BIN=$(command -v xcodegen || echo "/opt/homebrew/bin/xcodegen")
+"$XCODEGEN_BIN" generate
 xcodebuild \
   -project BrewStore.xcodeproj \
   -scheme BrewStore \
