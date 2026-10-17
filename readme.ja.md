@@ -1,10 +1,14 @@
 # 🍺 BrewStore
 
+> [!IMPORTANT]
+> **プロジェクトのアーカイブ・終了のお知らせ**：BrewStore は公式に開発・サポートを終了し、アーカイブ（Sunset）されました。コードベースは MIT ライセンスの下で引き続き閲覧およびフォークが可能です。これまで BrewStore をご利用・ご支援いただいた皆様に心より感謝申し上げます。
+
 <div align="center">
 
 **macOS 史上最強のネイティブパッケージマネージャー ＆ Homebrew コンパニオン**  
 *超高速・100% ネイティブ SwiftUI GUI ＆ CLI ターミナルコンパニオン。Cask、Formula、バックグラウンドサービス、複数バージョン切り替え、セキュリティ監査を網羅。*
 
+[![状態: アーカイブ済](https://img.shields.io/badge/状態-アーカイブ済%20%2F%20終了-red.svg?style=flat-square)](https://github.com/AMFI-Disable/BrewStore)
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/プラットフォーム-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
 [![Release: v1.0.0](https://img.shields.io/badge/リリース-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/AMFI-Disable/BrewStore/releases)

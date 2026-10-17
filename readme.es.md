@@ -1,10 +1,14 @@
 # 🍺 BrewStore
 
+> [!IMPORTANT]
+> **Aviso de cierre y archivado del proyecto**: BrewStore ha llegado oficialmente al final de su ciclo de vida activo y queda archivado (sunset). El código sigue disponible bajo la Licencia MIT para consulta histórica y forks comunitarios. ¡Muchísimas gracias a todos los que usaron y apoyaron BrewStore!
+
 <div align="center">
 
 **El Gestor de Paquetes Nativo y Compañero de Homebrew Definitivo para macOS**  
 *Interfaz gráfica ultrarrápida en SwiftUI nativo y compañero de terminal CLI para casks, formulae, servicios en segundo plano, fijación de versiones y auditorías de seguridad.*
 
+[![Estado: Archivado](https://img.shields.io/badge/Estado-Archivado%20%2F%20Cerrado-red.svg?style=flat-square)](https://github.com/AMFI-Disable/BrewStore)
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/Plataforma-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
 [![Release: v1.0.0](https://img.shields.io/badge/Versi%C3%B3n-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/AMFI-Disable/BrewStore/releases)

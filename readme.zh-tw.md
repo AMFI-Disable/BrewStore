@@ -1,10 +1,14 @@
 # 🍺 BrewStore
 
+> [!IMPORTANT]
+> **專案封存與日落公告**：BrewStore 正式結束其活躍生命週期並進行封存（Sunset）。程式碼將根據 MIT 授權條款永久保留供歷史查閱與社群 Fork。衷心感謝所有支持、測試與使用 BrewStore 的朋友們！
+
 <div align="center">
 
 **無可爭議的 macOS 原生最強套件管理器與 Homebrew 伴侶**  
 *極速、純原生 SwiftUI 圖形介面與 CLI 終端伴侶，支援 Cask 應用、Formula 命令列工具、背景系統服務、多版本切換與安全稽核。*
 
+[![狀態: 已封存](https://img.shields.io/badge/狀態-已封存%20%2F%20日落-red.svg?style=flat-square)](https://github.com/AMFI-Disable/BrewStore)
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/平台-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
 [![Release: v1.0.0](https://img.shields.io/badge/版本-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/AMFI-Disable/BrewStore/releases)

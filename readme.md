@@ -1,10 +1,14 @@
 # 🍺 BrewStore
 
+> [!IMPORTANT]
+> **Project Sunset & Archive Notice**: BrewStore has reached the end of its active development lifecycle and is now officially archived. The codebase remains preserved under the MIT License for historical reference and community forks. Thank you to all who supported, tested, and used BrewStore!
+
 <div align="center">
 
 **The Undisputed #1 Native macOS Package Manager & Homebrew Companion**  
 *Lightning-fast, native SwiftUI GUI & CLI companion for casks, formulae, background services, multi-version link management, and security audits.*
 
+[![Status: Archived](https://img.shields.io/badge/Status-Archived%20%2F%20Sunset-red.svg?style=flat-square)](https://github.com/AMFI-Disable/BrewStore)
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/Platform-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
 [![Release: v1.0.0](https://img.shields.io/badge/Release-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/AMFI-Disable/BrewStore/releases)
