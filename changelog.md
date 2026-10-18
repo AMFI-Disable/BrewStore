@@ -16,6 +16,7 @@ All notable changes, features, and architectural capabilities of BrewStore are d
 - Standardized asset catalog metadata filenames to lowercase (`contents.json`).
 - Updated copyright notices and human-readable metadata to `AMFI-Disable`.
 - Enhanced release download routing to official GitHub Releases and Homebrew Tap.
+- Updated standalone licensing references in documentation and renamed retained systems code attribution from JuicerKit to BrewStoreCore (`brewstorecore-mit.txt`).
 
 ---
 
