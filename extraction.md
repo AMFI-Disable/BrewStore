@@ -1,6 +1,6 @@
 # Standalone Repository Handoff
 
-BrewStore is maintained independently from the Juicer bundle. The current repository is the standalone product repository. BrewStore keeps its small command and removal-safety layer locally in `sources/core` and does not require a remote JuicerKit package.
+BrewStore is maintained independently from the Juicer bundle. The current repository is the standalone product repository. BrewStore keeps its command execution and removal-safety layer locally in `sources/core` and operates fully self-contained.
 
 Before the first public BrewStore release:
 

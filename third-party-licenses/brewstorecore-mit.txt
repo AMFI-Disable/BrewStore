@@ -1,4 +1,4 @@
-JuicerKit-derived code retained in BrewStoreCore
+BrewStoreCore retained systems code
 
 MIT License
 
