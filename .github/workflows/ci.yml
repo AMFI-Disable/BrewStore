@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -73,10 +73,18 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Select Xcode Version
-        run: sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer || sudo xcode-select -s $(ls -d /Applications/Xcode*.app | sort -r | head -1)/Contents/Developer
+        run: |
+          if [[ -d /Applications/Xcode_16.app ]]; then
+            sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer
+          else
+            latest_xcode="$(find /Applications -maxdepth 1 -name 'Xcode*.app' | sort -r | head -n 1)"
+            if [[ -n "$latest_xcode" ]]; then
+              sudo xcode-select -s "$latest_xcode/Contents/Developer"
+            fi
+          fi
 
       - name: Install XcodeGen
         run: brew install xcodegen
