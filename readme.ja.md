@@ -1,21 +1,24 @@
 # 🍺 BrewStore
 
-> [!IMPORTANT]
-> **プロジェクトのアーカイブ・終了のお知らせ**：BrewStore は公式に開発・サポートを終了し、アーカイブ（Sunset）されました。コードベースは MIT ライセンスの下で引き続き閲覧およびフォークが可能です。これまで BrewStore をご利用・ご支援いただいた皆様に心より感謝申し上げます。
-
 <div align="center">
 
 **macOS 史上最強のネイティブパッケージマネージャー ＆ Homebrew コンパニオン**  
 *超高速・100% ネイティブ SwiftUI GUI ＆ CLI ターミナルコンパニオン。Cask、Formula、バックグラウンドサービス、複数バージョン切り替え、セキュリティ監査を網羅。*
 
-[![状態: アーカイブ済](https://img.shields.io/badge/状態-アーカイブ済%20%2F%20終了-red.svg?style=flat-square)](https://github.com/AMFI-Disable/BrewStore)
+[![状態: アーカイブ済](https://img.shields.io/badge/状態-アーカイブ済%20%2F%20読み取り専用-inactive.svg?style=flat-square)](#)
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/プラットフォーム-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
 [![Release: v1.0.0](https://img.shields.io/badge/リリース-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/AMFI-Disable/BrewStore/releases)
-[![Tests: 345 / 345 Passed](https://img.shields.io/badge/テスト-339%20%2F%20339%20合格%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-自動テストと品質保証)
+[![Tests: 345 / 345 Passed](https://img.shields.io/badge/テスト-345%20%2F%20345%20合格%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-自動テストと品質保証)
 [![License: MIT](https://img.shields.io/badge/ライセンス-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/価格-100%25%20無料＆オープンソース-success.svg?style=flat-square)](#-なぜ-brewstore-が選ばれるのか)
 [![プライバシー: 完全ローカル](https://img.shields.io/badge/プライバシー-完全ローカル%20%2F%20テレメトリゼロ-purple.svg?style=flat-square)](#セキュリティとプライバシー最優先)
+
+</div>
+
+> [!NOTE]
+> **プロジェクトのアーカイブおよび終了のお知らせ**
+> BrewStore はライフサイクルの終了を迎え、公式にアーカイブされました。最終安定版リリースは [v1.0.0](https://github.com/AMFI-Disable/BrewStore/releases/tag/v1.0.0) です。本リポジトリは歴史的参照およびビルド済みバイナリの配信用として読み取り専用で維持されます。今後のアップデート、Issue、Pull Request の受付は終了いたしました。
 
 ---
 
@@ -41,8 +44,6 @@
 [📊 他ツールとの比較表](#-なぜ-brewstore-が選ばれるのか) •
 [🧪 自動テスト結果](#-自動テストと品質保証) •
 [🗺️ ロードマップ](#ロードマップ)
-
-</div>
 
 ---
 

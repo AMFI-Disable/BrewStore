@@ -1,21 +1,24 @@
 # 🍺 BrewStore
 
-> [!IMPORTANT]
-> **Avis de fin de projet et d'archivage** : BrewStore a officiellement atteint la fin de son cycle de développement actif et est désormais archivé (sunset). Le code source reste disponible sous licence MIT pour référence historique et forks communautaires. Un immense merci à tous ceux qui ont utilisé et soutenu BrewStore !
-
 <div align="center">
 
 **Le Gestionnaire de Paquets Natif et Compagnon Homebrew Numéro 1 pour macOS**  
 *Interface graphique SwiftUI native et compagnon terminal CLI ultra-rapides pour casks, formules, services en arrière-plan, verrouillage de versions et audits de sécurité.*
 
-[![Statut: Archivé](https://img.shields.io/badge/Statut-Archiv%C3%A9%20%2F%20Ferm%C3%A9-red.svg?style=flat-square)](https://github.com/AMFI-Disable/BrewStore)
+[![Statut: Archivé](https://img.shields.io/badge/Statut-Archiv%C3%A9%20%2F%20Lecture%20Seule-inactive.svg?style=flat-square)](#)
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/Plateforme-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
 [![Release: v1.0.0](https://img.shields.io/badge/Version-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/AMFI-Disable/BrewStore/releases)
-[![Tests: 345 / 345 Passed](https://img.shields.io/badge/Tests-339%20%2F%20339%20R%C3%A9ussis%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-tests-automatis%C3%A9s-et-assurance-qualit%C3%A9)
+[![Tests: 345 / 345 Passed](https://img.shields.io/badge/Tests-345%20%2F%20345%20R%C3%A9ussis%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-tests-automatis%C3%A9s-et-assurance-qualit%C3%A9)
 [![License: MIT](https://img.shields.io/badge/Licence-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/Prix-100%25%20Gratuit%20%26%20Open%20Source-success.svg?style=flat-square)](#pourquoi-brewstore-face-a-caskhub-et-taphouse-pro-1999)
 [![Confidentialité: Zéro Télémétrie](https://img.shields.io/badge/Confidentialit%C3%A9-Z%C3%A9ro%20T%C3%A9l%C3%A9m%C3%A9trie%20%2F%20100%25%20Local-purple.svg?style=flat-square)](#confidentialite-et-securite-dabord)
+
+</div>
+
+> [!NOTE]
+> **Avis d'Archivage et Fin de Projet (Sunset)**
+> BrewStore a atteint la fin de son cycle de vie et est officiellement archivé. La dernière version stable est [v1.0.0](https://github.com/AMFI-Disable/BrewStore/releases/tag/v1.0.0). Le dépôt reste disponible en lecture seule pour référence historique et binaires précompilés. Aucune mise à jour, issue ou pull request supplémentaire ne sera acceptée.
 
 ---
 
@@ -41,8 +44,6 @@
 [📊 Tableau Comparatif](#pourquoi-brewstore-face-a-caskhub-et-taphouse-pro-1999) •
 [🧪 Tests Automatisés](#-tests-automatis%C3%A9s-et-assurance-qualit%C3%A9) •
 [🗺️ Feuille de Route](#feuille-de-route)
-
-</div>
 
 ---
 

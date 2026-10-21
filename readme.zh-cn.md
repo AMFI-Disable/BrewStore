@@ -1,21 +1,24 @@
 # 🍺 BrewStore
- 
-> [!IMPORTANT]
-> **项目归档与日落公告**：BrewStore 正式结束其活跃生命周期并进行归档（Sunset）。代码仓库将根据 MIT 许可证永久保留供历史查阅与社区 Fork。衷心感谢所有支持、测试与使用 BrewStore 的朋友们！
 
 <div align="center">
 
 **无可争议的 macOS 原生最强包管理器与 Homebrew 伴侣**  
 *极速、纯原生 SwiftUI 图形界面与 CLI 终端伴侣，支持 Cask 应用、Formula 命令行工具、后台系统服务、多版本版本切换与安全审计。*
 
-[![状态: 已归档](https://img.shields.io/badge/状态-已归档%20%2F%20日落-red.svg?style=flat-square)](https://github.com/AMFI-Disable/BrewStore)
+[![状态: 已归档](https://img.shields.io/badge/状态-已归档%20%2F%20只读-inactive.svg?style=flat-square)](#)
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/平台-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
 [![Release: v1.0.0](https://img.shields.io/badge/版本-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/AMFI-Disable/BrewStore/releases)
-[![Tests: 345 / 345 Passed](https://img.shields.io/badge/测试-339%20%2F%20339%20全数通过-success.svg?style=flat-square&logo=checkmarx)](#-自动化测试与质量保障)
+[![Tests: 345 / 345 Passed](https://img.shields.io/badge/测试-345%20%2F%20345%20全数通过-success.svg?style=flat-square&logo=checkmarx)](#-自动化测试与质量保障)
 [![License: MIT](https://img.shields.io/badge/开源协议-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/价格-100%25%20免费开源-success.svg?style=flat-square)](#为什么选择-brewstore而不是-caskhub-或-taphouse-pro-1999)
 [![隐私: 零遥测](https://img.shields.io/badge/隐私-零遥测%20%2F%20100%25%20本地-purple.svg?style=flat-square)](#隐私与安全第一原则)
+
+</div>
+
+> [!NOTE]
+> **项目已归档与日落公告**
+> BrewStore 已达到生命周期终点并已正式归档。最终稳定版本为 [v1.0.0](https://github.com/AMFI-Disable/BrewStore/releases/tag/v1.0.0)。本仓库将保持只读模式，供历史参考与预构建二进制文件下载。后续将不再接受任何更新、Issue 或 Pull Request。
 
 ---
 
@@ -41,8 +44,6 @@
 [📊 横向功能对比表](#为什么选择-brewstore而不是-caskhub-或-taphouse-pro-1999) •
 [🧪 自动化测试验证](#-自动化测试与质量保障) •
 [🗺️ 开发路线图](#开发路线图)
-
-</div>
 
 ---
 

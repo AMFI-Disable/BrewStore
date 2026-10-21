@@ -1,21 +1,24 @@
 # 🍺 BrewStore
 
-> [!IMPORTANT]
-> **專案封存與日落公告**：BrewStore 正式結束其活躍生命週期並進行封存（Sunset）。程式碼將根據 MIT 授權條款永久保留供歷史查閱與社群 Fork。衷心感謝所有支持、測試與使用 BrewStore 的朋友們！
-
 <div align="center">
 
 **無可爭議的 macOS 原生最強套件管理器與 Homebrew 伴侶**  
 *極速、純原生 SwiftUI 圖形介面與 CLI 終端伴侶，支援 Cask 應用、Formula 命令列工具、背景系統服務、多版本切換與安全稽核。*
 
-[![狀態: 已封存](https://img.shields.io/badge/狀態-已封存%20%2F%20日落-red.svg?style=flat-square)](https://github.com/AMFI-Disable/BrewStore)
+[![狀態: 已封存](https://img.shields.io/badge/狀態-已封存%20%2F%20唯讀-inactive.svg?style=flat-square)](#)
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/平台-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
 [![Release: v1.0.0](https://img.shields.io/badge/版本-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/AMFI-Disable/BrewStore/releases)
-[![Tests: 345 / 345 Passed](https://img.shields.io/badge/測試-339%20%2F%20339%20全數通過%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-自動化測試與品質保障)
+[![Tests: 345 / 345 Passed](https://img.shields.io/badge/測試-345%20%2F%20345%20全數通過%20(100%25)-success.svg?style=flat-square&logo=checkmarx)](#-自動化測試與品質保障)
 [![License: MIT](https://img.shields.io/badge/開源協議-MIT-blue.svg?style=flat-square)](license)
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/價格-100%25%20免費開源-success.svg?style=flat-square)](#為什麼選擇-brewstore而不是-caskhub-或-taphouse-pro-1999)
 [![隱私: 零遙測](https://img.shields.io/badge/隱私-零遙測%20%2F%20100%25%20純本地-purple.svg?style=flat-square)](#隱私與安全第一原則)
+
+</div>
+
+> [!NOTE]
+> **專案已封存與日落公告**
+> BrewStore 已達到生命週期終點並已正式封存。最終穩定版本為 [v1.0.0](https://github.com/AMFI-Disable/BrewStore/releases/tag/v1.0.0)。本倉庫將保持唯讀模式，供歷史參考與預建二進位檔案下載。後續將不再接受任何更新、Issue 或 Pull Request。
 
 ---
 
@@ -41,8 +44,6 @@
 [📊 橫向功能對比表](#為什麼選擇-brewstore而不是-caskhub-或-taphouse-pro-1999) •
 [🧪 自動化測試驗證](#-自動化測試與品質保障) •
 [🗺️ 開發藍圖](#開發藍圖)
-
-</div>
 
 ---
 
