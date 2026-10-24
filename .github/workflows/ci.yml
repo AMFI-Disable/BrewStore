@@ -31,7 +31,7 @@ jobs:
 
       - name: Verify Lowercase Filenames
         run: |
-          if git ls-files | grep '[A-Z]'; then
+          if git ls-files | grep -v '^CNAME$' | grep '[A-Z]'; then
             echo "Error: uppercase tracked files found"
             exit 1
           fi
