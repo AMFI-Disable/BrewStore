@@ -5,7 +5,7 @@
 **無可爭議的 macOS 原生最強套件管理器與 Homebrew 伴侶**  
 *極速、純原生 SwiftUI 圖形介面與 CLI 終端伴侶，支援 Cask 應用、Formula 命令列工具、背景系統服務、多版本切換與安全稽核。*
 
-[![狀態: 已封存](https://img.shields.io/badge/狀態-已封存%20%2F%20唯讀-inactive.svg?style=flat-square)](#)
+[![狀態: 已封存](https://img.shields.io/badge/狀態-已封存%20%2F%20唯讀-inactive.svg?style=flat-square)](https://github.com/AMFI-Disable/BrewStore)
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/平台-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
 [![Release: v1.0.0](https://img.shields.io/badge/版本-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/AMFI-Disable/BrewStore/releases)
