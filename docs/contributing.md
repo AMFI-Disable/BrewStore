@@ -29,7 +29,7 @@ To build and run the BrewStore project locally:
 ## Development Guidelines
 
 - **File/Folder Naming**: All files and folders in the repository must be strictly named in **lowercase**.
-- **Commit Messages**: Follow standard commit prefixes (e.g. `feat: add ...`, `fix: resolve ...`, `style: format ...`).
+- **Commit Messages**: Strictly adhere to the canonical commit structure `xxx: xxx xxx xxx` (prefix + exactly three lowercase words, e.g. `feat: add search filter`, `fix: resolve runtime warnings`, `docs: update setup guide`).
 - **Formatting**: Run `swiftformat .` to maintain code formatting consistency.
 - **Testing**: Verify your changes build cleanly and run unit tests (`Cmd + U` in Xcode) before opening a Pull Request.
 
