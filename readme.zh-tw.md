@@ -16,12 +16,6 @@
 
 </div>
 
-> [!NOTE]
-> **專案已封存與日落公告**
-> BrewStore 已達到生命週期終點並已正式封存。最終穩定版本為 [v1.0.0](https://github.com/AMFI-Disable/BrewStore/releases/tag/v1.0.0)。本倉庫將保持唯讀模式，供歷史參考與預建二進位檔案下載。後續將不再接受任何更新、Issue 或 Pull Request。
-
----
-
 ## 🌐 語言選擇 / Select Language / 选择语言 / 言語を選択 / Idioma / Langue / Sprache
 
 **[English](readme.md)** •

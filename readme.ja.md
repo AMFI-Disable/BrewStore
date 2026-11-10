@@ -16,12 +16,6 @@
 
 </div>
 
-> [!NOTE]
-> **プロジェクトのアーカイブおよび終了のお知らせ**
-> BrewStore はライフサイクルの終了を迎え、公式にアーカイブされました。最終安定版リリースは [v1.0.0](https://github.com/AMFI-Disable/BrewStore/releases/tag/v1.0.0) です。本リポジトリは歴史的参照およびビルド済みバイナリの配信用として読み取り専用で維持されます。今後のアップデート、Issue、Pull Request の受付は終了いたしました。
-
----
-
 ## 🌐 言語を選択 / Select Language / 选择语言 / 言語を選択 / Idioma / Langue / Sprache
 
 **[English](readme.md)** •

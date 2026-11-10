@@ -16,12 +16,6 @@
 
 </div>
 
-> [!NOTE]
-> **Avis d'Archivage et Fin de Projet (Sunset)**
-> BrewStore a atteint la fin de son cycle de vie et est officiellement archivé. La dernière version stable est [v1.0.0](https://github.com/AMFI-Disable/BrewStore/releases/tag/v1.0.0). Le dépôt reste disponible en lecture seule pour référence historique et binaires précompilés. Aucune mise à jour, issue ou pull request supplémentaire ne sera acceptée.
-
----
-
 ## 🌐 Sélectionner la Langue / Select Language / 选择语言 / 言語を選択 / Idioma / Langue / Sprache
 
 **[English](readme.md)** •

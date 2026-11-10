@@ -16,12 +16,6 @@
 
 </div>
 
-> [!NOTE]
-> **项目已归档与日落公告**
-> BrewStore 已达到生命周期终点并已正式归档。最终稳定版本为 [v1.0.0](https://github.com/AMFI-Disable/BrewStore/releases/tag/v1.0.0)。本仓库将保持只读模式，供历史参考与预构建二进制文件下载。后续将不再接受任何更新、Issue 或 Pull Request。
-
----
-
 ## 🌐 语言选择 / Select Language / 言語を選択 / Idioma / Langue / Sprache
 
 **[English](readme.md)** •
