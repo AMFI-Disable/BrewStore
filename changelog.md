@@ -12,6 +12,8 @@ All notable changes, features, and architectural capabilities of BrewStore are d
 
 ### Changed
 
+- Restored active project maintenance status and badges across primary and localized documentation (`readme*.md`), removing archival and sunset notices.
+- Reinstated active security policy guidelines and vulnerability disclosure reporting workflow in `security.md`.
 - Standardized repository references and URLs to `AMFI-Disable/BrewStore` across documentation, source code, and formula manifests.
 - Standardized asset catalog metadata filenames to lowercase (`contents.json`).
 - Updated copyright notices and human-readable metadata to `AMFI-Disable`.
