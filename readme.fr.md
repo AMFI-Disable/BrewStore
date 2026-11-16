@@ -1,6 +1,6 @@
-# 🍺 BrewStore
-
 <div align="center">
+
+# BrewStore
 
 **Le Gestionnaire de Paquets Natif et Compagnon Homebrew Numéro 1 pour macOS**  
 *Interface graphique SwiftUI native et compagnon terminal CLI ultra-rapides pour casks, formules, services en arrière-plan, verrouillage de versions et audits de sécurité.*
@@ -16,7 +16,7 @@
 
 </div>
 
-## 🌐 Sélectionner la Langue / Select Language / 选择语言 / 言語を選択 / Idioma / Langue / Sprache
+## Sélectionner la Langue / Select Language / 选择语言 / 言語を選択 / Idioma / Langue / Sprache
 
 **[English](readme.md)** •
 **[简体中文](readme.zh-cn.md)** •
@@ -28,20 +28,20 @@
 
 ---
 
-### 🧭 Liens Directs & Navigation Rapide
+### Liens Directs & Navigation Rapide
 
-[🍺 Installation Homebrew Cask](#option-1-cask-homebrew-officiel-recommande) •
-[✨ Fonctionnalités Principales](#-fonctionnalit%C3%A9s-principales) •
-[⌨️ Raccourcis Clavier](#raccourcis-clavier) •
-[💻 Compagnon CLI Terminal](#-compagnon-cli-brewstore) •
-[🛡️ Sécurité & Restauration](#architecture-axee-sur-la-securite) •
-[📊 Tableau Comparatif](#pourquoi-brewstore-face-a-caskhub-et-taphouse-pro-1999) •
-[🧪 Tests Automatisés](#-tests-automatis%C3%A9s-et-assurance-qualit%C3%A9) •
-[🗺️ Feuille de Route](#feuille-de-route)
+[Installation Homebrew Cask](#option-1-cask-homebrew-officiel-recommande) •
+[Fonctionnalités Principales](#-fonctionnalit%C3%A9s-principales) •
+[Raccourcis Clavier](#raccourcis-clavier) •
+[Compagnon CLI Terminal](#compagnon-cli-brewstore) •
+[Sécurité & Restauration](#architecture-axee-sur-la-securite) •
+[Tableau Comparatif](#pourquoi-brewstore-face-a-caskhub-et-taphouse-pro-1999) •
+[Tests Automatisés](#-tests-automatis%C3%A9s-et-assurance-qualit%C3%A9) •
+[Feuille de Route](#feuille-de-route)
 
 ---
 
-## 📖 Qu'est-ce que BrewStore ?
+## Qu'est-ce que BrewStore ?
 
 **BrewStore** est l'application de bureau incontournable pour la gestion de paquets sur macOS. Conçue entièrement en **SwiftUI** et **AppKit** natifs, elle allie la puissance de Homebrew à l'élégance ergonomique d'un App Store moderne primé par Apple.
 
@@ -53,13 +53,13 @@
 
 ---
 
-## ⚡ Architecture & Composants
+## Architecture & Composants
 
 ```text
 +-----------------------------------------------------------------------------------------+
 |                               Couche d'Interface GUI Native                             |
 |   +-------------------+  +--------------------+  +-------------------+  +-----------+   |
-|   | Lanceur ⌘K        |  | Carrousel À la une |  | Graphe Dépendances|  | Barre Menus|  |
+| | Lanceur K        | | Carrousel À la une | | Graphe Dépendances| | Barre Menus| |
 |   +-------------------+  +--------------------+  +-------------------+  +-----------+   |
 |   +-------------------+  +--------------------+  +-------------------+  +-----------+   |
 |   | Épinglage Version |  | Tournoi Votes FOSS |  | Test des Miroirs  |  | Favoris   |   |
@@ -86,63 +86,58 @@
 
 ---
 
-## ✨ Fonctionnalités Principales
+## Fonctionnalités Principales
 
-### 👑 Les 5 Piliers du Gestionnaire d'Applications Mac Complet
+### Les 5 Piliers du Gestionnaire d'Applications Mac Complet
 
-1. **🏬 Gestion Unifiée Double-Store & Recommandation Homebrew**
-   - Regroupe les casks Homebrew, les formules CLI, les applications du Mac App Store (`mas-cli`) et les logiciels non gérés dans un inventaire unique interrogeable.
+1. **Gestion Unifiée Double-Store & Recommandation Homebrew**   - Regroupe les casks Homebrew, les formules CLI, les applications du Mac App Store (`mas-cli`) et les logiciels non gérés dans un inventaire unique interrogeable.
    - Détecte automatiquement les applications présentes sur les deux stores et recommande Homebrew pour des mises à jour rapides, l'automatisation CLI et l'absence d'invites de mot de passe Apple ID.
    - Détection native des reçus de l'App Store (`Contents/_MASReceipt/receipt`) avec conversion non-destructive vers Homebrew en 1 clic.
 
-2. **🧹 Analyse de Stockage par App & Nettoyeur Sécurisé de Caches**
-   - Répartition précise de l'espace disque en 3 colonnes : **Taille du binaire**, **Caches & Journaux**, et **Données applicatives**.
+2. **Analyse de Stockage par App & Nettoyeur Sécurisé de Caches**   - Répartition précise de l'espace disque en 3 colonnes : **Taille du binaire**, **Caches & Journaux**, et **Données applicatives**.
    - Bouton dédié **« Vider les caches »** : déplace les fichiers temporaires vers la Corbeille (`~/.Trash`) en toute sécurité, libérant plusieurs gigaoctets tout en conservant intactes les sessions utilisateur et les préférences.
 
-3. **🍎 Inspecteur de Migration Apple Silicon Natif & Rosetta 2**
-   - Badges visuels d'architecture pour chaque application : `ARM64 Natif` (vert), `Universel` (bleu) et `Rosetta 2` (orange d'avertissement).
+3. **Inspecteur de Migration Apple Silicon Natif & Rosetta 2**   - Badges visuels d'architecture pour chaque application : `ARM64 Natif` (vert), `Universel` (bleu) et `Rosetta 2` (orange d'avertissement).
    - Bannière d'alerte identifiant les anciennes applications Intel x86_64 fonctionnant sous émulation Rosetta 2, avec option en 1 clic **« Tout migrer vers Apple Silicon »** pour économiser la batterie et le processeur.
 
-4. **⚙️ Éléments d'Ouverture & Gestionnaire de Démons LaunchAgent macOS**
-   - Regroupe les services Homebrew, les LaunchAgents utilisateur (`~/Library/LaunchAgents`), les LaunchAgents système (`/Library/LaunchAgents`) et les éléments d'ouverture macOS dans une vue `ServicesView` unifiée.
+4. **Éléments d'Ouverture & Gestionnaire de Démons LaunchAgent macOS**   - Regroupe les services Homebrew, les LaunchAgents utilisateur (`~/Library/LaunchAgents`), les LaunchAgents système (`/Library/LaunchAgents`) et les éléments d'ouverture macOS dans une vue `ServicesView` unifiée.
    - Télémétrie en direct du processeur, de la mémoire vive (RSS) et des ports d'écoute avec bascules d'état et suppression sécurisée vers la Corbeille.
 
-5. **🚀 Configuration Mac en 1 Commande & Moteur de Transfert de Blueprint**
-   - Export complet d'un **Mac Blueprint** incluant tous les paquets Homebrew, taps, applications du Mac App Store (`mas "<name>", id: <id>`), versions verrouillées et préférences.
+5. **Configuration Mac en 1 Commande & Moteur de Transfert de Blueprint**   - Export complet d'un **Mac Blueprint** incluant tous les paquets Homebrew, taps, applications du Mac App Store (`mas "<name>", id: <id>`), versions verrouillées et préférences.
    - Génère un script Shell d'amorçage idempotent et offre une restauration intégrée dans `MultiMachineSyncView` pour cloner votre environnement en quelques minutes.
 
-### 🛍️ 6. Expérience App Store Moderne pour Homebrew
+### 6. Expérience App Store Moderne pour Homebrew
 
 - **Sélection Spotlight & Articles Éditoriaux** : Découvrez des utilitaires triés sur le volet avec des résumés de versions détaillés.
 - **Community Showdown** : Tournois communautaires sans serveur basés sur GitHub Discussions pour élire les meilleurs outils.
 - **Boîtes à Outils Développeurs** : Packs complets en 1 clic pour Full-Stack Web, Swift/iOS, DevOps, Rust, Data Science et Machine Learning.
 - **Favoris & Liste d'Envies** : Sauvegardez des paquets dans une liste de souhaits indépendante de l'état système.
 
-### 🛡️ 7. Architecture Axée sur la Sécurité & Instantanés Time Machine <a id="architecture-axee-sur-la-securite"></a>
+### 7. Architecture Axée sur la Sécurité & Instantanés Time Machine <a id="architecture-axee-sur-la-securite"></a>
 
 - **Épinglage Atomique de Version** : Fixez les versions critiques depuis la fiche détaillée. Rollback automatique en cas d'erreur.
 - **Prévisualisation de Désinstallation** : Analyse préalable montrant les dépendances inverses affectées et paquets orphelins.
 - **Instantanés et Restauration en 1 Clic** : Sauvegarde automatique de l'état du système avant toute modification avec affichage du diff.
 - **Coordination des Verrous PID** : Évite les conflits de processus concurrents avec Homebrew.
 
-### 🌐 8. Banc d'Essai des Miroirs CDN & Bascule Rapide
+### 8. Banc d'Essai des Miroirs CDN & Bascule Rapide
 
 - **Mesure de Latence en Direct** : Testez les vitesses du CDN officiel Fastly, USTC, TUNA et Aliyun.
 - **Bascule en 1 Clic** : Appliquez les miroirs les plus rapides sur `HOMEBREW_API_DOMAIN` et `HOMEBREW_BOTTLE_DOMAIN`.
 
-### 💻 9. Compagnon Barre des Menus & CLI Terminal
+### 9. Compagnon Barre des Menus & CLI Terminal
 
 - **Widget de Barre des Menus Sans Distorsion** : Géométrie rigide et stable pour consulter les mises à jour et l'état des services.
 - **CLI Terminal Complet (`brewstore`)** : Lancez audits de sécurité, bascules de versions et nettoyages de caches directement dans le terminal.
 
-### 🔄 10. Synchronisation Git Cloud Multi-Fournisseurs
+### 10. Synchronisation Git Cloud Multi-Fournisseurs
 
 - Sauvegarde de vos paquets dans un fichier `~/Brewfile`.
 - Support de premier ordre pour **GitHub Gists**, **GitLab Snippets**, **Codeberg**, **Forgejo** et **Gitea** auto-hébergé.
 
 ---
 
-## ⚡ Installation
+## Installation
 
 ### Option 1 : Cask Homebrew Officiel (Recommandé) <a id="option-1-cask-homebrew-officiel-recommande"></a>
 
@@ -200,26 +195,26 @@ xcodebuild test -scheme BrewStore -destination 'platform=macOS'
 
 ---
 
-## ⌨️ Raccourcis Clavier <a id="raccourcis-clavier"></a>
+## Raccourcis Clavier <a id="raccourcis-clavier"></a>
 
 | Raccourci | Action | Description |
 | :--- | :--- | :--- |
-| <kbd>⌘ K</kbd> | **Palette de Commandes** | Lanceur rapide (`> upgrade all`, `> cleanup`, `> benchmark`) et recherche |
-| <kbd>⌘ R</kbd> | **Rafraîchir** | Recharger les paquets, services et mises à jour disponibles |
-| <kbd>⌘ F</kbd> | **Recherche** | Placer immédiatement le curseur dans le champ de recherche |
-| <kbd>⌘ ,</kbd> | **Préférences** | Paramètres, serveurs miroirs, planning et synchronisation |
-| <kbd>⌘ 1</kbd> | **Découvrir** | Accéder à la sélection À la une et aux tendances |
-| <kbd>⌘ 2</kbd> | **Installés** | Consulter les formules et casks installés localement |
-| <kbd>⌘ 3</kbd> | **Mises à Jour** | Voir les paquets obsolètes et le temps estimé |
-| <kbd>⌘ 4</kbd> | **Services** | Surveiller et piloter les démons en arrière-plan |
-| <kbd>⌘ 5</kbd> | **Dépendances** | Ouvrir le graphe interactif des dépendances 2.0 |
-| <kbd>⌘ 6</kbd> | **Favoris** | Liste d'envies et logiciels sauvegardés |
-| <kbd>⌘ 7</kbd> | **Kits de Dév** | Suites logicielles prêtes à l'emploi |
-| <kbd>⌘ 8</kbd> | **Maintenance** | Diagnostics, nettoyage de cache et suppression des orphelins |
+| <kbd> K</kbd> | **Palette de Commandes**| Lanceur rapide (`> upgrade all`, `> cleanup`, `> benchmark`) et recherche |
+| <kbd> R</kbd> | **Rafraîchir**| Recharger les paquets, services et mises à jour disponibles |
+| <kbd> F</kbd> | **Recherche**| Placer immédiatement le curseur dans le champ de recherche |
+| <kbd> ,</kbd> | **Préférences**| Paramètres, serveurs miroirs, planning et synchronisation |
+| <kbd> 1</kbd> | **Découvrir**| Accéder à la sélection À la une et aux tendances |
+| <kbd> 2</kbd> | **Installés**| Consulter les formules et casks installés localement |
+| <kbd> 3</kbd> | **Mises à Jour**| Voir les paquets obsolètes et le temps estimé |
+| <kbd> 4</kbd> | **Services**| Surveiller et piloter les démons en arrière-plan |
+| <kbd> 5</kbd> | **Dépendances**| Ouvrir le graphe interactif des dépendances 2.0 |
+| <kbd> 6</kbd> | **Favoris**| Liste d'envies et logiciels sauvegardés |
+| <kbd> 7</kbd> | **Kits de Dév**| Suites logicielles prêtes à l'emploi |
+| <kbd> 8</kbd> | **Maintenance**| Diagnostics, nettoyage de cache et suppression des orphelins |
 
 ---
 
-## 💻 Compagnon CLI `brewstore`
+## Compagnon CLI `brewstore`
 
 Disponible à l'adresse `/opt/homebrew/bin/brewstore` ou `/usr/local/bin/brewstore` :
 
@@ -251,32 +246,32 @@ brewstore launch
 
 ---
 
-## 🌟 Pourquoi BrewStore face à CaskHub et Taphouse Pro ($19.99) ? <a id="pourquoi-brewstore-face-a-caskhub-et-taphouse-pro-1999"></a>
+## Pourquoi BrewStore face à CaskHub et Taphouse Pro ($19.99) ? <a id="pourquoi-brewstore-face-a-caskhub-et-taphouse-pro-1999"></a>
 
 | Critère | **BrewStore** | **Taphouse Pro** ($19.99) | **CaskHub** |
 | :--- | :---: | :---: | :---: |
 | **Prix & Licence** | **100% Gratuit & Open Source MIT** | 19,99 $ Propriétaire | Gratuit |
 | **Confidentialité** | **Zéro Télémétrie / 100% Local** | Traceurs tiers | Inconnue |
 | **Couverture de Tests** | **345 Méthodes XCTest (100% Réussite)** | Non communiquée | Faible |
-| **Nettoyeur de Cache par App** | **✅ Non-destructif (~/.Trash)** | ❌ Non | ❌ Non |
-| **Apple Silicon vs Rosetta 2** | **✅ Détection auto & migration 1 clic** | ❌ Non | ❌ Non |
-| **LaunchAgents & Éléments d'Ouverture** | **✅ Télémétrie & suivi PID/RAM** | ⚠️ Services seuls | ❌ Non |
-| **Moteur de Blueprint en 1 Commande** | **✅ Formules, Casks, MAS & Réglages** | ❌ Non | ❌ Non |
-| **Inventaire Double-Store & Recommandation** | **✅ Recommandation Homebrew** | ❌ Non | ❌ Non |
-| **Prévisualisation de Désinstallation** | **✅ Avertissements de cascade** | ❌ Non | ❌ Non |
-| **Instantanés en 1 Clic** | **✅ Restauration automatique avec diff** | ⚠️ Lecture seule | ❌ Non |
-| **Épinglage Atomique de Version** | **✅ Avec rollback en cas d'erreur** | ⚠️ Formules uniquement | ❌ Non |
-| **Télémétrie des Services** | **✅ CPU, RAM et Ports en direct** | ⚠️ Statut simple | ❌ Non |
-| **Banc d'Essai des Miroirs CDN** | **✅ Fastly, USTC, TUNA, Aliyun** | ❌ Non | ❌ Non |
-| **Synchronisation Git Multi-Cloud** | **✅ GitHub, GitLab, Codeberg, Gitea** | ❌ GitHub uniquement | ❌ Non |
-| **Graphe Interactif de Dépendances** | **✅ Graphe bidirectionnel** | ⚠️ Arborescence statique | ❌ Non |
-| **Barre des Menus** | **✅ Fenêtre rigide sans distorsion** | ⚠️ Basique | ❌ Non |
-| **Compagnon Terminal CLI** | **✅ Inclus (binaire `brewstore`)** | ❌ Non | ❌ Non |
-| **Temps de Lancement à Froid** | **⚡ &lt;20ms (Index mémoire)** | 🐢 2–3 s | 🐢 2–3 s |
+| **Nettoyeur de Cache par App**| **Non-destructif (~/.Trash)**| Non | Non |
+| **Apple Silicon vs Rosetta 2**| **Détection auto & migration 1 clic**| Non | Non |
+| **LaunchAgents & Éléments d'Ouverture**| **Télémétrie & suivi PID/RAM**| Services seuls | Non |
+| **Moteur de Blueprint en 1 Commande**| **Formules, Casks, MAS & Réglages**| Non | Non |
+| **Inventaire Double-Store & Recommandation**| **Recommandation Homebrew**| Non | Non |
+| **Prévisualisation de Désinstallation**| **Avertissements de cascade**| Non | Non |
+| **Instantanés en 1 Clic**| **Restauration automatique avec diff**| Lecture seule | Non |
+| **Épinglage Atomique de Version**| **Avec rollback en cas d'erreur**| Formules uniquement | Non |
+| **Télémétrie des Services**| **CPU, RAM et Ports en direct**| Statut simple | Non |
+| **Banc d'Essai des Miroirs CDN**| **Fastly, USTC, TUNA, Aliyun**| Non | Non |
+| **Synchronisation Git Multi-Cloud**| **GitHub, GitLab, Codeberg, Gitea**| GitHub uniquement | Non |
+| **Graphe Interactif de Dépendances**| **Graphe bidirectionnel**| Arborescence statique | Non |
+| **Barre des Menus**| **Fenêtre rigide sans distorsion**| Basique | Non |
+| **Compagnon Terminal CLI**| **Inclus (binaire `brewstore`)**| Non | Non |
+| **Temps de Lancement à Froid**| **&lt;20ms (Index mémoire)**| 2–3 s | 2–3 s |
 
 ---
 
-## 🧪 Tests Automatisés et Assurance Qualité
+## Tests Automatisés et Assurance Qualité
 
 BrewStore maintient une suite de tests automatisés exhaustive couvrant l'ensemble de la logique métier, des coordinateurs, des frontières de sécurité et des interactions utilisateur.
 
@@ -308,7 +303,7 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
 
 ---
 
-## 🛡️ Confidentialité et Sécurité d'Abord <a id="confidentialite-et-securite-dabord"></a>
+## Confidentialité et Sécurité d'Abord <a id="confidentialite-et-securite-dabord"></a>
 
 - **Zéro Télémétrie** : Aucun outil d'analyse, aucun SDK tiers et aucune collecte de données.
 - **Exécution Locale** : Toutes les commandes s'exécutent directement via votre binaire local Homebrew.
@@ -316,9 +311,9 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
 
 ---
 
-## 🗺️ Feuille de Route <a id="feuille-de-route"></a>
+## Feuille de Route <a id="feuille-de-route"></a>
 
-- [x] **v1.0.0** : Réécriture complète en SwiftUI natif, moteur FastCache, palette de commandes ⌘K, graphe de dépendances.
+- [x] **v1.0.0**: Réécriture complète en SwiftUI natif, moteur FastCache, palette de commandes K, graphe de dépendances.
 - [x] **v1.0.5** : Synchronisation Git multi-fournisseurs et tournois communautaires.
 - [x] **v1.1.0** :
   - [x] Prévisualisation avant désinstallation avec alertes de dépendances inverses.
@@ -332,6 +327,6 @@ xcodebuild test -scheme BrewStore -destination "platform=macOS"
 
 ---
 
-## 📄 Licence
+## Licence
 
 BrewStore est distribué sous la [Licence MIT](license). Logiciel libre, gratuit et fier de son indépendance.

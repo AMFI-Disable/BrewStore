@@ -1,10 +1,10 @@
-# 🤖 BrewStore Dedicated Sub-Sidebars & Auxiliary Panes: Feature Test Guide
+# BrewStore Dedicated Sub-Sidebars & Auxiliary Panes: Feature Test Guide
 
 This document details **EVERY SINGLE feature, setting toggle, documentation topic, and diagnostic workflow** in BrewStore's dedicated modal and sub-split sidebars: **Settings Control Center**, **Help Manual NavigationSplitView**, and **MenuBar Extra Companion**.
 
 ---
 
-## 🧭 Overview Of Dedicated Navigation Sidebars
+## Overview Of Dedicated Navigation Sidebars
 
 ```mermaid
 graph TD
@@ -16,7 +16,7 @@ graph TD
 
 ---
 
-## ⚙️ 1. Settings Control Center Sidebar (`SettingsView.swift`)
+## 1. Settings Control Center Sidebar (`SettingsView.swift`)
 
 The settings interface is organized into **7 Dedicated Sections** accessible via a responsive tab sidebar:
 
@@ -100,7 +100,7 @@ The settings interface is organized into **7 Dedicated Sections** accessible via
 
 ---
 
-## 📖 2. Help Manual NavigationSplitView Sidebar (`HelpManualView.swift`)
+## 2. Help Manual NavigationSplitView Sidebar (`HelpManualView.swift`)
 
 The Help Manual is built with a native `NavigationSplitView` featuring a dedicated **7-Topic Left Sidebar** and interactive search bar:
 
@@ -119,7 +119,7 @@ The Help Manual is built with a native `NavigationSplitView` featuring a dedicat
 6. **`Health Score & Dependency Doctor` (`heart.text.square`)**:
    - Health score metrics (0–100), repairing orphaned binaries, and CVE vulnerability scans.
 7. **`Keyboard Shortcuts & Power Features` (`command`)**:
-   - Complete cheat sheet of navigation shortcuts (**⌘1**–**⌘9**, **⌘0**, **⌘K**, **⌘?**, **⌥~**, **⌘R**, **⌥⌘U**).
+   - Complete cheat sheet of navigation shortcuts (**1**–**9**, **0**, **K**, **?**, **~**, **R**, **U**).
 
 ### 2.2 Interactive Features
 
@@ -129,7 +129,7 @@ The Help Manual is built with a native `NavigationSplitView` featuring a dedicat
 
 ---
 
-## 💻 3. MenuBar Extra Companion Sidebar (`MenuBarExtraView.swift`)
+## 3. MenuBar Extra Companion Sidebar (`MenuBarExtraView.swift`)
 
 The lightweight, persistent macOS Menu Bar companion (`BrewStoreMenuBarCompanion`):
 
@@ -145,15 +145,15 @@ The lightweight, persistent macOS Menu Bar companion (`BrewStoreMenuBarCompanion
 
 ---
 
-## 📋 Computer Use Sub-Sidebar Test Checklist
+## Computer Use Sub-Sidebar Test Checklist
 
 1. [ ] **Settings Navigation**:
-   - Click `General` ➔ Verify updater and LaunchAgent toggles.
-   - Click `Appearance` ➔ Toggle themes (`Terminal Emerald`, `Amber Brew`) and observe tint change.
-   - Click `Network & Mirrors` ➔ Click `Test Mirror Latencies` and verify concurrent pings (<2s).
-   - Click `Storage & Privacy` ➔ Verify storage metrics and cache purge triggers.
+   - Click `General`  Verify updater and LaunchAgent toggles.
+   - Click `Appearance`  Toggle themes (`Terminal Emerald`, `Amber Brew`) and observe tint change.
+   - Click `Network & Mirrors`  Click `Test Mirror Latencies` and verify concurrent pings (<2s).
+   - Click `Storage & Privacy`  Verify storage metrics and cache purge triggers.
 2. [ ] **Help Manual Split View**:
-   - Click each of the 7 topics ➔ Observe header, paragraphs, tips, and code blocks.
-   - Search `"shortcuts"` in help search bar ➔ Observe topics filtered to Keyboard Shortcuts.
+   - Click each of the 7 topics  Observe header, paragraphs, tips, and code blocks.
+   - Search `"shortcuts"` in help search bar  Observe topics filtered to Keyboard Shortcuts.
 3. [ ] **MenuBar Extra**:
    - Switch between Search, Updates, Services, and Maintenance tabs.

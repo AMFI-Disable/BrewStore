@@ -1,4 +1,4 @@
-# 🤖 BrewStore Dependency Topology, Background Services, Stories & Stacks: Feature Test Guide
+# BrewStore Dependency Topology, Background Services, Stories & Stacks: Feature Test Guide
 
 This document details **EVERY SINGLE feature, interactive gesture, service telemetry metric, and curated bundle workflow** across BrewStore's:
 
@@ -10,7 +10,7 @@ This document details **EVERY SINGLE feature, interactive gesture, service telem
 
 ---
 
-## 🧭 Overview Of Advanced Visual & System Panes
+## Overview Of Advanced Visual & System Panes
 
 ```mermaid
 graph TD
@@ -23,7 +23,7 @@ graph TD
 
 ---
 
-## 🕸️ 1. Interactive Dependency Topology Graph (`DependencyTopologyView.swift` & `DependencyGraphView.swift`)
+## 1. Interactive Dependency Topology Graph (`DependencyTopologyView.swift` & `DependencyGraphView.swift`)
 
 The interactive 2D visual canvas for exploring package dependencies:
 
@@ -55,7 +55,7 @@ The interactive 2D visual canvas for exploring package dependencies:
 
 ---
 
-## ⚙️ 2. Background Services & Live Log Inspector (`ServicesView.swift` & `ServiceLogView.swift`)
+## 2. Background Services & Live Log Inspector (`ServicesView.swift` & `ServiceLogView.swift`)
 
 The native macOS `launchd` background daemon control suite:
 
@@ -88,7 +88,7 @@ The native macOS `launchd` background daemon control suite:
 
 ---
 
-## 📖 3. Editorial Stories & Developer Guides (`StoriesFeedView.swift` & `StoryDetailView.swift`)
+## 3. Editorial Stories & Developer Guides (`StoriesFeedView.swift` & `StoryDetailView.swift`)
 
 The App Store-quality curated editorial feed:
 
@@ -110,7 +110,7 @@ The App Store-quality curated editorial feed:
 
 ---
 
-## 🧰 4. Developer Stacks & Toolkit Bundles (`StacksView.swift`)
+## 4. Developer Stacks & Toolkit Bundles (`StacksView.swift`)
 
 The curated 100% Free & Open-Source (FOSS) bundle deployment center:
 
@@ -143,7 +143,7 @@ The curated 100% Free & Open-Source (FOSS) bundle deployment center:
 
 ---
 
-## ⚙️ 5. Advanced Compilation & Installation Builder (`AdvancedInstallView.swift`)
+## 5. Advanced Compilation & Installation Builder (`AdvancedInstallView.swift`)
 
 The power-user installation flags sheet:
 
@@ -160,16 +160,16 @@ The power-user installation flags sheet:
 
 ---
 
-## 📋 Computer Use Verification Checklist
+## Computer Use Verification Checklist
 
 1. [ ] **Dependency Topology Graph**:
-   - Open Dependencies ➔ Pan across canvas ➔ Zoom in/out ➔ Click a node to open package detail.
+   - Open Dependencies  Pan across canvas  Zoom in/out  Click a node to open package detail.
 2. [ ] **Background Services**:
-   - Open Services ➔ Check active daemons and listening ports (`:5432`, `:6379`).
-   - Click "View Logs" on a service ➔ Verify live streaming log window.
+   - Open Services  Check active daemons and listening ports (`:5432`, `:6379`).
+   - Click "View Logs" on a service  Verify live streaming log window.
 3. [ ] **Editorial Stories**:
-   - Open Stories ➔ Click an article card ➔ Verify rich markdown reader and inline package install pills.
+   - Open Stories  Click an article card  Verify rich markdown reader and inline package install pills.
 4. [ ] **Developer Stacks**:
-   - Open Toolkits ➔ Check bundle progress bars ➔ Right-click a flow chip to test Star/Pin context actions.
+   - Open Toolkits  Check bundle progress bars  Right-click a flow chip to test Star/Pin context actions.
 5. [ ] **Advanced Install Options**:
-   - Open any package detail ➔ Click `slider.horizontal.3` ➔ Verify `--HEAD` and `--build-from-source` flags sheet.
+   - Open any package detail  Click `slider.horizontal.3`  Verify `--HEAD` and `--build-from-source` flags sheet.

@@ -2,33 +2,18 @@
 
 ## Supported Versions
 
-We actively provide security updates for the latest release of BrewStore.
+Only the latest release of `BrewStore` is actively supported with security updates.
 
 | Version | Supported |
 | :--- | :--- |
-| Latest Release | :white_check_mark: |
-| Older Releases | :x: |
+| Latest Release | Yes |
+| Older Releases | No |
 
 ## Reporting A Vulnerability
 
-The project team takes security seriously. If you discover a vulnerability or security defect within BrewStore, please do **not** disclose it publicly via issues or discussions.
+If you discover a security vulnerability or unintended data exposure in `BrewStore`, please do **not** open a public issue.
 
-### Preferred Reporting Channels
+Instead, report it privately through one of the following channels:
 
-1. Go to the **Security** tab of this repository on GitHub and click **Report a vulnerability** to open a private advisory.
-2. Alternatively, email the maintainer directly at [evengao6688@gmail.com](mailto:evengao6688@gmail.com).
-
-### Report Contents
-
-Please include:
-
-- A clear description of the vulnerability and its potential impact.
-- Step-by-step instructions or minimal proof of concept to reproduce the issue.
-- Operating system version, browser/runtime version, and software release version.
-- Do not attach credentials, private keys, or personal secrets in any report.
-
-### Response Timeline
-
-- **Acknowledgement**: Within 48 hours of initial report submission.
-- **Assessment**: Within 7 business days with triage classification and resolution plan.
-- **Remediation**: Coordinated disclosure schedule upon release of a patched version.
+- **GitHub Security Advisories**: Open a private security advisory on `https://github.com/AMFI-Disable/BrewStore/security/advisories/new`.
+- **Direct Email**: Contact `evengao6688@gmail.com` with reproduction steps, affected environment details, and impact summary.

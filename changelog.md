@@ -68,8 +68,8 @@ Below is the comprehensive page-by-page and component-by-component directory of 
    - [CLI Companion & Shell Completions](#cli-companion--shell-completions)
    - [Factory Reset & Cache Purge](#factory-reset--cache-purge)
 6. [Global Overlays, System Tools & Menus](#6-global-overlays-system-tools--menus)
-   - [Action Console Drawer (`⌥~`)](#action-console-drawer-)
-   - [⌘K Universal Command Palette](#k-universal-command-palette)
+   - [Action Console Drawer (`~`)](#action-console-drawer-)
+   - [K Universal Command Palette](#k-universal-command-palette)
    - [Persistent 340px Menu Bar Companion](#persistent-340px-menu-bar-companion)
    - [AI Package Discovery Assistant](#ai-package-discovery-assistant)
    - [Shell Environment Assistant & PATH Doctor](#shell-environment-assistant--path-doctor)
@@ -494,10 +494,10 @@ Below is the comprehensive page-by-page and component-by-component directory of 
 
 ### 6. Global Overlays, System Tools & Menus
 
-#### Action Console Drawer (`⌥~`)
+#### Action Console Drawer (`~`)
 
 - **Persistent Sliding Console (`ActionConsoleDrawer`)**:
-  - Bottom terminal drawer accessible via `⌥~` or toolbar icon, streaming real-time stdout and stderr output during all package operations.
+  - Bottom terminal drawer accessible via `~` or toolbar icon, streaming real-time stdout and stderr output during all package operations.
 - **ANSI Color & Control Sequence Rendering**:
   - Full support for ANSI color codes, text bolding, and terminal progress carriage returns.
 - **Process Timing & Cancellation**:
@@ -505,10 +505,10 @@ Below is the comprehensive page-by-page and component-by-component directory of 
 - **Log Export**:
   - 1-Click copy-to-clipboard or export log file for troubleshooting.
 
-#### ⌘K Universal Command Palette
+#### K Universal Command Palette
 
 - **Raycast-Style Launcher (`CommandPaletteView`)**:
-  - System-wide modal search accessible anywhere via `⌘K`.
+  - System-wide modal search accessible anywhere via `K`.
 - **Fuzzy Search Across 12,000+ Items (`FuzzySearchEngine`)**:
   - Lightning-fast sub-millisecond search querying:
     - All Formulae and Casks

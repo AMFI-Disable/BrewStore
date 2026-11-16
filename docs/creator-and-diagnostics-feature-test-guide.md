@@ -1,10 +1,10 @@
-# 🤖 BrewStore Creator Studio, AI Assistant & Security Diagnostics: Feature Test Guide
+# BrewStore Creator Studio, AI Assistant & Security Diagnostics: Feature Test Guide
 
 This document details **EVERY SINGLE feature, maintainer tool, AI recommendation workflow, and security diagnostic interface** in BrewStore: **Creator Studio Workbench**, **AI Package Assistant**, **Command Palette**, **Security & CVE Auditor**, and **App Adoption & Migration Engine**.
 
 ---
 
-## 🧭 Overview Of Advanced Auxiliary Interfaces
+## Overview Of Advanced Auxiliary Interfaces
 
 ```mermaid
 graph TD
@@ -17,7 +17,7 @@ graph TD
 
 ---
 
-## 🔨 1. Creator Studio Maintainer Workbench (`CreatorStudioView.swift`)
+## 1. Creator Studio Maintainer Workbench (`CreatorStudioView.swift`)
 
 The specialized workbench for tap maintainers and formula authors:
 
@@ -56,7 +56,7 @@ The specialized workbench for tap maintainers and formula authors:
 
 ---
 
-## 🤖 2. AI Package Assistant (`AISearchView.swift`)
+## 2. AI Package Assistant (`AISearchView.swift`)
 
 The offline-capable, intent-based natural language recommendation engine:
 
@@ -88,9 +88,9 @@ The offline-capable, intent-based natural language recommendation engine:
 
 ---
 
-## ⚡ 3. Quick Open Command Palette (`CommandPaletteView.swift`)
+## 3. Quick Open Command Palette (`CommandPaletteView.swift`)
 
-The keyboard-first, spotlight-style command and navigation hub (triggered via **⌘K** or toolbar):
+The keyboard-first, spotlight-style command and navigation hub (triggered via **K**or toolbar):
 
 ### 3.1 Global Search & Fuzzy Matching
 
@@ -111,7 +111,7 @@ The keyboard-first, spotlight-style command and navigation hub (triggered via **
 
 ---
 
-## 🩺 4. Health Doctor & CVE Security Audit (`HealthScoreView.swift` & `CVESecurityView.swift`)
+## 4. Health Doctor & CVE Security Audit (`HealthScoreView.swift` & `CVESecurityView.swift`)
 
 The comprehensive diagnostic and security hardening suite:
 
@@ -136,7 +136,7 @@ The comprehensive diagnostic and security hardening suite:
 
 ---
 
-## 🔄 5. App Adoption & Open-Source Replacements (`AppAdoptionView.swift`)
+## 5. App Adoption & Open-Source Replacements (`AppAdoptionView.swift`)
 
 The migration engine for bringing external apps under Homebrew management and replacing paid software:
 
@@ -156,19 +156,19 @@ The migration engine for bringing external apps under Homebrew management and re
 
 ---
 
-## 📋 Computer Use Verification Checklist
+## Computer Use Verification Checklist
 
 1. [ ] **Creator Studio**:
-   - Open Creator Studio ➔ Check maintainer telemetry and tap list.
-   - Click Formula Generator ➔ Input sample URL and verify SHA-256 calculation.
+   - Open Creator Studio  Check maintainer telemetry and tap list.
+   - Click Formula Generator  Input sample URL and verify SHA-256 calculation.
 2. [ ] **AI Assistant**:
-   - Click quick prompt *"Batch convert HEIC photos to PNG"* ➔ Observe `ImageMagick` recommendation with `95% match`.
-   - Click quick prompt *"Run local AI and LLMs on Mac"* ➔ Observe `Ollama` and `LM Studio` recommendations.
-3. [ ] **Command Palette (⌘K)**:
-   - Press ⌘K ➔ Search `"ffmpeg"` ➔ Observe package result with badges.
-   - Select a command ➔ Verify navigation.
+   - Click quick prompt *"Batch convert HEIC photos to PNG"*  Observe `ImageMagick` recommendation with `95% match`.
+   - Click quick prompt *"Run local AI and LLMs on Mac"*  Observe `Ollama` and `LM Studio` recommendations.
+3. [] **Command Palette (K)**:
+   - Press K  Search `"ffmpeg"`  Observe package result with badges.
+   - Select a command  Verify navigation.
 4. [ ] **Health Score & Security Doctor**:
-   - Open Health Score sheet ➔ Verify score calculation and Auto-Heal button.
-   - Click CVE Audit link ➔ Verify security vulnerability scan list.
+   - Open Health Score sheet  Verify score calculation and Auto-Heal button.
+   - Click CVE Audit link  Verify security vulnerability scan list.
 5. [ ] **App Adoption & Replacements**:
-   - Open Adoption ➔ Switch to Open-Source Replacements tab ➔ Verify replacement cards (`mole`, `bitwarden`, etc.).
+   - Open Adoption  Switch to Open-Source Replacements tab  Verify replacement cards (`mole`, `bitwarden`, etc.).

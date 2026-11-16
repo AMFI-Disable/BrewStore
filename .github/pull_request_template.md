@@ -13,8 +13,9 @@ Provide a concise overview of the problem solved and the modifications made.
 
 ## Pre-Flight Verification Checklist
 
-- [ ] **Strict Commit Message**: Does every commit match `xxx: xxx xxx xxx` (prefix + exactly 3 lowercase words)?
+- [ ] **Strict Commit Message**: Does every commit match `xxx: xxx xxx xxx`?
 - [ ] **Lowercase Tracked Files**: Are all added or modified files strictly lowercase?
 - [ ] **Title Case Headers**: Are all markdown headings formatted in Title Case?
-- [ ] **No Direct Binary Links**: Are all README and doc files free of direct `.dmg`/`.zip` download links?
-- [ ] **Unit Tests Passed**: Have all unit tests passed with zero failures?
+- [ ] **No Emojis**: Are all modified markdown files and templates free of emojis?
+- [ ] **No Direct Binary Links**: Are all markdown files free of direct `.dmg`/`.zip`/`.exe` links?
+- [ ] **Checks And Tests Passed**: Have lint, typecheck, and unit tests passed?

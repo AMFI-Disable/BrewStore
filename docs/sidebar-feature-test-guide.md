@@ -1,10 +1,10 @@
-# 🤖 BrewStore Sidebar: Complete Feature & Computer Use Test Guide
+# BrewStore Sidebar: Complete Feature & Computer Use Test Guide
 
 This document is an exhaustive, feature-by-feature test and verification specification for the primary **BrewStore Navigation Sidebar** and every interactive control, modal, sheet, drawer, action, and context menu accessible from it.
 
 ---
 
-## 🧭 Overview Of Sidebar Architecture
+## Overview Of Sidebar Architecture
 
 The primary sidebar (`BrewStoreRootView.swift`) is structured into **4 Primary Sections**, **7 Toolbar Quick-Action Items**, **1 Persistent Bottom Status / Profile Deck**, and **1 Collapsible Action Console Drawer**.
 
@@ -16,12 +16,12 @@ graph TD
     Sidebar --> Sec3["Section 3: Developer & Creator (1 View)"]
     Sidebar --> Sec4["Section 4: System & Maintenance (3 Views)"]
     Sidebar --> Footer["Bottom Profile & Status Deck"]
-    Sidebar --> Console["Action Console Drawer (⌥~)"]
+    Sidebar --> Console["Action Console Drawer (~)"]
 ```
 
 ---
 
-## 🛠️ Top Toolbar Quick Actions
+## Top Toolbar Quick Actions
 
 Every button in the top toolbar provides instant access to global modal sheets and utilities:
 
@@ -66,7 +66,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
 
 ### 5. `Console Drawer` (`terminal.fill` / `terminal`)
 
-- **Visual Trigger**: Terminal icon in toolbar (or keyboard shortcut **⌥~**).
+- **Visual Trigger**: Terminal icon in toolbar (or keyboard shortcut **~**).
 - **Action**: Toggles the sliding bottom `ActionConsoleDrawer`.
 - **Features to Test**:
   - Displays real-time streaming output of Homebrew shell commands.
@@ -74,7 +74,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
 
 ### 6. `Quick Open` (`command`)
 
-- **Visual Trigger**: Command symbol in toolbar (or keyboard shortcut **⌘K**).
+- **Visual Trigger**: Command symbol in toolbar (or keyboard shortcut **K**).
 - **Action**: Opens `CommandPaletteView` modal.
 - **Features to Test**:
   - Fuzzy search for packages, navigation sections, and maintenance tasks.
@@ -83,14 +83,14 @@ Every button in the top toolbar provides instant access to global modal sheets a
 
 ### 7. `Help Manual` (`questionmark.circle`)
 
-- **Visual Trigger**: Question mark circle icon (or keyboard shortcut **⌘?**).
+- **Visual Trigger**: Question mark circle icon (or keyboard shortcut **?**).
 - **Action**: Opens `HelpManualView` sheet.
 - **Features to Test**:
   - Searchable guide covering Homebrew basics, Casks vs Formulae, Pinning, Taps, and Shortcuts.
 
 ---
 
-## 🌟 Section 1: Storefront
+## Section 1: Storefront
 
 ### 1. `Discover` (`sparkles`)
 
@@ -125,7 +125,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
 
 ---
 
-## 📦 Section 2: Package Library
+## Section 2: Package Library
 
 ### 1. `Installed` (`shippingbox.fill`)
 
@@ -189,7 +189,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
 
 ---
 
-## 🔨 Section 3: Developer & Creator
+## Section 3: Developer & Creator
 
 ### 1. `Creator Studio` (`hammer.circle.fill`)
 
@@ -201,7 +201,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
 
 ---
 
-## ⚙️ Section 4: System & Maintenance
+## Section 4: System & Maintenance
 
 ### 1. `Updates` (`arrow.triangle.2.circlepath`)
 
@@ -236,7 +236,7 @@ Every button in the top toolbar provides instant access to global modal sheets a
 
 ---
 
-## 👤 Bottom Sidebar Profile & Status Deck
+## Bottom Sidebar Profile & Status Deck
 
 - **Active Operation Bar**: Spinning progress ring, active operation title, status message, and red `Cancel` button.
 - **GitHub Account Profile Tile**:
@@ -249,26 +249,26 @@ Every button in the top toolbar provides instant access to global modal sheets a
 
 ---
 
-## 📋 Computer Use Verification Checklist
+## Computer Use Verification Checklist
 
 When validating BrewStore via Computer Use, execute the following actions in sequence:
 
 1. [ ] **Click each sidebar tab from top to bottom**:
-   - `Discover` ➔ `Stories` ➔ `Toolkits` ➔ `Categories` ➔ `Installed` ➔ `Adoption` ➔ `Dependencies` ➔ `Wishlist` ➔ `Services` ➔ `Taps` ➔ `Creator Studio` ➔ `Updates` ➔ `Backups` ➔ `Settings`.
+   - `Discover`  `Stories`  `Toolkits`  `Categories`  `Installed`  `Adoption`  `Dependencies`  `Wishlist`  `Services`  `Taps`  `Creator Studio`  `Updates`  `Backups`  `Settings`.
 2. [ ] **Click each top toolbar icon**:
    - `Import Brewfile` modal opens and closes.
    - `Health Score` modal opens, displays score, and Auto-Heal button is present.
    - `AI Assistant` modal opens with prompt box.
    - `Shell Setup` modal opens with shell scripts.
-   - `Console Drawer` (⌥~) slides up and down.
-   - `Quick Open` (⌘K) displays palette search.
-   - `Help Manual` (⌘?) displays documentation.
+   - `Console Drawer` (~) slides up and down.
+   - `Quick Open` (K) displays palette search.
+   - `Help Manual` (?) displays documentation.
 3. [ ] **Verify Star / Wishlist Toggles**:
-   - Star a package ➔ Observe yellow `star.fill` in row header, detail header, and sidebar badge incrementing.
-   - Unstar the package ➔ Observe icon returning to gray unfilled `star` and sidebar badge decrementing.
+   - Star a package  Observe yellow `star.fill` in row header, detail header, and sidebar badge incrementing.
+   - Unstar the package  Observe icon returning to gray unfilled `star` and sidebar badge decrementing.
 4. [ ] **Verify Pin / Unpin Toggles**:
-   - Pin a formula ➔ Observe orange `pin.fill` badge appearing, and button changing to `"Unpin Version"` (`pin.slash.fill`).
-   - Unpin the formula ➔ Observe badge disappearing and button changing to `"Pin Version"` (`pin.fill`).
+   - Pin a formula  Observe orange `pin.fill` badge appearing, and button changing to `"Unpin Version"` (`pin.slash.fill`).
+   - Unpin the formula  Observe badge disappearing and button changing to `"Pin Version"` (`pin.fill`).
 5. [ ] **Verify Bottom Status Deck**:
-   - Click GitHub profile tile ➔ `GitHubAccountView` sheet opens.
-   - Trigger an operation (e.g. Refresh) ➔ Bottom progress bar appears with `Cancel` button.
+   - Click GitHub profile tile  `GitHubAccountView` sheet opens.
+   - Trigger an operation (e.g. Refresh)  Bottom progress bar appears with `Cancel` button.

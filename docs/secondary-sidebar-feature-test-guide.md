@@ -1,10 +1,10 @@
-# 🤖 BrewStore Secondary Pane & Sub-Navigation: Complete Feature Test Guide
+# BrewStore Secondary Pane & Sub-Navigation: Complete Feature Test Guide
 
 This document specifies **EVERY SINGLE feature, filter, batch action, contextual control, and sub-pane** available in the **Secondary Sidebar / Master-Detail Content Panes** of **BrewStore**.
 
 ---
 
-## 🧭 Overview Of Secondary Panes Architecture
+## Overview Of Secondary Panes Architecture
 
 When a primary sidebar item is selected, the adjacent **Secondary Pane** presents dedicated sub-navigation, multi-facet filtering, sorting engines, batch selection toolbars, and inspector panels:
 
@@ -20,7 +20,7 @@ graph TD
 
 ---
 
-## 📦 1. Package Library & Updates Secondary Pane (`PackageListView.swift`)
+## 1. Package Library & Updates Secondary Pane (`PackageListView.swift`)
 
 The central workhorse pane for browsing installed packages and pending updates:
 
@@ -111,7 +111,7 @@ When `Select` is enabled, a bottom floating action toolbar appears:
 
 ---
 
-## 🚰 2. Taps & Repositories Secondary Pane (`TapsView.swift`)
+## 2. Taps & Repositories Secondary Pane (`TapsView.swift`)
 
 The repository management sub-pane for third-party taps:
 
@@ -131,7 +131,7 @@ The repository management sub-pane for third-party taps:
 
 ---
 
-## 💾 3. Backups & Multi-Mac Sync Secondary Pane (`SnapshotsView.swift`)
+## 3. Backups & Multi-Mac Sync Secondary Pane (`SnapshotsView.swift`)
 
 The disaster recovery and device migration sub-pane:
 
@@ -155,7 +155,7 @@ The disaster recovery and device migration sub-pane:
 
 ---
 
-## ⚙️ 4. Settings & Maintenance Secondary Pane (`SettingsView.swift`)
+## 4. Settings & Maintenance Secondary Pane (`SettingsView.swift`)
 
 The configuration and tuning sub-pane:
 
@@ -181,7 +181,7 @@ The configuration and tuning sub-pane:
 
 ---
 
-## 🔍 5. Package Inspector & Detail Secondary Panel (`PackageDetailView.swift`)
+## 5. Package Inspector & Detail Secondary Panel (`PackageDetailView.swift`)
 
 The comprehensive package inspection panel:
 
@@ -218,22 +218,22 @@ The comprehensive package inspection panel:
 
 ---
 
-## 📋 Computer Use Secondary Pane Test Checklist
+## Computer Use Secondary Pane Test Checklist
 
 1. [ ] **Package List Filtering**:
-   - Switch kind to `Apps (Casks)` ➔ Observe only GUI apps listed.
-   - Switch kind to `CLI (Formulae)` ➔ Observe only CLI tools listed.
-   - Select `MIT License` ➔ Observe list filtered to MIT packages.
-   - Click `Pinned Only` pill ➔ Observe list filtered to pinned packages.
+   - Switch kind to `Apps (Casks)`  Observe only GUI apps listed.
+   - Switch kind to `CLI (Formulae)`  Observe only CLI tools listed.
+   - Select `MIT License`  Observe list filtered to MIT packages.
+   - Click `Pinned Only` pill  Observe list filtered to pinned packages.
 2. [ ] **Sorting & Grouping**:
-   - Select `Group by Tap` ➔ Observe section headers for each tap.
-   - Select `Size on Disk` sort ➔ Observe largest packages sorted to top.
+   - Select `Group by Tap`  Observe section headers for each tap.
+   - Select `Size on Disk` sort  Observe largest packages sorted to top.
 3. [ ] **Batch Selection Mode**:
-   - Click `Select` ➔ Checkboxes appear.
-   - Select 3 packages ➔ Bottom batch bar appears with `Batch Pin`, `Batch Reinstall`, `Batch Uninstall`.
-   - Click `Done` ➔ Checkboxes and batch bar disappear.
+   - Click `Select`  Checkboxes appear.
+   - Select 3 packages  Bottom batch bar appears with `Batch Pin`, `Batch Reinstall`, `Batch Uninstall`.
+   - Click `Done`  Checkboxes and batch bar disappear.
 4. [ ] **Settings Sub-Panes**:
-   - Click `CDN Mirrors` ➔ Run benchmark and observe latency times.
-   - Click `Storage & Purge` ➔ Observe reclaimable bytes calculation and purge buttons.
+   - Click `CDN Mirrors`  Run benchmark and observe latency times.
+   - Click `Storage & Purge`  Observe reclaimable bytes calculation and purge buttons.
 5. [ ] **Package Detail Inspector**:
-   - Click any package ➔ Observe header, version switcher, dependency tree, and bottle SHA-256 hash.
+   - Click any package  Observe header, version switcher, dependency tree, and bottle SHA-256 hash.
