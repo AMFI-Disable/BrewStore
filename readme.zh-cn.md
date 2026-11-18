@@ -151,7 +151,7 @@
 通过 Homebrew 官方 Cask 一键安装 BrewStore 桌面应用及终端 CLI：
 
 ```bash
-brew tap AMFI-Disable/brewstore
+brew tap AMFI-Disable/tap
 brew install --cask brewstore
 ```
 

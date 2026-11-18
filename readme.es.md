@@ -142,7 +142,7 @@
 ### Opción 1: Cask Oficial de Homebrew (Recomendado) <a id="opcion-1-cask-oficial-de-homebrew-recomendado"></a>
 
 ```bash
-brew tap AMFI-Disable/brewstore
+brew tap AMFI-Disable/tap
 brew install --cask brewstore
 ```
 

@@ -144,7 +144,7 @@
 ### オプション 1: 公式 Homebrew Cask（推奨） <a id="オプション-1公式-homebrew-cask-推奨"></a>
 
 ```bash
-brew tap AMFI-Disable/brewstore
+brew tap AMFI-Disable/tap
 brew install --cask brewstore
 ```
 

@@ -144,7 +144,7 @@
 ### 選項 1：官方 Homebrew Cask 安裝（推薦） <a id="選項-1官方-homebrew-cask-推薦"></a>
 
 ```bash
-brew tap AMFI-Disable/brewstore
+brew tap AMFI-Disable/tap
 brew install --cask brewstore
 ```
 
