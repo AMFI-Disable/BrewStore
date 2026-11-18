@@ -146,7 +146,7 @@ Whether you're a software engineer orchestrating multiple runtimes, a designer c
 Install BrewStore and the terminal CLI companion directly through Homebrew:
 
 ```bash
-brew tap AMFI-Disable/brewstore
+brew tap AMFI-Disable/tap
 brew install --cask brewstore
 ```
 
