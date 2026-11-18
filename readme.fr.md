@@ -5,7 +5,7 @@
 **Le Gestionnaire de Paquets Natif et Compagnon Homebrew Numéro 1 pour macOS**  
 *Interface graphique SwiftUI native et compagnon terminal CLI ultra-rapides pour casks, formules, services en arrière-plan, verrouillage de versions et audits de sécurité.*
 
-[![Statut: Archivé](https://img.shields.io/badge/Statut-Archiv%C3%A9%20%2F%20Lecture%20Seule-inactive.svg?style=flat-square)](https://github.com/AMFI-Disable/BrewStore)
+[![Statut: Actif](https://img.shields.io/badge/Statut-Actif-success.svg?style=flat-square)](https://github.com/AMFI-Disable/BrewStore)
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/Plateforme-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
 [![Release: v1.0.0](https://img.shields.io/badge/Version-v1.0.0-blue.svg?style=flat-square&logo=github)](https://github.com/AMFI-Disable/BrewStore/releases)
