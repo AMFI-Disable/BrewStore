@@ -68,9 +68,12 @@ app.innerHTML = `
         <a href="#quick-start">Quick Start</a>
         <a href="${siteConfig.repoUrl}" target="_blank" rel="noreferrer">GitHub</a>
       </nav>
-      <button class="theme-btn" id="theme-toggle" type="button">
-        ${initialTheme === "dark" ? "Light Mode" : "Dark Mode"}
-      </button>
+      <div class="nav-actions">
+        <a class="nav-home" href="https://amfi-disable.github.io/" title="Back to AMFI-Disable Hub">&larr; All Projects</a>
+        <button class="theme-btn" id="theme-toggle" type="button">
+          ${initialTheme === "dark" ? "Light Mode" : "Dark Mode"}
+        </button>
+      </div>
     </div>
   </header>
 

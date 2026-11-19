@@ -462,3 +462,25 @@ body {
     word-break: break-all;
   }
 }
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-home {
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+.nav-home:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
