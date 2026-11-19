@@ -5,6 +5,7 @@
 **The Undisputed #1 Native macOS Package Manager & Homebrew Companion**  
 *Lightning-fast, native SwiftUI GUI & CLI companion for casks, formulae, background services, multi-version link management, and security audits.*
 
+[![Website: Live](https://img.shields.io/badge/Website-Live-2EA3F2.svg?style=flat-square)](https://amfi-disable.github.io/BrewStore/)
 [![Status: Active](https://img.shields.io/badge/Status-Active-success.svg?style=flat-square)](https://github.com/AMFI-Disable/BrewStore)
 [![Platform: macOS Sonoma+](https://img.shields.io/badge/Platform-macOS%2014%2B%20(Sonoma%20%2F%20Sequoia%20%2F%20Tahoe)-blue.svg?style=flat-square&logo=apple)](https://apple.com)
 [![Swift: 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange.svg?style=flat-square&logo=swift)](https://swift.org)
