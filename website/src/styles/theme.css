@@ -364,3 +364,101 @@ footer {
     display: none;
   }
 }
+
+/* Adaptive System, Display & Accessibility Optimizations */
+:root {
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+body {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (min-width: 1440px) {
+  .container {
+    max-width: 1160px;
+  }
+}
+
+@media (min-resolution: 2dppx) {
+  .nav,
+  .card,
+  .cmd-pill,
+  .install-item,
+  .theme-btn,
+  .copy-btn,
+  .req-list li,
+  footer,
+  section {
+    border-width: 0.5px;
+  }
+}
+
+@media (color-gamut: p3) {
+  :root {
+    --accent-soft: color-mix(in display-p3, var(--accent) 16%, transparent);
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --border: rgba(255, 255, 255, 0.28);
+    --muted: #b8c2cc;
+  }
+  [data-theme="light"] {
+    --border: rgba(27, 31, 36, 0.28);
+    --muted: #3b434b;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .btn:hover {
+    transform: none;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .btn,
+  .theme-btn,
+  .copy-btn {
+    min-height: 44px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .btn:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 48px 0 40px;
+  }
+  .cmd-pill,
+  .install-code {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    word-break: break-word;
+  }
+  .cmd-pill code,
+  .install-code code {
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+}

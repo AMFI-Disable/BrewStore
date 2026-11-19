@@ -3,8 +3,48 @@ import { siteConfig } from "./data/site";
 
 document.documentElement.style.setProperty("--accent", siteConfig.accent);
 
-const savedTheme = localStorage.getItem("amfi-theme") || "dark";
-document.documentElement.setAttribute("data-theme", savedTheme);
+const colorSchemeMedia = window.matchMedia("(prefers-color-scheme: dark)");
+
+function resolveInitialTheme(): "dark" | "light" {
+  const saved = localStorage.getItem("amfi-theme");
+  if (saved === "dark" || saved === "light") return saved;
+  return colorSchemeMedia.matches ? "dark" : "light";
+}
+
+function applyTheme(theme: "dark" | "light", persist = false): void {
+  document.documentElement.setAttribute("data-theme", theme);
+  const metaTheme = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+  if (metaTheme) {
+    metaTheme.content = theme === "dark" ? "#0B0E14" : "#F6F8FA";
+  }
+  const btn = document.getElementById("theme-toggle");
+  if (btn) {
+    btn.textContent = theme === "dark" ? "Light Mode" : "Dark Mode";
+  }
+  if (persist) {
+    localStorage.setItem("amfi-theme", theme);
+  }
+}
+
+function syncDisplayContext(): void {
+  const root = document.documentElement;
+  const w = window.innerWidth;
+  root.setAttribute("data-viewport", w < 640 ? "mobile" : w < 1024 ? "tablet" : "desktop");
+  root.setAttribute("data-dpr", window.devicePixelRatio >= 2 ? "hidpi" : "standard");
+  root.setAttribute("data-pointer", window.matchMedia("(pointer: coarse)").matches ? "coarse" : "fine");
+  const ua = navigator.userAgent.toLowerCase();
+  const os = ua.includes("mac") ? "macos" : ua.includes("win") ? "windows" : ua.includes("linux") ? "linux" : "other";
+  root.setAttribute("data-os", os);
+}
+
+applyTheme(resolveInitialTheme());
+syncDisplayContext();
+window.addEventListener("resize", syncDisplayContext, { passive: true });
+colorSchemeMedia.addEventListener("change", (e) => {
+  if (!localStorage.getItem("amfi-theme")) {
+    applyTheme(e.matches ? "dark" : "light");
+  }
+});
 
 const escapeHtml = (str: string): string =>
   str
@@ -13,6 +53,7 @@ const escapeHtml = (str: string): string =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 
+const initialTheme = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
 const app = document.getElementById("app")!;
 app.innerHTML = `
   <header class="nav">
@@ -28,7 +69,7 @@ app.innerHTML = `
         <a href="${siteConfig.repoUrl}" target="_blank" rel="noreferrer">GitHub</a>
       </nav>
       <button class="theme-btn" id="theme-toggle" type="button">
-        ${savedTheme === "dark" ? "Light Mode" : "Dark Mode"}
+        ${initialTheme === "dark" ? "Light Mode" : "Dark Mode"}
       </button>
     </div>
   </header>
@@ -121,9 +162,7 @@ app.innerHTML = `
 const themeBtn = document.getElementById("theme-toggle") as HTMLButtonElement;
 themeBtn.addEventListener("click", () => {
   const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", next);
-  localStorage.setItem("amfi-theme", next);
-  themeBtn.textContent = next === "dark" ? "Light Mode" : "Dark Mode";
+  applyTheme(next, true);
 });
 
 document.querySelectorAll<HTMLButtonElement>(".copy-btn").forEach((btn) => {
