@@ -14,6 +14,8 @@
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/Pricing-100%25%20Free%20%26%20Open%20Source-success.svg?style=flat-square)](#why-brewstore-over-caskhub--taphouse-pro)
 [![Privacy: Zero Telemetry](https://img.shields.io/badge/Privacy-Zero%20Telemetry%20%2F%20100%25%20Local-purple.svg?style=flat-square)](#privacy--security-first)
 
+[Changelog](changelog.md) · [Security Policy](security.md) · [MIT License](license)
+
 </div>
 
 ## Select Language / 选择语言 / 言語を選択 / Idioma / Langue / Sprache
