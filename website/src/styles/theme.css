@@ -47,9 +47,10 @@ a {
 }
 
 .container {
-  max-width: 1040px;
+  width: 100%;
+  max-width: clamp(1040px, 88vw, 1840px);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 clamp(20px, 3vw, 56px);
 }
 
 /* Nav */
@@ -151,7 +152,7 @@ a {
 }
 
 .hero p {
-  max-width: 660px;
+  max-width: 72ch;
   margin: 0 auto 28px;
   font-size: 1.1rem;
   color: var(--muted);
@@ -247,8 +248,8 @@ section {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: clamp(16px, 1.5vw, 24px);
 }
 
 .card {
@@ -287,7 +288,8 @@ section {
 
 .install-list {
   display: grid;
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+  gap: 16px;
   margin-bottom: 24px;
 }
 
@@ -378,12 +380,6 @@ body {
   padding-left: env(safe-area-inset-left, 0px);
   padding-right: env(safe-area-inset-right, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-@media (min-width: 1440px) {
-  .container {
-    max-width: 1160px;
-  }
 }
 
 @media (min-resolution: 2dppx) {
