@@ -355,3 +355,29 @@ Contributions are warmly welcomed! Please read our [Contributing Guidelines](doc
 ## License
 
 BrewStore is licensed under the [MIT License](license). Open source, libre, and proudly independent.
+
+---
+
+## GitHub Activity & Stars
+
+[![Total Stars](https://img.shields.io/github/stars/AMFI-Disable?affiliations=OWNER&style=flat-square&label=Total%20Stars&color=f59e0b)](https://github.com/AMFI-Disable?tab=repositories)
+
+> **105 combined stars** across all AMFI-Disable repositories.
+
+### Contribution Hexagon Graph
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/AMFI-Disable/AMFI-Disable/main/assets/contribution-hexagon-dark.svg" />
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/AMFI-Disable/AMFI-Disable/main/assets/contribution-hexagon-light.svg" />
+  <img alt="AMFI-Disable Hexagonal Contribution Graph" src="https://raw.githubusercontent.com/AMFI-Disable/AMFI-Disable/main/assets/contribution-hexagon-dark.svg" />
+</picture>
+
+### Star History
+
+<a href="https://www.star-history.com/#AMFI-Disable/BrewStore&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=AMFI-Disable/BrewStore&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=AMFI-Disable/BrewStore&type=Date" />
+    <img alt="AMFI-Disable/BrewStore Star History Chart" src="https://api.star-history.com/svg?repos=AMFI-Disable/BrewStore&type=Date" />
+  </picture>
+</a>

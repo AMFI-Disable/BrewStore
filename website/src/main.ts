@@ -11,6 +11,36 @@ function resolveInitialTheme(): "dark" | "light" {
   return colorSchemeMedia.matches ? "dark" : "light";
 }
 
+const repoSlug = siteConfig.repoUrl.replace(/^https?:\/\/github\.com\//, "");
+
+function updateThemedGraphs(theme: "dark" | "light"): void {
+  const hexImg = document.getElementById("hexagon-graph-img") as HTMLImageElement | null;
+  if (hexImg) {
+    hexImg.src = `https://raw.githubusercontent.com/AMFI-Disable/AMFI-Disable/main/assets/contribution-hexagon-${theme}.svg`;
+  }
+  const starImg = document.getElementById("star-history-img") as HTMLImageElement | null;
+  if (starImg) {
+    const themeParam = theme === "dark" ? "&theme=dark" : "";
+    starImg.src = `https://api.star-history.com/svg?repos=${repoSlug}&type=Date${themeParam}`;
+  }
+}
+
+async function refreshTotalStars(): Promise<void> {
+  const el = document.getElementById("total-stars-count");
+  if (!el) return;
+  try {
+    const res = await fetch("https://api.github.com/users/AMFI-Disable/repos?per_page=100");
+    if (!res.ok) return;
+    const repos = (await res.json()) as Array<{ stargazers_count?: number }>;
+    const publicTotal = repos.reduce((sum, r) => sum + (r.stargazers_count ?? 0), 0);
+    if (publicTotal > 0) {
+      el.textContent = `${publicTotal} public stars (${publicTotal + 1} combined)`;
+    }
+  } catch {
+    // Keep static fallback count when offline or rate-limited
+  }
+}
+
 function applyTheme(theme: "dark" | "light", persist = false): void {
   document.documentElement.setAttribute("data-theme", theme);
   const metaTheme = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
@@ -24,6 +54,7 @@ function applyTheme(theme: "dark" | "light", persist = false): void {
   if (persist) {
     localStorage.setItem("amfi-theme", theme);
   }
+  updateThemedGraphs(theme);
 }
 
 function syncDisplayContext(): void {
@@ -147,6 +178,31 @@ app.innerHTML = `
         ${siteConfig.requirements.map((r) => `<li>${escapeHtml(r)}</li>`).join("")}
       </ul>
     </section>
+
+    <section id="github-stats">
+      <div class="stats-header">
+        <div>
+          <h2 class="section-title">GitHub Activity &amp; Star History</h2>
+          <p class="section-sub">Star growth for ${escapeHtml(siteConfig.title)} and AMFI-Disable's contribution hexagon graph.</p>
+        </div>
+        <a class="total-stars-pill" href="https://github.com/AMFI-Disable?tab=repositories" target="_blank" rel="noreferrer">
+          <span>&#9733;</span>
+          <span id="total-stars-count">105 combined stars</span>
+        </a>
+      </div>
+      <div class="stats-grid">
+        <article class="graph-card">
+          <h3>Star History</h3>
+          <a href="https://www.star-history.com/#${escapeHtml(repoSlug)}&Date" target="_blank" rel="noreferrer">
+            <img id="star-history-img" alt="${escapeHtml(siteConfig.title)} Star History Chart" loading="lazy" />
+          </a>
+        </article>
+        <article class="graph-card">
+          <h3>Contribution Hexagon Graph</h3>
+          <img id="hexagon-graph-img" alt="AMFI-Disable Hexagonal Contribution Graph" loading="lazy" />
+        </article>
+      </div>
+    </section>
   </main>
 
   <footer>
@@ -161,6 +217,9 @@ app.innerHTML = `
     </div>
   </footer>
 `;
+
+updateThemedGraphs(initialTheme);
+void refreshTotalStars();
 
 const themeBtn = document.getElementById("theme-toggle") as HTMLButtonElement;
 themeBtn.addEventListener("click", () => {
