@@ -14,30 +14,10 @@ function resolveInitialTheme(): "dark" | "light" {
 const repoSlug = siteConfig.repoUrl.replace(/^https?:\/\/github\.com\//, "");
 
 function updateThemedGraphs(theme: "dark" | "light"): void {
-  const hexImg = document.getElementById("hexagon-graph-img") as HTMLImageElement | null;
-  if (hexImg) {
-    hexImg.src = `https://raw.githubusercontent.com/AMFI-Disable/AMFI-Disable/main/assets/contribution-hexagon-${theme}.svg`;
-  }
   const starImg = document.getElementById("star-history-img") as HTMLImageElement | null;
   if (starImg) {
     const themeParam = theme === "dark" ? "&theme=dark" : "";
-    starImg.src = `https://api.star-history.com/svg?repos=AMFI-Disable/AMFI-Disable,AMFI-Disable/AMFI-Disable.github.io,AMFI-Disable/Brew-Ghost,AMFI-Disable/BrewStore,AMFI-Disable/DustIII,AMFI-Disable/FMG_Free-MapGenie,AMFI-Disable/GeoFS_Extension,AMFI-Disable/GimSell_Gimkit-Seller,AMFI-Disable/Homebrew-BrewStore,AMFI-Disable/Homebrew-Juicer,AMFI-Disable/Homebrew-Tap,AMFI-Disable/Juicer,AMFI-Disable/Lichess-AutoPlayer,AMFI-Disable/OmniSuite,AMFI-Disable/PathDeck,AMFI-Disable/RenYing,AMFI-Disable/TornTools&type=Date${themeParam}`;
-  }
-}
-
-async function refreshTotalStars(): Promise<void> {
-  const el = document.getElementById("total-stars-count");
-  if (!el) return;
-  try {
-    const res = await fetch("https://api.github.com/users/AMFI-Disable/repos?per_page=100");
-    if (!res.ok) return;
-    const repos = (await res.json()) as Array<{ stargazers_count?: number }>;
-    const publicTotal = repos.reduce((sum, r) => sum + (r.stargazers_count ?? 0), 0);
-    if (publicTotal > 0) {
-      el.textContent = `${publicTotal} public stars (${publicTotal + 1} combined)`;
-    }
-  } catch {
-    // Keep static fallback count when offline or rate-limited
+    starImg.src = `https://api.star-history.com/svg?repos=${repoSlug}&type=Date${themeParam}`;
   }
 }
 
@@ -180,28 +160,13 @@ app.innerHTML = `
     </section>
 
     <section id="github-stats">
-      <div class="stats-header">
-        <div>
-          <h2 class="section-title">GitHub Activity &amp; Star History</h2>
-          <p class="section-sub">Combined star growth across all AMFI-Disable repositories and contribution hexagon graph.</p>
-        </div>
-        <a class="total-stars-pill" href="https://github.com/AMFI-Disable?tab=repositories" target="_blank" rel="noreferrer">
-          <span>&#9733;</span>
-          <span id="total-stars-count">105 combined stars</span>
+      <h2 class="section-title">Star History</h2>
+      <p class="section-sub">GitHub star growth for ${escapeHtml(siteConfig.title)}.</p>
+      <article class="graph-card">
+        <a href="https://www.star-history.com/#${escapeHtml(repoSlug)}&Date" target="_blank" rel="noreferrer">
+          <img id="star-history-img" alt="${escapeHtml(siteConfig.title)} Star History Chart" loading="lazy" />
         </a>
-      </div>
-      <div class="stats-grid">
-        <article class="graph-card">
-          <h3>Star History</h3>
-          <a href="https://www.star-history.com/#AMFI-Disable/AMFI-Disable,AMFI-Disable/AMFI-Disable.github.io,AMFI-Disable/Brew-Ghost,AMFI-Disable/BrewStore,AMFI-Disable/DustIII,AMFI-Disable/FMG_Free-MapGenie,AMFI-Disable/GeoFS_Extension,AMFI-Disable/GimSell_Gimkit-Seller,AMFI-Disable/Homebrew-BrewStore,AMFI-Disable/Homebrew-Juicer,AMFI-Disable/Homebrew-Tap,AMFI-Disable/Juicer,AMFI-Disable/Lichess-AutoPlayer,AMFI-Disable/OmniSuite,AMFI-Disable/PathDeck,AMFI-Disable/RenYing,AMFI-Disable/TornTools&Date" target="_blank" rel="noreferrer">
-            <img id="star-history-img" alt="AMFI-Disable Combined Star History Chart" loading="lazy" />
-          </a>
-        </article>
-        <article class="graph-card">
-          <h3>Contribution Hexagon Graph</h3>
-          <img id="hexagon-graph-img" alt="AMFI-Disable Hexagonal Contribution Graph" loading="lazy" />
-        </article>
-      </div>
+      </article>
     </section>
   </main>
 
@@ -219,7 +184,6 @@ app.innerHTML = `
 `;
 
 updateThemedGraphs(initialTheme);
-void refreshTotalStars();
 
 const themeBtn = document.getElementById("theme-toggle") as HTMLButtonElement;
 themeBtn.addEventListener("click", () => {

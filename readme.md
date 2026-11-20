@@ -358,26 +358,12 @@ BrewStore is licensed under the [MIT License](license). Open source, libre, and 
 
 ---
 
-## GitHub Activity & Stars
+## Star History
 
-[![Total Stars](https://img.shields.io/github/stars/AMFI-Disable?affiliations=OWNER&style=flat-square&label=Total%20Stars&color=f59e0b)](https://github.com/AMFI-Disable?tab=repositories)
-
-> **105 combined stars** across all AMFI-Disable repositories.
-
-### Contribution Hexagon Graph
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/AMFI-Disable/AMFI-Disable/main/assets/contribution-hexagon-dark.svg" />
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/AMFI-Disable/AMFI-Disable/main/assets/contribution-hexagon-light.svg" />
-  <img alt="AMFI-Disable Hexagonal Contribution Graph" src="https://raw.githubusercontent.com/AMFI-Disable/AMFI-Disable/main/assets/contribution-hexagon-dark.svg" />
-</picture>
-
-### Star History
-
-<a href="https://www.star-history.com/#AMFI-Disable/AMFI-Disable,AMFI-Disable/AMFI-Disable.github.io,AMFI-Disable/Brew-Ghost,AMFI-Disable/BrewStore,AMFI-Disable/DustIII,AMFI-Disable/FMG_Free-MapGenie,AMFI-Disable/GeoFS_Extension,AMFI-Disable/GimSell_Gimkit-Seller,AMFI-Disable/Homebrew-BrewStore,AMFI-Disable/Homebrew-Juicer,AMFI-Disable/Homebrew-Tap,AMFI-Disable/Juicer,AMFI-Disable/Lichess-AutoPlayer,AMFI-Disable/OmniSuite,AMFI-Disable/PathDeck,AMFI-Disable/RenYing,AMFI-Disable/TornTools&Date">
+<a href="https://www.star-history.com/#AMFI-Disable/BrewStore&Date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=AMFI-Disable/AMFI-Disable,AMFI-Disable/AMFI-Disable.github.io,AMFI-Disable/Brew-Ghost,AMFI-Disable/BrewStore,AMFI-Disable/DustIII,AMFI-Disable/FMG_Free-MapGenie,AMFI-Disable/GeoFS_Extension,AMFI-Disable/GimSell_Gimkit-Seller,AMFI-Disable/Homebrew-BrewStore,AMFI-Disable/Homebrew-Juicer,AMFI-Disable/Homebrew-Tap,AMFI-Disable/Juicer,AMFI-Disable/Lichess-AutoPlayer,AMFI-Disable/OmniSuite,AMFI-Disable/PathDeck,AMFI-Disable/RenYing,AMFI-Disable/TornTools&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=AMFI-Disable/AMFI-Disable,AMFI-Disable/AMFI-Disable.github.io,AMFI-Disable/Brew-Ghost,AMFI-Disable/BrewStore,AMFI-Disable/DustIII,AMFI-Disable/FMG_Free-MapGenie,AMFI-Disable/GeoFS_Extension,AMFI-Disable/GimSell_Gimkit-Seller,AMFI-Disable/Homebrew-BrewStore,AMFI-Disable/Homebrew-Juicer,AMFI-Disable/Homebrew-Tap,AMFI-Disable/Juicer,AMFI-Disable/Lichess-AutoPlayer,AMFI-Disable/OmniSuite,AMFI-Disable/PathDeck,AMFI-Disable/RenYing,AMFI-Disable/TornTools&type=Date" />
-    <img alt="AMFI-Disable Combined Star History Chart" src="https://api.star-history.com/svg?repos=AMFI-Disable/AMFI-Disable,AMFI-Disable/AMFI-Disable.github.io,AMFI-Disable/Brew-Ghost,AMFI-Disable/BrewStore,AMFI-Disable/DustIII,AMFI-Disable/FMG_Free-MapGenie,AMFI-Disable/GeoFS_Extension,AMFI-Disable/GimSell_Gimkit-Seller,AMFI-Disable/Homebrew-BrewStore,AMFI-Disable/Homebrew-Juicer,AMFI-Disable/Homebrew-Tap,AMFI-Disable/Juicer,AMFI-Disable/Lichess-AutoPlayer,AMFI-Disable/OmniSuite,AMFI-Disable/PathDeck,AMFI-Disable/RenYing,AMFI-Disable/TornTools&type=Date" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=AMFI-Disable/BrewStore&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=AMFI-Disable/BrewStore&type=Date" />
+    <img alt="AMFI-Disable/BrewStore Star History Chart" src="https://api.star-history.com/svg?repos=AMFI-Disable/BrewStore&type=Date" />
   </picture>
 </a>
