@@ -21,7 +21,7 @@ function updateThemedGraphs(theme: "dark" | "light"): void {
   const starImg = document.getElementById("star-history-img") as HTMLImageElement | null;
   if (starImg) {
     const themeParam = theme === "dark" ? "&theme=dark" : "";
-    starImg.src = `https://api.star-history.com/svg?repos=${repoSlug}&type=Date${themeParam}`;
+    starImg.src = `https://api.star-history.com/svg?repos=AMFI-Disable/AMFI-Disable,AMFI-Disable/AMFI-Disable.github.io,AMFI-Disable/Brew-Ghost,AMFI-Disable/BrewStore,AMFI-Disable/DustIII,AMFI-Disable/FMG_Free-MapGenie,AMFI-Disable/GeoFS_Extension,AMFI-Disable/GimSell_Gimkit-Seller,AMFI-Disable/Homebrew-BrewStore,AMFI-Disable/Homebrew-Juicer,AMFI-Disable/Homebrew-Tap,AMFI-Disable/Juicer,AMFI-Disable/Lichess-AutoPlayer,AMFI-Disable/OmniSuite,AMFI-Disable/PathDeck,AMFI-Disable/RenYing,AMFI-Disable/TornTools&type=Date${themeParam}`;
   }
 }
 
@@ -183,7 +183,7 @@ app.innerHTML = `
       <div class="stats-header">
         <div>
           <h2 class="section-title">GitHub Activity &amp; Star History</h2>
-          <p class="section-sub">Star growth for ${escapeHtml(siteConfig.title)} and AMFI-Disable's contribution hexagon graph.</p>
+          <p class="section-sub">Combined star growth across all AMFI-Disable repositories and contribution hexagon graph.</p>
         </div>
         <a class="total-stars-pill" href="https://github.com/AMFI-Disable?tab=repositories" target="_blank" rel="noreferrer">
           <span>&#9733;</span>
@@ -193,8 +193,8 @@ app.innerHTML = `
       <div class="stats-grid">
         <article class="graph-card">
           <h3>Star History</h3>
-          <a href="https://www.star-history.com/#${escapeHtml(repoSlug)}&Date" target="_blank" rel="noreferrer">
-            <img id="star-history-img" alt="${escapeHtml(siteConfig.title)} Star History Chart" loading="lazy" />
+          <a href="https://www.star-history.com/#AMFI-Disable/AMFI-Disable,AMFI-Disable/AMFI-Disable.github.io,AMFI-Disable/Brew-Ghost,AMFI-Disable/BrewStore,AMFI-Disable/DustIII,AMFI-Disable/FMG_Free-MapGenie,AMFI-Disable/GeoFS_Extension,AMFI-Disable/GimSell_Gimkit-Seller,AMFI-Disable/Homebrew-BrewStore,AMFI-Disable/Homebrew-Juicer,AMFI-Disable/Homebrew-Tap,AMFI-Disable/Juicer,AMFI-Disable/Lichess-AutoPlayer,AMFI-Disable/OmniSuite,AMFI-Disable/PathDeck,AMFI-Disable/RenYing,AMFI-Disable/TornTools&Date" target="_blank" rel="noreferrer">
+            <img id="star-history-img" alt="AMFI-Disable Combined Star History Chart" loading="lazy" />
           </a>
         </article>
         <article class="graph-card">
