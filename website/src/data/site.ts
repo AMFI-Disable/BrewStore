@@ -67,5 +67,24 @@ export const siteConfig = {
     "macOS 14.0+ (Sonoma / Sequoia)",
     "Homebrew installed",
     "345 / 345 automated tests passing"
+  ],
+  "hubName": "AMFI Studio",
+  "hubHash": "studio",
+  "previewTabs": [
+    {
+      "tab": "Sub-20ms Search",
+      "title": "Tokenized Catalog Index",
+      "body": "Searches 10,000+ Homebrew formulae and casks instantaneously from local JSON metadata."
+    },
+    {
+      "tab": "Dry-Run Queue",
+      "title": "Preview Before Mutating",
+      "body": "Inspect dependency trees, disk impact, and conflict warnings in a serialized lock queue before installing."
+    },
+    {
+      "tab": "Time Machine",
+      "title": "Rollback Snapshots",
+      "body": "Restores previous Brewfile states and pinned formula versions with one click."
+    }
   ]
 } as const;

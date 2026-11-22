@@ -64,6 +64,8 @@ const escapeHtml = (str: string): string =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 
+let activeTabIdx = 0;
+
 const initialTheme = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
 const app = document.getElementById("app")!;
 app.innerHTML = `
@@ -74,13 +76,15 @@ app.innerHTML = `
         <span>${escapeHtml(siteConfig.title)}</span>
       </a>
       <nav class="nav-links">
+        <a href="#preview">Interactive</a>
         <a href="#features">Features</a>
         <a href="#how-it-works">How It Works</a>
         <a href="#quick-start">Quick Start</a>
-        <a href="${siteConfig.repoUrl}" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="https://amfi-disable.github.io/#arcade">Arcade</a>
       </nav>
       <div class="nav-actions">
-        <a class="nav-home" href="https://amfi-disable.github.io/" title="Back to AMFI-Disable Hub">&larr; All Projects</a>
+        <a class="hub-pill" href="https://amfi-disable.github.io/#${escapeHtml(siteConfig.hubHash)}" title="Open ${escapeHtml(siteConfig.hubName)}">${escapeHtml(siteConfig.hubName)}</a>
+        <a class="nav-home" href="https://amfi-disable.github.io/" title="Back to AMFI Plaza">&larr; Plaza</a>
         <button class="theme-btn" id="theme-toggle" type="button">
           ${initialTheme === "dark" ? "Light Mode" : "Dark Mode"}
         </button>
@@ -91,7 +95,7 @@ app.innerHTML = `
   <main class="container">
     <section class="hero" style="border-top: none;">
       <img class="hero-icon" src="./icon-512.png" alt="${escapeHtml(siteConfig.title)} app icon" />
-      <div><span class="badge">${escapeHtml(siteConfig.category)}</span></div>
+      <div><span class="badge">${escapeHtml(siteConfig.hubName)} · ${escapeHtml(siteConfig.category)}</span></div>
       <h1>${escapeHtml(siteConfig.title)}</h1>
       <p>${escapeHtml(siteConfig.tagline)}</p>
       <div class="cta-row">
@@ -101,6 +105,25 @@ app.innerHTML = `
       <div class="cmd-pill">
         <code>${escapeHtml(siteConfig.quickCmd)}</code>
         <button class="copy-btn" data-copy="${escapeHtml(siteConfig.quickCmd)}" type="button">Copy</button>
+      </div>
+    </section>
+
+    <section id="preview">
+      <h2 class="section-title">Interactive Walkthrough</h2>
+      <p class="section-sub">Explore ${escapeHtml(siteConfig.title)} capabilities inside ${escapeHtml(siteConfig.hubName)}.</p>
+      <div class="preview-box">
+        <div class="preview-tabs" id="preview-tabs">
+          ${siteConfig.previewTabs
+            .map(
+              (t, idx) =>
+                `<button class="preview-tab ${idx === 0 ? "active" : ""}" data-tab-idx="${idx}" type="button">${escapeHtml(t.tab)}</button>`
+            )
+            .join("")}
+        </div>
+        <div class="preview-panel" id="preview-panel">
+          <h3>${escapeHtml(siteConfig.previewTabs[0].title)}</h3>
+          <p>${escapeHtml(siteConfig.previewTabs[0].body)}</p>
+        </div>
       </div>
     </section>
 
@@ -172,11 +195,12 @@ app.innerHTML = `
 
   <footer>
     <div class="container footer-inner">
-      <span>AMFI-Disable · Local-First Software</span>
+      <span>AMFI-Disable · ${escapeHtml(siteConfig.hubName)}</span>
       <div class="footer-links">
-        <a href="https://amfi-disable.github.io/" target="_blank" rel="noreferrer">All Projects</a>
+        <a href="https://amfi-disable.github.io/">AMFI Plaza</a>
+        <a href="https://amfi-disable.github.io/#${escapeHtml(siteConfig.hubHash)}">${escapeHtml(siteConfig.hubName)}</a>
+        <a href="https://amfi-disable.github.io/#arcade">AMFI Arcade</a>
         <a href="${siteConfig.repoUrl}" target="_blank" rel="noreferrer">Repository</a>
-        <a href="${siteConfig.repoUrl}/blob/main/changelog.md" target="_blank" rel="noreferrer">Changelog</a>
         <a href="${siteConfig.repoUrl}/blob/main/license" target="_blank" rel="noreferrer">MIT License</a>
       </div>
     </div>
@@ -189,6 +213,22 @@ const themeBtn = document.getElementById("theme-toggle") as HTMLButtonElement;
 themeBtn.addEventListener("click", () => {
   const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
   applyTheme(next, true);
+});
+
+document.getElementById("preview-tabs")?.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-tab-idx]");
+  if (!btn) return;
+  const idx = Number(btn.dataset.tabIdx);
+  const tab = siteConfig.previewTabs[idx];
+  if (!tab || idx === activeTabIdx) return;
+  activeTabIdx = idx;
+  document.querySelectorAll(".preview-tab").forEach((el, i) => {
+    el.classList.toggle("active", i === idx);
+  });
+  const panel = document.getElementById("preview-panel");
+  if (panel) {
+    panel.innerHTML = `<h3>${escapeHtml(tab.title)}</h3><p>${escapeHtml(tab.body)}</p>`;
+  }
 });
 
 document.querySelectorAll<HTMLButtonElement>(".copy-btn").forEach((btn) => {
