@@ -19,6 +19,20 @@
 
 </div>
 
+---
+
+## Star History
+
+<a href="https://www.star-history.com/?type=date&repos=amfi-disable%2Fbrewstore">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=amfi-disable%2Fbrewstore&type=date&theme=dark&legend=top-left" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=amfi-disable%2Fbrewstore&type=date&legend=top-left" />
+    <img alt="AMFI-Disable/BrewStore Star History Chart" src="https://api.star-history.com/chart?repos=amfi-disable%2Fbrewstore&type=date&legend=top-left" />
+  </picture>
+</a>
+
+---
+
 ## Select Language / 选择语言 / 言語を選択 / Idioma / Langue / Sprache
 
 **[English](readme.md)** •
@@ -355,15 +369,3 @@ Contributions are warmly welcomed! Please read our [Contributing Guidelines](doc
 ## License
 
 BrewStore is licensed under the [MIT License](license). Open source, libre, and proudly independent.
-
----
-
-## Star History
-
-<a href="https://www.star-history.com/#AMFI-Disable/BrewStore&Date">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=AMFI-Disable/BrewStore&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=AMFI-Disable/BrewStore&type=Date" />
-    <img alt="AMFI-Disable/BrewStore Star History Chart" src="https://api.star-history.com/svg?repos=AMFI-Disable/BrewStore&type=Date" />
-  </picture>
-</a>

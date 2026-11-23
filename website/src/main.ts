@@ -12,12 +12,13 @@ function resolveInitialTheme(): "dark" | "light" {
 }
 
 const repoSlug = siteConfig.repoUrl.replace(/^https?:\/\/github\.com\//, "");
+const repoSlugEncoded = encodeURIComponent(repoSlug.toLowerCase());
 
 function updateThemedGraphs(theme: "dark" | "light"): void {
   const starImg = document.getElementById("star-history-img") as HTMLImageElement | null;
   if (starImg) {
     const themeParam = theme === "dark" ? "&theme=dark" : "";
-    starImg.src = `https://api.star-history.com/svg?repos=${repoSlug}&type=Date${themeParam}`;
+    starImg.src = `https://api.star-history.com/chart?repos=${repoSlugEncoded}&type=date${themeParam}&legend=top-left`;
   }
 }
 
@@ -186,7 +187,7 @@ app.innerHTML = `
       <h2 class="section-title">Star History</h2>
       <p class="section-sub">GitHub star growth for ${escapeHtml(siteConfig.title)}.</p>
       <article class="graph-card">
-        <a href="https://www.star-history.com/#${escapeHtml(repoSlug)}&Date" target="_blank" rel="noreferrer">
+        <a href="https://www.star-history.com/?type=date&repos=${escapeHtml(repoSlugEncoded)}" target="_blank" rel="noreferrer">
           <img id="star-history-img" alt="${escapeHtml(siteConfig.title)} Star History Chart" loading="lazy" />
         </a>
       </article>
