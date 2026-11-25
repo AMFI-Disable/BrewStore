@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIconFile</key>
-	<string>appicon</string>
+	<string>appicon.icns</string>
 	<key>CFBundleIconName</key>
 	<string>appicon</string>
 	<key>CFBundleIdentifier</key>

@@ -8,6 +8,11 @@ targets:
     deploymentTarget: "14.0"
     sources:
       - path: sources
+      - path: sources/resources/appicon.icns
+    preBuildScripts:
+      - name: Sync Asset Catalog Contents.json Casing
+        script: |
+          find "${SRCROOT}/sources/resources/assets.xcassets" -name "contents.json" -exec sh -c 'mv "$1" "$(dirname "$1")/Contents.json"' _ {} \;
     copyFiles:
       - destination: resources
         subpath: scripts
