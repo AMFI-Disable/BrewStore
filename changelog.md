@@ -12,6 +12,8 @@ All notable changes, features, and architectural capabilities of BrewStore are d
 
 ### Changed
 
+- Move hosted checks off the retired macOS 14 runner.
+
 - Restored the Star History chart section and links in `readme.md` and `website/src/main.ts`.
 - Migrated Homebrew tap references and installation instructions from `AMFI-Disable/brewstore` to the central `AMFI-Disable/tap` repository across `settingsgeneraltab.swift`, `settingssearchengine.swift`, `website/index.html`, `readme.md`, and localized `readme.*.md` files.
 - Restored active project maintenance status and badges across primary and localized documentation (`readme*.md`), removing archival and sunset notices.
