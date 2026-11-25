@@ -12,7 +12,7 @@ permissions:
 jobs:
   quality:
     name: Fast Offline Quality Checks
-    runs-on: macos-14
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
@@ -68,7 +68,7 @@ jobs:
 
   build-and-test:
     name: Build & Test macOS Application
-    runs-on: macos-14
+    runs-on: macos-15
     needs: [ quality ]
 
     steps:
