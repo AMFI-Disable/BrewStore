@@ -112,7 +112,7 @@ final class BrewStoreServiceLogManager: ObservableObject {
             let fileSize = try handle.seekToEnd()
             let offsetToSeek = fileSize > UInt64(maxBytes) ? fileSize - UInt64(maxBytes) : 0
             try handle.seek(toOffset: offsetToSeek)
-            data = handle.readDataToEndOfFile()
+            data = try handle.readToEnd() ?? Data()
         } catch {
             return []
         }

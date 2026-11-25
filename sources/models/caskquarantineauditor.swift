@@ -317,12 +317,13 @@ final class BrewStoreCaskQuarantineAuditor: ObservableObject {
         let attr = "com.apple.quarantine"
         let topResult = removexattr(path, attr, 0)
         if recursive {
-            let process = Process()
-            process.executableURL = URL(fileURLWithPath: "/usr/bin/xattr")
-            process.arguments = ["-rd", attr, path]
-            try? process.run()
-            process.waitUntilExit()
-            return process.terminationStatus == 0 || topResult == 0
+            let result = BrewStoreCommandExecutor.shared.run(
+                executablePath: "/usr/bin/xattr",
+                arguments: ["-rd", attr, path],
+                timeout: 15,
+                category: .reversibleMutation
+            )
+            return result.terminationStatus == 0 || topResult == 0
         }
         return topResult == 0
     }
@@ -372,23 +373,16 @@ final class BrewStoreCaskQuarantineAuditor: ObservableObject {
 
     nonisolated static func inspectCodesign(bundleURL: URL) async -> (isSigned: Bool, isAdHoc: Bool, authority: String?, teamID: String?) {
         await Task.detached(priority: .utility) {
-            let process = Process()
-            process.executableURL = URL(fileURLWithPath: "/usr/bin/codesign")
-            process.arguments = ["-d", "--verbose=2", bundleURL.path]
-
-            let pipe = Pipe()
-            process.standardError = pipe
-            process.standardOutput = pipe
-
-            do {
-                try process.run()
-                process.waitUntilExit()
-                let data = pipe.fileHandleForReading.readDataToEndOfFile()
-                let output = String(data: data, encoding: .utf8) ?? ""
-                return parseCodesignOutput(output)
-            } catch {
-                return (false, false, nil, nil)
-            }
+            let result = BrewStoreCommandExecutor.shared.run(
+                executablePath: "/usr/bin/codesign",
+                arguments: ["-d", "--verbose=2", bundleURL.path],
+                timeout: 15,
+                category: .readOnly
+            )
+            let combined = [result.standardOutput, result.standardError]
+                .filter { !$0.isEmpty }
+                .joined(separator: "\n")
+            return parseCodesignOutput(combined)
         }.value
     }
 }

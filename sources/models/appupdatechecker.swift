@@ -28,7 +28,7 @@ final class BrewStoreAppUpdateChecker: ObservableObject {
     }
 
     private let releaseAPIURL = URL(string: "https://api.github.com/repos/AMFI-Disable/BrewStore/releases/latest") ?? URL(fileURLWithPath: "/dev/null")
-    private let appcastFallbackURL = URL(string: "https://raw.githubusercontent.com/AMFI-Disable/BrewStore/main/website/downloads/appcast.xml") ?? URL(fileURLWithPath: "/dev/null")
+    private let appcastFallbackURL = URL(string: "https://raw.githubusercontent.com/AMFI-Disable/BrewStore/main/website/public/downloads/appcast.xml") ?? URL(fileURLWithPath: "/dev/null")
 
     init() {
         if let timestamp = UserDefaults.standard.object(forKey: "brewstore.appupdate.lastcheck") as? Double, timestamp > 0 {
@@ -54,7 +54,8 @@ final class BrewStoreAppUpdateChecker: ObservableObject {
                 }
 
                 if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    let tagName = (json["tag_name"] as? String ?? "").replacingOccurrences(of: "v", with: "")
+                    let rawTag = (json["tag_name"] as? String ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+                    let tagName = rawTag.hasPrefix("v") || rawTag.hasPrefix("V") ? String(rawTag.dropFirst()) : rawTag
                     let body = json["body"] as? String ?? "Bug fixes and performance improvements."
                     let isPrerelease = json["prerelease"] as? Bool ?? false
 

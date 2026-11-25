@@ -161,29 +161,23 @@ final class BrewStoreMoleManager: ObservableObject {
         defer { self.isOperating = false }
 
         return await Task.detached(priority: .userInitiated) { () -> (Bool, String) in
-            let process = Process()
-            let pipe = Pipe()
-            process.standardOutput = pipe
-            process.standardError = pipe
-            process.executableURL = URL(fileURLWithPath: "/bin/bash")
-
-            let permFlag = permanent ? "--permanent " : ""
-            let escapedName = appName.replacingOccurrences(of: "\"", with: "\\\"")
-            let script = "printf 'y\\n\\n' | '\(binary)' uninstall \(permFlag)\"\(escapedName)\""
-            process.arguments = ["-c", script]
-
-            do {
-                try process.run()
-                process.waitUntilExit()
-
-                let data = pipe.fileHandleForReading.readDataToEndOfFile()
-                let output = String(data: data, encoding: .utf8) ?? ""
-                let success = process.terminationStatus == 0
-
-                return (success, output)
-            } catch {
-                return (false, error.localizedDescription)
+            var args = ["uninstall"]
+            if permanent {
+                args.append("--permanent")
             }
+            args.append(appName)
+
+            let result = BrewStoreCommandExecutor.shared.run(
+                executablePath: binary,
+                arguments: args,
+                timeout: 120,
+                category: .destructiveMutation,
+                standardInput: Data("y\n\n".utf8)
+            )
+            let combined = [result.standardOutput, result.standardError]
+                .filter { !$0.isEmpty }
+                .joined(separator: "\n")
+            return (result.terminationStatus == 0, combined.isEmpty ? (result.launchErrorDescription ?? "") : combined)
         }.value
     }
 

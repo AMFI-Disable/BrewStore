@@ -53,6 +53,8 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
         timeout: TimeInterval = 30,
         category: BrewStoreCommandCategory = .readOnly,
         maximumOutputBytes: Int = 1_048_576,
+        allowedPrefix: String? = nil,
+        standardInput: Data? = nil,
         cancellationCheck: (@Sendable () -> Bool)? = nil,
         onOutput: (@Sendable (String) -> Void)? = nil
     ) -> BrewStoreCommandResult {
@@ -66,7 +68,7 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
         guard executablePath.hasPrefix("/") else {
             return failure("The executable path must be absolute.", category: category)
         }
-        guard ExecutionSecurityBoundary.isExecutableAllowed(executablePath: executablePath) else {
+        guard ExecutionSecurityBoundary.isExecutableAllowed(executablePath: executablePath, allowedPrefix: allowedPrefix) else {
             return failure("The executable path '\(executablePath)' is not permitted by BrewStore security boundaries.", category: category)
         }
         guard maximumOutputBytes > 0 else {
@@ -101,6 +103,9 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
             )
         }
 
+        if let inputData = standardInput, !inputData.isEmpty {
+            try? inputPipe.fileHandleForWriting.write(contentsOf: inputData)
+        }
         try? inputPipe.fileHandleForWriting.close()
         try? outputPipe.fileHandleForWriting.close()
         try? errorPipe.fileHandleForWriting.close()
@@ -139,9 +144,6 @@ final class BrewStoreCommandExecutor: @unchecked Sendable {
                     break
                 }
                 if exitSemaphore.wait(timeout: .now() + waitStep) == .success {
-                    break
-                }
-                if group.wait(timeout: .now()) == .success {
                     break
                 }
             }

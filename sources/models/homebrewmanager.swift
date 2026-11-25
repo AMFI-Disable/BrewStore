@@ -284,10 +284,12 @@ final class HomebrewManager: ObservableObject {
     }
 
     nonisolated static func detectBrewPath() -> String? {
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
         let candidates = [
             "/opt/homebrew/bin/brew",
             "/usr/local/bin/brew",
-            FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".linuxbrew/bin/brew").path
+            "\(home)/.homebrew/bin/brew",
+            "\(home)/.linuxbrew/bin/brew"
         ]
         return candidates.first(where: { FileManager.default.isExecutableFile(atPath: $0) })
     }
@@ -296,6 +298,8 @@ final class HomebrewManager: ObservableObject {
         guard let path = detectBrewPath() else { return nil }
         return URL(fileURLWithPath: path).deletingLastPathComponent().deletingLastPathComponent().path
     }
+
+    private var hasExplicitBrewPath = false
 
     func detectHomebrew() {
         brewPath = Self.detectBrewPath()
@@ -308,6 +312,7 @@ final class HomebrewManager: ObservableObject {
 
     func setActiveBrewPath(_ path: String) {
         guard FileManager.default.isExecutableFile(atPath: path) else { return }
+        hasExplicitBrewPath = true
         brewPath = path
         brewPrefix = URL(fileURLWithPath: path).deletingLastPathComponent().deletingLastPathComponent().path
         refresh()
@@ -330,7 +335,9 @@ final class HomebrewManager: ObservableObject {
     func refresh(force: Bool) {
         guard !isLoading, !isOperating else { return }
 
-        detectHomebrew()
+        if !hasExplicitBrewPath || brewPath == nil {
+            detectHomebrew()
+        }
         guard let brewPath else {
             errorMessage = nil
             catalogRefreshError = nil
@@ -625,6 +632,7 @@ final class HomebrewManager: ObservableObject {
                     parsedCasks[i].installedVersion = version
                 } else {
                     parsedCasks[i].isInstalled = false
+                    parsedCasks[i].installedVersion = nil
                 }
             }
 
@@ -636,6 +644,7 @@ final class HomebrewManager: ObservableObject {
                     parsedFormulae[i].installedVersion = version
                 } else {
                     parsedFormulae[i].isInstalled = false
+                    parsedFormulae[i].installedVersion = nil
                 }
             }
 

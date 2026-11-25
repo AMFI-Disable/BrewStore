@@ -176,8 +176,7 @@ final class BrewStoreAutoUpdateScheduler: ObservableObject {
         isAutoUpgrading = true
 
         Task.detached(priority: .utility) { [targetPackages, brewPath] in
-            // Execute upgrade
-            _ = BrewStoreCommandExecutor.shared.run(
+            let result = BrewStoreCommandExecutor.shared.run(
                 executablePath: brewPath,
                 arguments: ["upgrade"] + targetPackages,
                 timeout: 300,
@@ -188,14 +187,16 @@ final class BrewStoreAutoUpdateScheduler: ObservableObject {
                 BrewStoreAutoUpdateScheduler.shared.isAutoUpgrading = false
             }
 
-            Self.dispatchNotification(
-                title: "BrewStore Auto-Upgraded Packages",
-                body: "Successfully upgraded \(targetPackages.count) package\(targetPackages.count == 1 ? "" : "s"): \(targetPackages.prefix(4).joined(separator: ", "))"
-            )
+            let succeeded = result.terminationStatus == 0 && !result.didTimeOut && !result.wasCancelled
+            let title = succeeded ? "BrewStore Auto-Upgraded Packages" : "BrewStore Auto-Upgrade Failed"
+            let summary = succeeded
+                ? "Successfully upgraded \(targetPackages.count) package\(targetPackages.count == 1 ? "" : "s"): \(targetPackages.prefix(4).joined(separator: ", "))"
+                : "Auto-upgrade exited with status \(result.terminationStatus.map(String.init) ?? "error") for \(targetPackages.prefix(4).joined(separator: ", "))."
 
+            Self.dispatchNotification(title: title, body: summary)
             Self.dispatchWebhook(
-                title: "BrewStore Auto-Upgraded Packages",
-                body: "Successfully upgraded \(targetPackages.count) package\(targetPackages.count == 1 ? "" : "s").",
+                title: title,
+                body: summary,
                 packages: targetPackages,
                 onlyIfUpdatesFoundSetting: false
             )

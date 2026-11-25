@@ -29,7 +29,8 @@ enum ExecutionSecurityBoundary {
         "/usr/bin/clang",
         "/usr/bin/make",
         "/usr/bin/cmake",
-        "/usr/bin/ninja"
+        "/usr/bin/ninja",
+        "/bin/kill"
     ]
 
     /// Dangerous environment variables that must be scrubbed before executing child processes.
@@ -62,7 +63,10 @@ enum ExecutionSecurityBoundary {
             return true
         }
         if normalized == "/opt/homebrew/bin/cmake" || normalized == "/usr/local/bin/cmake" ||
-            normalized == "/opt/homebrew/bin/ninja" || normalized == "/usr/local/bin/ninja" {
+            normalized == "/opt/homebrew/bin/ninja" || normalized == "/usr/local/bin/ninja" ||
+            normalized == "/opt/homebrew/bin/gh" || normalized == "/usr/local/bin/gh" ||
+            normalized == "/opt/homebrew/bin/mo" || normalized == "/usr/local/bin/mo" ||
+            normalized == "/opt/homebrew/bin/mole" || normalized == "/usr/local/bin/mole" {
             return true
         }
 

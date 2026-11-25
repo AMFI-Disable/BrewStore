@@ -184,15 +184,21 @@ final class BrewStoreDependencyDoctorManager: ObservableObject {
         isHealing = true
         healStatusMessage = "Starting maintenance repairs…"
 
+        let installedFormulae = manager.packages
+            .filter { $0.kind == .formula && $0.isInstalled }
+            .map(\.id)
+
         Task.detached(priority: .userInitiated) {
             // Step 1: Link broken formulae
             await MainActor.run { self.healStatusMessage = "Step 1/4: Repairing broken symlinks…" }
-            _ = BrewStoreCommandExecutor.shared.run(
-                executablePath: brewPath,
-                arguments: ["link", "--overwrite", "--quiet"],
-                timeout: 60,
-                category: .reversibleMutation
-            )
+            if !installedFormulae.isEmpty {
+                _ = BrewStoreCommandExecutor.shared.run(
+                    executablePath: brewPath,
+                    arguments: ["link", "--overwrite", "--quiet"] + installedFormulae,
+                    timeout: 60,
+                    category: .reversibleMutation
+                )
+            }
 
             // Step 2: Prune dangling symlinks
             await MainActor.run { self.healStatusMessage = "Step 2/4: Pruning orphaned symlinks…" }

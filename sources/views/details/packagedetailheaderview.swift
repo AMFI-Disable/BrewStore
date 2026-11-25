@@ -31,8 +31,7 @@ struct PackageDetailHeaderView: View {
                 .buttonStyle(.bordered)
                 .controlSize(.small)
                 .keyboardShortcut(.cancelAction)
-                .keyboardShortcut("[", modifiers: .command)
-                .help("Back (Esc or ⌘[)")
+                .help("Back (Esc)")
                 .accessibilityIdentifier("PackageDetail.BackButton")
 
                 Spacer()

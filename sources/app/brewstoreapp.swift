@@ -275,7 +275,6 @@ private struct BrewStoreCommands: Commands {
             Button("BrewStore Help Manual") {
                 showingHelpSheet = true
             }
-            .keyboardShortcut("h", modifiers: [.command, .shift])
             .keyboardShortcut("?", modifiers: .command)
 
             Divider()

@@ -14,7 +14,6 @@ struct BrewStorePathSafetyValidator: Sendable {
 
         let resolvedURL = url.resolvingSymlinksInPath().standardizedFileURL
         let resolvedPath = resolvedURL.path.precomposedStringWithCanonicalMapping
-        let parentResolvedPath = url.deletingLastPathComponent().resolvingSymlinksInPath().standardizedFileURL.path.precomposedStringWithCanonicalMapping
 
         let protectedPaths = [
             "/",
@@ -34,17 +33,20 @@ struct BrewStorePathSafetyValidator: Sendable {
             throw BrewStorePathSafetyError.protectedPath(url)
         }
 
+        if isSymbolicLink(url) {
+            throw BrewStorePathSafetyError.symbolicLink(url)
+        }
+
         let matchingRoot = allowedRoots.first(where: {
             let rootPath = $0.path.precomposedStringWithCanonicalMapping
-            return resolvedPath == rootPath || resolvedPath.hasPrefix(rootPath + "/") ||
-                parentResolvedPath == rootPath || parentResolvedPath.hasPrefix(rootPath + "/")
+            return resolvedPath.hasPrefix(rootPath + "/")
         })
 
         guard let root = matchingRoot else {
             throw BrewStorePathSafetyError.outsideAllowedRoots(url)
         }
 
-        if isSymbolicLink(url) || containsIntermediateSymbolicLink(target: url, relativeTo: root, fileManager: fileManager) {
+        if containsIntermediateSymbolicLink(target: url, relativeTo: root, fileManager: fileManager) {
             throw BrewStorePathSafetyError.symbolicLink(url)
         }
     }

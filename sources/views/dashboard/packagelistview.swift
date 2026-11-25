@@ -380,9 +380,7 @@ struct PackageListView: View {
                         if !outdated.isEmpty {
                             Button("Upgrade Selected (\(outdated.count))") {
                                 BrewStoreActionReviewCoordinator.shared.requestUpgrade(packages: outdated, manager: manager) {
-                                    for pkg in outdated {
-                                        manager.perform(package: pkg, action: .upgrade)
-                                    }
+                                    manager.batchPerform(packages: outdated, action: .upgrade)
                                 }
                             }
                             .buttonStyle(.borderedProminent)

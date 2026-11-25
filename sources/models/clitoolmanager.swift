@@ -52,11 +52,6 @@ final class BrewStoreCLIToolManager: ObservableObject {
         if fileManager.fileExists(atPath: cwdScript) {
             return cwdScript
         }
-        // Fallback for local development / testing
-        let localWorkspace = "/Users/even/Desktop/Projects/Apps/BrewStore/scripts/brewstore"
-        if fileManager.fileExists(atPath: localWorkspace) {
-            return localWorkspace
-        }
         let appBundlePath = "/Applications/BrewStore.app/Contents/Resources/scripts/brewstore"
         if fileManager.fileExists(atPath: appBundlePath) {
             return appBundlePath
