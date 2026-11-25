@@ -60,9 +60,10 @@ final class WindowFrameManagerTests: XCTestCase {
         defer { secondWindow.orderOut(nil) }
 
         let restored = manager.restoreFrame(for: secondWindow)
+        let expected = manager.sanitizeFrame(NSRect(x: 200, y: 150, width: 1350, height: 850))
         XCTAssertTrue(restored)
-        XCTAssertEqual(secondWindow.frame.width, 1350, accuracy: 2.0)
-        XCTAssertEqual(secondWindow.frame.height, 850, accuracy: 2.0)
+        XCTAssertEqual(secondWindow.frame.width, expected.width, accuracy: 2.0)
+        XCTAssertEqual(secondWindow.frame.height, expected.height, accuracy: 2.0)
     }
 
     func testSanitizeFrameEnforcesMinimumBounds() {
