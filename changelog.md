@@ -9,11 +9,12 @@ All notable changes, features, and architectural capabilities of BrewStore are d
 ### Added
 
 - Automated offline quality checks in GitHub Actions CI (`ci.yml`), including Ruby YAML verification, lowercase filename validation, and strict commit message conventions.
+- Added `sources/resources/appicon.icns` and pre-build asset catalog `contents.json` casing sync in `project.yml`, plus modernization regression tests in `tests/modernizationtests.swift`.
 
 ### Changed
 
+- Modernized core studio services, managers, and views with cached local app icon resolution, non-shell command execution, path/security boundary hardening, and updated `WindowFrameManagerTests` bounds assertions.
 - Move hosted checks off the retired macOS 14 runner.
-
 - Restored the Star History chart section and links in `readme.md` and `website/src/main.ts`.
 - Migrated Homebrew tap references and installation instructions from `AMFI-Disable/brewstore` to the central `AMFI-Disable/tap` repository across `settingsgeneraltab.swift`, `settingssearchengine.swift`, `website/index.html`, `readme.md`, and localized `readme.*.md` files.
 - Restored active project maintenance status and badges across primary and localized documentation (`readme*.md`), removing archival and sunset notices.
@@ -23,6 +24,10 @@ All notable changes, features, and architectural capabilities of BrewStore are d
 - Updated copyright notices and human-readable metadata to `AMFI-Disable`.
 - Enhanced release download routing to official GitHub Releases and Homebrew Tap.
 - Updated standalone licensing references in documentation and renamed retained systems code attribution from JuicerKit to BrewStoreCore (`brewstorecore-mit.txt`).
+
+### Fixed
+
+- Fixed `casks/brewstore.rb` `postflight` `system_command` syntax and updated `vercel.json` `outputDirectory` to `website/dist`.
 
 ---
 
