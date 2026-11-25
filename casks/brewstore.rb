@@ -13,8 +13,8 @@ cask "brewstore" do
   app "BrewStore.app"
   binary "#{appdir}/BrewStore.app/Contents/Resources/scripts/brewstore", target: "brewstore"
 
-  postflight_steps do
-    run "/usr/bin/xattr", args: ["-cr", "/Applications/BrewStore.app"]
+  postflight do
+    system_command "/usr/bin/xattr", args: ["-cr", "#{appdir}/BrewStore.app"]
   end
 
   zap trash: [

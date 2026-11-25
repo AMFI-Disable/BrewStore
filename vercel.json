@@ -1,4 +1,4 @@
 {
   "cleanUrls": true,
-  "outputDirectory": "website"
+  "outputDirectory": "website/dist"
 }
