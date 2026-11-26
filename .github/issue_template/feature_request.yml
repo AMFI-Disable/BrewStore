@@ -1,0 +1,27 @@
+name: Feature Request / 功能建议
+description: Describe a user need and a way to address it / 说明使用场景及改进建议
+title: "[FEATURE] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User Need / 使用需求
+      description: Describe the workflow you want to improve. / 请说明希望改进的使用流程。
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Change / 改进方案
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered / 其他方案
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria / 验收条件
+      description: How would you know the feature solves the problem? / 如何确认此功能解决了问题？

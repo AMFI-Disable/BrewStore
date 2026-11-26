@@ -6,6 +6,10 @@ All notable changes, features, and architectural capabilities of BrewStore are d
 
 ## [Unreleased]
 
+### Documentation
+
+- Paired the English and Simplified Chinese setup and contribution guides and added bilingual prompts to bug reports, feature requests and pull requests.
+
 ### Added
 
 - Automated offline quality checks in GitHub Actions CI (`ci.yml`), including Ruby YAML verification, lowercase filename validation, and strict commit message conventions.

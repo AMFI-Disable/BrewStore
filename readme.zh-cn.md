@@ -14,6 +14,8 @@
 [![Pricing: Free & Open-Source](https://img.shields.io/badge/价格-100%25%20免费开源-success.svg?style=flat-square)](#为什么选择-brewstore而不是-caskhub-或-taphouse-pro-1999)
 [![隐私: 零遥测](https://img.shields.io/badge/隐私-零遥测%20%2F%20100%25%20本地-purple.svg?style=flat-square)](#隐私与安全第一原则)
 
+[English](readme.md) · [贡献指南](docs/contributing.zh-cn.md)
+
 </div>
 
 ## 语言选择 / Select Language / 言語を選択 / Idioma / Langue / Sprache

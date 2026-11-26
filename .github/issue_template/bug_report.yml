@@ -1,0 +1,37 @@
+name: Bug Report / 缺陷报告
+description: Report a reproducible problem / 报告可复现的问题
+title: "[BUG] "
+labels: ["bug"]
+assignees: ["AMFI-Disable"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Application Version / 应用版本
+      description: Include the release tag or commit. / 请填写发行版本或提交号。
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment / 运行环境
+      description: Include macOS version, chip and installation method. / 请填写 macOS 版本、芯片及安装方式。 Include the Homebrew version for package issues. / 软件包问题请注明 Homebrew 版本。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps To Reproduce / 复现步骤
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Expected And Actual Results / 预期与实际结果
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Diagnostic Details / 诊断信息
+      description: Remove credentials, personal paths and identifiers before sharing. / 提交日志前请删除凭据、个人路径及标识信息。
