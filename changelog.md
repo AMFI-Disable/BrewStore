@@ -8,6 +8,7 @@ All notable changes, features, and architectural capabilities of BrewStore are d
 
 ### Documentation
 
+- Added changelog, security policy, and MIT license links to the Simplified Chinese README navigation bar.
 - Paired the English and Simplified Chinese setup and contribution guides and added bilingual prompts to bug reports, feature requests and pull requests.
 
 ### Added
